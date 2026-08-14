@@ -39,9 +39,30 @@ jobs:
         with:
           use-public-rspm: true
 
-      # renv.lock es único para todo el repo (S3): el bundle se arma con las
-      # mismas versiones con las que se probó en local.
-      - uses: r-lib/actions/setup-renv@v2
+      # No se restaura renv.lock entero a propósito. El lockfile es único para
+      # todo el repo (S3) y trae 111 paquetes: los cuadernos de notes/SDA/, los
+      # talleres y hasta unigd/httpgd, que son el dispositivo gráfico del plugin
+      # de R de VS Code. unigd necesita libtiffxx.so.6, que el runner no tiene,
+      # y la restauración muere ahí sin que la app lo use nunca.
+      #
+      # Acá se instala solo lo que el bundle necesita. Las versiones que
+      # terminan DENTRO del bundle no salen de estas: shinylive baja los
+      # binarios wasm de su propio repositorio. Estrictamente bastan shinylive,
+      # renv y jsonlite; los demás van para que el aviso de "version mismatch"
+      # de shinylive compare contra algo real.
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          cache-version: 1
+          packages: |
+            any::shiny
+            any::bslib
+            any::bsicons
+            any::DT
+            any::ggplot2
+            any::commonmark
+            any::jsonlite
+            any::renv
+            any::shinylive
 
       - name: Construir el bundle wasm
         run: Rscript -e 'source("learn/build.R"); construir_bundle()'
@@ -70,4 +91,3 @@ jobs:
     steps:
       - id: despliegue
         uses: actions/deploy-pages@v4
-        
