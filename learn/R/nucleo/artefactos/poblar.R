@@ -7,12 +7,14 @@
 # El mapa es una promesa verificable — `verificar_mapa.R` cuenta cuántas
 # promesas están cumplidas y cuántas son deuda.
 #
-# Las filas se reparten en dos archivos por tamaño (C2):
-#   artefactos/exploracion.R  fases 1, 2 y 3
+# Las filas se reparten en tres archivos por tamaño (C2):
+#   artefactos/preparacion.R  fase 1, lo que se le HACE a los datos
+#   artefactos/exploracion.R  fase 1 ▣ Análisis, más las fases 2 y 3
 #   artefactos/evaluacion.R   fase 4
 
 poblar_artefactos <- function() {
   limpiar_artefactos()
+  poblar_artefactos_preparacion()
   poblar_artefactos_exploracion()
   poblar_artefactos_evaluacion()
   invisible(length(claves_artefactos()))

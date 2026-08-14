@@ -12,8 +12,8 @@ Todas las rutas son relativas a `learn/`.
 ## Resumen
 
 - **Métodos**: 54 registrados — 0 activos, 48 pendientes, 6 bloqueados
-- **Artefactos**: 71 registrados
-- **Textos escritos**: 2 de 71
+- **Artefactos**: 79 registrados
+- **Textos escritos**: 2 de 79
 - **Fichas escritas**: 3 de 54
 
 ## Artefactos
@@ -23,77 +23,85 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 
 | Clave | Artefacto | Gráfico | Lógica | Texto |
 |---|---|---|---|---|
-| `f1.analisis.boxplot` | Diagrama de caja | `graficos/g_univariado.R::graficar_boxplot` | `logica/resumen_univariado.R::resumir_variable` | *pendiente* |
-| `f1.analisis.boxplot_grupos` | Cajas comparadas por grupo | `graficos/g_univariado.R::graficar_boxplot_grupos` | `logica/resumen_univariado.R::resumir_por_grupo` | *pendiente* |
-| `f1.analisis.coordenadas_paralelas` | Coordenadas paralelas | `graficos/g_multivariado.R::graficar_coordenadas_paralelas` | `logica/asociacion.R::normalizar_columnas` | *pendiente* |
-| `f1.analisis.densidad` | Densidad kernel | `graficos/g_univariado.R::graficar_densidad` | `logica/densidad.R::estimar_densidad` | *pendiente* |
-| `f1.analisis.densidad_conjunta` | Densidad conjunta | `graficos/g_bivariado.R::graficar_densidad_conjunta` | `logica/densidad.R::estimar_densidad_2d` | *pendiente* |
-| `f1.analisis.dispersion` | Diagrama de dispersión | `graficos/g_bivariado.R::graficar_dispersion` | `logica/asociacion.R::medir_asociacion` | *pendiente* |
-| `f1.analisis.elipsoide` | Elipsoide de concentración | `graficos/g_multivariado.R::graficar_elipsoide` | `logica/distancias.R::elipsoide_concentracion` | *pendiente* |
-| `f1.analisis.heatmap_correlacion` | Mapa de calor de correlaciones | `graficos/g_multivariado.R::graficar_heatmap_correlacion` | `logica/asociacion.R::matriz_correlacion` | *pendiente* |
-| `f1.analisis.histograma` | Histograma | `graficos/g_univariado.R::graficar_histograma` | `logica/resumen_univariado.R::resumir_variable` | `textos/f1.analisis.histograma.md` |
-| `f1.analisis.matriz_dispersion` | Matriz de dispersión | `graficos/g_multivariado.R::graficar_pares` | `logica/asociacion.R::matriz_correlacion` | *pendiente* |
-| `f1.analisis.mosaico` | Gráfico de mosaico | `graficos/g_bivariado.R::graficar_mosaico` | `logica/contingencia.R::tabla_contingencia` | *pendiente* |
-| `f1.analisis.qq_mahalanobis` | Q-Q de distancias de Mahalanobis | `graficos/g_multivariado.R::graficar_qq_mahalanobis` | `logica/distancias.R::mahalanobis_cuadrado` | *pendiente* |
-| `f1.analisis.qq_normal_datos` | Q-Q normal de la variable | `graficos/g_univariado.R::graficar_qq` | `logica/normalidad.R::evaluar_normalidad` | *pendiente* |
-| `f1.balanceo.frecuencias` | Frecuencias por clase | `graficos/g_calidad.R::graficar_balance` | `logica/datos_balanceo.R::resumir_balance` | *pendiente* |
-| `f1.calidad.atipicos` | Atípicos detectados | `graficos/g_calidad.R::graficar_atipicos` | `logica/datos_calidad.R::detectar_atipicos` | *pendiente* |
-| `f1.calidad.matriz_nulidad` | Matriz de nulidad | `graficos/g_calidad.R::graficar_nulidad` | `logica/datos_calidad.R::patron_faltantes` | *pendiente* |
-| `f2.analisis.curva_potencia` | Curva de potencia | `graficos/g_modelo.R::graficar_potencia` | `logica/potencia.R::calcular_potencia` | *pendiente* |
-| `f2.analisis.espacio_hipotesis` | Espacio de hipótesis | `graficos/g_modelo.R::graficar_espacio_hipotesis` | `logica/modelo_geometria.R::familia_candidatas` | *pendiente* |
-| `f2.analisis.frontera_decision` | Frontera de decisión | `graficos/g_modelo.R::graficar_frontera` | `logica/modelo_geometria.R::malla_decision` | *pendiente* |
-| `f2.analisis.modelo_manual` | Modelo manual | `graficos/g_modelo.R::graficar_modelo_manual` | `logica/modelo_geometria.R::evaluar_objetivo` | *pendiente* |
-| `f2.analisis.presupuesto_parametros` | Presupuesto de parámetros | `graficos/g_modelo.R::graficar_presupuesto` | `logica/modelo_geometria.R::contar_parametros` | *pendiente* |
-| `f2.analisis.superficie_perdida` | Superficie de pérdida | `graficos/g_modelo.R::graficar_superficie_perdida` | `logica/modelo_geometria.R::malla_objetivo` | *pendiente* |
-| `f3.analisis.camino_superficie` | Camino sobre la superficie | `graficos/g_convergencia.R::graficar_camino` | `logica/traza.R::traza_a_tabla` | *pendiente* |
-| `f3.analisis.convergencia` | Traza de convergencia | `graficos/g_convergencia.R::graficar_convergencia` | `logica/traza.R::registrar_iteracion` | `textos/f3.analisis.convergencia.md` |
-| `f3.analisis.curva_aprendizaje` | Curva de aprendizaje | `graficos/g_convergencia.R::graficar_curva_aprendizaje` | `logica/validacion.R::curva_aprendizaje` | *pendiente* |
-| `f3.analisis.perfil_verosimilitud` | Perfil de verosimilitud | `graficos/g_convergencia.R::graficar_perfil` | `logica/verosimilitud.R::perfil_parametro` | *pendiente* |
-| `f3.analisis.ruta_regularizacion` | Ruta de regularización | `graficos/g_convergencia.R::graficar_ruta_lambda` | `logica/regularizacion.R::ruta_coeficientes` | *pendiente* |
-| `f3.analisis.sensibilidad_semilla` | Sensibilidad a la semilla | `graficos/g_convergencia.R::graficar_reinicios` | `logica/traza.R::comparar_reinicios` | *pendiente* |
-| `f3.analisis.trayectoria` | Trayectoria de parámetros | `graficos/g_convergencia.R::graficar_trayectoria` | `logica/traza.R::traza_a_tabla` | *pendiente* |
-| `f4.comparacion.hiperparametros` | Hiperparámetros contra métrica | `graficos/g_comparacion.R::graficar_paralelas_hiper` | `logica/comparacion.R::rejilla_hiperparametros` | *pendiente* |
-| `f4.comparacion.metricas` | Métricas lado a lado | `graficos/g_comparacion.R::tabla_comparacion` | `logica/comparacion.R::comparar_corridas` | *pendiente* |
-| `f4.desempeno.ajuste` | Ajuste sobre los datos | `graficos/g_desempeno.R::graficar_ajuste` | `logica/metricas_regresion.R::metricas_regresion` | *pendiente* |
-| `f4.desempeno.calibracion` | Curva de calibración | `graficos/g_desempeno.R::graficar_calibracion` | `logica/metricas_clasificacion.R::calibracion` | *pendiente* |
-| `f4.desempeno.distribucion_bootstrap` | Distribución bootstrap | `graficos/g_desempeno.R::graficar_bootstrap` | `logica/remuestreo.R::distribucion_bootstrap` | *pendiente* |
-| `f4.desempeno.distribucion_nula` | Distribución nula | `graficos/g_desempeno.R::graficar_nula` | `logica/remuestreo.R::distribucion_permutacion` | *pendiente* |
-| `f4.desempeno.intervalos_tukey` | Intervalos de Tukey | `graficos/g_desempeno.R::graficar_tukey` | `logica/metricas_anova.R::comparaciones_multiples` | *pendiente* |
-| `f4.desempeno.matriz_confusion` | Matriz de confusión | `graficos/g_desempeno.R::graficar_confusion` | `logica/metricas_clasificacion.R::matriz_confusion` | *pendiente* |
-| `f4.desempeno.precision_exhaustividad` | Precisión-exhaustividad | `graficos/g_desempeno.R::graficar_pr` | `logica/metricas_clasificacion.R::calcular_pr` | *pendiente* |
-| `f4.desempeno.region_confianza` | Región de confianza | `graficos/g_desempeno.R::graficar_region_confianza` | `logica/metricas_multivariada.R::region_hotelling` | *pendiente* |
-| `f4.desempeno.roc` | Curva ROC | `graficos/g_desempeno.R::graficar_roc` | `logica/metricas_clasificacion.R::calcular_roc` | *pendiente* |
-| `f4.desempeno.tabla_anova` | Tabla ANOVA | `graficos/g_desempeno.R::tabla_anova_formateada` | `logica/metricas_anova.R::descomponer_varianza` | *pendiente* |
-| `f4.desempeno.tabla_contingencia` | Tabla de contingencia | `graficos/g_desempeno.R::tabla_contingencia_formateada` | `logica/contingencia.R::tabla_contingencia` | *pendiente* |
-| `f4.desempeno.tamano_efecto` | Tamaño del efecto | `graficos/g_desempeno.R::graficar_tamano_efecto` | `logica/metricas_anova.R::tamano_efecto` | *pendiente* |
-| `f4.diagnostico.bic` | BIC por modelo | `graficos/g_diagnostico.R::graficar_bic` | `logica/metricas_grupos.R::bic_mezclas` | *pendiente* |
-| `f4.diagnostico.codo` | Codo de la inercia | `graficos/g_diagnostico.R::graficar_codo` | `logica/metricas_grupos.R::inercia_por_k` | *pendiente* |
-| `f4.diagnostico.cofenetico` | Correlación cofenética | `graficos/g_diagnostico.R::graficar_cofenetico` | `logica/metricas_grupos.R::cofenetico` | *pendiente* |
-| `f4.diagnostico.dendrograma` | Dendrograma | `graficos/g_diagnostico.R::graficar_dendrograma` | `logica/metricas_grupos.R::arbol_jerarquico` | *pendiente* |
-| `f4.diagnostico.esfericidad` | Esfericidad | `graficos/g_diagnostico.R::graficar_esfericidad` | `logica/metricas_anova.R::prueba_esfericidad` | *pendiente* |
-| `f4.diagnostico.homocedasticidad` | Escala-localización | `graficos/g_diagnostico.R::graficar_escala_localizacion` | `logica/diagnostico_regresion.R::prueba_homocedasticidad` | *pendiente* |
-| `f4.diagnostico.indices_internos` | Índices internos | `graficos/g_diagnostico.R::graficar_indices` | `logica/metricas_grupos.R::indices_internos` | *pendiente* |
-| `f4.diagnostico.influyentes` | Observaciones influyentes | `graficos/g_diagnostico.R::graficar_influyentes` | `logica/diagnostico_regresion.R::medidas_influencia` | *pendiente* |
-| `f4.diagnostico.knn_distancias` | Distancias al k-ésimo vecino | `graficos/g_diagnostico.R::graficar_knn_distancias` | `logica/metricas_grupos.R::distancias_knn` | *pendiente* |
-| `f4.diagnostico.qq_mahalanobis` | Q-Q de Mahalanobis (residual) | `graficos/g_diagnostico.R::graficar_qq_mahalanobis` | `logica/distancias.R::mahalanobis_cuadrado` | *pendiente* |
-| `f4.diagnostico.qq_normal` | Q-Q normal de residuos | `graficos/g_diagnostico.R::graficar_qq_residuos` | `logica/normalidad.R::evaluar_normalidad` | *pendiente* |
-| `f4.diagnostico.residuos` | Residuos contra ajustados | `graficos/g_diagnostico.R::graficar_residuos` | `logica/diagnostico_regresion.R::calcular_residuos` | *pendiente* |
-| `f4.diagnostico.residuos_estandarizados` | Residuos estandarizados | `graficos/g_diagnostico.R::graficar_residuos_contingencia` | `logica/contingencia.R::residuos_estandarizados` | *pendiente* |
-| `f4.diagnostico.scree` | Gráfico de sedimentación | `graficos/g_diagnostico.R::graficar_scree` | `logica/metricas_reduccion.R::varianza_explicada` | *pendiente* |
-| `f4.diagnostico.silueta` | Silueta | `graficos/g_diagnostico.R::graficar_silueta` | `logica/metricas_grupos.R::silueta` | *pendiente* |
-| `f4.diagnostico.vif` | Factor de inflación de varianza | `graficos/g_diagnostico.R::graficar_vif` | `logica/diagnostico_regresion.R::calcular_vif` | *pendiente* |
-| `f4.explicabilidad.biplot` | Biplot | `graficos/g_explicabilidad.R::graficar_biplot` | `logica/metricas_reduccion.R::coordenadas_biplot` | *pendiente* |
-| `f4.explicabilidad.cargas` | Cargas | `graficos/g_explicabilidad.R::graficar_cargas` | `logica/metricas_reduccion.R::cargas` | *pendiente* |
-| `f4.explicabilidad.circulo_correlaciones` | Círculo de correlaciones | `graficos/g_explicabilidad.R::graficar_circulo` | `logica/metricas_reduccion.R::correlaciones_componentes` | *pendiente* |
-| `f4.explicabilidad.coeficientes` | Coeficientes estimados | `graficos/g_explicabilidad.R::graficar_coeficientes` | `logica/metricas_regresion.R::tabla_coeficientes` | *pendiente* |
-| `f4.explicabilidad.efectos_aleatorios` | Efectos aleatorios | `graficos/g_explicabilidad.R::graficar_efectos_aleatorios` | `logica/metricas_mixtos.R::efectos_aleatorios` | *pendiente* |
-| `f4.explicabilidad.grafo` | Grafo de comunidades | `graficos/g_explicabilidad.R::graficar_grafo` | `logica/grafos.R::construir_grafo` | *pendiente* |
-| `f4.explicabilidad.heatmap_bicluster` | Mapa de calor de biclusters | `graficos/g_explicabilidad.R::graficar_heatmap_bicluster` | `logica/metricas_grupos.R::biclusters` | *pendiente* |
-| `f4.explicabilidad.importancia` | Importancia por permutación | `graficos/g_explicabilidad.R::graficar_importancia` | `logica/explicabilidad.R::importancia_permutacion` | *pendiente* |
-| `f4.explicabilidad.local` | Explicación local (LIME / SHAP) | `graficos/g_explicabilidad.R::graficar_explicacion_local` | `logica/explicabilidad.R::explicar_observacion` | *pendiente* |
-| `f4.explicabilidad.mapa_2d` | Mapa en dos dimensiones | `graficos/g_explicabilidad.R::graficar_mapa_2d` | `logica/metricas_reduccion.R::coordenadas_2d` | *pendiente* |
-| `f4.explicabilidad.pdp` | Dependencia parcial (PDP / ICE) | `graficos/g_explicabilidad.R::graficar_pdp` | `logica/explicabilidad.R::dependencia_parcial` | *pendiente* |
-| `f4.explicabilidad.series_por_grupo` | Series por grupo | `graficos/g_explicabilidad.R::graficar_series_grupo` | `logica/metricas_grupos.R::centroides_series` | *pendiente* |
+| `f1.analisis.boxplot` | Diagrama de caja | `R/graficos/g_univariado.R::graficar_boxplot` | `R/logica/resumen_univariado.R::resumir_variable` | *pendiente* |
+| `f1.analisis.boxplot_grupos` | Cajas comparadas por grupo | `R/graficos/g_univariado.R::graficar_boxplot_grupos` | `R/logica/resumen_univariado.R::resumir_por_grupo` | *pendiente* |
+| `f1.analisis.coordenadas_paralelas` | Coordenadas paralelas | `R/graficos/g_multivariado.R::graficar_coordenadas_paralelas` | `R/logica/asociacion.R::normalizar_columnas` | *pendiente* |
+| `f1.analisis.densidad` | Densidad kernel | `R/graficos/g_univariado.R::graficar_densidad` | `R/logica/densidad.R::estimar_densidad` | *pendiente* |
+| `f1.analisis.densidad_conjunta` | Densidad conjunta | `R/graficos/g_bivariado.R::graficar_densidad_conjunta` | `R/logica/densidad.R::estimar_densidad_2d` | *pendiente* |
+| `f1.analisis.dispersion` | Diagrama de dispersión | `R/graficos/g_bivariado.R::graficar_dispersion` | `R/logica/asociacion.R::medir_asociacion` | *pendiente* |
+| `f1.analisis.elipsoide` | Elipsoide de concentración | `R/graficos/g_multivariado.R::graficar_elipsoide` | `R/logica/distancias.R::elipsoide_concentracion` | *pendiente* |
+| `f1.analisis.heatmap_correlacion` | Mapa de calor de correlaciones | `R/graficos/g_multivariado.R::graficar_heatmap_correlacion` | `R/logica/asociacion.R::matriz_correlacion` | *pendiente* |
+| `f1.analisis.histograma` | Histograma | `R/graficos/g_univariado.R::graficar_histograma` | `R/logica/resumen_univariado.R::resumir_variable` | `textos/f1.analisis.histograma.md` |
+| `f1.analisis.matriz_dispersion` | Matriz de dispersión | `R/graficos/g_multivariado.R::graficar_pares` | `R/logica/asociacion.R::matriz_correlacion` | *pendiente* |
+| `f1.analisis.mosaico` | Gráfico de mosaico | `R/graficos/g_bivariado.R::graficar_mosaico` | `R/logica/contingencia.R::tabla_contingencia` | *pendiente* |
+| `f1.analisis.qq_mahalanobis` | Q-Q de distancias de Mahalanobis | `R/graficos/g_multivariado.R::graficar_qq_mahalanobis` | `R/logica/distancias.R::mahalanobis_cuadrado` | *pendiente* |
+| `f1.analisis.qq_normal_datos` | Q-Q normal de la variable | `R/graficos/g_univariado.R::graficar_qq` | `R/logica/normalidad.R::evaluar_normalidad` | *pendiente* |
+| `f1.balanceo.frecuencias` | Frecuencias por clase | `R/graficos/g_calidad.R::graficar_balance` | `R/logica/datos_balanceo.R::resumir_balance` | *pendiente* |
+| `f1.balanceo.nube_sinteticos` | Nube con filas remuestreadas | `R/graficos/g_preparacion.R::graficar_nube_sinteticos` | `R/logica/datos_balanceo.R::balancear` | *pendiente* |
+| `f1.calidad.atipicos` | Atípicos detectados | `R/graficos/g_calidad.R::graficar_atipicos` | `R/logica/datos_calidad.R::detectar_atipicos` | *pendiente* |
+| `f1.calidad.duplicados` | Filas duplicadas | `R/ui/f1/calidad.R::salida_duplicados` | `R/logica/datos_calidad.R::marcar_duplicados` | *pendiente* |
+| `f1.calidad.matriz_nulidad` | Matriz de nulidad | `R/graficos/g_calidad.R::graficar_nulidad` | `R/logica/datos_calidad.R::patron_faltantes` | *pendiente* |
+| `f1.diccionario.tabla` | Diccionario de columnas | `R/ui/f1/diccionario.R::salida_diccionario` | `R/logica/datos_diccionario.R::avisos_diccionario` | *pendiente* |
+| `f1.fuente.vista_previa` | Vista previa del dataset | `R/ui/f1/fuente.R::salida_fuente` | `R/logica/datos_fuente.R::cargar_fuente` | *pendiente* |
+| `f1.particion.balance` | Balance por partición | `R/graficos/g_preparacion.R::graficar_balance_particion` | `R/logica/datos_particion.R::balance_por_particion` | *pendiente* |
+| `f1.particion.tamanos` | Tamaño de cada parte | `R/graficos/g_preparacion.R::graficar_particion` | `R/logica/datos_particion.R::resumir_particion` | *pendiente* |
+| `f1.transformacion.antes_despues` | Antes y después | `R/graficos/g_preparacion.R::graficar_antes_despues` | `R/logica/datos_transformacion.R::aplicar_transformaciones` | *pendiente* |
+| `f1.transformacion.perfil_boxcox` | Perfil de lambda (Box-Cox) | `R/graficos/g_preparacion.R::graficar_perfil_boxcox` | `R/logica/datos_transformacion.R::perfil_boxcox` | *pendiente* |
+| `f2.analisis.curva_potencia` | Curva de potencia | `R/graficos/g_modelo.R::graficar_potencia` | `R/logica/potencia.R::calcular_potencia` | *pendiente* |
+| `f2.analisis.espacio_hipotesis` | Espacio de hipótesis | `R/graficos/g_modelo.R::graficar_espacio_hipotesis` | `R/logica/modelo_geometria.R::familia_candidatas` | *pendiente* |
+| `f2.analisis.frontera_decision` | Frontera de decisión | `R/graficos/g_modelo.R::graficar_frontera` | `R/logica/modelo_geometria.R::malla_decision` | *pendiente* |
+| `f2.analisis.modelo_manual` | Modelo manual | `R/graficos/g_modelo.R::graficar_modelo_manual` | `R/logica/modelo_geometria.R::evaluar_objetivo` | *pendiente* |
+| `f2.analisis.presupuesto_parametros` | Presupuesto de parámetros | `R/graficos/g_modelo.R::graficar_presupuesto` | `R/logica/modelo_geometria.R::contar_parametros` | *pendiente* |
+| `f2.analisis.superficie_perdida` | Superficie de pérdida | `R/graficos/g_modelo.R::graficar_superficie_perdida` | `R/logica/modelo_geometria.R::malla_objetivo` | *pendiente* |
+| `f3.analisis.camino_superficie` | Camino sobre la superficie | `R/graficos/g_convergencia.R::graficar_camino` | `R/logica/traza.R::traza_a_tabla` | *pendiente* |
+| `f3.analisis.convergencia` | Traza de convergencia | `R/graficos/g_convergencia.R::graficar_convergencia` | `R/logica/traza.R::registrar_iteracion` | `textos/f3.analisis.convergencia.md` |
+| `f3.analisis.curva_aprendizaje` | Curva de aprendizaje | `R/graficos/g_convergencia.R::graficar_curva_aprendizaje` | `R/logica/validacion.R::curva_aprendizaje` | *pendiente* |
+| `f3.analisis.perfil_verosimilitud` | Perfil de verosimilitud | `R/graficos/g_convergencia.R::graficar_perfil` | `R/logica/verosimilitud.R::perfil_parametro` | *pendiente* |
+| `f3.analisis.ruta_regularizacion` | Ruta de regularización | `R/graficos/g_convergencia.R::graficar_ruta_lambda` | `R/logica/regularizacion.R::ruta_coeficientes` | *pendiente* |
+| `f3.analisis.sensibilidad_semilla` | Sensibilidad a la semilla | `R/graficos/g_convergencia.R::graficar_reinicios` | `R/logica/traza.R::comparar_reinicios` | *pendiente* |
+| `f3.analisis.trayectoria` | Trayectoria de parámetros | `R/graficos/g_convergencia.R::graficar_trayectoria` | `R/logica/traza.R::traza_a_tabla` | *pendiente* |
+| `f4.comparacion.hiperparametros` | Hiperparámetros contra métrica | `R/graficos/g_comparacion.R::graficar_paralelas_hiper` | `R/logica/comparacion.R::rejilla_hiperparametros` | *pendiente* |
+| `f4.comparacion.metricas` | Métricas lado a lado | `R/graficos/g_comparacion.R::tabla_comparacion` | `R/logica/comparacion.R::comparar_corridas` | *pendiente* |
+| `f4.desempeno.ajuste` | Ajuste sobre los datos | `R/graficos/g_desempeno.R::graficar_ajuste` | `R/logica/metricas_regresion.R::metricas_regresion` | *pendiente* |
+| `f4.desempeno.calibracion` | Curva de calibración | `R/graficos/g_desempeno.R::graficar_calibracion` | `R/logica/metricas_clasificacion.R::calibracion` | *pendiente* |
+| `f4.desempeno.distribucion_bootstrap` | Distribución bootstrap | `R/graficos/g_desempeno.R::graficar_bootstrap` | `R/logica/remuestreo.R::distribucion_bootstrap` | *pendiente* |
+| `f4.desempeno.distribucion_nula` | Distribución nula | `R/graficos/g_desempeno.R::graficar_nula` | `R/logica/remuestreo.R::distribucion_permutacion` | *pendiente* |
+| `f4.desempeno.intervalos_tukey` | Intervalos de Tukey | `R/graficos/g_desempeno.R::graficar_tukey` | `R/logica/metricas_anova.R::comparaciones_multiples` | *pendiente* |
+| `f4.desempeno.matriz_confusion` | Matriz de confusión | `R/graficos/g_desempeno.R::graficar_confusion` | `R/logica/metricas_clasificacion.R::matriz_confusion` | *pendiente* |
+| `f4.desempeno.precision_exhaustividad` | Precisión-exhaustividad | `R/graficos/g_desempeno.R::graficar_pr` | `R/logica/metricas_clasificacion.R::calcular_pr` | *pendiente* |
+| `f4.desempeno.region_confianza` | Región de confianza | `R/graficos/g_desempeno.R::graficar_region_confianza` | `R/logica/metricas_multivariada.R::region_hotelling` | *pendiente* |
+| `f4.desempeno.roc` | Curva ROC | `R/graficos/g_desempeno.R::graficar_roc` | `R/logica/metricas_clasificacion.R::calcular_roc` | *pendiente* |
+| `f4.desempeno.tabla_anova` | Tabla ANOVA | `R/graficos/g_desempeno.R::tabla_anova_formateada` | `R/logica/metricas_anova.R::descomponer_varianza` | *pendiente* |
+| `f4.desempeno.tabla_contingencia` | Tabla de contingencia | `R/graficos/g_desempeno.R::tabla_contingencia_formateada` | `R/logica/contingencia.R::tabla_contingencia` | *pendiente* |
+| `f4.desempeno.tamano_efecto` | Tamaño del efecto | `R/graficos/g_desempeno.R::graficar_tamano_efecto` | `R/logica/metricas_anova.R::tamano_efecto` | *pendiente* |
+| `f4.diagnostico.bic` | BIC por modelo | `R/graficos/g_diagnostico.R::graficar_bic` | `R/logica/metricas_grupos.R::bic_mezclas` | *pendiente* |
+| `f4.diagnostico.codo` | Codo de la inercia | `R/graficos/g_diagnostico.R::graficar_codo` | `R/logica/metricas_grupos.R::inercia_por_k` | *pendiente* |
+| `f4.diagnostico.cofenetico` | Correlación cofenética | `R/graficos/g_diagnostico.R::graficar_cofenetico` | `R/logica/metricas_grupos.R::cofenetico` | *pendiente* |
+| `f4.diagnostico.dendrograma` | Dendrograma | `R/graficos/g_diagnostico.R::graficar_dendrograma` | `R/logica/metricas_grupos.R::arbol_jerarquico` | *pendiente* |
+| `f4.diagnostico.esfericidad` | Esfericidad | `R/graficos/g_diagnostico.R::graficar_esfericidad` | `R/logica/metricas_anova.R::prueba_esfericidad` | *pendiente* |
+| `f4.diagnostico.homocedasticidad` | Escala-localización | `R/graficos/g_diagnostico.R::graficar_escala_localizacion` | `R/logica/diagnostico_regresion.R::prueba_homocedasticidad` | *pendiente* |
+| `f4.diagnostico.indices_internos` | Índices internos | `R/graficos/g_diagnostico.R::graficar_indices` | `R/logica/metricas_grupos.R::indices_internos` | *pendiente* |
+| `f4.diagnostico.influyentes` | Observaciones influyentes | `R/graficos/g_diagnostico.R::graficar_influyentes` | `R/logica/diagnostico_regresion.R::medidas_influencia` | *pendiente* |
+| `f4.diagnostico.knn_distancias` | Distancias al k-ésimo vecino | `R/graficos/g_diagnostico.R::graficar_knn_distancias` | `R/logica/metricas_grupos.R::distancias_knn` | *pendiente* |
+| `f4.diagnostico.qq_mahalanobis` | Q-Q de Mahalanobis (residual) | `R/graficos/g_diagnostico.R::graficar_qq_mahalanobis` | `R/logica/distancias.R::mahalanobis_cuadrado` | *pendiente* |
+| `f4.diagnostico.qq_normal` | Q-Q normal de residuos | `R/graficos/g_diagnostico.R::graficar_qq_residuos` | `R/logica/normalidad.R::evaluar_normalidad` | *pendiente* |
+| `f4.diagnostico.residuos` | Residuos contra ajustados | `R/graficos/g_diagnostico.R::graficar_residuos` | `R/logica/diagnostico_regresion.R::calcular_residuos` | *pendiente* |
+| `f4.diagnostico.residuos_estandarizados` | Residuos estandarizados | `R/graficos/g_diagnostico.R::graficar_residuos_contingencia` | `R/logica/contingencia.R::residuos_estandarizados` | *pendiente* |
+| `f4.diagnostico.scree` | Gráfico de sedimentación | `R/graficos/g_diagnostico.R::graficar_scree` | `R/logica/metricas_reduccion.R::varianza_explicada` | *pendiente* |
+| `f4.diagnostico.silueta` | Silueta | `R/graficos/g_diagnostico.R::graficar_silueta` | `R/logica/metricas_grupos.R::silueta` | *pendiente* |
+| `f4.diagnostico.vif` | Factor de inflación de varianza | `R/graficos/g_diagnostico.R::graficar_vif` | `R/logica/diagnostico_regresion.R::calcular_vif` | *pendiente* |
+| `f4.explicabilidad.biplot` | Biplot | `R/graficos/g_explicabilidad.R::graficar_biplot` | `R/logica/metricas_reduccion.R::coordenadas_biplot` | *pendiente* |
+| `f4.explicabilidad.cargas` | Cargas | `R/graficos/g_explicabilidad.R::graficar_cargas` | `R/logica/metricas_reduccion.R::cargas` | *pendiente* |
+| `f4.explicabilidad.circulo_correlaciones` | Círculo de correlaciones | `R/graficos/g_explicabilidad.R::graficar_circulo` | `R/logica/metricas_reduccion.R::correlaciones_componentes` | *pendiente* |
+| `f4.explicabilidad.coeficientes` | Coeficientes estimados | `R/graficos/g_explicabilidad.R::graficar_coeficientes` | `R/logica/metricas_regresion.R::tabla_coeficientes` | *pendiente* |
+| `f4.explicabilidad.efectos_aleatorios` | Efectos aleatorios | `R/graficos/g_explicabilidad.R::graficar_efectos_aleatorios` | `R/logica/metricas_mixtos.R::efectos_aleatorios` | *pendiente* |
+| `f4.explicabilidad.grafo` | Grafo de comunidades | `R/graficos/g_explicabilidad.R::graficar_grafo` | `R/logica/grafos.R::construir_grafo` | *pendiente* |
+| `f4.explicabilidad.heatmap_bicluster` | Mapa de calor de biclusters | `R/graficos/g_explicabilidad.R::graficar_heatmap_bicluster` | `R/logica/metricas_grupos.R::biclusters` | *pendiente* |
+| `f4.explicabilidad.importancia` | Importancia por permutación | `R/graficos/g_explicabilidad.R::graficar_importancia` | `R/logica/explicabilidad.R::importancia_permutacion` | *pendiente* |
+| `f4.explicabilidad.local` | Explicación local (LIME / SHAP) | `R/graficos/g_explicabilidad.R::graficar_explicacion_local` | `R/logica/explicabilidad.R::explicar_observacion` | *pendiente* |
+| `f4.explicabilidad.mapa_2d` | Mapa en dos dimensiones | `R/graficos/g_explicabilidad.R::graficar_mapa_2d` | `R/logica/metricas_reduccion.R::coordenadas_2d` | *pendiente* |
+| `f4.explicabilidad.pdp` | Dependencia parcial (PDP / ICE) | `R/graficos/g_explicabilidad.R::graficar_pdp` | `R/logica/explicabilidad.R::dependencia_parcial` | *pendiente* |
+| `f4.explicabilidad.series_por_grupo` | Series por grupo | `R/graficos/g_explicabilidad.R::graficar_series_grupo` | `R/logica/metricas_grupos.R::centroides_series` | *pendiente* |
 
 ## Métodos
 

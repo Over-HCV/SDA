@@ -7,216 +7,216 @@ poblar_artefactos_evaluacion <- function() {
 
   # --- Desempeño ---------------------------------------------------------
   registrar_artefacto("f4.desempeno.ajuste", "Ajuste sobre los datos",
-    grafico = "graficos/g_desempeno.R::graficar_ajuste",
-    logica  = "logica/metricas_regresion.R::metricas_regresion",
+    grafico = "R/graficos/g_desempeno.R::graficar_ajuste",
+    logica  = "R/logica/metricas_regresion.R::metricas_regresion",
     descripcion = "Observado contra predicho, con la recta de identidad.")
 
   registrar_artefacto("f4.desempeno.roc", "Curva ROC",
-    grafico = "graficos/g_desempeno.R::graficar_roc",
-    logica  = "logica/metricas_clasificacion.R::calcular_roc",
+    grafico = "R/graficos/g_desempeno.R::graficar_roc",
+    logica  = "R/logica/metricas_clasificacion.R::calcular_roc",
     descripcion = "Sensibilidad contra 1 - especificidad al barrer el umbral.")
 
   registrar_artefacto("f4.desempeno.precision_exhaustividad", "Precisión-exhaustividad",
-    grafico = "graficos/g_desempeno.R::graficar_pr",
-    logica  = "logica/metricas_clasificacion.R::calcular_pr",
+    grafico = "R/graficos/g_desempeno.R::graficar_pr",
+    logica  = "R/logica/metricas_clasificacion.R::calcular_pr",
     descripcion = "Mejor que la ROC cuando las clases están desbalanceadas.")
 
   registrar_artefacto("f4.desempeno.matriz_confusion", "Matriz de confusión",
-    grafico = "graficos/g_desempeno.R::graficar_confusion",
-    logica  = "logica/metricas_clasificacion.R::matriz_confusion",
+    grafico = "R/graficos/g_desempeno.R::graficar_confusion",
+    logica  = "R/logica/metricas_clasificacion.R::matriz_confusion",
     descripcion = "Aciertos y errores por clase; cada celda es clicable.")
 
   registrar_artefacto("f4.desempeno.calibracion", "Curva de calibración",
-    grafico = "graficos/g_desempeno.R::graficar_calibracion",
-    logica  = "logica/metricas_clasificacion.R::calibracion",
+    grafico = "R/graficos/g_desempeno.R::graficar_calibracion",
+    logica  = "R/logica/metricas_clasificacion.R::calibracion",
     descripcion = "¿Cuando el modelo dice 0.8, acierta el 80 % de las veces?")
 
   registrar_artefacto("f4.desempeno.tabla_anova", "Tabla ANOVA",
-    grafico = "graficos/g_desempeno.R::tabla_anova_formateada",
-    logica  = "logica/metricas_anova.R::descomponer_varianza",
+    grafico = "R/graficos/g_desempeno.R::tabla_anova_formateada",
+    logica  = "R/logica/metricas_anova.R::descomponer_varianza",
     descripcion = "Fuente, SC, gl, CM, F y p. La descomposición completa.")
 
   registrar_artefacto("f4.desempeno.intervalos_tukey", "Intervalos de Tukey",
-    grafico = "graficos/g_desempeno.R::graficar_tukey",
-    logica  = "logica/metricas_anova.R::comparaciones_multiples",
+    grafico = "R/graficos/g_desempeno.R::graficar_tukey",
+    logica  = "R/logica/metricas_anova.R::comparaciones_multiples",
     descripcion = "Diferencias entre pares con el nivel familiar corregido.")
 
   registrar_artefacto("f4.desempeno.tamano_efecto", "Tamaño del efecto",
-    grafico = "graficos/g_desempeno.R::graficar_tamano_efecto",
-    logica  = "logica/metricas_anova.R::tamano_efecto",
+    grafico = "R/graficos/g_desempeno.R::graficar_tamano_efecto",
+    logica  = "R/logica/metricas_anova.R::tamano_efecto",
     descripcion = "Significancia no es relevancia: esto mide cuánto, no si.")
 
   registrar_artefacto("f4.desempeno.tabla_contingencia", "Tabla de contingencia",
-    grafico = "graficos/g_desempeno.R::tabla_contingencia_formateada",
-    logica  = "logica/contingencia.R::tabla_contingencia",
+    grafico = "R/graficos/g_desempeno.R::tabla_contingencia_formateada",
+    logica  = "R/logica/contingencia.R::tabla_contingencia",
     descripcion = "Observadas contra esperadas, con la contribución al ji-cuadrado.")
 
   registrar_artefacto("f4.desempeno.region_confianza", "Región de confianza",
-    grafico = "graficos/g_desempeno.R::graficar_region_confianza",
-    logica  = "logica/metricas_multivariada.R::region_hotelling",
+    grafico = "R/graficos/g_desempeno.R::graficar_region_confianza",
+    logica  = "R/logica/metricas_multivariada.R::region_hotelling",
     descripcion = "La elipse para el vector de medias; no es el rectángulo de dos IC.")
 
   registrar_artefacto("f4.desempeno.distribucion_nula", "Distribución nula",
-    grafico = "graficos/g_desempeno.R::graficar_nula",
-    logica  = "logica/remuestreo.R::distribucion_permutacion",
+    grafico = "R/graficos/g_desempeno.R::graficar_nula",
+    logica  = "R/logica/remuestreo.R::distribucion_permutacion",
     descripcion = "Lo que pasaría si H0 fuera cierta, con el observado marcado.")
 
   registrar_artefacto("f4.desempeno.distribucion_bootstrap", "Distribución bootstrap",
-    grafico = "graficos/g_desempeno.R::graficar_bootstrap",
-    logica  = "logica/remuestreo.R::distribucion_bootstrap",
+    grafico = "R/graficos/g_desempeno.R::graficar_bootstrap",
+    logica  = "R/logica/remuestreo.R::distribucion_bootstrap",
     descripcion = "La incertidumbre del estimador sin suponer una distribución.")
 
   # --- Diagnóstico -------------------------------------------------------
   registrar_artefacto("f4.diagnostico.residuos", "Residuos contra ajustados",
-    grafico = "graficos/g_diagnostico.R::graficar_residuos",
-    logica  = "logica/diagnostico_regresion.R::calcular_residuos",
+    grafico = "R/graficos/g_diagnostico.R::graficar_residuos",
+    logica  = "R/logica/diagnostico_regresion.R::calcular_residuos",
     descripcion = "El gráfico que más supuestos revisa de una sola mirada.")
 
   registrar_artefacto("f4.diagnostico.qq_normal", "Q-Q normal de residuos",
-    grafico = "graficos/g_diagnostico.R::graficar_qq_residuos",
-    logica  = "logica/normalidad.R::evaluar_normalidad",
+    grafico = "R/graficos/g_diagnostico.R::graficar_qq_residuos",
+    logica  = "R/logica/normalidad.R::evaluar_normalidad",
     descripcion = "Normalidad de los errores; las colas son lo que importa.")
 
   registrar_artefacto("f4.diagnostico.homocedasticidad", "Escala-localización",
-    grafico = "graficos/g_diagnostico.R::graficar_escala_localizacion",
-    logica  = "logica/diagnostico_regresion.R::prueba_homocedasticidad",
+    grafico = "R/graficos/g_diagnostico.R::graficar_escala_localizacion",
+    logica  = "R/logica/diagnostico_regresion.R::prueba_homocedasticidad",
     descripcion = "Si la nube se abre en abanico, la varianza no es constante.")
 
   registrar_artefacto("f4.diagnostico.influyentes", "Observaciones influyentes",
-    grafico = "graficos/g_diagnostico.R::graficar_influyentes",
-    logica  = "logica/diagnostico_regresion.R::medidas_influencia",
+    grafico = "R/graficos/g_diagnostico.R::graficar_influyentes",
+    logica  = "R/logica/diagnostico_regresion.R::medidas_influencia",
     descripcion = "Apalancamiento y distancia de Cook: quién manda en el ajuste.")
 
   registrar_artefacto("f4.diagnostico.vif", "Factor de inflación de varianza",
-    grafico = "graficos/g_diagnostico.R::graficar_vif",
-    logica  = "logica/diagnostico_regresion.R::calcular_vif",
+    grafico = "R/graficos/g_diagnostico.R::graficar_vif",
+    logica  = "R/logica/diagnostico_regresion.R::calcular_vif",
     descripcion = "Multicolinealidad: por qué los errores estándar se inflan.")
 
   registrar_artefacto("f4.diagnostico.scree", "Gráfico de sedimentación",
-    grafico = "graficos/g_diagnostico.R::graficar_scree",
-    logica  = "logica/metricas_reduccion.R::varianza_explicada",
+    grafico = "R/graficos/g_diagnostico.R::graficar_scree",
+    logica  = "R/logica/metricas_reduccion.R::varianza_explicada",
     descripcion = "Autovalores ordenados; el codo sugiere cuántas componentes.")
 
   registrar_artefacto("f4.diagnostico.silueta", "Silueta",
-    grafico = "graficos/g_diagnostico.R::graficar_silueta",
-    logica  = "logica/metricas_grupos.R::silueta",
+    grafico = "R/graficos/g_diagnostico.R::graficar_silueta",
+    logica  = "R/logica/metricas_grupos.R::silueta",
     descripcion = "Cohesión contra separación, observación por observación.")
 
   registrar_artefacto("f4.diagnostico.codo", "Codo de la inercia",
-    grafico = "graficos/g_diagnostico.R::graficar_codo",
-    logica  = "logica/metricas_grupos.R::inercia_por_k",
+    grafico = "R/graficos/g_diagnostico.R::graficar_codo",
+    logica  = "R/logica/metricas_grupos.R::inercia_por_k",
     descripcion = "W(K) contra K; la ganancia marginal decide dónde parar.")
 
   registrar_artefacto("f4.diagnostico.dendrograma", "Dendrograma",
-    grafico = "graficos/g_diagnostico.R::graficar_dendrograma",
-    logica  = "logica/metricas_grupos.R::arbol_jerarquico",
+    grafico = "R/graficos/g_diagnostico.R::graficar_dendrograma",
+    logica  = "R/logica/metricas_grupos.R::arbol_jerarquico",
     descripcion = "El historial completo de fusiones, con el corte móvil.")
 
   registrar_artefacto("f4.diagnostico.cofenetico", "Correlación cofenética",
-    grafico = "graficos/g_diagnostico.R::graficar_cofenetico",
-    logica  = "logica/metricas_grupos.R::cofenetico",
+    grafico = "R/graficos/g_diagnostico.R::graficar_cofenetico",
+    logica  = "R/logica/metricas_grupos.R::cofenetico",
     descripcion = "Cuánto distorsiona el dendrograma las distancias originales.")
 
   registrar_artefacto("f4.diagnostico.knn_distancias", "Distancias al k-ésimo vecino",
-    grafico = "graficos/g_diagnostico.R::graficar_knn_distancias",
-    logica  = "logica/metricas_grupos.R::distancias_knn",
+    grafico = "R/graficos/g_diagnostico.R::graficar_knn_distancias",
+    logica  = "R/logica/metricas_grupos.R::distancias_knn",
     descripcion = "La forma honesta de elegir ε en DBSCAN: el codo de la curva.")
 
   registrar_artefacto("f4.diagnostico.indices_internos", "Índices internos",
-    grafico = "graficos/g_diagnostico.R::graficar_indices",
-    logica  = "logica/metricas_grupos.R::indices_internos",
+    grafico = "R/graficos/g_diagnostico.R::graficar_indices",
+    logica  = "R/logica/metricas_grupos.R::indices_internos",
     descripcion = "Silueta, Calinski-Harabasz y Davies-Bouldin, comparados.")
 
   registrar_artefacto("f4.diagnostico.bic", "BIC por modelo",
-    grafico = "graficos/g_diagnostico.R::graficar_bic",
-    logica  = "logica/metricas_grupos.R::bic_mezclas",
+    grafico = "R/graficos/g_diagnostico.R::graficar_bic",
+    logica  = "R/logica/metricas_grupos.R::bic_mezclas",
     descripcion = "Cómo el GMM elige número de componentes y forma de covarianza.")
 
   registrar_artefacto("f4.diagnostico.qq_mahalanobis", "Q-Q de Mahalanobis (residual)",
-    grafico = "graficos/g_diagnostico.R::graficar_qq_mahalanobis",
-    logica  = "logica/distancias.R::mahalanobis_cuadrado",
+    grafico = "R/graficos/g_diagnostico.R::graficar_qq_mahalanobis",
+    logica  = "R/logica/distancias.R::mahalanobis_cuadrado",
     descripcion = "Normalidad multivariada de los residuos multivariados.")
 
   registrar_artefacto("f4.diagnostico.esfericidad", "Esfericidad",
-    grafico = "graficos/g_diagnostico.R::graficar_esfericidad",
-    logica  = "logica/metricas_anova.R::prueba_esfericidad",
+    grafico = "R/graficos/g_diagnostico.R::graficar_esfericidad",
+    logica  = "R/logica/metricas_anova.R::prueba_esfericidad",
     descripcion = "El supuesto propio de medidas repetidas y su corrección.")
 
   registrar_artefacto("f4.diagnostico.residuos_estandarizados", "Residuos estandarizados",
-    grafico = "graficos/g_diagnostico.R::graficar_residuos_contingencia",
-    logica  = "logica/contingencia.R::residuos_estandarizados",
+    grafico = "R/graficos/g_diagnostico.R::graficar_residuos_contingencia",
+    logica  = "R/logica/contingencia.R::residuos_estandarizados",
     descripcion = "En qué celdas está la asociación que el ji-cuadrado detectó.")
 
   # --- Explicabilidad ----------------------------------------------------
   registrar_artefacto("f4.explicabilidad.coeficientes", "Coeficientes estimados",
-    grafico = "graficos/g_explicabilidad.R::graficar_coeficientes",
-    logica  = "logica/metricas_regresion.R::tabla_coeficientes",
+    grafico = "R/graficos/g_explicabilidad.R::graficar_coeficientes",
+    logica  = "R/logica/metricas_regresion.R::tabla_coeficientes",
     descripcion = "Estimación, error estándar e intervalo, por variable.")
 
   registrar_artefacto("f4.explicabilidad.importancia", "Importancia por permutación",
-    grafico = "graficos/g_explicabilidad.R::graficar_importancia",
-    logica  = "logica/explicabilidad.R::importancia_permutacion",
+    grafico = "R/graficos/g_explicabilidad.R::graficar_importancia",
+    logica  = "R/logica/explicabilidad.R::importancia_permutacion",
     descripcion = "Cuánto empeora el modelo al barajar cada variable.")
 
   registrar_artefacto("f4.explicabilidad.pdp", "Dependencia parcial (PDP / ICE)",
-    grafico = "graficos/g_explicabilidad.R::graficar_pdp",
-    logica  = "logica/explicabilidad.R::dependencia_parcial",
+    grafico = "R/graficos/g_explicabilidad.R::graficar_pdp",
+    logica  = "R/logica/explicabilidad.R::dependencia_parcial",
     descripcion = "El efecto marginal de una variable, promediando el resto.")
 
   registrar_artefacto("f4.explicabilidad.local", "Explicación local (LIME / SHAP)",
-    grafico = "graficos/g_explicabilidad.R::graficar_explicacion_local",
-    logica  = "logica/explicabilidad.R::explicar_observacion",
+    grafico = "R/graficos/g_explicabilidad.R::graficar_explicacion_local",
+    logica  = "R/logica/explicabilidad.R::explicar_observacion",
     descripcion = "Por qué el modelo predijo ESO para ESTA observación.")
 
   registrar_artefacto("f4.explicabilidad.cargas", "Cargas",
-    grafico = "graficos/g_explicabilidad.R::graficar_cargas",
-    logica  = "logica/metricas_reduccion.R::cargas",
+    grafico = "R/graficos/g_explicabilidad.R::graficar_cargas",
+    logica  = "R/logica/metricas_reduccion.R::cargas",
     descripcion = "Cuánto pesa cada variable original en cada componente.")
 
   registrar_artefacto("f4.explicabilidad.biplot", "Biplot",
-    grafico = "graficos/g_explicabilidad.R::graficar_biplot",
-    logica  = "logica/metricas_reduccion.R::coordenadas_biplot",
+    grafico = "R/graficos/g_explicabilidad.R::graficar_biplot",
+    logica  = "R/logica/metricas_reduccion.R::coordenadas_biplot",
     descripcion = "Observaciones y variables en el mismo plano factorial.")
 
   registrar_artefacto("f4.explicabilidad.circulo_correlaciones", "Círculo de correlaciones",
-    grafico = "graficos/g_explicabilidad.R::graficar_circulo",
-    logica  = "logica/metricas_reduccion.R::correlaciones_componentes",
+    grafico = "R/graficos/g_explicabilidad.R::graficar_circulo",
+    logica  = "R/logica/metricas_reduccion.R::correlaciones_componentes",
     descripcion = "Correlación de cada variable con las dos primeras componentes.")
 
   registrar_artefacto("f4.explicabilidad.mapa_2d", "Mapa en dos dimensiones",
-    grafico = "graficos/g_explicabilidad.R::graficar_mapa_2d",
-    logica  = "logica/metricas_reduccion.R::coordenadas_2d",
+    grafico = "R/graficos/g_explicabilidad.R::graficar_mapa_2d",
+    logica  = "R/logica/metricas_reduccion.R::coordenadas_2d",
     descripcion = "La proyección al plano, coloreada por grupo o por etiqueta.")
 
   registrar_artefacto("f4.explicabilidad.series_por_grupo", "Series por grupo",
-    grafico = "graficos/g_explicabilidad.R::graficar_series_grupo",
-    logica  = "logica/metricas_grupos.R::centroides_series",
+    grafico = "R/graficos/g_explicabilidad.R::graficar_series_grupo",
+    logica  = "R/logica/metricas_grupos.R::centroides_series",
     descripcion = "Las curvas de cada grupo con su centroide superpuesto.")
 
   registrar_artefacto("f4.explicabilidad.grafo", "Grafo de comunidades",
-    grafico = "graficos/g_explicabilidad.R::graficar_grafo",
-    logica  = "logica/grafos.R::construir_grafo",
+    grafico = "R/graficos/g_explicabilidad.R::graficar_grafo",
+    logica  = "R/logica/grafos.R::construir_grafo",
     descripcion = "Nodos coloreados por comunidad; el umbral cambia todo.")
 
   registrar_artefacto("f4.explicabilidad.heatmap_bicluster", "Mapa de calor de biclusters",
-    grafico = "graficos/g_explicabilidad.R::graficar_heatmap_bicluster",
-    logica  = "logica/metricas_grupos.R::biclusters",
+    grafico = "R/graficos/g_explicabilidad.R::graficar_heatmap_bicluster",
+    logica  = "R/logica/metricas_grupos.R::biclusters",
     descripcion = "Bloques de filas y columnas que se comportan igual.")
 
   registrar_artefacto("f4.explicabilidad.efectos_aleatorios", "Efectos aleatorios",
-    grafico = "graficos/g_explicabilidad.R::graficar_efectos_aleatorios",
-    logica  = "logica/metricas_mixtos.R::efectos_aleatorios",
+    grafico = "R/graficos/g_explicabilidad.R::graficar_efectos_aleatorios",
+    logica  = "R/logica/metricas_mixtos.R::efectos_aleatorios",
     descripcion = "Cuánto se desvía cada grupo del comportamiento promedio.")
 
   # --- Comparación entre corridas ----------------------------------------
   registrar_artefacto("f4.comparacion.metricas", "Métricas lado a lado",
-    grafico = "graficos/g_comparacion.R::tabla_comparacion",
-    logica  = "logica/comparacion.R::comparar_corridas",
+    grafico = "R/graficos/g_comparacion.R::tabla_comparacion",
+    logica  = "R/logica/comparacion.R::comparar_corridas",
     descripcion = "Las corridas seleccionadas, una fila cada una.")
 
   registrar_artefacto("f4.comparacion.hiperparametros", "Hiperparámetros contra métrica",
-    grafico = "graficos/g_comparacion.R::graficar_paralelas_hiper",
-    logica  = "logica/comparacion.R::rejilla_hiperparametros",
+    grafico = "R/graficos/g_comparacion.R::graficar_paralelas_hiper",
+    logica  = "R/logica/comparacion.R::rejilla_hiperparametros",
     descripcion = "Coordenadas paralelas de un barrido; qué combinación ganó.")
 
   invisible(TRUE)
