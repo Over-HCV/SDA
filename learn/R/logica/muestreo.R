@@ -30,7 +30,7 @@ muestrear_para_grafico <- function(datos, umbral = UMBRAL_MUESTREO,
        n_muestra = umbral, semilla = semilla, muestreado = TRUE)
 }
 
-#' Lo que viaja al JSON de la corrida y al bloque de contexto para el chat.
+#' Lo que viaja al JSON de la corrida y al bloque de contexto.
 #' Devuelve NULL cuando no se muestreó: así el bloque no se llena de ruido.
 descripcion_muestreo <- function(muestreo) {
   if (!isTRUE(muestreo$muestreado)) return(NULL)

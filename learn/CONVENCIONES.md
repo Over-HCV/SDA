@@ -84,7 +84,7 @@ tres columnas literales.
 │ ble      │ └────────────────────────────────────────────────────┘ │
 │          │ ▸ ¿Cómo se lee?        (colapsado)                      │
 │ controles│ ▸ ¿Por qué importa?    (colapsado)                      │
-│ vivos    │ ▸ Contexto para el chat(colapsado)                      │
+│ vivos    │ ▸ contexto(colapsado)                      │
 ├──────────┴────────────────────────────────────────────────────────┤
 │ franja de estado — solo valores que cambian                        │
 └────────────────────────────────────────────────────────────────────┘
@@ -193,7 +193,7 @@ viajan al JSON de la corrida.
 Cada artefacto visual tiene una **clave estable** `fase.subseccion.artefacto`
 registrada en `R/nucleo/claves.R` junto a sus rutas de gráfico, lógica y texto.
 
-Cada panel de resultado expone un toggle "Contexto para el chat" con un bloque
+Cada panel de resultado expone un toggle "contexto" con un bloque
 seleccionable que trae clave, rutas, corrida, parámetros y métricas. Pegado en
 una conversación, basta para reconstruir la derivación completa de un resultado.
 

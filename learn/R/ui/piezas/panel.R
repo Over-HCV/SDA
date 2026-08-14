@@ -82,7 +82,7 @@ panel_resultado <- function(clave, contenido, contexto = NULL, porque = NULL,
           "¿Por qué importa?", icon = bsicons::bs_icon("question-circle"),
           porque),
         if (!is.null(contexto)) bslib::accordion_panel(
-          "Contexto para el chat", icon = bsicons::bs_icon("chat-square-text"),
+          "contexto", icon = bsicons::bs_icon("chat-square-text"),
           shiny::tags$p(class = "text-muted small",
                         paste("Copiá este bloque y pegalo en una conversación",
                               "para preguntar por qué salió este resultado.")),

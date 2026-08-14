@@ -35,7 +35,7 @@ concreta usa pestañas y plegables:
 │ controles│ └────────────────────────────────────────────────────┘ │
 │ vivos    │ ▸ ¿Cómo se lee?          (plegado)                      │
 │          │ ▸ ¿Por qué importa?      (plegado)                      │
-│          │ ▸ Contexto para el chat  (plegado)                      │
+│          │ ▸ contexto  (plegado)                      │
 ├──────────┴────────────────────────────────────────────────────────┤
 │ franja de estado — solo valores que cambian                        │
 └────────────────────────────────────────────────────────────────────┘
@@ -238,7 +238,7 @@ Tres consecuencias, todas ya construidas:
 1. **El sello ⓘ** en el encabezado de cada panel muestra la clave y las tres
    rutas. Metadato, no resultado: por eso está en el encabezado y no roba
    espacio al gráfico.
-2. **El plegable "Contexto para el chat"** genera un bloque seleccionable con
+2. **El plegable "contexto"** genera un bloque seleccionable con
    clave, rutas, corrida (`dataset × modelo × receta`), parámetros, métricas y
    la ruta del JSON. Pegado en una conversación, basta para reconstruir la
    derivación completa. Sin JavaScript: bloque de texto más descarga `.md`.
@@ -320,7 +320,7 @@ el feedback-loop de la fase. Dar clic en la sección denotada [① DATOS] retorn
 │   [Examinar…]     │  Mostrando 10 de 35.115 filas                        │
 │                   │                                                      │
 │ [Cargar]          │  ▸ ¿Por qué esta subsección?                          │
-│                   │  ▸ Contexto para el chat                              │
+│                   │  ▸ contexto                              │
 ├───────────────────┴──────────────────────────────────────────────────────┤
 │ ESTADO  n=35115  p=5  faltantes 0.4%  numéricas 2  categóricas 3         │
 │         partición: ninguna · balanceo: ninguno · transformaciones: 0      │
@@ -362,7 +362,7 @@ Tres pestañas por dimensionalidad, cada gráfico con su ficha de "cómo se lee"
 │ ☐ log en x        │                                                      │
 │                   │  ▸ ¿Cómo se lee?                                      │
 │ Agrupar [Unit ▾]  │  ▸ ¿Por qué importa?                                  │
-│                   │  ▸ Contexto para el chat                              │
+│                   │  ▸ contexto                              │
 └───────────────────┴──────────────────────────────────────────────────────┘
 ```
 
