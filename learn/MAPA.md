@@ -13,8 +13,8 @@ Todas las rutas son relativas a `learn/`.
 
 - **Métodos**: 54 registrados — 0 activos, 48 pendientes, 6 bloqueados
 - **Artefactos**: 71 registrados
-- **Textos escritos**: 0 de 71
-- **Fichas escritas**: 0 de 54
+- **Textos escritos**: 2 de 71
+- **Fichas escritas**: 3 de 54
 
 ## Artefactos
 
@@ -31,7 +31,7 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f1.analisis.dispersion` | Diagrama de dispersión | `graficos/g_bivariado.R::graficar_dispersion` | `logica/asociacion.R::medir_asociacion` | *pendiente* |
 | `f1.analisis.elipsoide` | Elipsoide de concentración | `graficos/g_multivariado.R::graficar_elipsoide` | `logica/distancias.R::elipsoide_concentracion` | *pendiente* |
 | `f1.analisis.heatmap_correlacion` | Mapa de calor de correlaciones | `graficos/g_multivariado.R::graficar_heatmap_correlacion` | `logica/asociacion.R::matriz_correlacion` | *pendiente* |
-| `f1.analisis.histograma` | Histograma | `graficos/g_univariado.R::graficar_histograma` | `logica/resumen_univariado.R::resumir_variable` | *pendiente* |
+| `f1.analisis.histograma` | Histograma | `graficos/g_univariado.R::graficar_histograma` | `logica/resumen_univariado.R::resumir_variable` | `textos/f1.analisis.histograma.md` |
 | `f1.analisis.matriz_dispersion` | Matriz de dispersión | `graficos/g_multivariado.R::graficar_pares` | `logica/asociacion.R::matriz_correlacion` | *pendiente* |
 | `f1.analisis.mosaico` | Gráfico de mosaico | `graficos/g_bivariado.R::graficar_mosaico` | `logica/contingencia.R::tabla_contingencia` | *pendiente* |
 | `f1.analisis.qq_mahalanobis` | Q-Q de distancias de Mahalanobis | `graficos/g_multivariado.R::graficar_qq_mahalanobis` | `logica/distancias.R::mahalanobis_cuadrado` | *pendiente* |
@@ -46,7 +46,7 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f2.analisis.presupuesto_parametros` | Presupuesto de parámetros | `graficos/g_modelo.R::graficar_presupuesto` | `logica/modelo_geometria.R::contar_parametros` | *pendiente* |
 | `f2.analisis.superficie_perdida` | Superficie de pérdida | `graficos/g_modelo.R::graficar_superficie_perdida` | `logica/modelo_geometria.R::malla_objetivo` | *pendiente* |
 | `f3.analisis.camino_superficie` | Camino sobre la superficie | `graficos/g_convergencia.R::graficar_camino` | `logica/traza.R::traza_a_tabla` | *pendiente* |
-| `f3.analisis.convergencia` | Traza de convergencia | `graficos/g_convergencia.R::graficar_convergencia` | `logica/traza.R::registrar_iteracion` | *pendiente* |
+| `f3.analisis.convergencia` | Traza de convergencia | `graficos/g_convergencia.R::graficar_convergencia` | `logica/traza.R::registrar_iteracion` | `textos/f3.analisis.convergencia.md` |
 | `f3.analisis.curva_aprendizaje` | Curva de aprendizaje | `graficos/g_convergencia.R::graficar_curva_aprendizaje` | `logica/validacion.R::curva_aprendizaje` | *pendiente* |
 | `f3.analisis.perfil_verosimilitud` | Perfil de verosimilitud | `graficos/g_convergencia.R::graficar_perfil` | `logica/verosimilitud.R::perfil_parametro` | *pendiente* |
 | `f3.analisis.ruta_regularizacion` | Ruta de regularización | `graficos/g_convergencia.R::graficar_ruta_lambda` | `logica/regularizacion.R::ruta_coeficientes` | *pendiente* |

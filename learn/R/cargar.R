@@ -23,7 +23,11 @@ sda_raiz <- function() {
   if (!is.null(.sda_cache$raiz)) return(.sda_cache$raiz)
   d <- normalizePath(getwd(), winslash = "/", mustWork = FALSE)
   repeat {
-    if (file.exists(file.path(d, "data", "charcoal.csv")) ||
+    # `sda-raiz` es el marcador que planta el bundle wasm (sin punto inicial:
+    # shinylive::export() no copia archivos ocultos): ahí no hay ni renv
+    # ni necesariamente data/, así que sin él el buscador subiría hasta "/".
+    if (file.exists(file.path(d, "sda-raiz")) ||
+        file.exists(file.path(d, "data", "charcoal.csv")) ||
         file.exists(file.path(d, "renv", "activate.R"))) {
       .sda_cache$raiz <- d
       return(d)
@@ -52,9 +56,13 @@ ruta_app <- function(...) file.path(sda_base(), ...)
 ruta_repo <- function(...) file.path(sda_raiz(), ...)
 
 # --- Orden de carga --------------------------------------------------------
-# nucleo -> logica -> graficos -> metodos -> ui.
-# El orden importa: ui/ llama a nucleo/, y graficos/ no puede depender de ui/.
-.CARPETAS_APP <- c("nucleo", "logica", "graficos", "ui")
+# nucleo -> logica -> graficos -> ui/piezas -> ui -> metodos.
+#
+# `ui/piezas` aparece antes que `ui` porque las piezas definen constantes que
+# los módulos usan en el nivel superior de su archivo (ETIQUETA_ANALISIS, por
+# ejemplo). Las rutas repetidas no se sourcean dos veces: .sourcear_arbol()
+# lleva registro de lo ya cargado.
+.CARPETAS_APP <- c("nucleo", "logica", "graficos", "ui/piezas", "ui")
 
 # De libs/_comun/R/ solo lo que la app necesita. Añadir aquí, no en cada módulo.
 .COMUN <- c("datos.R", "metricas.R", "temas.R", "temas_bslib.R")
@@ -67,12 +75,14 @@ ruta_repo <- function(...) file.path(sda_raiz(), ...)
 #' archivos solo DEFINEN funciones; lo que se ejecuta al cargar son las
 #' llamadas a poblar_* del final de cargar_sda().
 #'
-#' @return número de archivos sourceados
+#' @return número de archivos sourceados en esta llamada
 .sourcear_arbol <- function(dir) {
   if (!dir.exists(dir)) return(0L)
   archivos <- sort(list.files(dir, pattern = "[.][Rr]$", full.names = TRUE,
                               recursive = TRUE))
+  archivos <- setdiff(normalizePath(archivos), .sda_cache$sourceados)
   for (archivo in archivos) source(archivo, local = FALSE)
+  .sda_cache$sourceados <- c(.sda_cache$sourceados, archivos)
   length(archivos)
 }
 
@@ -81,6 +91,8 @@ ruta_repo <- function(...) file.path(sda_raiz(), ...)
 #' @param con_ui FALSE en contexto headless: salta `ui/` y no carga bslib/DT.
 #' @param silencioso TRUE para no imprimir el inventario.
 cargar_sda <- function(con_ui = TRUE, silencioso = TRUE) {
+  .sda_cache$sourceados <- character(0)
+
   for (f in .COMUN) {
     ruta <- ruta_repo("libs", "_comun", "R", f)
     if (file.exists(ruta)) source(ruta, local = FALSE)

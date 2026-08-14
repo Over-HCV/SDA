@@ -15,17 +15,58 @@ de implementar.
 > Feedback-loop closure efectivo: **entrada → proceso → resultado**
 > visibles al mismo tiempo, en la misma pantalla, sin scroll y sin recargar.
 
-Esto no es un adorno de UX: es la **invariante de layout** de toda la app. Cada vista de método tiene tres zonas simultáneas. Si un cambio de input no mueve algo visible en menos de un segundo, la vista está mal diseñada.
+Esto no es un adorno de UX: es la **invariante de layout** de toda la app. Si
+un cambio de input no mueve algo visible en menos de un segundo, la vista está
+mal diseñada.
+
+Ahora bien, el tríptico es una invariante **lógica**, no tres columnas
+literales. Tres columnas fijas condenarían al gráfico a un tercio de la
+pantalla y dejarían texto que no cambia ocupando los otros dos. La realización
+concreta usa pestañas y plegables:
 
 ```
-┌─ ENTRADAS ────────┬─ PROCESOS ─────────────┬─ RESULTADOS ──────────────┐
-│ controles         │ qué está calculando   │ gráficos + métricas         │
-│ (sliders, selects)│ ahora mismo:          │ que cambian al mover       │
-│                   │ fórmula, paso del     │ un control                 │
-│                   │ algoritmo, iteración  │ (why is important)         │
-│                   │ el por qué es útil    │                            │
-└───────────────────┴───────────────────────┴────────────────────────────┘
+┌─ navbar ── ⌂ ① Datos ② Modelado ③ Ajuste ④ Evaluación ──── 🎨 ⚙ ⓘ ─┐
+├──────────┬────────────────────────────────────────────────────────┤
+│ ENTRADAS │  [ Fuente ][ Diccionario ][ Calidad ][ … ][ ▣ Análisis ]│ ← tabs
+│ sidebar  │ ┌────────────────────────────────────────────────────┐ │
+│ plegable │ │                                                    │ │
+│          │ │              RESULTADO (domina)                    │ │
+│ solo los │ │                                                    │ │
+│ controles│ └────────────────────────────────────────────────────┘ │
+│ vivos    │ ▸ ¿Cómo se lee?          (plegado)                      │
+│          │ ▸ ¿Por qué importa?      (plegado)                      │
+│          │ ▸ Contexto para el chat  (plegado)                      │
+├──────────┴────────────────────────────────────────────────────────┤
+│ franja de estado — solo valores que cambian                        │
+└────────────────────────────────────────────────────────────────────┘
 ```
+
+- Subsecciones → `navset_card_tab`. Con más de seis, `navset_pill_list`
+  (vertical a la izquierda).
+- **Entradas** → `sidebar()` plegable; los controles secundarios dentro de un
+  `accordion` cerrado.
+- **Resultado** → el cuerpo de la card. Máximo espacio, siempre.
+- **Proceso y explicaciones** → plegados debajo, o en `popover` si caben en una
+  línea.
+
+Ninguna vista arma estas piezas a mano: todas salen de `R/ui/piezas/`.
+
+### 0.1b La regla de lo estático
+
+> Si un contenido **no cambia** en respuesta a los inputs de esta fase, se
+> oculta en un plegable. Los píxeles son para lo que se mueve.
+
+| Contenido | ¿Cambia con inputs? | Destino |
+|---|---|---|
+| Gráfico, métricas, tabla de resultados | sí | visible siempre |
+| Franja de estado (n, p, % faltantes) | sí | visible, una línea |
+| Fórmula del método, explicación del algoritmo | no | plegado |
+| "¿Por qué es necesaria esta técnica?" | no | plegado |
+| "¿Cómo se lee este gráfico?" | no | plegado |
+| Ficha completa del método | no | modal |
+| Definición de un símbolo | no | `tooltip` |
+
+Las reglas completas y verificables están en `CONVENCIONES.md` (C1–C14).
 
 ### 0.2 Las 4 fases y una traducción
 
@@ -174,12 +215,49 @@ razón escrita al lado.
 Los objetos se serializan al contrato S2 de `libs/sdd.md`, así que una corrida
 hecha en la UI y una hecha por `Rscript run_headless.R` producen el mismo JSON.
 
+### 2.5 Trazabilidad — de un resultado a su código
+
+El caso de uso: ves un número que no entendés, abrís un chat y preguntás *¿por
+qué la ROC me dio esto?*. Para que un agente pueda contestar sin adivinar, hace
+falta un puente del gráfico al archivo.
+
+Cada artefacto visual tiene una **clave estable** `fase.subseccion.artefacto`
+registrada junto a sus rutas:
+
+```r
+registrar_artefacto(
+  clave   = "f4.desempeno.roc",
+  titulo  = "Curva ROC",
+  grafico = "graficos/g_desempeno.R::graficar_roc",
+  logica  = "logica/metricas_clasificacion.R::calcular_roc",
+  descripcion = "Sensibilidad frente a 1 − especificidad al barrer el umbral.")
+```
+
+Tres consecuencias, todas ya construidas:
+
+1. **El sello ⓘ** en el encabezado de cada panel muestra la clave y las tres
+   rutas. Metadato, no resultado: por eso está en el encabezado y no roba
+   espacio al gráfico.
+2. **El plegable "Contexto para el chat"** genera un bloque seleccionable con
+   clave, rutas, corrida (`dataset × modelo × receta`), parámetros, métricas y
+   la ruta del JSON. Pegado en una conversación, basta para reconstruir la
+   derivación completa. Sin JavaScript: bloque de texto más descarga `.md`.
+3. **`MAPA.md`** es el índice generado de las 71 claves. Es el primer archivo
+   que lee un agente, y `verificar_mapa.R` falla si queda desactualizado.
+
+El orden de lectura para responder es siempre el mismo: **lógica** (de ahí sale
+el número) → **gráfico** (cómo se dibuja) → **texto** (qué se le dijo al
+usuario).
+
 ---
 
 ## 3 · Wireframes por vista
 
-Ancho de referencia ≥ 1280 px. Debajo de 992 px las tres columnas se apilan
-Entradas → Resultado → Proceso.
+Ancho de referencia ≥ 1280 px. Debajo de 992 px el sidebar se pliega y las
+pestañas siguen igual.
+
+Convención de los wireframes: `▸` marca un plegable **cerrado por defecto**
+(la regla de lo estático, §0.1b). Lo que no lleva `▸` está siempre visible.
 
 ### ⌂ Inicio
 
@@ -238,15 +316,21 @@ el feedback-loop de la fase. Dar clic en la sección denotada [① DATOS] retorn
 │   n:    ──●───    │  ┌─ ¿Por qué esta subsección? ────────────────────┐  │
 │   efecto:──●──    │  │ Un método no se aplica a "datos": se aplica a  │  │
 │   semilla: 42     │  │ una matriz X (n×p) con roles definidos. Antes  │  │
-│ ○ Subir archivo   │  │ de eso no hay estadística, hay un archivo.     │  │
-│   [Examinar…]     │  │ → notes/tree.md 020/030 · 070/020              │  │
-│                   │  └────────────────────────────────────────────────┘  │
-│ [Cargar]          │                                                      │
+│ ○ Subir archivo   │  ⚠ graficando 5.000 de 35.115 · semilla 42 [usar todo]│
+│   [Examinar…]     │  Mostrando 10 de 35.115 filas                        │
+│                   │                                                      │
+│ [Cargar]          │  ▸ ¿Por qué esta subsección?                          │
+│                   │  ▸ Contexto para el chat                              │
 ├───────────────────┴──────────────────────────────────────────────────────┤
 │ ESTADO  n=35115  p=5  faltantes 0.4%  numéricas 2  categóricas 3         │
 │         partición: ninguna · balanceo: ninguno · transformaciones: 0      │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
+
+El badge de muestreo aparece **solo cuando de verdad se muestreó** (por encima
+de 5.000 filas) y las métricas siguen usando el total. Truncar en silencio
+convierte un gráfico en una mentira; el pie "mostrando X de N" es obligatorio
+en toda tabla.
 
 | Subsección | Acciones | Salida visible en vivo |
 |---|---|---|
@@ -274,13 +358,23 @@ Tres pestañas por dimensionalidad, cada gráfico con su ficha de "cómo se lee"
 │          0.42     │  │   ├──[▒▒▒|▒▒]──┤ ∘∘ │ │      ⋰⋰⋰                │ │
 │                   │  └─────────────────────┘ └─────────────────────────┘ │
 │ ☑ densidad        │                                                      │
-│ ☑ atípicos        │  ┌─ PROCESO ──────────────────────────────────────┐  │
-│ ☐ log en x        │  │ f̂ₕ(x) = (1/nh) Σ K((x−xᵢ)/h)                   │  │
-│                   │  │ h=0.42 (Silverman ⇒ 0.51). h chico = ruido;    │  │
-│ Agrupar [Unit ▾]  │  │ h grande = borra la bimodalidad. Movelo.       │  │
-│                   │  └────────────────────────────────────────────────┘  │
-│                   │  x̄ 312.4 │ Me 180.0 │ s 501.2 │ CV 1.60 │ g₁ 2.8    │
+│ ☑ atípicos        │  x̄ 312.4 │ Me 180.0 │ s 501.2 │ CV 1.60 │ g₁ 2.8    │
+│ ☐ log en x        │                                                      │
+│                   │  ▸ ¿Cómo se lee?                                      │
+│ Agrupar [Unit ▾]  │  ▸ ¿Por qué importa?                                  │
+│                   │  ▸ Contexto para el chat                              │
 └───────────────────┴──────────────────────────────────────────────────────┘
+```
+
+Al abrir **¿Cómo se lee?** aparece el texto del artefacto, con la fórmula y la
+trampa del gráfico:
+
+```
+│ ▾ ¿Cómo se lee?                                                          │
+│   Qué muestra · frecuencias por intervalo; la altura es un conteo.       │
+│   Qué buscar  · centro, dispersión, forma, modas, huecos.                │
+│   Cuándo engaña · el número de clases cambia la historia. Con pocas      │
+│     barras todo parece una campana; con muchas, ruido dentado. Movelo.   │
 ```
 
 | Pestaña | Diagramas | Hook interactivo |
@@ -289,8 +383,11 @@ Tres pestañas por dimensionalidad, cada gráfico con su ficha de "cómo se lee"
 | **Bivariado** | dispersión (+ jitter, alfa, hexbin) · densidad conjunta con curvas de nivel · boxplot agrupado · mosaico · tabla de contingencia con residuos estandarizados | selector de par + slider de transparencia; el sobreploteo se ve y se cura |
 | **Multivariado** | matriz de dispersión · mapa de calor de `R` (con reordenamiento) · coordenadas paralelas · elipsoide de concentración · Q–Q de distancias de Mahalanobis · superficie de densidad bivariada 3D | multi-select de variables; el elipsoide se deforma con la correlación |
 
-Cada gráfico trae un pie fijo con tres líneas: **qué muestra · qué buscar ·
-cuándo engaña**.
+Cada gráfico lleva su plegable con la estructura fija **qué muestra · qué
+buscar · cuándo engaña**. Los textos viven en `learn/textos/<clave>.md`, uno por
+artefacto, y se escriben incrementalmente: si falta el archivo, la UI lo avisa
+en gris y no falla. Son 71 y llevan tiempo; la cobertura se ve en el Inicio y en
+`MAPA.md`.
 
 ---
 

@@ -136,6 +136,29 @@ Ningún párrafo explicativo dentro de un `.R`.
 
 Lo mismo para las fichas de método: `learn/fichas/<clave>.md`.
 
+### Sin LaTeX en los textos
+
+`commonmark` no renderiza matemáticas, y traer MathJax o KaTeX significaría una
+dependencia de red que en el navegador (wasm, servido como archivos estáticos)
+no está garantizada — además de JavaScript propio, que C10 prohíbe.
+
+Un `$$\sum x_i$$` sin renderizar no es una fórmula: es ruido que estorba.
+Entonces la notación se escribe con **Unicode y código**, igual que en
+`notes/tree.md`:
+
+| En vez de | Escribir |
+|---|---|
+| `$\lambda_i$` | `λᵢ` |
+| `$\sum_{i=1}^{n} x_i$` | `Σᵢ xᵢ` |
+| `$\lVert x - \mu \rVert^2$` | `‖x − μ‖²` |
+| bloque `$$...$$` | bloque de código con la fórmula en una línea |
+
+Para una fórmula que necesita aire, un bloque de código:
+
+```
+W = Σₖ Σ_{i ∈ Cₖ} ‖xᵢ − μₖ‖²
+```
+
 ---
 
 ## C7 · Tablas siempre acotadas

@@ -137,10 +137,14 @@ probar("severidad_maxima ordena bien",
 
 # ---------------------------------------------------------------------------
 cat("\n[textos]\n")
+probar("un texto escrito se renderiza a HTML",
+       grepl("<h2", texto("f1.analisis.histograma"), fixed = TRUE))
 probar("un texto inexistente avisa y no falla",
        grepl("Sin texto todav", texto("f4.desempeno.roc")))
+probar("una ficha escrita se renderiza a HTML",
+       grepl("<h2", ficha("acp"), fixed = TRUE))
 probar("una ficha inexistente avisa y no falla",
-       grepl("pendiente", ficha("acp")))
+       grepl("Ficha pendiente", ficha("hotelling"), fixed = TRUE))
 probar("cobertura_textos cuenta los esperados",
        cobertura_textos()$textos_esperados == length(claves_artefactos()))
 

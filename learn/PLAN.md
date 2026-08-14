@@ -52,47 +52,62 @@ dibuja solo desde el registro, el tema cambia, y está viva en GitHub Pages.
 
 Codifica C4, C5 y C7 una sola vez, para que ninguna vista las reinvente.
 
-- [ ] `R/ui/ui_piezas.R`
-  - [ ] `panel_resultado(clave, contenido, ...)` — card + los tres toggles
-  - [ ] `toggle(titulo, contenido, abierto = FALSE)`
-  - [ ] `tabla_paginada(df, ...)` — paginación, filtro, pie "X de N"
-  - [ ] `badge_muestreo(n_total, n_muestra, semilla)`
-  - [ ] `franja_estado(items)`
-  - [ ] `tarjeta_metodo(clave)` — con candado si `estado != "activo"`
-- [ ] `R/ui/ui_ficha.R` — ficha desde `fichas/<clave>.md`, con "el puente" si está bloqueada
-- [ ] `R/ui/ui_formulario.R` — `hiper{}` → widgets
-- [ ] `fichas/acp.md`, `fichas/kmeans.md`, `fichas/mlp.md` (bloqueada)
-- [ ] 2 textos de ejemplo en `textos/`
+- [x] `R/ui/piezas/panel.R` — `panel_resultado()`, `plegable()`, `sello_clave()`,
+      `salida_contexto()` / `dibujar_contexto()`, `panel_pendiente()`
+- [x] `R/ui/piezas/tablas.R` — `tabla_paginada()`, `recortar_para_tabla()`,
+      `pie_tabla()`, `salida_tabla()` / `dibujar_tabla()`
+- [x] `R/ui/piezas/indicadores.R` — `franja_estado()`, `badge_muestreo()`,
+      `badge_estado()`, `badge_modo()`, `barra_progreso()`, `lista_avisos()`
+- [x] `R/ui/piezas/tarjetas.R` — `tarjeta_metodo()`, `rejilla_metodos()`
+- [x] `R/ui/piezas/fase.R` — `armazon_fase()`, `navegacion_fase()`, `fase_pendiente()`
+- [x] `R/ui/ficha.R` — ficha desde `fichas/<clave>.md`, con "el puente" si está bloqueada
+- [x] `R/ui/formulario.R` — `hiper{}` → widgets, `valores_hiper()`, `hiper_por_defecto()`
+- [x] `fichas/acp.md`, `fichas/kmeans.md`, `fichas/mlp.md` (bloqueada)
+- [x] `textos/f1.analisis.histograma.md`, `textos/f3.analisis.convergencia.md`
+
+> Completado el 2026-08-13. Sin LaTeX en los textos: `commonmark` no renderiza
+> matemáticas y MathJax exigiría red y JavaScript propio. Notación en Unicode,
+> como en `notes/tree.md` (ver C6 en CONVENCIONES.md).
 
 ### E3 · Shell navegable
 
-- [ ] `R/app.R` — `page_navbar`: ⌂ ① ② ③ ④ ⚙ ⓘ + tema + badge de modo. Solo cablea
-- [ ] `R/ui/f0_inicio.R` — estado, mapa del curso, últimas corridas, ruta sugerida
-- [ ] `R/ui/f2_catalogo.R` — **la vista real del hito**: tarjetas + filtros + ficha
-- [ ] `R/ui/x_objetos.R` — CRUD con `tabla_paginada()`
-- [ ] `R/ui/x_referencia.R` — glosario · árbol · galería (`libs/shiny/R/gal_*.R`) · tema
-- [ ] Placeholders navegables de ① ② ③ ④ con sus tabs y aviso "en construcción"
-- [ ] `R/pruebas/test_app.R` — recorre 7 secciones, cambia tema, filtra, abre ficha;
-      cero errores de consola + aserciones positivas (C14)
+- [x] `R/app.R` — `page_navbar`: ⌂ ① ② ③ ④ ⚙ ⓘ + tema + badge de modo. Solo cablea
+- [x] `R/ui/f0/inicio.R` — estado, mapa del curso, cobertura de textos, corridas
+- [x] `R/ui/f2/catalogo.R` + `f2/modelado.R` — **la vista real del hito**
+- [x] `R/ui/transversal/objetos.R` — CRUD + exportar/importar sesión
+- [x] `R/ui/transversal/referencia.R` — glosario · catálogo · artefactos · entorno
+- [x] `R/ui/f1/datos.R`, `f3/ajuste.R`, `f4/evaluacion.R` — pestañas reales, vacías
+- [x] `R/nucleo/tema_app.R` — `tema_seguro()`: sin `font_google()` en wasm
+- [x] `R/pruebas/test_app.R` — 30 aserciones, cero errores de consola (C14)
+
+> Completado el 2026-08-13.
 
 ### E4 · Despliegue día 0
 
-- [ ] `app.R` — wrapper shinylive (patrón de `libs/shiny-live/app.R`, ojo con `$value`)
-- [ ] `build.R` — `construir_bundle()` filtrando `wasm == TRUE`, staging con
-      `data/` y `libs/_comun/` adentro
-- [ ] Export a `docs/`
-- [ ] `verificar_html()` sobre el bundle: consola limpia + aserciones positivas
+- [x] `app.R` — wrapper con `$value` **y** las librerías declaradas
+- [x] `build.R` — staging fuera del repo, `verificar_staging()`,
+      `verificar_dependencias()`, `inventario_bundle()`
+- [x] Export a `docs/` — 53 archivos, 24 paquetes wasm, app.json 3.0 MB
+- [x] `R/pruebas/verificar_bundle.R` — webR real en Chrome headless, aserciones
+      positivas dentro del iframe
 - [ ] GitHub Pages sirviendo `learn/docs/`
+
+> Completado el 2026-08-13 salvo la publicación en Pages, que es un ajuste del
+> repositorio, no de código.
 
 ### Definición de "hecho" — Hito 1
 
-- [ ] `verificar_loc.R` verde
-- [ ] `verificar_idioma.R` verde
-- [ ] `verificar_mapa.R` verde
-- [ ] `test_headless.R` verde
-- [ ] `test_app.R` verde, consola sin errores
-- [ ] Bundle wasm abre y navega sin errores
-- [ ] `renv::status()` limpio (Hito 1 no debería añadir dependencias)
+- [x] `verificar_loc.R` verde — 47 archivos, máximo 184 LOC
+- [x] `verificar_idioma.R` verde
+- [x] `verificar_mapa.R` verde
+- [x] `test_headless.R` verde — 48 pruebas
+- [x] `test_app.R` verde — 30 pruebas, consola sin errores
+- [x] `verificar_bundle.R` verde — el bundle wasm arranca y pinta
+- [x] Cero dependencias nuevas: los 14 paquetes que `learn/` necesita ya estaban
+      en `renv.lock`. `renv::status()` reporta 15 paquetes fuera de sincronía
+      (tidyverse, plotly, GGally, psych…), pero todos vienen de los cuadernos de
+      `notes/SDA/`, no de `learn/`. Comprobar con:
+      `Rscript -e 'print(sort(unique(renv::dependencies("learn", quiet=TRUE)$Package)))'`
 
 ---
 

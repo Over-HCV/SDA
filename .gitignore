@@ -40,6 +40,23 @@ libs/shiny-live/R/shiny_bookmarks/**
 # ── Shinylive  (bundle webR + staging; ver libs/shiny-live/.gitignore) ──
 .build/
 
+# ── SDA Lab (learn/) — todo lo autogenerado ──
+# El staging de learn/build.R vive en tempdir(), NO acá: renv::dependencies()
+# respeta .gitignore, y con el staging dentro del repo shinylive detectaba cero
+# paquetes y el bundle salía vacío (ver learn/AGENT.md).
+#
+# El bundle se reconstruye con:
+#   Rscript -e 'source("learn/build.R"); construir_bundle()'
+# app.json pesa ~3 MB y cambia entero en cada build, así que versionarlo
+# engorda el historial rápido. Para publicar en GitHub Pages: o una Action que
+# lo construya, o un `git add -f learn/docs` deliberado.
+learn/docs/
+learn/outputs/
+learn/.build/
+# MAPA.md SÍ se versiona aunque lo genere learn/R/mapa.R: es el índice que un
+# agente lee antes de tocar nada, y tiene que estar disponible sin correr R.
+# verificar_mapa.R falla si queda desactualizado.
+
 # ── Quarto / Rmarkdown ──
 .quarto/
 *_cache/

@@ -1,0 +1,381 @@
+---
+title: "Análisis Estadístico de Datos"
+author: "Profesor: Nicolás López"
+output:
+  rmdformats::downcute
+---
+
+
+
+# Dependencias
+
+Para la ejecución de este cuaderno, debe instalar con anterioridad los siguientes paquetes desde la consola de R o usando el menú Tools\>Install Packages en RStudio:
+
+- `install.packages("tidyverse")`
+- `install.packages("ggfortify")`
+- `install.packages("corrplot")`
+- `install.packages("gridExtra")`
+- `install.packages("ggplot2")`
+- `install.packages("ggrepel")`
+- `install.packages("factoextra")`
+
+------------------------------------------------------------------------
+
+# Objetivo y Alcance
+
+**Objetivo** Explicar el uso de la técnica de Análisis de Componentes principales ACP (PCA en inglés) aplicada a un conjunto de datos, iniciando con un ejemplo y posteriormente incluyendo aspectos relevantes de la teoría detrás de este método.
+
+**Alcance**: Este cuaderno busca combinar la teoría de manera general con ejercicios prácticos que permitan el entendimiento de esta técnica.
+
+# Contexto General de ACP
+
+## Motivación
+
+Al analizar observaciones para dos variables de tipo cuantitativo, podemos observar de manera conjunta sus características de manera simple al realizar un diagrama de dispersión. Las parejas ordenadas son ubicadas en el plano y con esto podemos entender características de los datos: tales como la centralidad, dispersión y correlación entre estos. Incluso, podemos determinar si las características de los datos observados siguen un modelo probabilístico, como la distribución normal bivariada vista anteriormente. Al contar con más de dos variables por individuo, se dificulta analizar visualmente las características de los datos, sin embargo, en este espacio de mayor dimensión, también existen características de tendencia, dispersión, correlación, entre las UE ¿cómo podemos observar estos datos que viven en un espacio que no podemos visualizar?. Como motivación, observe la figura de abajo, la cual es tomada de la animación web disponible [aquí](https://www.viral3d.com/V3D/this_is_truth/v1/).
+
+![Grafica de motivación - ACP](pics/img_01.jpg)
+
+Grafica de motivación - ACP
+
+Puede verse que la gran verdad (o *truth*) es una sola, y en este caso es representada por un cilindro en tres dimensiones. La perspectiva desde donde se mire dicha gran verdad puede llevar a diferentes verdades parciales (o *trues*), las cuales son las figuras proyectadas: cuadrada y circular. Note que pueden haber múltiples verdades parciales (visite la página web destacada arriba), pero se reflejan solamente las dos más informativas. Ambas son ciertas aunque sean diferentes, varían respecto a la perspectiva desde la cual se vea la gran verdad. **Estas figuras permiten entender la gran verdad a partir de verdades más simples**. Volviendo al escenario multivariado de datos, la gran verdad de los datos se encuentra en un espacio de gran dimensión, ya no es un cilindro tridimensional, son puntos en un espacio de dimensión <span class="math inline">\\p\\</span> (donde <span class="math inline">\\p\\</span> representa el número de variables, usualmente mayor a 2). Al ver los datos desde abstracciones simples e informativas, podremos acercarnos de manera aproximada a su representación multivariada, y este es el objetivo del ACP.
+
+## ¿Qué es el ACP?
+
+El ACP es una técnica estadística que nos permite resumir y visualizar la información en un conjunto de datos que contiene UE descritas por múltiples variables cuantitativas. El ACP se utiliza para extraer la información importante de una tabla de datos multivariada y para expresar esta información como un conjunto de pocas variables nuevas llamadas componentes principales (CP, de Componentes Principales). Estas nuevas variables corresponden a una combinación lineal de las originales. El número de componentes principales es menor o igual al número de variables originales.
+
+- Cada variable podría considerarse como una dimensión diferente. Si tiene más de 3 variables en sus conjuntos de datos, podría ser muy difícil visualizar un espacio multidimensional.
+
+- La información en un conjunto de datos dado corresponde a la variación total que contiene. El objetivo de PCA es identificar direcciones (o componentes principales) a lo largo de las cuales la variación en los datos es máxima.
+
+- En otras palabras, el ACP reduce la dimensionalidad de los datos multivariados a dos o tres componentes principales, que se pueden visualizar gráficamente, con una mínima pérdida de información.
+
+![Grafica de los componentes principales como vectores](pics/img_02.png) Fuente: <https://bradleyboehmke.github.io/HOML/pca.html>
+
+El primer componente principal tiene la mayor variabilidad. El segundo componente tiene la máxima variabilidad entre todas las combinaciones lineales que son ortogonales al primero. El tercer componente principal es ortogonal tanto al primero como al segundo, y así sucesivamente para otros componentes. En otras palabras, el análisis de componentes principales reduce una gran cantidad de variables a una cantidad relativamente pequeña de combinaciones lineales de estas que pueden usarse para explicar gran parte de la variabilidad en los datos. Las variables con la mayor varianza típicamente dominarán el análisis.
+
+## ¿Cómo se obtienen los CP?
+
+### Datos de ejemplo
+
+Para motivar los conceptos, se utilizará un conjunto de datos multivariado con mas de tres variables: los datos de vehiculos (mtcars) incorporados en R por defecto. Estos datos describen 32 modelos de automóviles, tomados de una revista de automovilismo estadounidense (revista Motor Trend de 1974). Para cada modelo de automóvil, se tienen 11 variables, las cuales son:
+
+<span class="math display">\\\begin{array}{\|l\|l\|} \hline \text{Variable} & \text{Descripción} \\ \hline mpg & \text{Consumo de combustible (millas por galón EE.UU.)} \\ cyl & \text{Número de cilindros} \\ disp & \text{Desplazamiento (cu.in.) el volumen combinado de los cilindros del motor} \\ hp & \text{Potencia bruta} \\ drat& \text{Relación del eje trasero: esto describe cómo un giro del eje de transmisión corresponde a un giro de las ruedas}\\ wt& \text{Peso (1000 lbs)}\\ qsec & \text{Tiempo de 1/4 de milla: la velocidad y aceleración de los autos } \\ vs & \text{Bloque del motor: esto indica si el motor del vehículo tiene forma de "V" o si es una forma recta más común} \\ am & \text{Transmisión: indica si la transmisión del automóvil es automática (0) o manual (1).} \\ marcha & \text{Número de marchas hacia adelante} \\ carb & \text{Número de carburadores} \\ \hline \end{array}\\</span>
+
+Es importante señalar que las unidades utilizadas en las variables varían y ocupan diferentes escalas.
+
+### Evidenciando el problema multivariado
+
+Si contáramos con una sola variable, podríamos fácilmente visualizarla en en una línea recta:
+
+```{r}
+mtcars$car = rownames(mtcars)
+gg1 = ggplot(mtcars,aes(x=mpg,
+                        y=rep(0,nrow(mtcars)),
+                        label=car)) + 
+      geom_point() + 
+      xlab('Millas por galón (rendimiento)') + 
+      ylab('') + 
+      geom_text_repel(max.overlaps = Inf,
+                      size         = 2,
+                      box.padding  = 1.5)
+
+gg1
+```
+
+![](pics/img_03.png)
+
+Los carros Fiat 128 y Toyota Corolla son los que rinden una mayor cantidad de millas por galón, es decir, son de mayor rendimiento de gasolina. Mientras que Lincoln Continental y Cadillac Fleetwood consumen mucho mas: al tener menor cantidad de millas por galón tienen un menor rendimiento de gasolina. En esta variable, Fiat 128 y Toyota Corolla son similares, y a su vez, diferentes a Lincoln Continental y Cadillac Fleetwood.
+
+Si medimos dos variables:
+
+```{r}
+gg2 = ggplot(mtcars,aes(x=mpg,
+                        y=wt,
+                        label=car)) + 
+      geom_point() + 
+      xlab('Millas por galón (rendimiento)') + 
+      ylab('Peso') + 
+      geom_text_repel(max.overlaps = Inf,
+                      size         = 2,
+                      box.padding  = 0)
+
+gg2
+```
+
+![](pics/img_04.png)
+
+Este par de parejas siguen siendo similares dentro de ellas pero diferentes entre ellas: Fiat 128 y Toyota Corolla son los livianos de mayor rendimiento, mientras que Lincoln Continental y Cadillac Fleetwood son vehículos pesados de alto consumo. Si midiéramos una tercera variable, podríamos *cruzarla* con las dos variables anteriores y visualizar nuevas posibles agrupaciones:
+
+```{r}
+gg3 = ggplot(mtcars,aes(x=mpg,
+                        y=hp,
+                        label=car)) + 
+      geom_point() + 
+      xlab('Millas por galón (rendimiento)') + 
+      ylab('Potencia') + 
+      geom_text_repel(max.overlaps = Inf,
+                      size         = 2,
+                      box.padding  = 0)
+
+gg4 = ggplot(mtcars,aes(x=wt,
+                        y=hp,
+                        label=car)) + 
+      geom_point() + 
+      xlab('Peso') + 
+      ylab('Potencia') + 
+      geom_text_repel(max.overlaps = Inf,
+                      size         = 2,
+                      box.padding  = 0)
+
+grid.arrange(gg3,gg4, ncol=2)
+```
+
+![](pics/img_05.png)
+
+Ahora, Fiat 128 y Toyota Corolla, los livianos de mayor rendimiento, tienen menor potencia. Mientras que el Lincoln Continental el y Cadillac Fleetwood, los pesados de bajo consumo tienen una alta potencia. Es claro que las variables presentan asociaciones interesantes, y esta proyección en dos dimensiones puede resultar informativa para este análisis. Sin embargo, es tedioso e ineficiente observar todas las posibles parejas de gráficos de dispersión.
+
+## Cálculo de los ejes. Ejemplo básico
+
+Pensando unicamente en la relación entre consumo y peso, transformemos los datos de manera conveniente para el análisis: vamos a centrarlos respecto al promedio:
+
+```{r}
+gg2c = ggplot(mtcars %>% mutate(mpg_c = mpg - mean(mpg),
+                                wt_c  = wt  - mean(wt)),
+              aes(x=mpg_c,
+                  y=wt_c,
+                  label=car)) + 
+       geom_point() + 
+       xlab('Millas por galón (rendimiento) centrado') + 
+       ylab('Peso centrado') + 
+       geom_text_repel(max.overlaps = Inf,
+                      size          = 2,
+                      box.padding   = 0)
+
+grid.arrange(gg2,gg2c, ncol=2)
+```
+
+![](pics/img_06.png)
+
+Ahora, vamos a añadir al gráfico centrado una línea a través del origen. Esta línea se va a rotar hasta encontrar aquella que se ajuste lo mejor posible a los datos:
+
+```{r}
+gg2cl = gg2c
+for(i in c(-1,-0.5,-0.1,0.1,0.5,1)){
+  if(i==-0.1){
+    gg2cl = gg2cl + geom_abline(intercept=0,slope=i,
+                   linetype="dashed", linewidth=0.5,col='red')
+  }else{
+    gg2cl = gg2cl + geom_abline(intercept=0,slope=i,
+                   linetype="dashed", linewidth=0.5,col='blue')
+  }
+}
+gg2cl
+```
+
+![](pics/img_07.png)
+
+En rojo observamos la línea que más se acerca a los datos. Pero, ¿que significa exactamente que sea la más “cercana”?. En este caso, representa la línea que:
+
+- Minimiza las distancias2 de cada punto a su proyección. O, de manera equivalente:
+- Maximiza las distancias2 de cada proyección al origen (llamada suma de distancias proyectadas al cuadrado)
+
+Estas son equivalentes, pues la distancia del punto al origen se mantiene constante bajo cualquier línea (recordar el teorema de Pitágoras). La línea roja corresponde al primer eje principal, y este eje, como vemos en la elaboración del gráfico, tiene una pendiente igual a -0.1 = -1/10: es decir, para CP1, cada aumento en 10 unidades de rendimiento (centrado), disminuye una unidad de peso (centrado) con lo cual los datos están bastante más dispersos sobre el eje de rendimiento Es decir, la variable rendimiento es más importante que el peso para describir la variabilidad del conjunto de datos.
+
+Notas importantes:
+
+- Podemos caracterizar la línea roja (es decir, el CP1) mediante cualquier *vector* que pase sobre ella. Por ejemplo, el vector <span class="math inline">\\v_1=(1,-0.1)\\</span>, ó, <span class="math inline">\\v_2=(10,-1)\\</span>, cualquiera sirve. En particular, el vector <span class="math inline">\\u_1\\</span> de longitud 1 da el vector de pesos o cargas de las variables y es llamado el vector propio de CP1.
+
+- La suma de distancias proyectadas al cuadrado da una medida de qué tanta información captura el CP1. Entre mayor sea, más variabilidad captura el eje. Este valor es llamado el valor propio de CP1, y su raíz cuadrada es el valor singular del CP1.
+
+- Además de centrados, los datos deben ser escalados para que la variabilidad inherente de las variables no *arrastre* los ejes. En este caso, puede verse que la variabilidad del rendimiento es mayor, y probablemente esto haga que dicha variable sea más importante.
+
+El CP2 es aquel que mejor complementa la información que deja fuera el CP1. Es decir, aquél que maximiza la suma de distancias2 de cada proyección al origen, y además es ortogonal a CP1. En este ejercicio el resultado de CP2 es inmediato al estar ubicados en dos dimensiones, pero es claro que cuando se cuenta con más dimensiones, este segundo eje presentará información complementaria y no vista por el primero (volviendo al ejemplo de motivación, este segundo eje da una segunda verdad de los datos).
+
+- A medida que hay más variables, el vector propio de CP1 (y de los demás), tendrá una mayor dimensión, igual al número de variables.
+
+## Resumen
+
+- El análisis de componentes principales reduce una gran cantidad de variables multivariadas a una cantidad relativamente pequeña de combinaciones lineales de estas que pueden usarse para explicar gran parte de la variabilidad en los datos. Las variables con la mayor varianza típicamente dominarán el análisis.
+
+- Luego del cálculo de los componentes principales se pueden utilizar estos como insumo para realizar análisis posteriores con una dimesionalidad menor.
+
+- Si bien no es un método de agrupamiento, van a existir relaciones mas fuertes entre unas variables y un componente principal particular. Esto facilitara su interpretación en donde el primer componente principal tiene la mayor variabilidad. El segundo componente tiene la máxima variabilidad entre todas las combinaciones lineales que son ortogonales al primero. El tercer componente principal es ortogonal tanto al primero como al segundo, y así sucesivamente para otros componentes.
+
+## Funciones en R para ACP
+
+Hay múltiples métodos para realizar PCA en R, como las funciones princomp() y prcomp(). Se prefiere la función prcomp() sobre princomp() por precisión numérica, pero se usarán ambas en este cuaderno (ver anexo con detalles del cálculo mediante princomp()). Para ambas funciones existen salidas útiles que permiten utilizar los siguientes elementos para complementar el análisis:
+
+<span class="math display">\\\begin{array}{\|c\|c\|l\|} \hline \text{prcomp()} & \text{princomp()} & Descripción \\ \hline sdev & sdev & \text{Desviaciones estándar de los componentes principales} \\ rotation & loadings & \text{La matriz de cargas variables (las columnas son vectores propios)} \\ center & center & \text{Las media de las variables (medias que se restaron)} \\ scale & scale & \text{Desviaciones estándar de las variables (el escalamiento aplicado a cada variable )} \\ x & scores & \text{Las coordenadas de los individuos (observaciones transformadas) sobre los componentes principales} \\ \hline \end{array}\\</span>
+
+# Exploremos un poco más estos datos
+
+Por las definiciones de cada variable, ¿cuáles variables son cuantitativas y cuáles no? Es importante antes de realizar cualquier análisis tener claridad sobre los tipos de variables que están presentes en el conjunto de datos. La razón, no todos los métodos se pueden aplicar indistintamente en todas las variables.
+
+```{r}
+head(mtcars)
+```
+
+De esta misma forma es útil calcular algunas estadísticas básicas y de esta forma ver su comportamiento a nivel univariado. Si el método requiere que todas las variables sean **cuantitativas** entonces, ¿tendrá sentido incluir las variables “vs” y “am”? La respuesta es no, Al no tener una estructura ordinal no existe la posibilidad de establecer asociaciones lineales con las demás variables
+
+**R tip** Existen múltiples acercamientos para descartar variables en R de un conjunto dado de datos. Hemos aprendido a realizarlo mediante tibble usando ´select(-c(variables_a_excluír))´, sin embargo, es posible lograrlo usando r base. Esto se puede hacer de al menos dos formas diferentes:
+
+- Tomar las columnas que se desean conservar mediante los numeros de las columnas en las que se encuentran ubicadas: ´mtcars\[,c(1:7,10,11)\]´.
+- Indicar nombres de las variables que no se desean tener en cuenta y utilizar el operador de negación: **mtcars\[ , ! names(mtcars) %in% c(“vs”, “am”)\]**.
+
+```{r}
+summary(mtcars)
+```
+
+Es útil revisar los boxplot para las variables cuantitativas
+
+```{r}
+mynames<-c("mpg", "cyl", "disp", "hp", "drat","wt","qsec","gear","carb")
+
+ncols <- length(mynames)
+
+par(mfrow=c(3,3),cex=.9,oma=c(.1,.1,.1,.1))
+for(i in 1:ncols){
+  boxplot(mtcars[,i],horizontal = FALSE,
+        main = mynames[i])
+
+}
+```
+
+![](pics/img_08.png)
+
+```{r}
+par(mfrow=c(1,1))
+```
+
+Una vez se revisan las variables individualmente es útil observarlas de manera bivariada La manera mas sencilla es observar las correlaciones entre las variables:
+
+```{r}
+corrplot.mixed(cor(mtcars[ , ! names(mtcars) %in% c("vs", "am" , "car")]), order = 'AOE')
+```
+
+![](pics/img_09.png)
+
+# ACP en acción
+
+## Objetivos
+
+1.  *Reducción de dimensionalidad*: El análisis de componentes principales reduce una gran cantidad de variables multivariadas a una cantidad relativamente pequeña de combinaciones lineales de estas que pueden usarse para explicar gran parte de la variabilidad en los datos. Las variables con la mayor varianza típicamente dominarán el análisis.
+
+2.  *Interpretabilidad del componente*: Si bien no es un método de agrupamiento, van a existir relaciones mas fuertes entre unas variables y un componente principal particular. Esto facilitara su interpretación.s
+
+3.  *Comparar los individuos entre si*: Las gráficas que se obtienen permiten observar la estructura de la “nube de individuos” y detectar grupos de ellos.
+
+## Calculo de las componentes Principales
+
+Cada componente principal <span class="math inline">\\(Z_i)\\</span> se obtiene por combinación lineal de las variables originales. Se pueden entender como nuevas variables obtenidas al combinar de una determinada forma las variables originales. La primera componente principal de un grupo de variables <span class="math inline">\\(X_1, X_2, \cdots, X_p)\\</span> es la combinación lineal normalizada de dichas variables que tiene mayor varianza. Con la función *prcomp*
+
+```{r}
+mtcars2 <- mtcars %>% 
+  dplyr::select(-c(vs,am,car))
+
+pc_b <-prcomp(mtcars2)
+pc_b
+```
+
+```{r}
+summary(pc_b)
+```
+
+## Escalamiento de las variables
+
+El proceso de PCA identifica aquellas direcciones en las que la varianza es mayor. Como la varianza de una variable se mide en su misma escala elevada al cuadrado, si antes de calcular las componentes no se estandarizan todas las variables para que tengan media 0 y desviación estándar 1, aquellas variables cuya escala sea mayor dominarán al resto. De ahí que sea recomendable estandarizar siempre los datos.
+
+```{r}
+pc_c <-prcomp(mtcars2, scale = TRUE)
+pc_c
+```
+
+```{r}
+summary(pc_c)
+```
+
+## Influencia de outliers
+
+Al trabajar con varianzas, el método PCA es altamente sensible a outliers, por lo que es altamente recomendable estudiar si los hay. La detección de valores atípicos con respecto a una determinada dimensión es algo relativamente sencillo de hacer mediante comprobaciones gráficas. Sin embargo, cuando se trata con múltiples dimensiones el proceso se hace más difícil. La *distancia de Mahalanobis* es una medida de distancia entre un punto y la media que se ajusta en función de la correlación entre dimensiones y que permite encontrar potenciales outliers en distribuciones multivariante.
+
+## Proporción de varianza explicada
+
+Como objetivo PCA busca reducir la dimensionalidad, por lo cual conviene contar con un número de componentes suficientes para explicar el conjunto de datos. No existe un método único que permita identificar cual es el número óptimo de componentes principales a utilizar. La forma mas común consiste en evaluar la proporción de varianza explicada acumulada y seleccionar el número de componentes mínimo a partir del cual el incremento deja de ser importante.
+
+Este diagrama es una forma heuristica de determinar en que momento la ganancia de incluir un componente adicional no tiene un aporte grande a la varianza explicada de las componentes. Esto no es una prueba estadística que determine el número de componentes óptimos:
+
+```{r}
+screeplot(pc_c, col = "red", pch = 16,
+type = "lines", cex = 2, lwd = 2, main = "")
+```
+
+![](pics/img_10.png)
+
+Según el gráfico de varianza explicada, en este PCA sería suficiente trabajar con 2 componentes principales, que explican el 86% de la variabilidad total.
+
+## Resultados finales
+
+A continuación se recalcula el PCA, pero esto no es necesario, ya que el resultado sobre los primeros 2 componentes es el mismo. Esto sirve para filtrar el resultado a los primeros dos componentes únicamente y para interpretar de manera clara los gráficos de la siguiente sección (**Uso de factoextra para la visualización**):
+
+```{r}
+pc_f <-prcomp(mtcars2, scale = TRUE, rank. = 2)
+pc_f
+```
+
+Podemos observar que, por ejemplo, la variable **mpg** está definida por las cargas <span class="math inline">\\(-0.393,0.027)\\</span>. Podemos además ver los puntajes sobre los dos primeros componentes para cada uno de los vehículos, redondeados a dos décimas
+
+```{r}
+round(pc_f$x,2)
+```
+
+Podemos observar que, por ejemplo, el vehículo **Maserati Bora** está definida por los puntajes <span class="math inline">\\(2.96,4.00)\\</span>.
+
+## Uso de factoextra para la visualización
+
+Las funciones base vistas hasta ahora no permiten una inmediata visualización del análisis resultante de una manera informativa. Por tanto, existe un paquete complementario denominado **factoextra**. Este paquete permite realizar distintos gráficos de interés para el análisis. Las cargas pueden ser graficados de manera informativa mediante el gráfico de variables: cada variable es representada mediante una flecha, o vector, cuyo extremo está indicado por el vector de cargas en las dos nuevas dimensiones.
+
+```{r}
+fviz_pca_var(pc_c)
+```
+
+![](pics/img_11.png)
+
+Notamos con esto que, entre más larga sea una flecha, la variable indicada tiene un vector de cargas de mayor magnitud absoluta. Recuerde que en la constitución de los CP, los vectores propios correspondientes indican la importancia de cada una de las variables: entre mayor sea su entrada en valor absoluto, más importante es la variable en la construcción del CP. Entonces, vemos por ejemplo que para el primer eje se tiene un vector particularmente alargado hacia la izquierda para la variable **mpg** (rendimiento), esto implica que este primer eje, a la izquierda, tiene valores de alto **mpg** (alto rendimiento, carros económicos en consumo de gasolina), mientras que a la derecha se tienen los carros de bajo rendimiento (alto consumo de gasolina).
+
+Cuando graficamos los puntajes pueden ser en el plano cartesiano mediante la función *fviz_pca_ind*
+
+```{r}
+fviz_pca_ind(pc_c,
+             col.ind = mtcars$mpg, # Color por las mpg
+             gradient.cols = c("red","green"),
+             repel = TRUE         # Evita que el texto se sobreponga
+             )
+```
+
+![](pics/img_12.png)
+
+Notamos que en efecto, los carros que se encuentran a la izquierda del eje son carros de bajo consumo de gasolina (alto **mpg**), mientras los que están a la derecha, tienen un alto consumo (bajo **mpg**). Compare los dos gráficos con las dos tablas presentadas en la sección: **Resultados finales** para una mayor claridad en la interpretación.
+
+# Anexos
+
+# Cálculo de los componentes principales con la función *princomp*
+
+```{r}
+pc_a <- princomp(mtcars2)
+summary(pc_a)
+```
+
+# Bibliografía
+
+-Muhammad Hanif, A., Muhammad Qaiser Shahbaz, A., & Saman Hanif Shahbaz, A. (2019). Multivariate Techniques: An Example Based Approach. Cambridge Scholars Publishing.
+
+-Zelterman, D. (2015). Applied Multivariate Statistics with R. \[electronic resource\]. Springer International Publishing.
+
+-Schumacker, R. E. (2016). Using R with multivariate statistics. a primer. SAGE.
+
+-Everitt, B., & Hothorn, T. (2011). An Introduction to Applied Multivariate Analysis with R. \[electronic resource\]. Springer New York.
+
+\-<https://rpubs.com/aaronsc32/eigenvalues-eigenvectors-r>
+
+\-<https://www.datacamp.com/tutorial/pca-analysis-r>
+

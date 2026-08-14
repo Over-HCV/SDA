@@ -122,17 +122,56 @@ Rscript -e 'source("libs/_comun/R/pruebas_web.R"); verificar_html("http://localh
 
 ## Known traps
 
-- **`data/twins.csv` does not exist at the repo root.** The file is at
-  `workshops/twins/twins.csv`. `libs/shiny-live/build.R` still lists it in
-  `.DATOS` and will fail. `learn/build.R` must resolve twins from the
-  workshops path or the bundle staging breaks.
-- **shinylive wrapper needs `$value`**: `source("R/app.R")$value`. Without it
-  the bundle dies with "app.R did not return a shiny.appobj".
-- **The exported bundle only contains what is inside the staged directory.**
-  `data/` and `libs/_comun/` must be copied into the staging root or the root
-  finder walks to `/` and the app dies in webR.
+Every one of these was hit while building Hito 1. They cost real time.
+
+### Bundle / shinylive
+
+- **Staging must live OUTSIDE the repo.** `shinylive::export()` resolves the
+  package list with `renv::dependencies(appdir)`, and renv honours
+  `.gitignore`. With the staging in `learn/.build/` — matched by the root
+  `.gitignore` rule `.build/` — the scan returned **zero** packages, the bundle
+  shipped with none, and webR died with a wall of
+  `preload error: Downloading webR package: ...`. Export stayed green
+  throughout. `stage_por_defecto()` now points at `tempdir()`, and
+  `verificar_dependencias()` fails loudly if the scan comes up short.
+- **The scan only sees the app-dir root.** A one-line `app.R` wrapper hides
+  every `library()` call in `R/`. `learn/app.R` therefore declares the runtime
+  packages explicitly — those calls are load-bearing, not decoration.
+- **`shinylive::export()` skips dotfiles.** The root marker is `sda-raiz`, no
+  leading dot; `.sda-raiz` silently never travelled.
+- **shinylive renders the app inside an `<iframe>`.** `document.querySelectorAll`
+  on the top document always returns 0. `verificar_bundle.R` walks
+  `iframe.contentDocument` (same-origin, so it is reachable).
+- **`Page.loadEventFired` times out on webR.** Tens of MB download before
+  `load` fires, past chromote's 60 s cap in `verificar_html()`. Poll the DOM
+  instead — "the app painted" is the honest signal anyway.
+- **The wrapper needs `$value`**: `source("R/app.R")$value`, or the bundle dies
+  with "app.R did not return a shiny.appobj".
+- **The bundle only contains the staged directory.** `data/`, `libs/_comun/`
+  and the root marker must be copied in, or the root finder walks to `/`.
+- **`data/twins.csv` does not exist at the repo root**; it is at
+  `workshops/twins/twins.csv`. `libs/shiny-live/build.R` still lists the old
+  path in `.DATOS` and will fail today. `learn/build.R` resolves both.
+- **`font_google()` hangs in webR** (needs network and a disk cache). Use
+  `tema_seguro()` from `R/nucleo/tema_app.R`, never `tema()` directly.
+
+### Shiny
+
+- **Outputs on a hidden tab are suspended.** After `set_inputs(seccion = ...)`
+  the panel's outputs render on a later cycle that `set_inputs()` does not wait
+  for. `test_app.R` polls with `esperar_html()`.
+- **`AppDriver$new()` calls `skip_on_cran()`.** Outside testthat that aborts
+  with "Reason: On CRAN". Set `NOT_CRAN=true`.
+- **Load order matters for top-level constants.** `ui/piezas` is sourced before
+  the rest of `ui/` because modules reference `ETIQUETA_ANALISIS` at file
+  scope. `.sourcear_arbol()` de-duplicates, so listing a path twice is safe.
+
+### Content
+
+- **No LaTeX in `textos/` or `fichas/`.** `commonmark` does not render math and
+  MathJax would need network plus hand-written JS (C10 forbids it). Use Unicode
+  and code blocks, like `notes/tree.md`.
 - **Clean render + HTTP 200 proves nothing.** `libs/sdd.md` S2b lists four bugs
   that passed both and only showed up in the browser console or the error DOM.
-  Assertions must be positive (expected content present), not just
-  absence-of-errors.
+  Assertions must be positive, not just absence-of-errors.
 - **No hand-written JavaScript** (C10). R cannot test it.
