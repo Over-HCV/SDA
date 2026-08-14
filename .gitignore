@@ -68,3 +68,4 @@ venv/
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+libs/shiny-live/R/shiny_bookmarks/**
