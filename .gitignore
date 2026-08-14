@@ -35,6 +35,7 @@ rsconnect/
 */shinylive/
 */shinybookmarks
 libs/shiny/R/shiny_bookmarks/*
+libs/shiny-live/R/shiny_bookmarks/**
 
 # ── Shinylive  (bundle webR + staging; ver libs/shiny-live/.gitignore) ──
 .build/
@@ -68,4 +69,3 @@ venv/
 *.fls
 *.fdb_latexmk
 *.synctex.gz
-libs/shiny-live/R/shiny_bookmarks/**
