@@ -242,7 +242,7 @@ Tres consecuencias, todas ya construidas:
    clave, rutas, corrida (`dataset × modelo × receta`), parámetros, métricas y
    la ruta del JSON. Pegado en una conversación, basta para reconstruir la
    derivación completa. Sin JavaScript: bloque de texto más descarga `.md`.
-3. **`MAPA.md`** es el índice generado de las 71 claves. Es el primer archivo
+3. **`MAPA.md`** es el índice generado de las 79 claves. Es el primer archivo
    que lee un agente, y `verificar_mapa.R` falla si queda desactualizado.
 
 El orden de lectura para responder es siempre el mismo: **lógica** (de ahí sale
@@ -665,7 +665,7 @@ Consecuencias directas:
   `verificar_mapa.R` falla si un método promete un artefacto no registrado.
 - `run_headless.R` recorre el mismo registro → app y batch nunca divergen (S2).
 
-**Estado actual**: 54 métodos registrados (48 pendientes, 6 bloqueados) y 71
+**Estado actual**: 54 métodos registrados (48 pendientes, 6 bloqueados) y 79
 artefactos. Poblados desde `libs/topics-map.md`, los seis cuadernos de
 `notes/SDA/` y el temario de `guide-eda-26A.md`. El inventario vivo está en
 `MAPA.md`; este documento no lo repite para no quedar desactualizado.
@@ -767,12 +767,19 @@ learn/
 │  │   ├─ informe.R             armado del cuaderno .Rmd
 │  │   ├─ modo.R                wasm vs servidor
 │  │   └─ tema_app.R            tema_seguro(): sin font_google() en wasm
-│  ├─ logica/               cálculo puro (Hito 2 en adelante)
-│  ├─ graficos/             ggplot puro (Hito 2 en adelante)
+│  ├─ logica/               cálculo puro
+│  │   ├─ muestreo.R            UMBRAL_MUESTREO + muestrear_para_grafico() (C8)
+│  │   ├─ resumen_univariado.R  densidad.R  normalidad.R
+│  │   ├─ asociacion.R  contingencia.R  distancias.R
+│  │   └─ datos/                fuente · diccionario · calidad ·
+│  │                            transformacion · particion · balanceo
+│  ├─ graficos/             ggplot puro
+│  │   └─ univariado.R  bivariado.R  multivariado.R  calidad.R  preparacion.R
 │  ├─ ui/
 │  │   ├─ piezas/               panel · tablas · indicadores · tarjetas · fase
 │  │   ├─ ficha.R  formulario.R
-│  │   ├─ f0/ f1/ f2/ f3/ f4/   un archivo por subsección
+│  │   ├─ f1/                   un archivo por subsección + analisis/
+│  │   ├─ f0/ f2/ f3/ f4/
 │  │   └─ transversal/          objetos.R · referencia.R
 │  └─ pruebas/
 │      ├─ verificar_loc.R       techo de 300 LOC
@@ -780,10 +787,11 @@ learn/
 │      ├─ verificar_mapa.R      huérfanos + MAPA.md al día + deuda
 │      ├─ verificar_bundle.R    webR real en Chrome headless
 │      ├─ test_headless.R       núcleo sin Shiny
+│      ├─ test_fase1.R          lógica y gráficos de la fase 1, sin Shiny
 │      └─ test_app.R            UI + consola del navegador (S2b)
 ├─ metodos/          una función ajustar_*() pura por método
 ├─ fichas/           un .md por método
-├─ textos/           un .md por artefacto
+├─ textos/           un .md por artefacto, en carpetas fase/subseccion/
 ├─ docs/             GENERADO — bundle wasm (ignorado por git)
 └─ outputs/          GENERADO — corridas headless (ignorado por git)
 ```
@@ -823,17 +831,23 @@ Cerradas durante el Hito 1:
   identificadores, verificado por `verificar_idioma.R` (C1).
 - ~~Orden de construcción~~ → ver `PLAN.md`. Hito 1 hecho.
 
+Cerradas durante el Hito 2:
+
+- ~~charcoal en el bundle~~ → van los dos, crudo y pivotado, con **carga
+  diferida**: nada se lee hasta pulsar Cargar, y en wasm el panel crudo avisa
+  antes de cuánto pesa. Con sus 35.113 filas es además el único dataset que
+  ejercita de verdad el badge de muestreo (C8).
+- ~~Publicación en Pages~~ → `.github/workflows/pages.yml` construye el bundle y
+  lo sube como artefacto. `learn/docs/` sigue fuera de git.
+
 Siguen abiertas:
 
-1. **Tamaño del bundle.** Hoy son 3 MB de `app.json` más el runtime de webR, y
+1. **Tamaño del bundle.** Hoy son 3,2 MB de `app.json` más el runtime de webR, y
    todavía no hay ni un método implementado. Cada dependencia nueva suma. Puede
    convenir un bundle núcleo más uno por sesión del curso, en vez de uno solo.
-2. **charcoal en el bundle.** Son 2,7 MB inlinados en base64 y el Hito 1 no los
-   usa. Cuando llegue el Hito 2 hay que decidir entre el panel crudo, versiones
-   pre-agregadas, o ambas.
-3. **Publicación en Pages.** `learn/docs/` está en `.gitignore` porque `app.json`
-   cambia entero en cada build y engordaría el historial. Falta decidir entre
-   una GitHub Action que lo construya o un `git add -f` deliberado.
-4. **El paso a paso del optimizador.** El diseño lo promete para el Hito 4. En
+2. **Imputación y balanceo serios.** MICE, k-NN y SMOTE quedaron como pendientes
+   del catálogo: los tres traen paquetes nuevos al bundle. Hay que decidir si el
+   curso los necesita ejecutables o basta con la ficha y el puente.
+3. **El paso a paso del optimizador.** El diseño lo promete para el Hito 4. En
    wasm cada iteración cruza la frontera R↔navegador; hay que medir si el
    modo paso a paso es usable ahí o queda solo para servidor.

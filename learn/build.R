@@ -32,8 +32,9 @@ source("learn/R/cargar.R")
 
 #' Datasets a incluir, resueltos desde donde de verdad están.
 #'
-#' OJO: twins.csv NO está en data/ del repo, está en workshops/twins/. El
-#' build.R de libs/shiny-live todavía lo busca en data/ y por eso hoy falla.
+#' OJO: twins.csv NO está en data/ del repo, está en workshops/twins/. Desde el
+#' Hito 2 `twins_path()` de libs/_comun/ prueba los dos sitios, así que el
+#' build de libs/shiny-live ya no falla por esto.
 rutas_datos <- function() {
   candidatas <- c(ruta_repo("data", "charcoal.csv"),
                   ruta_repo("data", "twins.csv"),

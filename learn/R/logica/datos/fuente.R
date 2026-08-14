@@ -1,4 +1,4 @@
-# learn/R/logica/datos_fuente.R
+# learn/R/logica/datos/fuente.R
 #
 # Responsabilidad: convertir "elegí charcoal" en un data.frame listo para
 # nuevo_dataset(), sin que la UI sepa de rutas ni de CSV.

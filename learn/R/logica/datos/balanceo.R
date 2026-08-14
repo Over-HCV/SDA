@@ -1,4 +1,4 @@
-# learn/R/logica/datos_balanceo.R
+# learn/R/logica/datos/balanceo.R
 #
 # Responsabilidad: mirar y corregir el desbalance de una variable de clase.
 #

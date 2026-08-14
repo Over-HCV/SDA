@@ -1,4 +1,4 @@
-# learn/R/graficos/g_multivariado.R
+# learn/R/graficos/multivariado.R
 #
 # Responsabilidad: mirar p variables a la vez.
 #

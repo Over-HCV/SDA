@@ -16,8 +16,10 @@ es necesario.
 
 ## Estado
 
-**Hito 1 hecho**: núcleo, shell navegable y bundle wasm que arranca. Las cuatro
-fases se recorren y el catálogo de métodos funciona; todavía no se calcula nada.
+**Hito 2 hecho**: la fase 1 calcula de verdad. Se carga un dataset (de los del
+curso, sintético o un CSV propio), se declara qué es cada columna, se limpia, se
+transforma, se parte y se balancea, y se mira en univariado, bivariado y
+multivariado. Las fases 2, 3 y 4 siguen siendo andamio, salvo el catálogo.
 El avance vive en [`PLAN.md`](PLAN.md) — este README no lo repite para no quedar
 desactualizado.
 
@@ -43,6 +45,7 @@ Rscript learn/R/pruebas/verificar_loc.R      # techo de 300 LOC (C2)
 Rscript learn/R/pruebas/verificar_idioma.R   # español ASCII (C1)
 Rscript learn/R/pruebas/verificar_mapa.R     # MAPA.md al día (C9)
 Rscript learn/R/pruebas/test_headless.R      # núcleo, sin Shiny
+Rscript learn/R/pruebas/test_fase1.R         # lógica y gráficos de la fase 1
 Rscript learn/R/pruebas/test_app.R           # UI + consola del navegador
 Rscript learn/R/pruebas/verificar_bundle.R   # el bundle wasm arranca de verdad
 ```
@@ -81,10 +84,14 @@ El árbol completo y comentado está en [`SCHEMA.md`](SCHEMA.md) §7. En corto:
 - `R/nucleo/` — registro, estado, contratos, trazabilidad, exportación.
   **Sin Shiny en ninguna línea**: `cargar_sda(con_ui = FALSE)` lo carga entero
   sin bslib ni DT, que es lo que haría viable una CLI encima.
-- `R/logica/` y `R/graficos/` — cálculo y ggplot puros.
+- `R/logica/` y `R/graficos/` — cálculo y ggplot puros. Sin prefijos en los
+  nombres: lo que agrupa es la carpeta (`logica/datos/calidad.R`), no el
+  archivo (`logica/datos_calidad.R`).
 - `R/ui/` — módulos Shiny; solo cablean. `piezas/` tiene los componentes
   compartidos y ninguna vista los reinventa.
 - `fichas/` y `textos/` — la parte pedagógica, en markdown, fuera del código.
+  Los textos siguen la clave del artefacto:
+  `f1.analisis.histograma` → `textos/f1/analisis/histograma.md`.
 
 Reutiliza `libs/_comun/R/` (datos, temas, métricas, verificación en navegador)
 del resto del repo. No duplicar esas funciones aquí.
@@ -95,7 +102,7 @@ No se versionan y se reconstruyen con un comando:
 
 | Ruta | Cómo se regenera |
 |---|---|
-| `learn/docs/` | `Rscript -e 'source("learn/build.R"); construir_bundle()'` |
+| `learn/docs/` | `Rscript -e 'source("learn/build.R"); construir_bundle()'` — en GitHub lo hace `.github/workflows/pages.yml` |
 | `learn/outputs/` | corridas de `run_headless.R` |
 
 `MAPA.md` también se genera (`Rscript learn/R/mapa.R`) pero **sí** se versiona:

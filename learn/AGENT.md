@@ -83,6 +83,9 @@ Rscript learn/R/pruebas/verificar_mapa.R
 # Logic + contracts, no GUI
 Rscript learn/R/pruebas/test_headless.R
 
+# Phase 1 logic and plots, no GUI
+Rscript learn/R/pruebas/test_fase1.R
+
 # UI + browser console (mandatory, spec S2b)
 Rscript learn/R/pruebas/test_app.R
 
@@ -112,8 +115,10 @@ Rscript -e 'source("libs/_comun/R/pruebas_web.R"); verificar_html("http://localh
 2. Write the pure fit function in `learn/metodos/<clave>.R` — no `input`,
    no `reactive`, no `session`.
 3. Write `learn/fichas/<clave>.md`.
-4. Register each plot it produces with `registrar_artefacto()` and write
-   `learn/textos/<clave-artefacto>.md`.
+4. Register each plot it produces with `registrar_artefacto()` and write its
+   text in `learn/textos/<fase>/<subseccion>/<artefacto>.md` — the path
+   `ruta_texto_de()` derives from the key (`f1.analisis.histograma` →
+   `textos/f1/analisis/histograma.md`).
 5. Three-parts rule (C11): every hyperparameter exists in the pure function,
    in `correr()` of `run_headless.R` including its `params` block, **and** as a
    UI input. Miss one and app and batch diverge silently.
@@ -150,8 +155,9 @@ Every one of these was hit while building Hito 1. They cost real time.
 - **The bundle only contains the staged directory.** `data/`, `libs/_comun/`
   and the root marker must be copied in, or the root finder walks to `/`.
 - **`data/twins.csv` does not exist at the repo root**; it is at
-  `workshops/twins/twins.csv`. `libs/shiny-live/build.R` still lists the old
-  path in `.DATOS` and will fail today. `learn/build.R` resolves both.
+  `workshops/twins/twins.csv`. Since Hito 2 `twins_path()` in
+  `libs/_comun/R/datos.R` probes both locations, and `libs/shiny-live/build.R`
+  copies it by name instead of hard-coding `data/`.
 - **`font_google()` hangs in webR** (needs network and a disk cache). Use
   `tema_seguro()` from `R/nucleo/tema_app.R`, never `tema()` directly.
 
@@ -165,6 +171,18 @@ Every one of these was hit while building Hito 1. They cost real time.
 - **Load order matters for top-level constants.** `ui/piezas` is sourced before
   the rest of `ui/` because modules reference `ETIQUETA_ANALISIS` at file
   scope. `.sourcear_arbol()` de-duplicates, so listing a path twice is safe.
+- **Do not build a whole sidebar with `renderUI`.** Hito 2 started with the
+  phase-1 sidebar re-rendered per subsection. The HTML appeared in the DOM but
+  Shiny never re-bound it: `input$clases` stayed NULL forever, `set_inputs()`
+  answered *"Unable to find input binding"*, and **the browser console was
+  clean** — the exact silent client-side failure S2b is about. The fix is the
+  boring one: build every control once, show them with `conditionalPanel(ns =
+  ns)`, and fill their choices with `update*Input()` when the dataset changes.
+  `renderUI` is fine for text-only fragments (notices, badges, legends).
+- **A label in the DOM is not a bound control.** `esperar_html()` returning does
+  not mean `set_inputs()` will find the widget; bindings attach a cycle later.
+  `ir_a_pestana()` in `test_app.R` waits for the pattern **and** for
+  `wait_for_idle()`.
 
 ### Content
 

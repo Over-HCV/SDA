@@ -1,4 +1,4 @@
-# learn/R/graficos/g_univariado.R
+# learn/R/graficos/univariado.R
 #
 # Responsabilidad: dibujar UNA variable. Histograma, densidad, caja y Q-Q.
 #

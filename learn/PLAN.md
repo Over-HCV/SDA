@@ -90,10 +90,12 @@ Codifica C4, C5 y C7 una sola vez, para que ninguna vista las reinvente.
 - [x] Export a `docs/` — 53 archivos, 24 paquetes wasm, app.json 3.0 MB
 - [x] `R/pruebas/verificar_bundle.R` — webR real en Chrome headless, aserciones
       positivas dentro del iframe
-- [ ] GitHub Pages sirviendo `learn/docs/`
+- [x] GitHub Pages sirviendo `learn/docs/` — `.github/workflows/pages.yml`
+      construye el bundle y lo sube como artefacto. Falta un clic humano:
+      Settings → Pages → Source = *GitHub Actions*
 
-> Completado el 2026-08-13 salvo la publicación en Pages, que es un ajuste del
-> repositorio, no de código.
+> Completado el 2026-08-13. La Action de Pages se añadió en el Hito 2; queda
+> solo el ajuste del repositorio, que no es código.
 
 ### Definición de "hecho" — Hito 1
 
@@ -111,11 +113,85 @@ Codifica C4, C5 y C7 una sola vez, para que ninguna vista las reinvente.
 
 ---
 
+## Hito 2 — Fase 1 completa
+
+Al terminar: se carga un dataset real, se le declara el diccionario, se lo
+limpia, transforma, parte y balancea, y se lo mira en univariado, bivariado y
+multivariado. Entran las dos invariantes que hasta ahora solo estaban escritas:
+el muestreo visible (C8) y la escala de medición gobernando la UI.
+
+### E5 · Lógica pura de la fase 1
+
+- [x] `R/logica/muestreo.R` — `UMBRAL_MUESTREO`, `muestrear_para_grafico()`:
+      los gráficos reciben la muestra, las métricas el total (C8)
+- [x] `R/logica/resumen_univariado.R` — estadísticos filtrados por escala
+- [x] `R/logica/densidad.R` · `normalidad.R` · `asociacion.R` ·
+      `contingencia.R` · `distancias.R`
+- [x] `R/logica/datos/` — `fuente`, `diccionario`, `calidad`,
+      `transformacion`, `particion`, `balanceo` (una carpeta, sin prefijos)
+- [x] Cero dependencias nuevas: imputación por media/mediana/moda, atípicos por
+      IQR/z/Mahalanobis, balanceo por sub/sobre-muestreo y bootstrap. MICE y
+      SMOTE quedan como pendientes del catálogo
+
+### E6 · Gráficos de la fase 1
+
+- [x] `R/graficos/univariado.R` · `bivariado.R` · `multivariado.R` ·
+      `calidad.R` · `preparacion.R` — 25 funciones, ggplot puro
+- [x] Contra el sobreploteo: transparencia, jitter y conteo por celda
+      (`geom_bin2d`, sin traer hexbin)
+- [x] Densidad 2D y elipsoide a mano, sin `MASS`
+
+### E7 · Artefactos y textos
+
+- [x] `R/nucleo/artefactos/preparacion.R` — 8 claves nuevas
+      (`f1.fuente.*`, `f1.diccionario.*`, `f1.transformacion.*`,
+      `f1.particion.*`) y las 3 de preparación que estaban en `exploracion.R`
+- [x] Las rutas del registro apuntan a archivos que existen: `R/logica/...`,
+      `R/graficos/...`. Antes decían `logica/...` y `MAPA.md` mentía
+- [x] `textos/<fase>/<subseccion>/<artefacto>.md` — 24 textos de `f1`, con los
+      tres bloques fijos
+
+### E8 · UI de las 7 subsecciones
+
+- [x] `R/ui/f1/` — `datos.R` (cableado) + una subsección por archivo
+- [x] `R/ui/f1/analisis/` — `analisis.R` + `univariado.R` · `bivariado.R` ·
+      `multivariado.R`
+- [x] Controles estáticos con `conditionalPanel` + `update*Input`, no un
+      sidebar rendido con `renderUI` (ver la trampa en `AGENT.md`)
+- [x] Badge de muestreo, franja de estado persistente y "Guardar en Objetos"
+
+### E9 · Datos y despliegue
+
+- [x] `twins_path()` resuelve `data/` **y** `workshops/twins/`
+- [x] `libs/shiny-live/build.R` copia los datos por nombre: ya no falla
+- [x] charcoal crudo y pivot, ambos con carga diferida y aviso de peso en wasm
+- [x] `.github/workflows/pages.yml`
+
+### E10 · Pruebas
+
+- [x] `R/pruebas/test_fase1.R` — 50 pruebas de lógica y gráficos, sin Shiny
+- [x] `test_app.R` — recorrido real de la fase: cargar, transformar, partir,
+      balancear, y el badge de muestreo con charcoal crudo
+
+### Definición de "hecho" — Hito 2
+
+- [x] `verificar_loc.R` verde
+- [x] `verificar_idioma.R` verde
+- [x] `verificar_mapa.R` verde — 79 artefactos, deuda de código 20/44
+- [x] `test_headless.R` verde
+- [x] `test_fase1.R` verde
+- [x] `test_app.R` verde, consola del navegador limpia
+- [x] `verificar_bundle.R` verde — el bundle wasm arranca con la fase 1 dentro
+- [x] Cero dependencias nuevas
+
+---
+
 ## Hitos siguientes
 
-- [ ] **Hito 2 · Fase 1 completa** — 6 subsecciones + ▣ Análisis (uni/bi/multi).
-      Entra el muestreo con aviso (C8) y el diccionario que filtra la UI según
-      la escala de medición
+> Completado el 2026-08-13. Pendiente heredado: los métodos de la fase 1 que
+> exigirían dependencias nuevas (MICE, k-NN, SMOTE) siguen sin implementar, a
+> propósito. Entran cuando se decida pagar el peso en el bundle.
+
 - [ ] **Hito 3 · ACP de punta a punta** — primer método por las 4 fases; valida
       el marco. Teoría en `notes/SDA/NB3/main.md`
 - [ ] **Hito 4 · k-medias** — valida el modo paso a paso y la traza de

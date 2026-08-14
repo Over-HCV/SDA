@@ -1,4 +1,4 @@
-# learn/R/graficos/g_bivariado.R
+# learn/R/graficos/bivariado.R
 #
 # Responsabilidad: dibujar DOS variables a la vez.
 #

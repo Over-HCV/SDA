@@ -1,4 +1,4 @@
-# learn/R/logica/datos_transformacion.R
+# learn/R/logica/datos/transformacion.R
 #
 # Responsabilidad: la pila de transformaciones y cómo se aplica.
 #

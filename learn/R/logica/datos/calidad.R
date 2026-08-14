@@ -1,4 +1,4 @@
-# learn/R/logica/datos_calidad.R
+# learn/R/logica/datos/calidad.R
 #
 # Responsabilidad: encontrar y arreglar lo que está roto en el dataset —
 # faltantes, duplicados, atípicos y tipos mal leídos.

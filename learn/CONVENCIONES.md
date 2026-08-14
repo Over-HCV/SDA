@@ -44,6 +44,10 @@ la mitad de su ventana.
   `f1_calidad.R` son archivos distintos.
 - Al acercarse al techo, partir por eje natural (por subsección, por familia de
   gráficos), **nunca** por "parte 1 / parte 2".
+- Lo que agrupa es la **carpeta**, no un prefijo en el nombre:
+  `logica/datos/calidad.R`, no `logica/datos_calidad.R`; `graficos/univariado.R`,
+  no `graficos/g_univariado.R`. Cuando tres archivos comparten prefijo, ese
+  prefijo era una carpeta.
 
 Verifica: `Rscript learn/R/pruebas/verificar_loc.R`
 
@@ -120,8 +124,9 @@ Ninguna vista construye estas piezas a mano: todas salen de
 
 Ningún párrafo explicativo dentro de un `.R`.
 
-- Un `.md` por artefacto en `learn/textos/`, nombrado por su clave:
-  `textos/f1.analisis.histograma.md`.
+- Un `.md` por artefacto en `learn/textos/`, en la carpeta que dicta su clave:
+  `f1.analisis.histograma` → `textos/f1/analisis/histograma.md`. La ruta la
+  calcula `ruta_texto_de()`; con 79 artefactos una carpeta plana no se navega.
 - Contenido **genérico**: explica el gráfico, no los datos del usuario.
 - Estructura fija de tres bloques:
 
@@ -250,8 +255,12 @@ reproducir no es un resultado.
 
 ## C14 · Verificación en dos harness, no uno
 
-- `pruebas/test_headless.R` — lógica y contratos, sin GUI.
+- `pruebas/test_headless.R` — núcleo, contratos y exportadores, sin GUI.
+- `pruebas/test_fase1.R` — lógica y gráficos de la fase 1, también sin GUI.
 - `pruebas/test_app.R` — UI **y consola del navegador** (`app$get_logs()`).
+
+Que un gráfico devuelva un `ggplot` no prueba nada: hay que construirlo con
+`ggplot2::ggplot_build()`, que es donde de verdad se evalúa el `aes()`.
 
 Los dos son obligatorios (S2b). `test_headless.R` no puede ver lo que se rompe
 del lado del cliente: un `conditionalPanel` mal escrito deja el servidor
@@ -269,5 +278,6 @@ Rscript learn/R/pruebas/verificar_loc.R      # C2
 Rscript learn/R/pruebas/verificar_idioma.R   # C1
 Rscript learn/R/pruebas/verificar_mapa.R     # C9
 Rscript learn/R/pruebas/test_headless.R      # C3, C11, C13
+Rscript learn/R/pruebas/test_fase1.R         # C3, C8, C13
 Rscript learn/R/pruebas/test_app.R           # C14
 ```

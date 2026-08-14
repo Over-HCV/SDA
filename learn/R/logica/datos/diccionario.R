@@ -1,4 +1,4 @@
-# learn/R/logica/datos_diccionario.R
+# learn/R/logica/datos/diccionario.R
 #
 # Responsabilidad: hacer que la escala de medición mande sobre la UI.
 #

@@ -1,4 +1,4 @@
-# learn/R/graficos/g_preparacion.R
+# learn/R/graficos/preparacion.R
 #
 # Responsabilidad: mostrar el EFECTO de lo que se le hizo a los datos.
 #

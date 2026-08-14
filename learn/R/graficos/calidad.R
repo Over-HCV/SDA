@@ -1,4 +1,4 @@
-# learn/R/graficos/g_calidad.R
+# learn/R/graficos/calidad.R
 #
 # Responsabilidad: dibujar lo que está roto — faltantes, atípicos, desbalance.
 #

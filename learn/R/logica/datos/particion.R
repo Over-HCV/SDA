@@ -1,4 +1,4 @@
-# learn/R/logica/datos_particion.R
+# learn/R/logica/datos/particion.R
 #
 # Responsabilidad: repartir las filas en conjuntos, con semilla y sin trampa.
 #

@@ -31,7 +31,17 @@ proyecto_raiz <- function() {
 
 charcoal_path <- function() file.path(proyecto_raiz(), "data", "charcoal.csv")
 
-twins_path <- function() file.path(proyecto_raiz(), "data", "twins.csv")
+# twins vive en workshops/twins/, no en data/. Se prueban los dos sitios en vez
+# de fijar uno: el taller lo tiene donde lo dejó su autor y el bundle wasm lo
+# copia a data/ para no arrastrar la carpeta entera.
+twins_path <- function() {
+  raiz <- proyecto_raiz()
+  candidatas <- c(file.path(raiz, "data", "twins.csv"),
+                  file.path(raiz, "workshops", "twins", "twins.csv"))
+  existentes <- candidatas[file.exists(candidatas)]
+  if (!length(existentes)) return(candidatas[1])
+  existentes[1]
+}
 
 # ---------------------------------------------------------------------------
 # Cargar y limpiar

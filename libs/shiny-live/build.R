@@ -55,7 +55,13 @@ construir_bundle <- function(destino = "libs/shiny-live/docs",
   file.copy(file.path(origen, "R", .APP_R), file.path(stage, "R"))
   file.copy(file.path(raiz, "libs", "_comun", "R", .COMUN_R),
             file.path(stage, "libs", "_comun", "R"))
-  file.copy(file.path(raiz, "data", .DATOS), file.path(stage, "data"))
+  # twins.csv no está en data/ sino en workshops/twins/: se resuelve por
+  # nombre en vez de fijar la ruta, que es lo que tenía roto este build.
+  for (nombre in .DATOS) {
+    origen_dato <- if (identical(nombre, "twins.csv")) twins_path()
+                   else file.path(raiz, "data", nombre)
+    file.copy(origen_dato, file.path(stage, "data", nombre))
+  }
 
   faltan <- Filter(Negate(file.exists), file.path(
     stage, c("app.R", file.path("R", .APP_R),
