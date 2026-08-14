@@ -626,8 +626,6 @@ corrida desde `rscript`, y que el agente verifique la app sin GUI.
 Una sola tabla declarativa gobierna el catálogo, los filtros, los candados y
 qué entra en el bundle wasm. Añadir un método es añadir una fila y un archivo.
 
-<!-- Quizás el candado se ve feo, simplemente haz que esté desactivado/ más opaco -->
-
 ```r
 registrar_metodo(
   clave       = "kmeans",
@@ -644,25 +642,33 @@ registrar_metodo(
   optimizador = list(metodos = c("Lloyd","MacQueen","Hartigan-Wong"),
                      traza = TRUE, paso_a_paso = TRUE),
   supuestos   = c("escalado_previo","grupos_esfericos","tamanos_similares"),
-  analisis    = c("scree_inercia","silueta","plano_factorial","dendrograma"),
-  ficha       = "learn/fichas/kmeans.md",
+  artefactos  = c("f3.analisis.convergencia", "f4.diagnostico.silueta",
+                  "f4.diagnostico.codo"),    # claves registradas en artefactos/
   ajustar     = ajustar_kmeans          # función PURA, sin input/reactive (S1)
 )
 ```
+
+`ficha` no se declara: sale de la clave (`fichas/<clave>.md`). `registrar_metodo()`
+rechaza un método `activo` sin `ajustar` y uno `bloqueado` sin `motivo`, así que
+el catálogo no puede prometer algo que no existe.
 
 Consecuencias directas:
 
 - El **catálogo** se dibuja recorriendo el registro. Cero HTML a mano.
 - Los **filtros** son consultas sobre columnas del registro.
 - La UI de **hiperparámetros** se genera desde `hiper` (tipo → widget).
-- Los **candados** son `estado != "activo"`, con su motivo en la ficha.
-- El **bundle wasm** filtra `wasm == TRUE`; el servidor no filtra nada.
+- Los tres **estados** dan tres botones distintos: *Elegir* (activo), *Sin
+  implementar* (pendiente) y *No ejecutable* (bloqueado, con su motivo). La
+  tarjeta se atenúa; no hay iconos de candado repitiendo el mensaje.
 - El **checklist de supuestos** de la fase 2 se genera desde `supuestos`.
-- Las **pestañas de análisis** de la fase 4 se generan desde `analisis`.
+- Las **pestañas de análisis** de la fase 4 se generan desde `artefactos`, y
+  `verificar_mapa.R` falla si un método promete un artefacto no registrado.
 - `run_headless.R` recorre el mismo registro → app y batch nunca divergen (S2).
 
-`libs/topics-map.md` ya trae 33 filas listas para transcribir (datos, deps,
-firma de `modelo.R`, módulo UI base, hook reactivo).
+**Estado actual**: 54 métodos registrados (48 pendientes, 6 bloqueados) y 71
+artefactos. Poblados desde `libs/topics-map.md`, los seis cuadernos de
+`notes/SDA/` y el temario de `guide-eda-26A.md`. El inventario vivo está en
+`MAPA.md`; este documento no lo repite para no quedar desactualizado.
 
 ---
 
@@ -674,24 +680,37 @@ firma de `modelo.R`, módulo UI base, hook reactivo).
           ┌───────────────┴────────────────┐
           ▼                                ▼
    BUNDLE WASM                       SERVIDOR R
-   shinylive::export()               shiny::runApp()
-   filtra wasm == TRUE               registro completo
+   learn/build.R                     shiny::runApp("learn/R/app.R")
+   staging + shinylive::export()     todo el catálogo disponible
           │                                │
           ▼                                ▼
-   GitHub Pages                      shinyapps.io / local
+   GitHub Pages                      local · shinyapps.io
    cero instalación                  cualquier paquete CRAN
-   arranque ~15 s                    arranque inmediato
-   ~25 métodos                       los 33+
+   arranque lento (webR)             arranque inmediato
+   solo métodos wasm ejecutables     todos ejecutables
 ```
 
-La app **sabe dónde está corriendo** (`Sys.getenv("SDA_MODO")`) y lo dice en el
-navbar: `⚡ navegador` o `🖥 servidor`. En modo navegador, los métodos no-wasm
-aparecen con candado ⚡ y el texto: *"Este método necesita R completo. Abrilo en
-la versión de servidor o corré `Rscript learn/R/run_headless.R`."*
+La app **sabe dónde está corriendo** (`modo_ejecucion()`, con `SDA_MODO` como
+override) y lo dice en el navbar: `⚡ navegador` o `🖥 servidor`.
 
-Reutiliza `construir_bundle()` de `libs/shiny-live/build.R`, que ya resolvió el
-staging con `data/` y `libs/_comun/` adentro (sin eso el bundle no arranca en
-webR — ver los 6 defectos documentados en `libs/shiny-live/AGENT.md`).
+El catálogo **no se recorta** en el bundle: los 54 métodos siguen visibles con
+su ficha en las dos salidas. Lo que cambia es qué se puede *ejecutar*. Un
+método marcado `wasm = FALSE` abierto en el navegador explica por qué y hacia
+dónde ir, en vez de desaparecer del menú.
+
+Lo que sí se filtra son los **paquetes**: `shinylive::export()` mete en el
+bundle solo lo que `renv::dependencies()` detecta, y varias librerías del
+catálogo (`brms`, `torch`, `mclust`) no compilan a WebAssembly.
+
+**Trampas que costaron tiempo** y están documentadas en `AGENT.md`:
+
+| Síntoma | Causa |
+|---|---|
+| `preload error: Downloading webR package: ...` | el staging estaba dentro del repo y `.gitignore` lo ocultaba de `renv::dependencies()` |
+| bundle sin paquetes, export en verde | un `app.R` de una línea esconde los `library()` de `R/` |
+| `.sda-raiz` nunca viajó | `shinylive::export()` salta archivos ocultos |
+| la app parece vacía al verificarla | shinylive renderiza dentro de un `<iframe>` |
+| tema colgado en el navegador | `font_google()` necesita red y caché en disco |
 
 ---
 
@@ -716,65 +735,105 @@ logística en el lab, después imaginá una capa más."*
 
 ---
 
-## 7 · Estructura de archivos propuesta
+## 7 · Estructura de archivos
+
+Construida, no propuesta. El techo de 300 LOC (C2) es lo que obliga a las
+subcarpetas: un módulo por subsección, un catálogo por macro-tema del curso.
 
 ```
 learn/
-├─ SCHEMA.md                este documento
-├─ README.md                cómo correr (español)
-├─ AGENT.md                 comandos exactos + schema de salidas (inglés)
-├─ app.R                    wrapper de 9 líneas para shinylive
+├─ SCHEMA.md         este documento — qué hay en cada pantalla
+├─ CONVENCIONES.md   C1…C14, verificables
+├─ PLAN.md           hitos con casillas; los agentes marcan acá
+├─ MAPA.md           GENERADO — clave de artefacto → archivos
+├─ AGENT.md          comandos y trampas conocidas (inglés)
+├─ README.md         cómo correr (español)
+├─ app.R             wrapper shinylive: $value + librerías declaradas
+├─ build.R           staging fuera del repo + export + verificaciones
 ├─ R/
-│  ├─ app.R                 solo cablea: navbar de 4 fases + shell
-│  ├─ registro.R            registrar_metodo() + la tabla completa
-│  ├─ estado.R              los 4 objetos (Dataset/Modelo/Receta/Corrida) + CRUD
-│  ├─ contratos.R           validación de compatibilidad entre objetos
-│  ├─ fase1_datos.R         módulo de la fase 1 (subsecciones)
-│  ├─ fase1_analisis.R      ▣ Análisis de datos
-│  ├─ fase2_modelo.R
-│  ├─ fase2_analisis.R
-│  ├─ fase3_ajuste.R
-│  ├─ fase3_analisis.R
-│  ├─ fase4_evaluacion.R
-│  ├─ fase4_analisis.R
-│  ├─ ui_ficha.R            renderiza una ficha de método desde markdown
-│  ├─ ui_generador.R        hiper{} → widgets; el generador de formularios
-│  ├─ graficos.R            todos los ggplot, funciones PURAS
-│  ├─ run_headless.R        contrato S2: png+json+csv+run_log
-│  ├─ test_headless.R       lógica + invariantes por método
-│  └─ test_app.R            shinytest2 + consola del navegador (S2b)
-├─ metodos/                 un archivo por método, función pura ajustar_*()
-│  ├─ kmeans.R
-│  ├─ acp.R
-│  ├─ lasso.R
-│  └─ …
-├─ fichas/                  un .md por método (QUÉ ES / POR QUÉ / FALLA SI …)
-│  ├─ kmeans.md
-│  └─ …
-├─ build.R                  export wasm filtrando registro por wasm==TRUE
-├─ docs/                    bundle exportado → GitHub Pages
-└─ outputs/                 corridas headless (png/json/csv + run_log.csv)
+│  ├─ cargar.R              punto único de arranque; resuelve rutas
+│  ├─ app.R                 shell: navbar de 7 secciones. Solo cablea
+│  ├─ mapa.R                genera MAPA.md
+│  ├─ nucleo/               sin Shiny en ninguna línea
+│  │   ├─ registro.R            registrar_metodo() + consultas
+│  │   ├─ catalogo/             poblar.R + un archivo por macro-tema
+│  │   ├─ claves.R              artefactos + contexto_de()
+│  │   ├─ artefactos/           poblar.R + exploracion.R + evaluacion.R
+│  │   ├─ estado.R              los 4 objetos + diccionario de columnas
+│  │   ├─ almacen.R             CRUD puro (devuelve copias)
+│  │   ├─ contratos.R           validar_compatibilidad()
+│  │   ├─ textos.R              texto() y ficha(), tolerantes a .md ausente
+│  │   ├─ exportar.R            JSON · CSV · PNG · RDS · Rmd · MD
+│  │   ├─ informe.R             armado del cuaderno .Rmd
+│  │   ├─ modo.R                wasm vs servidor
+│  │   └─ tema_app.R            tema_seguro(): sin font_google() en wasm
+│  ├─ logica/               cálculo puro (Hito 2 en adelante)
+│  ├─ graficos/             ggplot puro (Hito 2 en adelante)
+│  ├─ ui/
+│  │   ├─ piezas/               panel · tablas · indicadores · tarjetas · fase
+│  │   ├─ ficha.R  formulario.R
+│  │   ├─ f0/ f1/ f2/ f3/ f4/   un archivo por subsección
+│  │   └─ transversal/          objetos.R · referencia.R
+│  └─ pruebas/
+│      ├─ verificar_loc.R       techo de 300 LOC
+│      ├─ verificar_idioma.R    español ASCII, snake_case, sin raíces inglesas
+│      ├─ verificar_mapa.R      huérfanos + MAPA.md al día + deuda
+│      ├─ verificar_bundle.R    webR real en Chrome headless
+│      ├─ test_headless.R       núcleo sin Shiny
+│      └─ test_app.R            UI + consola del navegador (S2b)
+├─ metodos/          una función ajustar_*() pura por método
+├─ fichas/           un .md por método
+├─ textos/           un .md por artefacto
+├─ docs/             GENERADO — bundle wasm (ignorado por git)
+└─ outputs/          GENERADO — corridas headless (ignorado por git)
 ```
 
-Se respeta S1 (`metodos/*.R` y `graficos.R` sin `input`/`reactive`) y el techo
-de 300 LOC por archivo — por eso cada fase se parte en módulo + análisis.
+Las carpetas `f0`…`f4` usan el mismo prefijo que las claves de artefacto
+(`f1.analisis.histograma` vive bajo `ui/f1/`), para que la clave que se ve en
+pantalla apunte también a la carpeta.
+
+### Reutilizado del repo, no reescrito
+
+| Se usa | De |
+|---|---|
+| `cargar_charcoal()`, `pivot_paises()`, `gen_sintetico()` | `libs/_comun/R/datos.R` |
+| `listar_temas()`, `tema()`, `cambiar_tema()` | `libs/_comun/R/temas_bslib.R` |
+| `escribir_salida()` (contrato S2) | `libs/_comun/R/metricas.R` |
+| Galería de componentes | `libs/shiny/R/gal_*.R` |
+| Patrón `tryCatch` + `validate` | `projects/_template/R/mod_main.R` |
+| Regla de las tres partes | `projects/_template/R/run_headless.R` |
+| 33 filas de routing | `libs/topics-map.md` |
+| Anclas teóricas por nodo | `notes/tree.md` |
+
+Hito 1 no añadió **ninguna** dependencia: los 14 paquetes que `learn/` necesita
+ya estaban en `renv.lock`.
 
 ---
 
 ## 8 · Preguntas abiertas
 
-1. **Persistencia entre sesiones.** ¿Las corridas viven solo en memoria (se
-   pierden al recargar) o se guardan? En wasm no hay disco: la opción realista
-   es exportar/importar JSON a mano, o `localStorage` vía un pequeño binding JS.
-2. **Tamaño del bundle.** Cada dep suma megas al arranque de webR. Puede
-   convenir un bundle "núcleo" (base + stats + ggplot2) y bundles por sesión del
-   curso, en vez de uno solo con todo.
-3. **`charcoal` con 35 115 filas** es lento para gráficos interactivos en wasm.
-   ¿Muestreo automático con aviso visible, o precómputo de agregados?
-4. **Idioma de la UI.** El repo usa español con tildes en UI e identificadores
-   ASCII. Asumo lo mismo aquí. ¿O UI bilingüe, dado que `topics-tf.csv` trae los
-   temas en ESP y ENG?
-5. **Orden de construcción.** Sugerencia: shell + registro + fase 1 completa
-   primero (es la que más se usa y la única que no depende de las otras), luego
-   ACP de punta a punta como método de prueba del marco, luego k-medias (valida
-   el paso a paso), luego el resto.
+Cerradas durante el Hito 1:
+
+- ~~Persistencia entre sesiones~~ → memoria más exportar/importar explícito, en
+  seis formatos. JSON viaja y lo lee un agente; RDS conserva todo sin pérdida.
+  Sin `localStorage`: sería JavaScript propio, que R no puede testear (C10).
+- ~~Datos grandes~~ → muestreo automático por encima de 5.000 filas con badge
+  visible y semilla; las métricas siempre sobre el total (C8).
+- ~~Idioma~~ → español en todo, con tildes en la UI y ASCII en los
+  identificadores, verificado por `verificar_idioma.R` (C1).
+- ~~Orden de construcción~~ → ver `PLAN.md`. Hito 1 hecho.
+
+Siguen abiertas:
+
+1. **Tamaño del bundle.** Hoy son 3 MB de `app.json` más el runtime de webR, y
+   todavía no hay ni un método implementado. Cada dependencia nueva suma. Puede
+   convenir un bundle núcleo más uno por sesión del curso, en vez de uno solo.
+2. **charcoal en el bundle.** Son 2,7 MB inlinados en base64 y el Hito 1 no los
+   usa. Cuando llegue el Hito 2 hay que decidir entre el panel crudo, versiones
+   pre-agregadas, o ambas.
+3. **Publicación en Pages.** `learn/docs/` está en `.gitignore` porque `app.json`
+   cambia entero en cada build y engordaría el historial. Falta decidir entre
+   una GitHub Action que lo construya o un `git add -f` deliberado.
+4. **El paso a paso del optimizador.** El diseño lo promete para el Hito 4. En
+   wasm cada iteración cruza la frontera R↔navegador; hay que medir si el
+   modo paso a paso es usable ahí o queda solo para servidor.

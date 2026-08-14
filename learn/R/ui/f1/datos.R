@@ -1,4 +1,4 @@
-e# learn/R/ui/fase1/datos.R
+# learn/R/ui/f1/datos.R
 #
 # Fase 1 · Datos. Todo lo que se le hace a los datos, en orden.
 #

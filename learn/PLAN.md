@@ -78,7 +78,7 @@ Codifica C4, C5 y C7 una sola vez, para que ninguna vista las reinvente.
 - [x] `R/ui/transversal/referencia.R` — glosario · catálogo · artefactos · entorno
 - [x] `R/ui/f1/datos.R`, `f3/ajuste.R`, `f4/evaluacion.R` — pestañas reales, vacías
 - [x] `R/nucleo/tema_app.R` — `tema_seguro()`: sin `font_google()` en wasm
-- [x] `R/pruebas/test_app.R` — 30 aserciones, cero errores de consola (C14)
+- [x] `R/pruebas/test_app.R` — 31 aserciones, cero errores de consola (C14)
 
 > Completado el 2026-08-13.
 
@@ -97,11 +97,11 @@ Codifica C4, C5 y C7 una sola vez, para que ninguna vista las reinvente.
 
 ### Definición de "hecho" — Hito 1
 
-- [x] `verificar_loc.R` verde — 47 archivos, máximo 184 LOC
+- [x] `verificar_loc.R` verde — 47 archivos, máximo 188 LOC
 - [x] `verificar_idioma.R` verde
 - [x] `verificar_mapa.R` verde
-- [x] `test_headless.R` verde — 48 pruebas
-- [x] `test_app.R` verde — 30 pruebas, consola sin errores
+- [x] `test_headless.R` verde — 46 pruebas
+- [x] `test_app.R` verde — 31 pruebas, consola sin errores
 - [x] `verificar_bundle.R` verde — el bundle wasm arranca y pinta
 - [x] Cero dependencias nuevas: los 14 paquetes que `learn/` necesita ya estaban
       en `renv.lock`. `renv::status()` reporta 15 paquetes fuera de sincronía

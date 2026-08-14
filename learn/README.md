@@ -16,8 +16,10 @@ es necesario.
 
 ## Estado
 
-**Hito 1 en curso**: núcleo + shell navegable + despliegue. Las cuatro fases
-existen y se recorren, pero todavía no calculan nada. Ver `PLAN.md`.
+**Hito 1 hecho**: núcleo, shell navegable y bundle wasm que arranca. Las cuatro
+fases se recorren y el catálogo de métodos funciona; todavía no se calcula nada.
+El avance vive en [`PLAN.md`](PLAN.md) — este README no lo repite para no quedar
+desactualizado.
 
 ## Correr
 
@@ -40,9 +42,13 @@ SDA_MODO=wasm Rscript -e 'shiny::runApp("learn/R/app.R", launch.browser = TRUE)'
 Rscript learn/R/pruebas/verificar_loc.R      # techo de 300 LOC (C2)
 Rscript learn/R/pruebas/verificar_idioma.R   # español ASCII (C1)
 Rscript learn/R/pruebas/verificar_mapa.R     # MAPA.md al día (C9)
-Rscript learn/R/pruebas/test_headless.R      # lógica y contratos
+Rscript learn/R/pruebas/test_headless.R      # núcleo, sin Shiny
 Rscript learn/R/pruebas/test_app.R           # UI + consola del navegador
+Rscript learn/R/pruebas/verificar_bundle.R   # el bundle wasm arranca de verdad
 ```
+
+Los dos últimos abren un navegador de verdad. No son opcionales: un render
+limpio y un HTTP 200 no prueban nada (ver `libs/sdd.md` S2b).
 
 ## Desplegar
 
@@ -55,8 +61,10 @@ Rscript -e 'source("learn/build.R"); construir_bundle()'
 python3 -m http.server 8000 --directory learn/docs
 ```
 
-Los métodos que no compilan a WebAssembly (`brms`, `torch`, …) aparecen en el
-catálogo con candado y su explicación, en vez de desaparecer.
+Los métodos que no compilan a WebAssembly (`brms`, `torch`, …) siguen visibles
+en el catálogo, con su ficha y su explicación, pero sin botón de ejecutar.
+
+`learn/docs/` no se versiona: se reconstruye con el comando de arriba.
 
 ## Variables de entorno
 
@@ -68,18 +76,28 @@ catálogo con candado y su explicación, en vez de desaparecer.
 
 ## Cómo está organizado
 
-```
-learn/
-├─ R/nucleo/    registro de métodos, estado, contratos, claves, exportación
-├─ R/logica/    cálculo puro — sin Shiny
-├─ R/graficos/  ggplot puro — sin Shiny
-├─ R/ui/        módulos Shiny; solo cablean
-├─ R/pruebas/   verificadores y los dos harness de test
-├─ metodos/     una función ajustar_*() pura por método
-├─ fichas/      un .md por método (qué es, por qué, cuándo falla)
-├─ textos/      un .md por gráfico (qué muestra, qué buscar, cuándo engaña)
-└─ docs/        bundle wasm exportado
-```
+El árbol completo y comentado está en [`SCHEMA.md`](SCHEMA.md) §7. En corto:
+
+- `R/nucleo/` — registro, estado, contratos, trazabilidad, exportación.
+  **Sin Shiny en ninguna línea**: `cargar_sda(con_ui = FALSE)` lo carga entero
+  sin bslib ni DT, que es lo que haría viable una CLI encima.
+- `R/logica/` y `R/graficos/` — cálculo y ggplot puros.
+- `R/ui/` — módulos Shiny; solo cablean. `piezas/` tiene los componentes
+  compartidos y ninguna vista los reinventa.
+- `fichas/` y `textos/` — la parte pedagógica, en markdown, fuera del código.
 
 Reutiliza `libs/_comun/R/` (datos, temas, métricas, verificación en navegador)
 del resto del repo. No duplicar esas funciones aquí.
+
+## Archivos generados
+
+No se versionan y se reconstruyen con un comando:
+
+| Ruta | Cómo se regenera |
+|---|---|
+| `learn/docs/` | `Rscript -e 'source("learn/build.R"); construir_bundle()'` |
+| `learn/outputs/` | corridas de `run_headless.R` |
+
+`MAPA.md` también se genera (`Rscript learn/R/mapa.R`) pero **sí** se versiona:
+es el índice que un agente lee antes de tocar nada y tiene que estar disponible
+sin correr R. `verificar_mapa.R` falla si queda desactualizado.
