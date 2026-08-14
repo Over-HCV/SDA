@@ -27,10 +27,16 @@ fuentes_disponibles <- function() {
       "Gemelos: salario, educacion y controles. 16 variables numericas.",
       "k grupos normales con medias separadas por 'efecto'.",
       "Relacion cubica con ruido: la recta se queda corta a proposito."),
-    filas_aprox = c(35115L, 145L, 182L, 100L, 100L),
+    filas_aprox = c(35113L, 145L, 182L, 100L, 100L),
     diferida = c(TRUE, TRUE, FALSE, FALSE, FALSE),
     stringsAsFactors = FALSE)
 }
+
+# Los cuatro flujos que se usan en clase, de los 31 del archivo. La lista
+# completa sale de listar_flujos(), pero pedirla obliga a leer el CSV entero:
+# justo lo que la carga diferida evita.
+FLUJOS_SUGERIDOS <- c("Production", "Imports", "Exports",
+                      "Consumption by households")
 
 #' Aviso de peso previo a cargar, o NULL si la fuente es liviana.
 #' En modo servidor no molesta a nadie; en wasm es información necesaria.

@@ -195,7 +195,7 @@ bloque <- contexto_de("f4.desempeno.roc", corrida = corrida,
                       metricas = list(auc = 0.81))
 probar("el bloque nombra la clave", grepl("f4.desempeno.roc", bloque, fixed = TRUE))
 probar("el bloque apunta al archivo de lógica",
-       grepl("learn/logica/metricas_clasificacion.R", bloque, fixed = TRUE))
+       grepl("learn/R/logica/metricas_clasificacion.R", bloque, fixed = TRUE))
 probar("el bloque nombra la composición completa",
        grepl(sprintf("dataset %s x modelo %s", id_dataset, id_modelo), bloque,
              fixed = TRUE))

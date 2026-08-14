@@ -35,7 +35,7 @@ md_a_html <- function(md) {
 #' @param clave clave de artefacto. Ej: "f1.analisis.histograma"
 texto <- function(clave) {
   relativa <- if (existe_artefacto(clave)) artefacto(clave)$texto
-              else file.path("textos", paste0(clave, ".md"))
+              else ruta_texto_de(clave)
   md <- leer_md(relativa)
   if (is.null(md)) return(sprintf(.AVISO_SIN_TEXTO, file.path("learn", relativa)))
   md_a_html(md)
@@ -44,7 +44,7 @@ texto <- function(clave) {
 #' ¿Hay texto escrito para esta clave?
 hay_texto <- function(clave) {
   relativa <- if (existe_artefacto(clave)) artefacto(clave)$texto
-              else file.path("textos", paste0(clave, ".md"))
+              else ruta_texto_de(clave)
   file.exists(ruta_app(relativa))
 }
 

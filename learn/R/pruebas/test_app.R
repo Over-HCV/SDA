@@ -51,6 +51,17 @@ ir_a <- function(app, seccion, patron) {
   esperar_html(app, patron)
 }
 
+#' Cambia de pestaña dentro de una fase y espera a que el sidebar exista Y esté
+#' enlazado. Que el HTML aparezca no alcanza: Shiny ata los bindings un ciclo
+#' después, y hasta entonces set_inputs() no encuentra el control.
+ir_a_pestana <- function(app, entrada, pestana, patron) {
+  do.call(app$set_inputs,
+          c(stats::setNames(list(pestana), entrada), list(wait_ = FALSE)))
+  html <- esperar_html(app, patron)
+  app$wait_for_idle(duration = 400, timeout = 20000)
+  html
+}
+
 #' Errores de la consola del navegador. Lo único que delata un bug de cliente.
 errores_de_consola <- function(app) {
   registro <- app$get_logs()
@@ -140,7 +151,7 @@ probar("la ficha muestra metadatos del registro",
        grepl("notes/tree.md", html_ficha, fixed = TRUE))
 
 cat("\n[resto de secciones]\n")
-marcas <- c("① Datos" = "En construcción", "③ Ajuste" = "En construcción",
+marcas <- c("① Datos" = "Vista previa del dataset", "③ Ajuste" = "En construcción",
             "④ Evaluación" = "En construcción", "Objetos" = "Exportar JSON",
             "Referencia" = "Glosario")
 for (seccion in names(marcas)) {
@@ -150,8 +161,10 @@ for (seccion in names(marcas)) {
            !grepl("Error:", html, fixed = TRUE))
 }
 
-cat("\n[pestañas de fases sin construir]\n")
-html_datos <- ir_a(app, "① Datos", "Diccionario")
+cat("\n[fase 1 · estructura]\n")
+# Se espera por la franja de estado y no por un título: los títulos son UI
+# estática y ya están en el DOM antes de que el servidor rinda el sidebar.
+html_datos <- ir_a(app, "① Datos", "sin cargar")
 probar("las 6 subsecciones de Datos ya existen como pestañas", {
   faltan <- Filter(function(s) !grepl(s, html_datos, fixed = TRUE),
                    c("Fuente", "Diccionario", "Calidad", "Transformación",
@@ -160,8 +173,124 @@ probar("las 6 subsecciones de Datos ya existen como pestañas", {
 })
 probar("la pestaña de Análisis está presente en la fase 1",
        grepl("Análisis", html_datos, fixed = TRUE))
-probar("una fase sin construir lo dice y apunta al hito",
-       grepl("En construcción", html_datos, fixed = TRUE))
+probar("la fase 1 ya no es un andamio del Hito 2",
+       !grepl("En construcción · Hito 2", html_datos, fixed = TRUE))
+probar("la franja de estado arranca sin dataset",
+       grepl("sin cargar", html_datos, fixed = TRUE))
+probar("el sidebar ofrece las fuentes del curso",
+       grepl("charcoal", html_datos, fixed = TRUE))
+
+cat("\n[fase 1 · cargar y mirar]\n")
+app$set_inputs(`datos-fuente` = "sintetico_anova", wait_ = FALSE)
+app$wait_for_idle(duration = 400, timeout = 20000)
+app$click("datos-cargar")
+html_cargado <- esperar_html(app, "sintetico_anova")
+probar("cargar el sintético llena la franja de estado",
+       grepl("faltantes", html_cargado, fixed = TRUE))
+probar("la vista previa trae su pie de conteo",
+       grepl("filas", html_cargado, fixed = TRUE))
+probar("el badge de muestreo no aparece por debajo del umbral",
+       !grepl("graficando", html_cargado, fixed = TRUE))
+
+html_analisis <- ir_a_pestana(app, "datos-pestana", "▣ Análisis",
+                              "Clases del histograma")
+probar("▣ Análisis pinta el histograma con su sello",
+       grepl("Histograma", html_analisis, fixed = TRUE))
+probar("el hook de las clases del histograma está a la vista",
+       grepl("Clases del histograma", html_analisis, fixed = TRUE))
+probar("el ancho de banda h también es un control",
+       grepl("Ancho de banda h", html_analisis, fixed = TRUE))
+
+app$set_inputs(`datos-clases` = 12, wait_ = FALSE)
+app$wait_for_idle(duration = 400, timeout = 20000)
+probar("mover las clases no rompe el panel",
+       grepl("Histograma", app$get_html("body"), fixed = TRUE))
+
+cat("\n[fase 1 · la escala manda]\n")
+# Se espera por un encabezado de la tabla: los rótulos del sidebar ya están en
+# el DOM aunque su pestaña esté oculta, así que no sirven de señal.
+html_diccionario <- ir_a_pestana(app, "datos-pestana", "Diccionario",
+                                 "faltantes_pct")
+probar("el diccionario se dibuja con una fila por columna",
+       grepl("faltantes_pct", html_diccionario, fixed = TRUE))
+probar("se explica qué habilita la escala elegida",
+       grepl("se habilitan", html_diccionario, fixed = TRUE))
+
+app$set_inputs(`datos-columna_dic` = "valor", wait_ = FALSE)
+app$wait_for_idle(duration = 400, timeout = 20000)
+app$set_inputs(`datos-escala` = "nominal", wait_ = FALSE)
+app$wait_for_idle(duration = 400, timeout = 20000)
+app$click("datos-aplicar_dic")
+invisible(ir_a_pestana(app, "datos-pestana", "▣ Análisis",
+                       "Clases del histograma"))
+app$set_inputs(`datos-variable_uni` = "valor", wait_ = FALSE)
+html_bloqueado <- esperar_html(app, "no aplica a una escala nominal")
+probar("marcar la variable como nominal bloquea el histograma",
+       grepl("no aplica a una escala nominal", html_bloqueado, fixed = TRUE))
+probar("el bloqueo viene con su razón escrita",
+       grepl("Promediarlas no significa nada", html_bloqueado, fixed = TRUE))
+
+cat("\n[fase 1 · preparar de verdad]\n")
+html_calidad <- ir_a_pestana(app, "datos-pestana", "Calidad",
+                             "Matriz de nulidad")
+probar("Calidad ofrece los tres criterios de atípico",
+       grepl("Mahalanobis (multivariado)", html_calidad, fixed = TRUE))
+app$set_inputs(`datos-metodo_atipicos` = "z", wait_ = FALSE)
+app$wait_for_idle(duration = 400, timeout = 20000)
+probar("cambiar el criterio no rompe el panel",
+       !grepl("Error:", app$get_html("body"), fixed = TRUE))
+
+invisible(ir_a_pestana(app, "datos-pestana", "Transformación", "Pila aplicada"))
+app$set_inputs(`datos-columnas_tr` = "valor", wait_ = FALSE)
+app$wait_for_idle(duration = 400, timeout = 20000)
+app$set_inputs(`datos-tipo_tr` = "logaritmo", wait_ = FALSE)
+app$wait_for_idle(duration = 400, timeout = 20000)
+app$click("datos-aplicar_tr")
+html_transformada <- esperar_html(app, "logaritmo sobre")
+probar("aplicar una transformación la deja anotada en la pila",
+       grepl("logaritmo sobre", html_transformada, fixed = TRUE))
+probar("la franja de estado cuenta la transformación aplicada",
+       grepl("transformaciones", html_transformada, fixed = TRUE))
+app$click("datos-deshacer_tr")
+app$wait_for_idle(duration = 600, timeout = 20000)
+probar("deshacer vacía la pila",
+       !grepl("logaritmo sobre", app$get_html("body"), fixed = TRUE))
+
+invisible(ir_a_pestana(app, "datos-pestana", "Partición", "Tamaño de cada parte"))
+app$set_inputs(`datos-estrato` = "grupo", wait_ = FALSE)
+app$wait_for_idle(duration = 400, timeout = 20000)
+app$click("datos-partir")
+html_particion <- esperar_html(app, "estratificada por grupo")
+probar("partir deja constancia de tipo, semilla y estrato",
+       grepl("holdout · semilla 42 · estratificada por grupo", html_particion,
+             fixed = TRUE))
+probar("la franja de estado registra la partición",
+       grepl("holdout", html_particion, fixed = TRUE))
+
+invisible(ir_a_pestana(app, "datos-pestana", "Balanceo", "Frecuencias por clase"))
+app$click("datos-balancear")
+html_balanceo <- esperar_html(app, "Se rebalanceo por")
+probar("balancear avisa de lo que hizo y por qué importa",
+       grepl("Las probabilidades a priori cambiaron", html_balanceo,
+             fixed = TRUE))
+probar("rebalancear invalida la partición anterior",
+       grepl("balanceo", html_balanceo, fixed = TRUE))
+
+cat("\n[fase 1 · muestreo visible (C8)]\n")
+invisible(ir_a_pestana(app, "datos-pestana", "Fuente", "Vista previa"))
+app$set_inputs(`datos-fuente` = "charcoal_crudo", wait_ = FALSE)
+app$wait_for_idle(duration = 400, timeout = 20000)
+app$click("datos-cargar")
+invisible(esperar_html(app, "charcoal_crudo", intentos = 120))
+# El badge vive en el encabezado de los paneles con gráfico, y los outputs de
+# una pestaña oculta están suspendidos: hay que ir a mirarlo.
+html_charcoal <- ir_a_pestana(app, "datos-pestana", "▣ Análisis", "graficando")
+probar("con 35.113 filas aparece el badge de muestreo",
+       grepl("graficando", html_charcoal, fixed = TRUE))
+probar("el badge dice cuántas filas se dibujan y con qué semilla",
+       grepl("de 35.113 · semilla 42", html_charcoal, fixed = TRUE))
+probar("la franja sigue reportando el total, no la muestra",
+       grepl("35.113", html_charcoal, fixed = TRUE))
 
 cat("\n[referencia]\n")
 html_referencia <- ir_a(app, "Referencia", "Mahalanobis")

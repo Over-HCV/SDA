@@ -13,7 +13,7 @@ Todas las rutas son relativas a `learn/`.
 
 - **Métodos**: 54 registrados — 0 activos, 48 pendientes, 6 bloqueados
 - **Artefactos**: 79 registrados
-- **Textos escritos**: 2 de 79
+- **Textos escritos**: 25 de 79
 - **Fichas escritas**: 3 de 54
 
 ## Artefactos
@@ -23,30 +23,30 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 
 | Clave | Artefacto | Gráfico | Lógica | Texto |
 |---|---|---|---|---|
-| `f1.analisis.boxplot` | Diagrama de caja | `R/graficos/g_univariado.R::graficar_boxplot` | `R/logica/resumen_univariado.R::resumir_variable` | *pendiente* |
-| `f1.analisis.boxplot_grupos` | Cajas comparadas por grupo | `R/graficos/g_univariado.R::graficar_boxplot_grupos` | `R/logica/resumen_univariado.R::resumir_por_grupo` | *pendiente* |
-| `f1.analisis.coordenadas_paralelas` | Coordenadas paralelas | `R/graficos/g_multivariado.R::graficar_coordenadas_paralelas` | `R/logica/asociacion.R::normalizar_columnas` | *pendiente* |
-| `f1.analisis.densidad` | Densidad kernel | `R/graficos/g_univariado.R::graficar_densidad` | `R/logica/densidad.R::estimar_densidad` | *pendiente* |
-| `f1.analisis.densidad_conjunta` | Densidad conjunta | `R/graficos/g_bivariado.R::graficar_densidad_conjunta` | `R/logica/densidad.R::estimar_densidad_2d` | *pendiente* |
-| `f1.analisis.dispersion` | Diagrama de dispersión | `R/graficos/g_bivariado.R::graficar_dispersion` | `R/logica/asociacion.R::medir_asociacion` | *pendiente* |
-| `f1.analisis.elipsoide` | Elipsoide de concentración | `R/graficos/g_multivariado.R::graficar_elipsoide` | `R/logica/distancias.R::elipsoide_concentracion` | *pendiente* |
-| `f1.analisis.heatmap_correlacion` | Mapa de calor de correlaciones | `R/graficos/g_multivariado.R::graficar_heatmap_correlacion` | `R/logica/asociacion.R::matriz_correlacion` | *pendiente* |
-| `f1.analisis.histograma` | Histograma | `R/graficos/g_univariado.R::graficar_histograma` | `R/logica/resumen_univariado.R::resumir_variable` | `textos/f1.analisis.histograma.md` |
-| `f1.analisis.matriz_dispersion` | Matriz de dispersión | `R/graficos/g_multivariado.R::graficar_pares` | `R/logica/asociacion.R::matriz_correlacion` | *pendiente* |
-| `f1.analisis.mosaico` | Gráfico de mosaico | `R/graficos/g_bivariado.R::graficar_mosaico` | `R/logica/contingencia.R::tabla_contingencia` | *pendiente* |
-| `f1.analisis.qq_mahalanobis` | Q-Q de distancias de Mahalanobis | `R/graficos/g_multivariado.R::graficar_qq_mahalanobis` | `R/logica/distancias.R::mahalanobis_cuadrado` | *pendiente* |
-| `f1.analisis.qq_normal_datos` | Q-Q normal de la variable | `R/graficos/g_univariado.R::graficar_qq` | `R/logica/normalidad.R::evaluar_normalidad` | *pendiente* |
-| `f1.balanceo.frecuencias` | Frecuencias por clase | `R/graficos/g_calidad.R::graficar_balance` | `R/logica/datos_balanceo.R::resumir_balance` | *pendiente* |
-| `f1.balanceo.nube_sinteticos` | Nube con filas remuestreadas | `R/graficos/g_preparacion.R::graficar_nube_sinteticos` | `R/logica/datos_balanceo.R::balancear` | *pendiente* |
-| `f1.calidad.atipicos` | Atípicos detectados | `R/graficos/g_calidad.R::graficar_atipicos` | `R/logica/datos_calidad.R::detectar_atipicos` | *pendiente* |
-| `f1.calidad.duplicados` | Filas duplicadas | `R/ui/f1/calidad.R::salida_duplicados` | `R/logica/datos_calidad.R::marcar_duplicados` | *pendiente* |
-| `f1.calidad.matriz_nulidad` | Matriz de nulidad | `R/graficos/g_calidad.R::graficar_nulidad` | `R/logica/datos_calidad.R::patron_faltantes` | *pendiente* |
-| `f1.diccionario.tabla` | Diccionario de columnas | `R/ui/f1/diccionario.R::salida_diccionario` | `R/logica/datos_diccionario.R::avisos_diccionario` | *pendiente* |
-| `f1.fuente.vista_previa` | Vista previa del dataset | `R/ui/f1/fuente.R::salida_fuente` | `R/logica/datos_fuente.R::cargar_fuente` | *pendiente* |
-| `f1.particion.balance` | Balance por partición | `R/graficos/g_preparacion.R::graficar_balance_particion` | `R/logica/datos_particion.R::balance_por_particion` | *pendiente* |
-| `f1.particion.tamanos` | Tamaño de cada parte | `R/graficos/g_preparacion.R::graficar_particion` | `R/logica/datos_particion.R::resumir_particion` | *pendiente* |
-| `f1.transformacion.antes_despues` | Antes y después | `R/graficos/g_preparacion.R::graficar_antes_despues` | `R/logica/datos_transformacion.R::aplicar_transformaciones` | *pendiente* |
-| `f1.transformacion.perfil_boxcox` | Perfil de lambda (Box-Cox) | `R/graficos/g_preparacion.R::graficar_perfil_boxcox` | `R/logica/datos_transformacion.R::perfil_boxcox` | *pendiente* |
+| `f1.analisis.boxplot` | Diagrama de caja | `R/graficos/g_univariado.R::graficar_boxplot` | `R/logica/resumen_univariado.R::resumir_variable` | `textos/f1/analisis/boxplot.md` |
+| `f1.analisis.boxplot_grupos` | Cajas comparadas por grupo | `R/graficos/g_univariado.R::graficar_boxplot_grupos` | `R/logica/resumen_univariado.R::resumir_por_grupo` | `textos/f1/analisis/boxplot_grupos.md` |
+| `f1.analisis.coordenadas_paralelas` | Coordenadas paralelas | `R/graficos/g_multivariado.R::graficar_coordenadas_paralelas` | `R/logica/asociacion.R::normalizar_columnas` | `textos/f1/analisis/coordenadas_paralelas.md` |
+| `f1.analisis.densidad` | Densidad kernel | `R/graficos/g_univariado.R::graficar_densidad` | `R/logica/densidad.R::estimar_densidad` | `textos/f1/analisis/densidad.md` |
+| `f1.analisis.densidad_conjunta` | Densidad conjunta | `R/graficos/g_bivariado.R::graficar_densidad_conjunta` | `R/logica/densidad.R::estimar_densidad_2d` | `textos/f1/analisis/densidad_conjunta.md` |
+| `f1.analisis.dispersion` | Diagrama de dispersión | `R/graficos/g_bivariado.R::graficar_dispersion` | `R/logica/asociacion.R::medir_asociacion` | `textos/f1/analisis/dispersion.md` |
+| `f1.analisis.elipsoide` | Elipsoide de concentración | `R/graficos/g_multivariado.R::graficar_elipsoide` | `R/logica/distancias.R::elipsoide_concentracion` | `textos/f1/analisis/elipsoide.md` |
+| `f1.analisis.heatmap_correlacion` | Mapa de calor de correlaciones | `R/graficos/g_multivariado.R::graficar_heatmap_correlacion` | `R/logica/asociacion.R::matriz_correlacion` | `textos/f1/analisis/heatmap_correlacion.md` |
+| `f1.analisis.histograma` | Histograma | `R/graficos/g_univariado.R::graficar_histograma` | `R/logica/resumen_univariado.R::resumir_variable` | `textos/f1/analisis/histograma.md` |
+| `f1.analisis.matriz_dispersion` | Matriz de dispersión | `R/graficos/g_multivariado.R::graficar_pares` | `R/logica/asociacion.R::matriz_correlacion` | `textos/f1/analisis/matriz_dispersion.md` |
+| `f1.analisis.mosaico` | Gráfico de mosaico | `R/graficos/g_bivariado.R::graficar_mosaico` | `R/logica/contingencia.R::tabla_contingencia` | `textos/f1/analisis/mosaico.md` |
+| `f1.analisis.qq_mahalanobis` | Q-Q de distancias de Mahalanobis | `R/graficos/g_multivariado.R::graficar_qq_mahalanobis` | `R/logica/distancias.R::mahalanobis_cuadrado` | `textos/f1/analisis/qq_mahalanobis.md` |
+| `f1.analisis.qq_normal_datos` | Q-Q normal de la variable | `R/graficos/g_univariado.R::graficar_qq` | `R/logica/normalidad.R::evaluar_normalidad` | `textos/f1/analisis/qq_normal_datos.md` |
+| `f1.balanceo.frecuencias` | Frecuencias por clase | `R/graficos/g_calidad.R::graficar_balance` | `R/logica/datos_balanceo.R::resumir_balance` | `textos/f1/balanceo/frecuencias.md` |
+| `f1.balanceo.nube_sinteticos` | Nube con filas remuestreadas | `R/graficos/g_preparacion.R::graficar_nube_sinteticos` | `R/logica/datos_balanceo.R::balancear` | `textos/f1/balanceo/nube_sinteticos.md` |
+| `f1.calidad.atipicos` | Atípicos detectados | `R/graficos/g_calidad.R::graficar_atipicos` | `R/logica/datos_calidad.R::detectar_atipicos` | `textos/f1/calidad/atipicos.md` |
+| `f1.calidad.duplicados` | Filas duplicadas | `R/ui/f1/calidad.R::salida_duplicados` | `R/logica/datos_calidad.R::marcar_duplicados` | `textos/f1/calidad/duplicados.md` |
+| `f1.calidad.matriz_nulidad` | Matriz de nulidad | `R/graficos/g_calidad.R::graficar_nulidad` | `R/logica/datos_calidad.R::patron_faltantes` | `textos/f1/calidad/matriz_nulidad.md` |
+| `f1.diccionario.tabla` | Diccionario de columnas | `R/ui/f1/diccionario.R::salida_diccionario` | `R/logica/datos_diccionario.R::avisos_diccionario` | `textos/f1/diccionario/tabla.md` |
+| `f1.fuente.vista_previa` | Vista previa del dataset | `R/ui/f1/fuente.R::salida_fuente` | `R/logica/datos_fuente.R::cargar_fuente` | `textos/f1/fuente/vista_previa.md` |
+| `f1.particion.balance` | Balance por partición | `R/graficos/g_preparacion.R::graficar_balance_particion` | `R/logica/datos_particion.R::balance_por_particion` | `textos/f1/particion/balance.md` |
+| `f1.particion.tamanos` | Tamaño de cada parte | `R/graficos/g_preparacion.R::graficar_particion` | `R/logica/datos_particion.R::resumir_particion` | `textos/f1/particion/tamanos.md` |
+| `f1.transformacion.antes_despues` | Antes y después | `R/graficos/g_preparacion.R::graficar_antes_despues` | `R/logica/datos_transformacion.R::aplicar_transformaciones` | `textos/f1/transformacion/antes_despues.md` |
+| `f1.transformacion.perfil_boxcox` | Perfil de lambda (Box-Cox) | `R/graficos/g_preparacion.R::graficar_perfil_boxcox` | `R/logica/datos_transformacion.R::perfil_boxcox` | `textos/f1/transformacion/perfil_boxcox.md` |
 | `f2.analisis.curva_potencia` | Curva de potencia | `R/graficos/g_modelo.R::graficar_potencia` | `R/logica/potencia.R::calcular_potencia` | *pendiente* |
 | `f2.analisis.espacio_hipotesis` | Espacio de hipótesis | `R/graficos/g_modelo.R::graficar_espacio_hipotesis` | `R/logica/modelo_geometria.R::familia_candidatas` | *pendiente* |
 | `f2.analisis.frontera_decision` | Frontera de decisión | `R/graficos/g_modelo.R::graficar_frontera` | `R/logica/modelo_geometria.R::malla_decision` | *pendiente* |
@@ -54,7 +54,7 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f2.analisis.presupuesto_parametros` | Presupuesto de parámetros | `R/graficos/g_modelo.R::graficar_presupuesto` | `R/logica/modelo_geometria.R::contar_parametros` | *pendiente* |
 | `f2.analisis.superficie_perdida` | Superficie de pérdida | `R/graficos/g_modelo.R::graficar_superficie_perdida` | `R/logica/modelo_geometria.R::malla_objetivo` | *pendiente* |
 | `f3.analisis.camino_superficie` | Camino sobre la superficie | `R/graficos/g_convergencia.R::graficar_camino` | `R/logica/traza.R::traza_a_tabla` | *pendiente* |
-| `f3.analisis.convergencia` | Traza de convergencia | `R/graficos/g_convergencia.R::graficar_convergencia` | `R/logica/traza.R::registrar_iteracion` | `textos/f3.analisis.convergencia.md` |
+| `f3.analisis.convergencia` | Traza de convergencia | `R/graficos/g_convergencia.R::graficar_convergencia` | `R/logica/traza.R::registrar_iteracion` | `textos/f3/analisis/convergencia.md` |
 | `f3.analisis.curva_aprendizaje` | Curva de aprendizaje | `R/graficos/g_convergencia.R::graficar_curva_aprendizaje` | `R/logica/validacion.R::curva_aprendizaje` | *pendiente* |
 | `f3.analisis.perfil_verosimilitud` | Perfil de verosimilitud | `R/graficos/g_convergencia.R::graficar_perfil` | `R/logica/verosimilitud.R::perfil_parametro` | *pendiente* |
 | `f3.analisis.ruta_regularizacion` | Ruta de regularización | `R/graficos/g_convergencia.R::graficar_ruta_lambda` | `R/logica/regularizacion.R::ruta_coeficientes` | *pendiente* |

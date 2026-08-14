@@ -37,13 +37,24 @@ registrar_artefacto <- function(clave, titulo, grafico = NA_character_,
     fase = substr(clave, 1, 2),
     subseccion = strsplit(clave, ".", fixed = TRUE)[[1]][2],
     grafico = grafico, logica = logica,
-    texto = texto %||% file.path("textos", paste0(clave, ".md")),
+    texto = texto %||% ruta_texto_de(clave),
     descripcion = descripcion
   )
   invisible(clave)
 }
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
+
+#' Ruta por defecto del texto de una clave.
+#'
+#' Una carpeta por fase y por subsección, igual que `R/ui/`: la clave
+#' `f1.analisis.histograma` se escribe en `textos/f1/analisis/histograma.md`.
+#' Con 79 artefactos, una carpeta plana deja de ser navegable.
+ruta_texto_de <- function(clave) {
+  partes <- strsplit(clave, ".", fixed = TRUE)[[1]]
+  if (length(partes) != 3L) return(file.path("textos", paste0(clave, ".md")))
+  file.path("textos", partes[1], partes[2], paste0(partes[3], ".md"))
+}
 
 claves_artefactos <- function() sort(ls(.ARTEFACTOS))
 
