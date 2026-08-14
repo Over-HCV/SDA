@@ -67,7 +67,9 @@ preparar_staging <- function(stage) {
   for (excluido in .EXCLUIR_R)
     unlink(file.path(stage, "R", excluido), recursive = TRUE)
 
-  for (carpeta in c("textos", "fichas", "metodos"))
+  # `www` trae KaTeX vendorizado (ver learn/www/katex/LEEME.md). Sin él las
+  # fórmulas llegan al navegador como TeX crudo y nada avisa.
+  for (carpeta in c("textos", "fichas", "metodos", "www"))
     .copiar_arbol(ruta_app(carpeta), stage, carpeta)
 
   dir.create(file.path(stage, "libs", "_comun", "R"), recursive = TRUE,
@@ -91,7 +93,9 @@ verificar_staging <- function(stage) {
   obligatorios <- c("sda-raiz", "app.R", "R/app.R", "R/cargar.R",
                     "R/nucleo/registro.R", "R/nucleo/catalogo/poblar.R",
                     "R/nucleo/artefactos/poblar.R", "R/ui/piezas/panel.R",
-                    "R/ui/f2/catalogo.R", "libs/_comun/R/temas_bslib.R")
+                    "R/ui/f2/catalogo.R", "libs/_comun/R/temas_bslib.R",
+                    "www/katex/katex.min.js", "www/katex/katex.min.css",
+                    "www/katex/enganche.js")
   faltan <- obligatorios[!file.exists(file.path(stage, obligatorios))]
   if (length(faltan))
     stop("Staging incompleto, faltan: ", paste(faltan, collapse = ", "))

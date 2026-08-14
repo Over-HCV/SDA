@@ -27,24 +27,29 @@ plegable <- function(titulo, contenido, abierto = FALSE,
   )
 }
 
-#' Etiqueta ⓘ con la clave y las rutas del artefacto, dentro de un popover.
+#' Sello ⓘ del encabezado: para qué sirve esta card, en dos o tres frases.
 #'
-#' Está en el encabezado y no en el cuerpo a propósito: es metadato, no
+#' Antes mostraba clave y rutas, que es un subconjunto estricto de lo que ya
+#' trae el bloque "Contexto" del pie — y las 25 cards lo pasan. Repetir la
+#' traza acá no informaba de nada; la pregunta que ninguna otra parte de la
+#' card responde es para qué sirve mirarla.
+#'
+#' Está en el encabezado y no en el cuerpo a propósito: es orientación, no
 #' resultado, así que no puede robarle espacio al gráfico.
+#'
+#' El disparador es un <span> y no el icono: `bs_icon()` devuelve un <svg> con
+#' `aria-hidden="true"`, y Bootstrap le pone `tabindex="0"` al disparador. Con
+#' el icono de disparador el foco caía sobre un elemento oculto a los lectores
+#' de pantalla y el navegador bloqueaba la interacción. Por lo mismo va un solo
+#' componente y no un popover envolviendo a un tooltip.
 sello_clave <- function(clave) {
-  rutas <- if (existe_artefacto(clave)) rutas_de(clave)
-           else list(clave = clave, grafico = NA, logica = NA, texto = NA)
-  linea <- function(etiqueta, valor) {
-    if (is.null(valor) || is.na(valor)) return(NULL)
-    shiny::tags$div(shiny::tags$strong(etiqueta), " ", shiny::tags$code(valor))
-  }
   bslib::popover(
-    bslib::tooltip(bsicons::bs_icon("info-circle", class = "text-muted"),
-                   "De dónde sale este gráfico"),
-    title = rutas$clave,
-    linea("gráfico:", rutas$grafico),
-    linea("lógica:", rutas$logica),
-    linea("texto:", rutas$texto),
+    shiny::tags$span(
+      class = "text-muted d-inline-flex", tabindex = "0", role = "button",
+      `aria-label` = "¿Para qué sirve?",
+      bsicons::bs_icon("info-circle")),
+    title = "¿Para qué sirve?",
+    shiny::HTML(texto_bloque(clave)),
     placement = "left"
   )
 }
@@ -54,10 +59,9 @@ sello_clave <- function(clave) {
 #' @param clave     clave registrada en artefactos/
 #' @param contenido el resultado: plotOutput, tableOutput, lo que sea
 #' @param contexto  salida_contexto(ns), o NULL para no ofrecer el bloque
-#' @param porque    UI opcional para "¿Por qué importa?" (contenido estático)
 #' @param altura    alto del cuerpo, ej. "420px"
 #' @param encabezado_extra UI a la derecha del título (badges, botones chicos)
-panel_resultado <- function(clave, contenido, contexto = NULL, porque = NULL,
+panel_resultado <- function(clave, contenido, contexto = NULL,
                             altura = NULL, encabezado_extra = NULL) {
   bslib::card(
     full_screen = TRUE,
@@ -78,14 +82,11 @@ panel_resultado <- function(clave, contenido, contexto = NULL, porque = NULL,
         bslib::accordion_panel(
           "¿Cómo se lee?", icon = bsicons::bs_icon("eyeglasses"),
           shiny::HTML(texto(clave))),
-        if (!is.null(porque)) bslib::accordion_panel(
-          "¿Por qué importa?", icon = bsicons::bs_icon("question-circle"),
-          porque),
         if (!is.null(contexto)) bslib::accordion_panel(
-          "contexto", icon = bsicons::bs_icon("chat-square-text"),
+          "Contexto", icon = bsicons::bs_icon("chat-square-text"),
           shiny::tags$p(class = "text-muted small",
-                        paste("Copiá este bloque y pegalo en una conversación",
-                              "para preguntar por qué salió este resultado.")),
+                        paste("Este bloque sirve para orientarse",
+                              "y preguntar sobre un resultado específico.")),
           contexto)
       )
     )

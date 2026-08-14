@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Ver la forma de una variable sin la arbitrariedad del número de clases. Es la
+que conviene para juzgar si una transformación hizo falta y si funcionó,
+porque el cambio de forma se lee sin depender de dónde cayeron los bordes.
+
 ## Qué muestra
 
 Una curva suave que estima la densidad de probabilidad de la variable. En vez
@@ -6,9 +12,9 @@ observación y las suma todas.
 
 El parámetro que manda es el ancho de banda `h`, no el número de clases:
 
-```
-f̂(x) = (1 / n·h) Σᵢ K((x − xᵢ) / h)
-```
+$$
+\hat{f}(x) = \frac{1}{n h} \sum_{i=1}^{n} K\!\left( \frac{x - x_i}{h} \right)
+$$
 
 El área bajo la curva vale 1, así que la altura no es una cuenta de casos: es
 densidad. Comparar dos densidades de muestras de tamaño distinto es legítimo;

@@ -8,11 +8,12 @@ en la que la nube de puntos está más estirada.
 Formalmente: se busca el vector `a` de norma 1 que maximiza la varianza
 proyectada.
 
-```
-maximizar  Var(aᵀX)   sujeto a  ‖a‖ = 1
-```
+$$
+\text{maximizar } \operatorname{Var}\!\left( a^{\mathsf{T}} X \right)
+\quad \text{sujeto a} \quad \lVert a \rVert = 1
+$$
 
-Con multiplicadores de Lagrange eso se convierte en `S a = λ a` — un problema
+Con multiplicadores de Lagrange eso se convierte en $S a = \lambda a$ — un problema
 de autovalores. Los autovectores son las direcciones, los autovalores son las
 varianzas.
 

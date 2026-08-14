@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Ver si dos variables cualitativas están asociadas, que es lo que después
+contesta con un número la prueba χ². En una tabla de contingencia grande los
+conteos no se leen de un vistazo; las áreas sí.
+
 ## Qué muestra
 
 El cruce de dos variables cualitativas. El ancho de cada columna es la
@@ -8,10 +14,12 @@ frecuencia conjunta.
 El color no es la frecuencia: es el **residuo estandarizado**, cuánto se aparta
 esa celda de lo que se esperaría si las dos variables fueran independientes.
 
-```
-esperado(i,j) = fila(i) · columna(j) / n
-residuo(i,j)  = (observado − esperado) / √(varianza del esperado)
-```
+$$
+\begin{aligned}
+\text{esperado}(i,j) &= \frac{\text{fila}(i) \cdot \text{columna}(j)}{n} \\[4pt]
+\text{residuo}(i,j) &= \frac{\text{observado} - \text{esperado}}{\sqrt{\text{varianza del esperado}}}
+\end{aligned}
+$$
 
 Azul es más de lo esperado, rojo es menos, gris es lo esperado.
 

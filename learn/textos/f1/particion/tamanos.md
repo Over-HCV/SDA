@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Confirmar cuántos datos van a quedar para evaluar, que es lo que fija cuánta
+confianza merecen las métricas. Con doscientas filas de prueba, dos puntos de
+exactitud no alcanzan para distinguir dos modelos.
+
 ## Qué muestra
 
 Cuántas filas quedaron en cada parte: entrenamiento y prueba en un holdout, o

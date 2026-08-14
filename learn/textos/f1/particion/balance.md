@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Comprobar que la partición no sesgó el problema antes de entrenar nada. Una
+prueba con distinta distribución que el entrenamiento devuelve métricas que no
+significan lo que parecen, y el fallo no avisa por ningún lado.
+
 ## Qué muestra
 
 La distribución de una columna dentro de cada parte de la partición. Es la

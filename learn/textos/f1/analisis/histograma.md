@@ -1,3 +1,10 @@
+## Para qué sirve
+
+Formarse la primera idea de una variable antes de decidir cualquier otra cosa
+sobre ella: si transformarla, si partirla por grupos, si desconfiar de cómo se
+midió. Es la card que se abre primero y la que más veces termina cambiando el
+plan.
+
 ## Qué muestra
 
 Cuántas observaciones caen en cada intervalo de la variable. La altura de cada

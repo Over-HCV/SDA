@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Explorar todas las relaciones de a pares sin pedirlas una por una, y elegir
+cuáles merecen una dispersión propia. Es un mapa de dónde mirar, no el lugar
+donde se mira: las celdas son demasiado chicas para concluir nada en ellas.
+
 ## Qué muestra
 
 Todas las parejas de variables numéricas a la vez, en una rejilla. La celda de

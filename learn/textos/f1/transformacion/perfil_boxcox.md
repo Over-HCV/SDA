@@ -1,12 +1,21 @@
+## Para qué sirve
+
+Elegir λ, y sobre todo elegir uno redondo. Si la curva es plana alrededor del
+máximo, conviene el λ interpretable —el logaritmo, la raíz— antes que el
+óptimo con cuatro decimales que después nadie puede explicar.
+
 ## Qué muestra
 
 La log-verosimilitud de la familia de Box-Cox en función de λ. La familia es una
 sola fórmula que contiene a casi todas las transformaciones que se usan a mano:
 
-```
-y(λ) = (yᵏ − 1) / λ    si λ ≠ 0
-y(λ) = log(y)          si λ = 0
-```
+$$
+y(\lambda) =
+\begin{cases}
+\dfrac{y^{\lambda} - 1}{\lambda} & \text{si } \lambda \neq 0 \\[10pt]
+\log(y) & \text{si } \lambda = 0
+\end{cases}
+$$
 
 λ = 1 deja la variable como está, λ = 0,5 es la raíz, λ = 0 es el logaritmo y
 λ = −1 es el inverso. La curva dice qué λ hace a los datos lo más parecidos

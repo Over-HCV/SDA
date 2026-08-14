@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Atrapar el desastre antes de gastar una hora en él. Es la única card que se
+mira sin haber decidido nada todavía, y la que dice si el archivo se cargó
+como creías o hay que volver a leerlo con otras opciones.
+
 ## Qué muestra
 
 Las primeras filas de lo que se acaba de cargar, con el pie que dice cuántas se

@@ -1,3 +1,10 @@
+## Para qué sirve
+
+Decidir si vale la pena correr una prueba de diferencia de medias antes de
+correrla. Si las cajas se solapan casi por completo, el ANOVA rara vez va a
+encontrar algo; si están claramente separadas, ya sabés el resultado y la
+prueba solo le pone un número.
+
 ## Qué muestra
 
 La misma variable numérica partida por un factor: una caja por grupo, en el

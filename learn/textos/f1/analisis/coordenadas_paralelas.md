@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Buscar grupos y perfiles cuando hay demasiadas variables para mirarlas de a
+pares. Sirve sobre todo antes de agrupar: si se ven haces de líneas que viajan
+juntas, hay estructura que un método de conglomerados puede encontrar.
+
 ## Qué muestra
 
 Cada observación es una línea que atraviesa todos los ejes; cada eje es una

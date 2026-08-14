@@ -1,3 +1,10 @@
+## Para qué sirve
+
+Saber si las filas repetidas son un error de carga o una característica del
+dato, antes de tocar nada. La misma repetición puede ser un cruce mal hecho o
+un panel con varias observaciones por unidad, y la diferencia cambia el
+análisis entero.
+
 ## Qué muestra
 
 Qué filas se repiten y cuántas veces aparece cada combinación. Se puede mirar

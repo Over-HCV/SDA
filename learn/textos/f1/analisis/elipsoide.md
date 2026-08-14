@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Comprobar si el supuesto de normalidad bivariada es defendible antes de usar
+un método que lo necesita. Mahalanobis, el análisis discriminante y la T² de
+Hotelling lo suponen sin pedirlo, y ninguno avisa cuando no se cumple.
+
 ## Qué muestra
 
 La nube de dos variables con los contornos que encerrarían el 50 % y el 95 % de

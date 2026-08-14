@@ -1,3 +1,10 @@
+## Para qué sirve
+
+Decidir cómo tratar los faltantes, que es una de las decisiones que más cambia
+los resultados. Borrar filas, imputar o modelar la ausencia son caminos
+distintos que llevan a números distintos, y el dibujo de esta card es lo que
+dice cuál corresponde.
+
 ## Qué muestra
 
 Una celda por cada par (fila, columna) del dataset: pintada si el valor falta,

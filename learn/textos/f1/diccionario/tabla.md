@@ -1,3 +1,10 @@
+## Para qué sirve
+
+Declarar qué es cada columna, que es lo que después habilita o bloquea cada
+operación en el resto de la app. Es la card con más consecuencias del
+proyecto: marcar una variable como nominal apaga su media y su histograma a
+propósito, y con la razón escrita al lado.
+
 ## Qué muestra
 
 Una fila por columna del dataset, con lo que la app necesita saber de ella:

@@ -1,13 +1,21 @@
+## Para qué sirve
+
+Decidir qué hacer con los valores extremos: corregirlos, dejarlos, o cambiar a
+un método robusto que no dependa de ellos. Lo que no se decide acá se decide
+solo más adelante, y casi siempre mal.
+
 ## Qué muestra
 
 Cada observación contra su posición en el archivo, con los atípicos marcados
 según el criterio elegido. Los tres criterios responden preguntas distintas:
 
-```
-IQR          fuera de [Q1 − 1.5·RIC , Q3 + 1.5·RIC]   robusto, univariado
-z            |x − x̄| / s  por encima de 3            no robusto, univariado
-Mahalanobis  d² por encima del cuantil χ²(p)          multivariado
-```
+$$
+\begin{aligned}
+\text{IQR} &: && x \notin \left[\, Q_1 - 1{,}5 \cdot \text{RIC} \;,\; Q_3 + 1{,}5 \cdot \text{RIC} \,\right] && \text{robusto, univariado} \\[4pt]
+z &: && \frac{\lvert x - \bar{x} \rvert}{s} > 3 && \text{no robusto, univariado} \\[4pt]
+\text{Mahalanobis} &: && d^2 > \chi^2_p(\alpha) && \text{multivariado}
+\end{aligned}
+$$
 
 Los dos primeros miran una columna; el tercero mira todas a la vez y encuentra
 filas que ninguna columna por separado delata.

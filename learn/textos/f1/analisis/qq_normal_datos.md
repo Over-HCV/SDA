@@ -1,3 +1,10 @@
+## Para qué sirve
+
+Comprobar la normalidad de una variable con más resolución que un histograma,
+sobre todo en las colas. Es donde se distingue si el problema son unos pocos
+valores extremos o la forma completa, y esa diferencia decide si alcanza con
+recortar o hay que cambiar de método.
+
 ## Qué muestra
 
 Los cuantiles observados de la variable contra los que tendría si fuera normal.

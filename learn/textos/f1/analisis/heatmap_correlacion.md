@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Encontrar de un vistazo qué variables sobran por redundantes y decidir si hace
+falta reducir dimensión. Es el paso previo natural al ACP: si acá no aparecen
+bloques de color, el ACP no va a tener mucho que comprimir.
+
 ## Qué muestra
 
 La matriz de correlaciones `R` pintada: una celda por par de variables, color

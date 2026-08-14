@@ -32,26 +32,32 @@ mod_objetos_ui <- function(id) {
   })
 
   bslib::layout_sidebar(
+    # Mismo trato que en piezas/fase.R, y por la misma razón: el alto lo acota
+    # el sidebar y nadie más, y fillable = FALSE deja que la tabla crezca en vez
+    # de repartirse un alto que no le alcanza.
+    fillable = FALSE,
     sidebar = bslib::sidebar(
       width = 300, title = "Sesión", open = "desktop",
-      shiny::tags$p(class = "small text-muted",
-                    paste("Todo vive en memoria. Exportá antes de cerrar la",
-                          "pestaña si querés conservarlo.")),
-      shiny::downloadButton(ns("bajar_json"), "Exportar JSON",
-                            class = "btn-sm btn-outline-primary w-100 mb-2"),
-      shiny::downloadButton(ns("bajar_rds"), "Exportar RDS",
-                            class = "btn-sm btn-outline-primary w-100 mb-3"),
-      shiny::fileInput(ns("subir"), "Importar sesión",
-                       accept = c(".json", ".rds"), buttonLabel = "Elegir"),
-      shiny::hr(),
-      plegable("¿JSON o RDS?", shiny::tags$div(
-        class = "small",
-        shiny::tags$p(shiny::tags$strong("JSON"), " viaja entre máquinas y lo",
-                      " puede leer un agente, pero pierde fidelidad: los",
-                      " objetos de ajuste no se serializan y los datasets se",
-                      " truncan a 200 filas."),
-        shiny::tags$p(class = "mb-0", shiny::tags$strong("RDS"), " conserva",
-                      " todo exactamente, pero solo lo abre R.")))
+      shiny::div(
+        style = ESTILO_CONTROLES,
+        shiny::tags$p(class = "small text-muted",
+                      paste("Todo vive en memoria. Exportá antes de cerrar la",
+                            "pestaña si querés conservarlo.")),
+        shiny::downloadButton(ns("bajar_json"), "Exportar JSON",
+                              class = "btn-sm btn-outline-primary w-100 mb-2"),
+        shiny::downloadButton(ns("bajar_rds"), "Exportar RDS",
+                              class = "btn-sm btn-outline-primary w-100 mb-3"),
+        shiny::fileInput(ns("subir"), "Importar sesión",
+                         accept = c(".json", ".rds"), buttonLabel = "Elegir"),
+        shiny::hr(),
+        plegable("¿JSON o RDS?", shiny::tags$div(
+          class = "small",
+          shiny::tags$p(shiny::tags$strong("JSON"), " viaja entre máquinas y lo",
+                        " puede leer un agente, pero pierde fidelidad: los",
+                        " objetos de ajuste no se serializan y los datasets se",
+                        " truncan a 200 filas."),
+          shiny::tags$p(class = "mb-0", shiny::tags$strong("RDS"), " conserva",
+                        " todo exactamente, pero solo lo abre R."))))
     ),
     do.call(bslib::navset_card_tab, paneles)
   )

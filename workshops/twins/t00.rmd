@@ -44,7 +44,7 @@ Importe la base de datos a R y determine el número de UE y de variables en la b
 -   La función `apply(datos,MARGIN=1,FUN=funcion_x)` aplica a cada fila (`MARGIN=1`) de la tabla `datos` la función `funcion_x`.
 
 ```{r}
-gemelos = read_csv('twins.csv',na= '.')
+gemelos = read_csv('workshops/twins/twins.csv',na= '.')
 # Numero de registros
 nrow(gemelos)
 # Numero de variables
@@ -55,8 +55,6 @@ sum(num_faltantes>=1)
 # Registros con información completa
 sum(num_faltantes==0)
 ```
-
-
 
 
 ## Pregunta 2.
@@ -99,7 +97,7 @@ bp2 = boxplot(gemelos_completo$HRWAGEH,main='Salario por hora. Gemelo 2')
 ## Pregunta 5.
 Determine las observaciones atípicas univariadas para la variables HRWAGEL y HRWAGEH usando el diagrama de caja de Tukey. ¿cuál variable presenta mayor número de atipicidades?
 
-**Ayuda**: 
+**Ayuda**:
 
  - Desde R, aplicar `$out` a la función `boxplot()` como sigue: `boxplot(variable,plot=FALSE)$out`, permite determinar las observaciones atípicas mediante el criterio de diagrama de caja de Tukey.
  

@@ -1,3 +1,10 @@
+## Para qué sirve
+
+Ver de cuánto es el desbalance y decidir si hace falta hacer algo. La
+respuesta muchas veces es que no: un 60/40 no necesita tratamiento, y
+rebalancear por costumbre estropea la calibración de las probabilidades que
+salen del modelo.
+
 ## Qué muestra
 
 Cuántas observaciones hay por clase, antes y después de rebalancear. El

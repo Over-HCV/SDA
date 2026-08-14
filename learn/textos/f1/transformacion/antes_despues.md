@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Decidir si la transformación se queda o se descarta, mirando lo que hizo en
+vez de suponerlo. Una transformación que no mejora la forma solo agrega un
+paso que después hay que deshacer para poder interpretar el resultado.
+
 ## Qué muestra
 
 La misma variable dos veces: como venía y como quedó después de aplicar la pila
@@ -7,11 +13,13 @@ escala.
 El subtítulo trae la asimetría (g₁) antes y después, que es el número que
 resume qué hizo la transformación:
 
-```
-g₁ > 0   cola a la derecha
-g₁ ≈ 0   simétrica
-g₁ < 0   cola a la izquierda
-```
+$$
+\begin{aligned}
+g_1 &> 0 && \text{cola a la derecha} \\
+g_1 &\approx 0 && \text{simétrica} \\
+g_1 &< 0 && \text{cola a la izquierda}
+\end{aligned}
+$$
 
 ## Qué buscar
 

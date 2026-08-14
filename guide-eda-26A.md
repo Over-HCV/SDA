@@ -110,13 +110,13 @@ De acuerdo con los propósitos de formación establecidos en el programa, se esp
 
 ## 8. Actividades de evaluación
 
-| Tema | Actividad de evaluación | Porcentaje | Fecha |
-| --- | --- | --- | --- |
-| 1, 2 | Taller 0 | 0 % | Sesión 1 |
-| 1, 2 | Taller 1 | 25 % | Sesión 3 |
-| 3, 4, 5 | Taller 2 | 25 % | Sesión 5 |
-| 6, 7, 8 | Taller 3 | 25 % | Sesión 7 |
-| Todos | Proyecto aplicado | 25 % | Sesión 8 |
+| Tema    | Actividad de evaluación | Porcentaje | Fecha    |
+| ------- | ----------------------- | ---------- | -------- |
+| 1, 2    | Taller 0                | 0 %        | Sesión 1 |
+| 1, 2    | Taller 1                | 25 %       | Sesión 3 |
+| 3, 4, 5 | Taller 2                | 25 %       | Sesión 5 |
+| 6, 7, 8 | Taller 3                | 25 %       | Sesión 7 |
+| Todos   | Proyecto aplicado       | 25 %       | Sesión 8 |
 
 ---
 

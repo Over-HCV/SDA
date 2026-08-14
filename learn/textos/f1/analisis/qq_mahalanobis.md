@@ -1,11 +1,18 @@
+## Para qué sirve
+
+Decidir si la nube entera se comporta como una normal multivariada, no solo
+cada variable por separado. Cada variable puede pasar su propio Q-Q y la
+conjunta fallar igual: es el chequeo que corresponde antes de cualquier método
+basado en la matriz de covarianzas.
+
 ## Qué muestra
 
 El Q-Q normal, pero para todas las variables a la vez. En lugar de un valor por
 observación se usa su distancia de Mahalanobis al centro de la nube:
 
-```
-d²(x) = (x − x̄)ᵀ S⁻¹ (x − x̄)
-```
+$$
+d^2(x) = (x - \bar{x})^{\mathsf{T}}\, S^{-1}\, (x - \bar{x})
+$$
 
 La covarianza inversa es lo que la distingue de la distancia euclídea: divide
 por la forma de la nube, así que una unidad cuenta más en las direcciones donde

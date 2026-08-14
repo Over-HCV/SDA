@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Decidir si el resultado se puede usar. Un optimizador que no convergió
+devuelve números igual, con la misma cara que uno que sí: esta es la card que
+hay que mirar antes de creerle a cualquier otra de la fase.
+
 ## Qué muestra
 
 El valor de la función objetivo en cada iteración del optimizador. Es el

@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Decidir si dos variables tienen relación, y de qué tipo, antes de resumirla en
+un coeficiente. Todo lo que venga después —correlación, regresión— da por
+hecha una forma; acá se comprueba que esa forma existe.
+
 ## Qué muestra
 
 Cada observación como un punto en el plano de dos variables. Es el gráfico más

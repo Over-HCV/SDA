@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Comparar posición y dispersión de un vistazo, y decidir qué variable merece
+una mirada más detallada. Es el resumen que escala: veinte boxplots en fila se
+leen sin esfuerzo; veinte histogramas, no.
+
 ## Qué muestra
 
 El resumen de cinco números: mínimo dentro de la cerca, primer cuartil,
@@ -7,9 +13,11 @@ que encierra el 50 % central de los datos, y la línea de adentro es la mediana.
 Los bigotes llegan hasta la observación más lejana que todavía cae dentro de
 1,5 veces el rango intercuartílico:
 
-```
-cerca inferior = Q1 − 1.5·RIC        cerca superior = Q3 + 1.5·RIC
-```
+$$
+\text{cerca inferior} = Q_1 - 1{,}5 \cdot \text{RIC}
+\qquad
+\text{cerca superior} = Q_3 + 1{,}5 \cdot \text{RIC}
+$$
 
 Lo que queda afuera se dibuja punto por punto. Son los **atípicos de Tukey**, y
 son una convención, no un diagnóstico.

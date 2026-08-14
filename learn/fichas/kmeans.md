@@ -6,9 +6,9 @@ centroide más cercano.
 
 Lo que el algoritmo minimiza es la **inercia intra-grupo**:
 
-```
-W = Σₖ Σ_{i ∈ Cₖ} ‖xᵢ − μₖ‖²
-```
+$$
+W = \sum_{k=1}^{K} \; \sum_{i \in C_k} \lVert x_i - \mu_k \rVert^2
+$$
 
 ## Por qué es necesaria
 

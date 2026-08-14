@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Ver qué se fabricó al rebalancear, para no confundirlo con datos. Es la card
+que evita el error más caro del remuestreo: creer que ahora hay más
+información que antes, cuando lo único que hay son más filas.
+
 ## Qué muestra
 
 La nube de dos variables después de rebalancear, con las filas remuestreadas

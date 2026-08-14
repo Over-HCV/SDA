@@ -4,10 +4,12 @@ Capas de regresiones logísticas encadenadas. Cada **neurona** hace exactamente
 lo mismo que ya viste: una combinación lineal de sus entradas seguida de una
 función no lineal.
 
-```
-h  = σ(W₁ x + b₁)        capa oculta
-ŷ  = σ(W₂ h + b₂)        salida
-```
+$$
+\begin{aligned}
+h &= \sigma(W_1 x + b_1) && \text{capa oculta} \\
+\hat{y} &= \sigma(W_2 h + b_2) && \text{salida}
+\end{aligned}
+$$
 
 Lo único nuevo respecto a la regresión logística es la línea del medio: una
 **capa oculta** que fabrica variables intermedias en vez de usar las originales.

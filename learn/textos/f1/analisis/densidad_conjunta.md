@@ -1,3 +1,9 @@
+## Para qué sirve
+
+Ver dónde se concentra la masa cuando hay tantos puntos que la dispersión se
+vuelve una mancha. Es el reemplazo natural de la dispersión con decenas de
+miles de filas, donde el solapamiento esconde justo lo que interesa.
+
 ## Qué muestra
 
 La densidad estimada de las dos variables a la vez: el color es cuánta masa hay

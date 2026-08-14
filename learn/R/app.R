@@ -34,6 +34,11 @@ ui <- bslib::page_navbar(
   navbar_options = bslib::navbar_options(bg = "#0B1623", type = "dark"),
   fillable = FALSE,
 
+  # KaTeX, una vez para toda la app. No pinta nada por sí sola: engancha el JS
+  # y el CSS que convierten en matemáticas los nodos que deja
+  # R/nucleo/formulas.R. Ver R/ui/piezas/formulas.R.
+  header = dependencia_formulas(),
+
   bslib::nav_panel("Inicio", icon = bsicons::bs_icon("house"),
                    mod_inicio_ui("inicio")),
   bslib::nav_panel("① Datos",      mod_datos_ui("datos")),

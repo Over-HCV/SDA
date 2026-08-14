@@ -149,6 +149,50 @@ probar("cobertura_textos cuenta los esperados",
        cobertura_textos()$textos_esperados == length(claves_artefactos()))
 
 # ---------------------------------------------------------------------------
+cat("\n[bloques de texto]\n")
+probar("bloques_md parte por encabezado de nivel 2",
+       identical(names(bloques_md("## Uno\n\na\n\n## Dos\n\nb")),
+                 c("Uno", "Dos")))
+probar("un ## dentro de una valla no es encabezado",
+       identical(names(bloques_md("## Uno\n\n```\n## falso\n```\n\n## Dos\n\nb")),
+                 c("Uno", "Dos")))
+probar("un .md sin encabezados no se pierde",
+       identical(unname(bloques_md("suelto")), list("suelto")))
+probar("el sello no repite lo que dice el pie",
+       !grepl("Para qu", texto("f1.fuente.vista_previa"), fixed = TRUE))
+probar("el sello trae el bloque de utilidad",
+       grepl("Atrapar el desastre", texto_bloque("f1.fuente.vista_previa"),
+             fixed = TRUE))
+probar("un bloque que falta avisa y no falla",
+       grepl("Falta el bloque", texto_bloque("f4.desempeno.roc"), fixed = TRUE))
+
+# ---------------------------------------------------------------------------
+cat("\n[formulas]\n")
+# La aserción que importa: CommonMark se come `\\`, que es el separador de
+# filas de una matriz. Si esto falla, las matrices llegan rotas al navegador
+# sin que nada avise (ver R/nucleo/formulas.R).
+.MATRIZ <- "$$\n\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}\n$$"
+probar("la barra doble de una matriz sobrevive a markdown",
+       grepl("\\\\ c ", md_a_html(.MATRIZ), fixed = TRUE))
+# El & del alineador se escapa a &amp; porque va dentro de HTML; el navegador
+# lo devuelve a & al leer textContent, que es lo que recibe KaTeX.
+probar("el alineador & viaja escapado y entero",
+       grepl("a &amp; b", md_a_html(.MATRIZ), fixed = TRUE))
+probar("una formula de bloque sale como div, no dentro de un p",
+       grepl("<div class=\"formula-bloque\">", md_a_html(.MATRIZ), fixed = TRUE))
+probar("una formula en linea sale como span",
+       grepl("<span class=\"formula-linea\">\\alpha</span>",
+             md_a_html("vale $\\alpha$ acá"), fixed = TRUE))
+probar("el subrayado de un subindice no se vuelve enfasis",
+       grepl("x_i", md_a_html("es $x_i + y_i$ acá"), fixed = TRUE))
+probar("un precio no es una formula",
+       !grepl("formula-linea", md_a_html("cuesta $ 5 y $ 8"), fixed = TRUE))
+probar("un texto sin formulas pasa igual que antes",
+       identical(md_a_html("## Uno\n\nsimple"),
+                 commonmark::markdown_html("## Uno\n\nsimple",
+                                           extensions = TRUE, smart = TRUE)))
+
+# ---------------------------------------------------------------------------
 cat("\n[exportadores]\n")
 directorio <- file.path(tempdir(), "sda-pruebas")
 dir.create(directorio, showWarnings = FALSE, recursive = TRUE)
