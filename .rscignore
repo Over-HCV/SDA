@@ -1,0 +1,29 @@
+# Qué NO viaja al servidor cuando se despliega con rsconnect.
+#
+# El repo pesa ~300 MB y la app usa una fracción: learn/, libs/_comun/ y
+# data/. Sin este archivo el manifiesto listaría los cuadernos de notes/ (y
+# arrastraría tidyverse, plotly y GGally como dependencias, que la app no usa).
+
+notes
+projects
+workshops
+anlopez
+software
+renv
+.git
+.github
+.quarto
+
+# De libs/ solo se necesita _comun/.
+libs/quarto
+libs/shiny
+libs/shiny-live
+
+# Generados: se reconstruyen, no se despliegan.
+learn/docs
+learn/outputs
+learn/.build
+
+# Herramientas de desarrollo, no de ejecución.
+learn/R/pruebas
+learn/R/mapa.R

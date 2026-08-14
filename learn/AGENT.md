@@ -95,6 +95,9 @@ Rscript -e 'shiny::runApp("learn/R/app.R", launch.browser = TRUE)'
 # Regenerate the artifact index
 Rscript learn/R/mapa.R
 
+# Server deploy manifest (Posit Connect Cloud). Entry point is the ROOT app.R.
+Rscript -e 'source("learn/manifiesto.R"); escribir_manifiesto()'
+
 # wasm bundle
 Rscript -e 'source("learn/build.R"); construir_bundle()'
 python3 -m http.server 8000 --directory learn/docs
@@ -154,10 +157,16 @@ Every one of these was hit while building Hito 1. They cost real time.
   with "app.R did not return a shiny.appobj".
 - **The bundle only contains the staged directory.** `data/`, `libs/_comun/`
   and the root marker must be copied in, or the root finder walks to `/`.
-- **`data/twins.csv` does not exist at the repo root**; it is at
-  `workshops/twins/twins.csv`. Since Hito 2 `twins_path()` in
-  `libs/_comun/R/datos.R` probes both locations, and `libs/shiny-live/build.R`
-  copies it by name instead of hard-coding `data/`.
+- **`twins.csv` used to live only in `workshops/twins/`.** It is now also in
+  `data/` (the deploy mirror needs it there), and `twins_path()` probes both.
+  Keep them in sync or drop the workshop copy.
+- **`rsconnect::writeManifest(".")` reads `renv.lock` and ships all 111
+  packages.** The lockfile is repo-wide (S3). `learn/manifiesto.R` builds a
+  mirror without a lockfile so dependencies are inferred from the code that the
+  app actually loads — 60 with transitive deps instead of 111.
+- **Connect Cloud needs `manifest.json` at the repo root**, and its `Primary
+  file` is the root `app.R`, not `learn/R/app.R`. Regenerate the manifest
+  whenever the app's `library()` calls change.
 - **`font_google()` hangs in webR** (needs network and a disk cache). Use
   `tema_seguro()` from `R/nucleo/tema_app.R`, never `tema()` directly.
 

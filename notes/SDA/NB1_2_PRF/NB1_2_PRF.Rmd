@@ -25,7 +25,7 @@ Vamos a cargar nuevamente los datos de la sesión pasada:
 
 ```{r}
 library(tidyverse)
-data_charcoal  = read_csv("UNdata_Charcoal.csv",show_col_types = FALSE)
+data_charcoal  = read_csv("data/charcoal.csv",show_col_types = FALSE)
 charcoal_chh19 = data_charcoal %>% 
                  filter(Year==2019 & Commodity=="Charcoal - Consumption by households") %>% 
                  select(-Commodity)

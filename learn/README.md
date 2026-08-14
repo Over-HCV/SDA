@@ -64,6 +64,35 @@ Rscript -e 'source("learn/build.R"); construir_bundle()'
 python3 -m http.server 8000 --directory learn/docs
 ```
 
+### En navegador (wasm) — GitHub Pages
+
+`.github/workflows/pages.yml` reconstruye el bundle en cada push a `main` que
+toque `learn/`, `libs/_comun/` o `data/`, y lo publica. Requiere un ajuste
+manual una sola vez: **Settings → Pages → Build and deployment → Source =
+GitHub Actions** (en el repo, no en los ajustes de la cuenta).
+
+### En servidor (R completo) — Posit Connect Cloud
+
+El punto de entrada es el `app.R` de la **raíz** del repo, que solo hace
+`source("learn/R/app.R")$value`. Vive ahí porque la app usa `data/` y
+`libs/_comun/`, que se comparten con `notes/`, `workshops/` y `projects/`:
+moverlas dentro de `learn/` las duplicaría. Al desplegar desde git, el servidor
+clona el repositorio entero y las encuentra donde siempre.
+
+Connect Cloud exige un `manifest.json` con las dependencias de R. Se regenera
+—y hay que volver a generarlo cuando cambien las librerías que usa la app— con:
+
+```bash
+Rscript -e 'source("learn/manifiesto.R"); escribir_manifiesto()'
+```
+
+No se corre `rsconnect::writeManifest(".")` directo: rsconnect leería
+`renv.lock`, que es único para todo el repo y trae 111 paquetes (tidyverse,
+plotly, chromote…). El script lo genera contra un espejo con solo lo que la app
+toca, y quedan 60 con sus dependencias transitivas.
+
+En el formulario de Connect Cloud: **Primary file = `app.R`**.
+
 Los métodos que no compilan a WebAssembly (`brms`, `torch`, …) siguen visibles
 en el catálogo, con su ficha y su explicación, pero sin botón de ejecutar.
 

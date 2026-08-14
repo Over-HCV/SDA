@@ -97,7 +97,7 @@ Para el desarrollo del siguiente cuaderno, se trabaja con una colección de dato
 Se definen los datos de consumo de carbón en hogares (`charcoal_chh19`) y de producción de carbón (`charcoal_prd19`) para el año 2019:
 
 ``` r
-data_charcoal  = read_csv("UNdata_Charcoal.csv",show_col_types = FALSE)
+data_charcoal  = read_csv("data/charcoal.csv",show_col_types = FALSE)
 charcoal_chh19 = data_charcoal %>% 
                  filter(Year==2019 & Commodity=="Charcoal - Consumption by households") %>% 
                  select(-Commodity)
