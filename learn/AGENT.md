@@ -20,9 +20,9 @@ The user pastes a **context block** produced by the app. It looks like this:
 ```
 ### Contexto SDA Lab
 clave    : f4.desempeno.roc
-grafico  : learn/graficos/g_desempeno.R::graficar_roc()
-logica   : learn/logica/metricas_clasificacion.R::metricas_clasificacion()
-texto    : learn/textos/f4.desempeno.roc.md
+grafico  : learn/R/graficos/desempeno.R::graficar_roc
+logica   : learn/R/logica/metricas_clasificacion.R::calcular_roc
+texto    : learn/textos/f4/desempeno/roc.md
 corrida  : c12 = dataset d3 x modelo m5 x receta r1
 params   : {...}
 metricas : {...}

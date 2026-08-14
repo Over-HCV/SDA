@@ -228,8 +228,8 @@ registrada junto a sus rutas:
 registrar_artefacto(
   clave   = "f4.desempeno.roc",
   titulo  = "Curva ROC",
-  grafico = "graficos/g_desempeno.R::graficar_roc",
-  logica  = "logica/metricas_clasificacion.R::calcular_roc",
+  grafico = "R/graficos/desempeno.R::graficar_roc",
+  logica  = "R/logica/metricas_clasificacion.R::calcular_roc",
   descripcion = "Sensibilidad frente a 1 − especificidad al barrer el umbral.")
 ```
 
@@ -384,7 +384,7 @@ trampa del gráfico:
 | **Multivariado** | matriz de dispersión · mapa de calor de `R` (con reordenamiento) · coordenadas paralelas · elipsoide de concentración · Q–Q de distancias de Mahalanobis · superficie de densidad bivariada 3D | multi-select de variables; el elipsoide se deforma con la correlación |
 
 Cada gráfico lleva su plegable con la estructura fija **qué muestra · qué
-buscar · cuándo engaña**. Los textos viven en `learn/textos/<clave>.md`, uno por
+buscar · cuándo engaña**. Los textos viven en `learn/textos/<fase>/<subseccion>/<artefacto>.md`, uno por
 artefacto, y se escriben incrementalmente: si falta el archivo, la UI lo avisa
 en gris y no falla. Son 71 y llevan tiempo; la cobertura se ve en el Inicio y en
 `MAPA.md`.

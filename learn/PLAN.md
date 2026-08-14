@@ -63,7 +63,8 @@ Codifica C4, C5 y C7 una sola vez, para que ninguna vista las reinvente.
 - [x] `R/ui/ficha.R` — ficha desde `fichas/<clave>.md`, con "el puente" si está bloqueada
 - [x] `R/ui/formulario.R` — `hiper{}` → widgets, `valores_hiper()`, `hiper_por_defecto()`
 - [x] `fichas/acp.md`, `fichas/kmeans.md`, `fichas/mlp.md` (bloqueada)
-- [x] `textos/f1.analisis.histograma.md`, `textos/f3.analisis.convergencia.md`
+- [x] `textos/f1/analisis/histograma.md`, `textos/f3/analisis/convergencia.md`
+      (rutas del Hito 2; en el Hito 1 eran planas)
 
 > Completado el 2026-08-13. Sin LaTeX en los textos: `commonmark` no renderiza
 > matemáticas y MathJax exigiría red y JavaScript propio. Notación en Unicode,

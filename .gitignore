@@ -31,6 +31,9 @@ renv/sandbox/
 renv/staging/
 
 # ── Shiny ──
+# rsconnect/ son los registros locales de despliegue (credenciales incluidas).
+# OJO: manifest.json, app.R y .rscignore de la raíz SÍ se versionan — son lo
+# que Posit Connect Cloud lee para publicar desde GitHub.
 rsconnect/
 */shinylive/
 */shinybookmarks
@@ -48,8 +51,8 @@ libs/shiny-live/R/shiny_bookmarks/**
 # El bundle se reconstruye con:
 #   Rscript -e 'source("learn/build.R"); construir_bundle()'
 # app.json pesa ~3 MB y cambia entero en cada build, así que versionarlo
-# engorda el historial rápido. Para publicar en GitHub Pages: o una Action que
-# lo construya, o un `git add -f learn/docs` deliberado.
+# engorda el historial rápido. Se publica desde .github/workflows/pages.yml,
+# que lo construye y lo sube como artefacto de Pages: nunca entra a git.
 learn/docs/
 learn/outputs/
 learn/.build/

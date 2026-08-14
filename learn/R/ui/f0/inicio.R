@@ -72,8 +72,8 @@ mod_inicio_server <- function(id, almacen) {
         shiny::tags$li("Abrí la ficha de ", shiny::tags$code("mlp"),
                        " (bloqueado) y leé el puente: conecta un método",
                        " inalcanzable con uno que sí corre acá."),
-        shiny::tags$li("Las fases 1, 3 y 4 ya se navegan, pero todavía no",
-                       " calculan. El avance está en ",
+        shiny::tags$li("Fases 1, 3 y 4 navegables, todavía no",
+                       " calculan. Avance está en ",
                        shiny::tags$code("learn/PLAN.md"), ".")
       )
     })
