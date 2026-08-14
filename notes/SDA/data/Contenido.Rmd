@@ -1,0 +1,50 @@
+---
+title: "Análisis Estadístico de Datos"
+author: "Profesor: Nicolás López"
+output:
+  rmdformats::downcute
+---
+
+<br>
+
+**Resumen** 
+
+El estudio de fenómenos reales requiere considerar múltiples variables y sus posibles relaciones. Considerar múltiples variables o dimensiones suele ser una tarea difícil, así como extraer información útil de estos conjuntos de datos multidimensionales. Este curso presenta un conjunto de herramientas estadísticas para analizar datos multidimensionales y construir modelos con aplicación en un amplio espectro de áreas. El curso iniciará con un resumen de los fundamentos univariados del análisis de datos, junto a las bases del análisis multidimensional y la distribución normal multivariada. Luego se concentrará en la inferencia del vector de medias y el modelo de regresión múltiple. La reducción de dimensionalidad es el siguiente tema, seguido del análisis de correlaciones y métodos de clasificación y agrupamiento. 
+
+<br>
+
+**Introducción**
+
+- [Laboratorios de programación](https://anlopezl.github.io/files/AED/Laboratorios.html)
+- [Canal de youtube](https://www.youtube.com/@SimpleEstad%C3%ADstica)
+
+**Clases**
+
+- Capítulo 1.1: Herramientas estadísticas básicas. Parte 1
+  - [Diapositivas de clase](https://anlopezl.github.io/files/AED/SL_1_1.pdf)
+  - [Cuaderno estudiante](https://anlopezl.github.io/files/AED/NB1_1_EST.html)
+  - [Cuaderno profesor](https://anlopezl.github.io/files/AED/NB1_1_PRF.html)
+- Capítulo 1.2: Herramientas estadísticas básicas. Parte 2
+  - [Diapositivas de clase](https://anlopezl.github.io/files/AED/SL_1_2.pdf)
+  - [Cuaderno estudiante](https://anlopezl.github.io/files/AED/NB1_2_EST.html)
+  - [Cuaderno profesor](https://anlopezl.github.io/files/AED/NB1_2_PRF.html)
+- Capítulo 2: Introducción normal multivariada y visualización.
+  - [Diapositivas de clase](https://anlopezl.github.io/files/AED/SL_2.pdf)
+  - [Cuaderno estudiante](https://anlopezl.github.io/files/AED/NB2_EST.html)
+  - [Cuaderno profesor](https://anlopezl.github.io/files/AED/NB2_PRF.html)
+- Capítulo 3: Análisis de componentes principales.
+  - [Diapositivas de clase](https://anlopezl.github.io/files/AED/SL_3.pdf)
+  - [Cuaderno estudiante](https://anlopezl.github.io/files/AED/NB3.html)
+
+
+**Clases futuras (work in progress)**
+
+- Capítulo 4: Clustering.
+  - [Cuaderno estudiante](https://anlopezl.github.io/files/AED/NB4_EST.html)
+  - [Cuaderno profesor](https://anlopezl.github.io/files/AED/NB4_PRF.html)
+- Capítulo 5: Regresión lineal en múltiples variables.
+  - [Cuaderno estudiante](https://anlopezl.github.io/files/AED/NB5_EST.html)
+  - [Cuaderno profesor](https://anlopezl.github.io/files/AED/NB5_PRF.html)
+- Capítulo 6: ANOVA.
+  - [Cuaderno estudiante](https://anlopezl.github.io/files/AED/NB6_EST.html)
+  - [Cuaderno profesor](https://anlopezl.github.io/files/AED/NB6_PRF.html)

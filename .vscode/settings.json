@@ -1,0 +1,41 @@
+{
+  "//": "Config VS Code para el proyecto SDA — R (radian + LSP) + Quarto.",
+
+  "r.rterm.mac": "/opt/homebrew/bin/radian",
+  "r.rterm.option": ["--no-save", "--no-restore", "--no-history"],
+  "r.rterm.bracketed.paste": true,
+  "r.editor.maxConsoleLines": 10000,
+
+  "r.lsp.enabled": true,
+  "r.lsp.debug": false,
+  "r.lsp.diagnostics": true,
+  "r.lsp.use_stdio": true,
+
+  "r.plot.useHttpgd": true,
+  "r.plot.defaults.colorTheme": "vscode",
+
+  "r.workspaceWatcher.onLoad": true,
+  "r.livePreview": true,
+  "r.source.encoding": "UTF-8",
+  "r.session.levelSessionWatcher": true,
+
+  "quarto.render.preview": true,
+  "quarto.render.previewType": "internal",
+  "quarto.mathjax.enable": true,
+
+  "[r]": {
+    "editor.wordSeparators": "|",
+    "editor.formatOnPaste": true
+  },
+
+  "[quarto]": {
+    "editor.wordWrap": "on"
+  },
+
+  "files.exclude": {
+    "**/.Rproj.user": true,
+    "**/.Rhistory": true,
+    "**/renv/library": true,
+    "**/renv/staging": true
+  }
+}

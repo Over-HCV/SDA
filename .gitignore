@@ -1,0 +1,70 @@
+# ─────────────────────────────────────────────────────────────
+# SDA — .gitignore raíz
+# Multi-motor: renv (R) · Shiny · Shinylive · Quarto (qmd/rmd) · Python · LaTeX
+# Estrategia aditiva: los .gitignore anidados (anlopez/, libs/shiny-live/,
+# renv/) se mantienen y especializan; este archivo cubre patrones GLOBALES.
+#
+# Se versiona (NO ignorar): .Rprofile, renv.lock, .vscode/
+# ─────────────────────────────────────────────────────────────
+
+# ── SO ──
+.DS_Store
+Thumbs.db
+
+# ── Temporales del repo ──
+.temp/
+
+# ── R / RStudio ──
+.Rhistory
+.Rapp.history
+.RData
+.Rproj.user/
+*.Rproj
+
+# ── renv  (refuerzo; fuente de verdad: renv/.gitignore) ──
+renv/library/
+renv/local/
+renv/cellar/
+renv/lock/
+renv/python/
+renv/sandbox/
+renv/staging/
+
+# ── Shiny ──
+rsconnect/
+*/shinylive/
+*/shinybookmarks
+libs/shiny/R/shiny_bookmarks/*
+
+# ── Shinylive  (bundle webR + staging; ver libs/shiny-live/.gitignore) ──
+.build/
+
+# ── Quarto / Rmarkdown ──
+.quarto/
+*_cache/
+*_files/
+_probe_files/
+# HTML renderado (salida de qmd/rmd). Si algún día escribís HTML a mano,
+# negatealo con !ruta/al.html
+*.html
+
+# ── Artefactos de corridas (todos los motores) ──
+outputs/
+
+# ── Python (anlopez/) ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ── LaTeX (projects/final) ──
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz

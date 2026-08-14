@@ -1,0 +1,231 @@
+---
+title: "SDA · PCA + Clustering"
+subtitle: "Proyecto 2 — Quarto + Observable JS · charcoal y twins precomputados en R"
+format:
+  dashboard:
+    orientation: rows
+    scrolling: true
+    theme: cosmo
+execute:
+  warning: false
+  cache: true
+---
+
+```{r}
+#| include: false
+#| cache: false
+source("R/_bootstrap.R")
+bootstrap_quarto()
+precomputo()  # idempotente: si ya existen los CSVs, no regenera
+charcoal_pca      <- read.csv("outputs/charcoal_pca.csv")
+charcoal_clusters <- read.csv("outputs/charcoal_clusters.csv")
+charcoal_var      <- read.csv("outputs/charcoal_var.csv")
+charcoal_rot      <- read.csv("outputs/charcoal_rotation.csv")
+charcoal_codo     <- read.csv("outputs/charcoal_codo.csv")
+twins_pca         <- read.csv("outputs/twins_pca.csv")
+twins_clusters    <- read.csv("outputs/twins_clusters.csv")
+twins_var         <- read.csv("outputs/twins_var.csv")
+twins_rot         <- read.csv("outputs/twins_rotation.csv")
+twins_codo        <- read.csv("outputs/twins_codo.csv")
+ojs_define(charcoal_pca, charcoal_clusters, charcoal_var, charcoal_rot, charcoal_codo,
+           twins_pca, twins_clusters, twins_var, twins_rot, twins_codo)
+```
+
+# Visión general
+
+```{ojs}
+// --- Dataset activo (cambia todo lo de abajo) ---
+// NOTA: ojs_define() serializa data.frames como object-of-arrays;
+// transpose() los convierte a array-of-objects (lo que Plot espera).
+viewof dataset = Inputs.select(["charcoal", "twins"], {label: "Dataset"})
+
+pca_all      = transpose(dataset === "charcoal" ? charcoal_pca      : twins_pca)
+clusters_all = transpose(dataset === "charcoal" ? charcoal_clusters : twins_clusters)
+var_all      = transpose(dataset === "charcoal" ? charcoal_var      : twins_var)
+rot_all      = transpose(dataset === "charcoal" ? charcoal_rot      : twins_rot)
+codo_all     = transpose(dataset === "charcoal" ? charcoal_codo     : twins_codo)
+obs_nombres  = pca_all.map(d => d.obs)
+```
+
+```{ojs}
+// --- Controles globales (showcase de Inputs) ---
+viewof k          = Inputs.range([2, 10], {step: 1, value: 4, label: "k (clústeres)"})
+viewof pc_x       = Inputs.select(["PC1","PC2","PC3","PC4"], {value: "PC1", label: "Eje X"})
+viewof pc_y       = Inputs.select(["PC1","PC2","PC3","PC4"], {value: "PC2", label: "Eje Y"})
+viewof show_label = Inputs.toggle({label: "Etiquetas en biplot", checked: true})
+viewof opacity    = Inputs.range([0.2, 1], {step: 0.05, value: 0.7, label: "Opacidad"})
+viewof color_by   = Inputs.radio(["cluster", "variable continua"], {label: "Color por", value: "cluster"})
+// OJO: Inputs.search(data) NO devuelve el texto buscado, devuelve el
+// SUBCONJUNTO FILTRADO de `data` (un Array). Por eso `highlight.trim()` en la
+// celda de abajo reventaba con "highlight.trim is not a function".
+// Para un string se usa Inputs.text().
+viewof highlight  = Inputs.text({label: "Filtrar por nombre", placeholder: "Escribe…"})
+viewof bins       = Inputs.range([5, 50], {step: 1, value: 20, label: "Bins histograma"})
+// NOTA: Inputs.selection() no existe en @observablehq/inputs 0.10.6 (llegó en 0.10.7).
+// Sustituto: Inputs.select({multiple:true}) → devuelve Array (no Set).
+viewof pais_sel   = Inputs.select(obs_nombres, {label: "Selección (multi)", multiple: true, size: 7})
+viewof accent     = Inputs.color({label: "Color de acento", value: "#0072B2"})
+```
+
+```{ojs}
+// --- Crossfilter: pais_sel (Array de obs) + highlight (texto) → obs visibles ---
+// Convención: si pais_sel está vacío, se muestran todas las observaciones.
+obs_visibles = {
+  const por_pais = new Set(pais_sel);
+  const filtro_activo = pais_sel.length > 0;
+  const q = highlight.trim().toLowerCase();
+  return obs_nombres.filter(n =>
+    (!filtro_activo || por_pais.has(n)) && (q === "" || n.toLowerCase().includes(q))
+  );
+}
+
+pca_filtrada = pca_all.filter(d => obs_visibles.includes(d.obs))
+clusters_k   = clusters_all.filter(d => d.k === k && obs_visibles.includes(d.obs))
+cluster_de   = new Map(clusters_k.map(d => [d.obs, d.cluster]))
+n_visibles   = obs_visibles.length
+n_total      = obs_nombres.length
+```
+
+## Varianza explicada {scroller-height="280px"}
+
+```{ojs}
+md`**Dataset activo:** ${dataset} · **obs visibles:** ${n_visibles}/${n_total} · **var PC1+PC2:** ${(var_all[0].var_pct + var_all[1].var_pct).toFixed(1)}%`
+```
+
+```{ojs}
+// Scree: barras (var_pct) + línea acumulada (cum_pct)
+Plot.plot({
+  height: 280,
+  x: {label: "Componente"},
+  y: {label: "Varianza (%)", domain: [0, 100]},
+  marks: [
+    Plot.barY(var_all, {x: "PC", y: "var_pct", fill: accent, fillOpacity: 0.55}),
+    Plot.lineY(var_all, {x: "PC", y: "cum_pct", stroke: "#D55E00", strokeWidth: 2}),
+    Plot.ruleY([0]),
+    Plot.text(var_all, {x: "PC", y: "cum_pct", dx: 10, dy: -6,
+      text: d => d.cum_pct.toFixed(0) + "%", fill: "#D55E00", fontSize: 9})
+  ]
+})
+```
+
+# PCA
+
+## Biplot `${pc_x}` × `${pc_y}` {height="55%"}
+
+```{ojs}
+// Biplot: puntos (obs) + flechas (cargas de rotación)
+Plot.plot({
+  height: 480,
+  x: {label: pc_x, grid: true},
+  y: {label: pc_y, grid: true},
+  marks: [
+    Plot.arrow(rot_all, {
+      x1: 0, y1: 0, x2: d => d[pc_x], y2: d => d[pc_y],
+      stroke: "#D55E00", strokeOpacity: 0.65, strokeWidth: 1.5
+    }),
+    Plot.text(rot_all, {
+      x: d => d[pc_x] * 1.12, y: d => d[pc_y] * 1.12,
+      text: "variable", fill: "#D55E00", fontSize: 9
+    }),
+    Plot.dot(pca_filtrada, {
+      x: pc_x, y: pc_y,
+      fill: color_by === "cluster" ? d => "clúster " + cluster_de.get(d.obs) : accent,
+      fillOpacity: opacity, stroke: "white", strokeWidth: 0.5,
+      title: d => `${d.obs} · clúster ${cluster_de.get(d.obs) ?? "?"}`
+    }),
+    ...(show_label
+      ? [Plot.text(pca_filtrada, {x: pc_x, y: pc_y, text: "obs",
+          fontSize: 8, dx: 4, fill: "grey30"})]
+      : [])
+  ]
+})
+```
+
+## Heatmap obs × PC {height="45%"}
+
+```{ojs}
+// Heatmap de scores: filtra los PCs visibles al rango dinámico
+pca_long = pca_filtrada.flatMap(d =>
+  ["PC1","PC2","PC3","PC4"].map(pc => ({obs: d.obs, PC: pc, valor: d[pc]}))
+)
+
+Plot.plot({
+  height: 360,
+  marginTop: 50, marginBottom: 50,
+  x: {label: "Componente"},
+  y: {label: "Observación", domain: obs_visibles.reverse()},
+  color: {scheme: "RdBu", reverse: true, legend: true},
+  marks: [Plot.cell(pca_long, {x: "PC", y: "obs", fill: "valor"})]
+})
+```
+
+# Clústeres
+
+## Curva del codo {height="40%"}
+
+```{ojs}
+// tot.withinss vs k (para elegir k)
+Plot.plot({
+  height: 260,
+  x: {label: "k (nº de clústeres)", domain: codo_all.map(d => d.k)},
+  y: {label: "tot.withinss"},
+  marks: [
+    Plot.line(codo_all, {x: "k", y: "tot_withinss", stroke: accent, strokeWidth: 2}),
+    Plot.dot(codo_all, {x: "k", y: "tot_withinss", fill: accent, r: 5}),
+    Plot.ruleX([k], {stroke: "#D55E00", strokeDasharray: "4 4"})
+  ]
+})
+```
+
+## Histograma de PC1 (bins = `${bins}`) {height="60%"}
+
+```{ojs}
+Plot.plot({
+  height: 340,
+  x: {label: "PC1"},
+  y: {label: "Frecuencia"},
+  marks: [
+    Plot.rectY(pca_filtrada, Plot.binX({y: "count"}, {x: "PC1", thresholds: bins})),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+# Datos
+
+## Tabla cruzada (filtrada por selección y búsqueda)
+
+```{ojs}
+// Inputs.table con columnas derivadas (obs + PC1..PC4 + clúster a k actual)
+tabla_view = pca_filtrada.map(d => ({
+  obs: d.obs,
+  PC1: d.PC1.toFixed(3),
+  PC2: d.PC2.toFixed(3),
+  PC3: d.PC3.toFixed(3),
+  PC4: d.PC4.toFixed(3),
+  cluster: cluster_de.get(d.obs) ?? "—"
+}))
+
+Inputs.table(tabla_view, {
+  sort: "obs",
+  reverse: false,
+  required: false,
+  label: `${n_visibles} de ${n_total} observaciones (${dataset}, k=${k})`
+})
+```
+
+## Filtrado activo
+
+```{ojs}
+md`
+**Resumen del crossfilter**
+
+- **Dataset:** \`${dataset}\`
+- **Selección explícita (pais_sel):** ${pais_sel.length} obs
+- **Texto buscado (highlight):** \`${highlight || "—"}\`
+- **Obs visibles finales:** **${n_visibles}** / ${n_total}
+
+El crossfilter \`pais_sel\` afecta a la vez al **biplot**, a la **tabla** y al **heatmap**.
+Cambia \`viewof dataset\` arriba para saltar entre charcoal y twins: todo se recompute en el navegador, sin backend.
+`
+```

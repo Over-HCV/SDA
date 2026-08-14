@@ -1,0 +1,44 @@
+// libs/_comun/scss/custom.scss
+//
+// Tus reglas propias. Se compila DESPUES de retro.scss, asi que lo que
+// escribas aca gana sobre el look 8-bit.
+//
+// Podes usar cualquier variable Sass de Bootstrap 5 directamente:
+//   $primary $secondary $success $info $warning $danger
+//   $body-bg $body-color $card-bg $border-color
+//   $font-family-base $font-size-base $spacer
+//
+// Y las funciones de Bootstrap:
+//   color-contrast($primary)   -> blanco o negro segun contraste
+//   tint-color($primary, 20%)  -> aclarar
+//   shade-color($primary, 20%) -> oscurecer
+//
+// Flujo recomendado para descubrir que tocar:
+//   1. Levanta la app en modo debug (trae el widget bs_themer):
+//        Rscript -e 'shiny::runApp("libs/galeria/R/app.R")'   # boton "Personalizar tema"
+//   2. Mueve los controles del widget hasta que te guste.
+//   3. El widget imprime en la CONSOLA de R el codigo bs_theme() equivalente.
+//   4. Pega los colores/variables en temas_bslib.R, y el CSS fino aca.
+
+// ---------------------------------------------------------------------------
+// Ejemplo (comentado): franja de scanlines tipo CRT sobre el fondo.
+// Descomentar para probar.
+// ---------------------------------------------------------------------------
+// body::after {
+//   content: "";
+//   position: fixed;
+//   inset: 0;
+//   pointer-events: none;
+//   z-index: 9999;
+//   background: repeating-linear-gradient(
+//     to bottom,
+//     rgba(0, 0, 0, 0.06) 0px,
+//     rgba(0, 0, 0, 0.06) 1px,
+//     transparent 1px,
+//     transparent 3px
+//   );
+// }
+
+// ---------------------------------------------------------------------------
+// Tus reglas debajo de esta linea.
+// ---------------------------------------------------------------------------

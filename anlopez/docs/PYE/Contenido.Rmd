@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Probabilidad y Estadística · Nicolás López</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .lang-en { display: none; }
+        
+        .dark { background-color: #0f172a; color: #e2e8f0; }
+        .dark .bg-white { background-color: #1e293b; }
+        .dark .border-gray-100 { border-color: #334155; }
+        .dark .text-gray-500 { color: #94a3b8; }
+        .dark .text-gray-600 { color: #cbd5e1; }
+        .dark .text-gray-700 { color: #e2e8f0; }
+        .dark .text-gray-800 { color: #f1f5f9; }
+        .dark .text-gray-900 { color: #f8fafc; }
+        .dark .bg-gray-50 { background-color: #0f172a; }
+        .dark .bg-gray-100 { background-color: #1e293b; }
+        .dark .bg-blue-50 { background-color: #1e3a8a; }
+        .dark .text-blue-600 { color: #60a5fa; }
+        .dark .border-blue-600 { border-color: #3b82f6; }
+        .dark .hover\:text-blue-600:hover { color: #60a5fa; }
+        
+        .lang-toggle button.active {
+            background-color: #e2e8f0;
+            color: #0f172a;
+        }
+        .dark .lang-toggle button.active {
+            background-color: #334155;
+            color: #f8fafc;
+        }
+        
+        .course-card {
+            transition: all 0.2s ease;
+        }
+        .course-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+        }
+        .dark .course-card:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .resource-link {
+            transition: all 0.1s ease;
+        }
+        .resource-link:hover {
+            background-color: #f1f5f9;
+        }
+        .dark .resource-link:hover {
+            background-color: #334155;
+        }
+    </style>
+</head>
+<body class="antialiased bg-[#fafafa] dark:bg-[#0f172a] transition-colors duration-200">
+
+    <header class="bg-white dark:bg-[#1e293b] border-b border-gray-100 dark:border-[#334155] py-10 md:py-14 px-4 md:px-6 transition-colors">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex flex-wrap justify-between items-center mb-6">
+                <a href="#" onclick="window.history.back(); return false;" class="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition flex items-center gap-1.5">
+                    <i class="fas fa-arrow-left text-xs"></i> 
+                    <span class="lang-es">Volver al portafolio</span>
+                    <span class="lang-en">Back to portfolio</span>
+                </a>
+                <div class="flex items-center gap-3">
+                    <div class="lang-toggle bg-gray-100 dark:bg-[#334155] p-1 rounded-full flex">
+                        <button id="lang-es-btn" class="active lang-btn px-3 sm:px-4 py-1 text-xs sm:text-sm font-medium rounded-full" data-lang="es">ES</button>
+                        <button id="lang-en-btn" class="lang-btn px-3 sm:px-4 py-1 text-xs sm:text-sm font-medium rounded-full" data-lang="en">EN</button>
+                    </div>
+                    <button id="darkModeToggle" class="p-2 rounded-full bg-gray-100 dark:bg-[#334155] text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition" aria-label="Cambiar tema">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-center md:text-left">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-3">
+                    <span class="lang-es">Probabilidad y Estadística</span>
+                    <span class="lang-en">Probability and Statistics</span>
+                </h1>
+                <p class="text-lg text-gray-500 dark:text-gray-400 font-medium">
+                    <i class="fas fa-user-graduate mr-2 text-blue-500"></i>
+                    <span class="lang-es">Profesor: Nicolás López</span>
+                    <span class="lang-en">Professor: Nicolás López</span>
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        
+        <!-- Resumen -->
+        <div class="mb-10">
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-2xl p-6 sm:p-8 border border-blue-100 dark:border-blue-900/50 shadow-sm">
+                <div class="flex items-start gap-4">
+                    <div class="bg-blue-500 rounded-full p-3 hidden sm:block">
+                        <i class="fas fa-dice text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                            <i class="fas fa-book-open text-blue-500 sm:hidden"></i>
+                            <span class="lang-es">Resumen del curso</span>
+                            <span class="lang-en">Course overview</span>
+                        </h2>
+                        <p class="text-gray-700 dark:text-gray-300 leading-relaxed lang-es">
+                            La asignatura de probabilidad y estadística es indispensable como herramienta para el planteamiento y solución de problemas, y como complemento de otras áreas del saber. Ofrece al estudiante la formación básica necesaria conceptual y práctica para la recolección, organización, manejo de los datos e información, su análisis e interpretación, su modelamiento y su aplicación.
+                        </p>
+                        <p class="text-gray-700 dark:text-gray-300 leading-relaxed lang-en">
+                            The Probability and Statistics course is essential as a tool for problem formulation and solving, and as a complement to other fields of knowledge. It provides students with the necessary conceptual and practical foundations for data and information collection, organization, handling, analysis, interpretation, modeling, and application.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recursos destacados: Laboratorios + YouTube -->
+        <div class="grid sm:grid-cols-2 gap-4 mb-10">
+            <a href="https://anlopezl.github.io/files/AED/Laboratorios.html" target="_blank" 
+               class="course-card bg-white dark:bg-[#1e293b] rounded-2xl p-6 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-xl">
+                        <i class="fas fa-laptop-code text-blue-600 dark:text-blue-400 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-1">
+                            <span class="lang-es">Laboratorios de programación</span>
+                            <span class="lang-en">Programming labs</span>
+                        </h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            <span class="lang-es">Ejercicios prácticos en R</span>
+                            <span class="lang-en">Hands-on exercises in R</span>
+                        </p>
+                    </div>
+                </div>
+            </a>
+            <a href="https://www.youtube.com/@SimpleEstad%C3%ADstica" target="_blank" 
+               class="course-card bg-white dark:bg-[#1e293b] rounded-2xl p-6 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-red-200 dark:hover:border-red-800 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="bg-red-100 dark:bg-red-900/30 p-3 rounded-xl">
+                        <i class="fab fa-youtube text-red-600 dark:text-red-400 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-1">
+                            <span class="lang-es">Canal de YouTube</span>
+                            <span class="lang-en">YouTube Channel</span>
+                        </h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            <span class="lang-es">Simple Estadística</span>
+                            <span class="lang-en">Simple Estadística</span>
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Clases por semanas -->
+        <div>
+            <h2 class="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+                <i class="fas fa-calendar-alt text-blue-500"></i>
+                <span class="lang-es">Clases por semana</span>
+                <span class="lang-en">Weekly lectures</span>
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                <!-- Semanas 1-15 con solo PDF -->
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S1.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 1</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S2.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 2</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S3.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 3</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S4.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 4</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S5.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 5</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S6.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 6</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S7.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 7</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S8.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 8</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S9.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 9</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S10.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 10</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S11.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 11</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S12.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 12</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S13.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 13</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S14.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 14</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+                <a href="https://anlopezl.github.io/files/PYE/Clases/PYE1_S15.pdf" target="_blank" class="course-card bg-white dark:bg-[#1e293b] rounded-xl p-4 border border-gray-100 dark:border-[#334155] shadow-sm hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <span class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full w-full">Semana 15</span>
+                        <i class="fas fa-file-pdf text-red-500 text-2xl my-1"></i>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-es">Diapositivas</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 lang-en">Slides</span>
+                    </div>
+                </a>
+            </div>
+            
+            <!-- Semana 16 destacada con cuadernos -->
+            <div class="mt-6 bg-white dark:bg-[#1e293b] rounded-2xl p-5 border border-blue-200 dark:border-blue-800 shadow-sm">
+                <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">Semana 16</span>
+                        <h3 class="font-semibold text-gray-800 dark:text-white">
+                            <span class="lang-es">Material complementario</span>
+                            <span class="lang-en">Supplementary material</span>
+                        </h3>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 ml-0 sm:ml-11">
+                    <a href="https://anlopezl.github.io/files/PYE/Clases/PYE_S16_EST.html" target="_blank" class="resource-link inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-800/50 rounded-lg text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                        <i class="fas fa-user-graduate text-green-600"></i> <span class="lang-es">Cuaderno estudiante</span><span class="lang-en">Student notebook</span>
+                    </a>
+                    <a href="https://anlopezl.github.io/files/PYE/Clases/PYE_S16_PRF.html" target="_blank" class="resource-link inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-800/50 rounded-lg text-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                        <i class="fas fa-chalkboard-teacher text-purple-600"></i> <span class="lang-es">Cuaderno profesor</span><span class="lang-en">Instructor notebook</span>
+                    </a>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-3 ml-0 sm:ml-11">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    <span class="lang-es">La semana 16 incluye cuadernos interactivos en HTML.</span>
+                    <span class="lang-en">Week 16 includes interactive HTML notebooks.</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Nota final -->
+        <div class="mt-10 text-center text-sm text-gray-500 dark:text-gray-400">
+            <p class="lang-es">Todo el material del curso está disponible en formato PDF. Para dudas, contactar al profesor.</p>
+            <p class="lang-en">All course materials are available in PDF format. Contact the professor for any questions.</p>
+        </div>
+    </main>
+
+    <footer class="border-t border-gray-100 dark:border-[#334155] py-6 sm:py-8 text-center text-xs sm:text-sm text-gray-400 dark:text-gray-500">
+        <p>© 2026 Andrés Nicolás López · 
+            <span class="lang-es">Curso de pregrado</span>
+            <span class="lang-en">Undergraduate course</span>
+        </p>
+    </footer>
+
+    <script>
+        const esBtn = document.getElementById('lang-es-btn');
+        const enBtn = document.getElementById('lang-en-btn');
+        const esElements = document.querySelectorAll('.lang-es');
+        const enElements = document.querySelectorAll('.lang-en');
+        
+        function setLanguage(lang) {
+            const isEs = lang === 'es';
+            esElements.forEach(el => el.style.display = isEs ? 'block' : 'none');
+            enElements.forEach(el => el.style.display = isEs ? 'none' : 'block');
+            
+            document.querySelectorAll('.lang-es.flex, .lang-es.inline-flex').forEach(el => {
+                el.style.display = isEs ? 'flex' : 'none';
+            });
+            document.querySelectorAll('.lang-en.flex, .lang-en.inline-flex').forEach(el => {
+                el.style.display = isEs ? 'none' : 'flex';
+            });
+            
+            esBtn.classList.toggle('active', isEs);
+            enBtn.classList.toggle('active', !isEs);
+        }
+        
+        esBtn.addEventListener('click', () => setLanguage('es'));
+        enBtn.addEventListener('click', () => setLanguage('en'));
+        setLanguage('es');
+
+        const darkToggle = document.getElementById('darkModeToggle');
+        const html = document.documentElement;
+        
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+            html.classList.remove('light');
+        } else {
+            html.classList.add('light');
+            html.classList.remove('dark');
+        }
+        
+        darkToggle.addEventListener('click', () => {
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                localStorage.theme = 'light';
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        });
+    </script>
+    <style>
+        .lang-es.flex, .lang-en.flex,
+        .lang-es.inline-flex, .lang-en.inline-flex {
+            display: none;
+        }
+    </style>
+</body>
+</html>

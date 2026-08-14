@@ -1,0 +1,322 @@
+// libs/_comun/scss/retro.scss
+//
+// Estetica "NES" (8-bit) sobre Bootstrap 5, al estilo del ejemplo de la
+// vinieta de bslib que usa nes.min.css.
+//
+// A diferencia de vendorizar nes.min.css (30 KB de CSS fijo que pelea con
+// Bootstrap), estas reglas se escriben CONTRA las variables Sass de bslib.
+// Resultado: el look pixel-art se adapta solo cuando cambias bg/fg/primary
+// desde bs_theme() o desde el widget bs_themer().
+//
+// Variables disponibles aqui (las inyecta bslib antes de compilar):
+//   $primary $secondary $success $info $warning $danger
+//   $body-bg $body-color $border-color $card-bg $font-family-base
+//
+// Se aplica con:
+//   bs_add_rules(tema, sass::sass_file(".../retro.scss"))
+// Ver libs/_comun/R/temas_bslib.R :: tema_retro()
+
+// ---------------------------------------------------------------------------
+// Tokens del look 8-bit
+// ---------------------------------------------------------------------------
+$nes-borde:  4px;                       // grosor del "pixel" de borde
+$nes-sombra: 4px;                       // desplazamiento de la sombra dura
+
+// Sombra dura (sin blur) = la que da la sensacion de sprite recortado.
+@mixin nes-sombra($color: rgba(0, 0, 0, 0.35), $d: $nes-sombra) {
+  box-shadow: #{$d} #{$d} 0 0 $color;
+}
+
+// Borde pixelado: 4 barras absolutas en vez de border-radius.
+// Truco de nes.css: usar un box-shadow multiple para simular escalones.
+@mixin nes-borde($color) {
+  border: $nes-borde solid $color;
+  border-radius: 0;
+}
+
+// ---------------------------------------------------------------------------
+// Base
+// ---------------------------------------------------------------------------
+body {
+  background-color: $body-bg;
+  color: $body-color;
+  // El pixel-art se ve mal con antialiasing suave.
+  -webkit-font-smoothing: none;
+  image-rendering: pixelated;
+}
+
+// Press Start 2P es MUY ancha: sin esto los titulos desbordan.
+h1, h2, h3, h4, h5, h6,
+.card-header, .navbar-brand {
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.15rem; }
+h4, h5, h6 { font-size: 1rem; }
+
+// ---------------------------------------------------------------------------
+// Cards — el contenedor que mas se usa en las apps del curso
+// ---------------------------------------------------------------------------
+.card {
+  @include nes-borde($body-color);
+  @include nes-sombra();
+  background-color: $card-bg;
+}
+
+.card-header {
+  @include nes-borde($body-color);
+  border-width: 0 0 $nes-borde 0;
+  background-color: transparent;
+  font-weight: normal;
+  text-transform: none;
+}
+
+// value_box: mismo tratamiento, pero el borde toma el color del tema del box
+// (bslib le pone .bg-primary / .bg-success / etc.)
+.value-box,
+.bslib-value-box {
+  @include nes-borde($body-color);
+  @include nes-sombra();
+  border-radius: 0;
+}
+
+// ---------------------------------------------------------------------------
+// Botones — el elemento mas caracteristico de nes.css
+// ---------------------------------------------------------------------------
+.btn {
+  @include nes-borde($body-color);
+  @include nes-sombra(rgba(0, 0, 0, 0.5));
+  position: relative;
+  text-transform: none;
+  transition: none;              // nada de easing: es 8-bit, no material design
+  padding: 0.6rem 1.1rem;
+
+  // "Hundir" el boton al presionar = desplazarlo hacia la sombra.
+  &:active,
+  &.active {
+    top: $nes-sombra;
+    left: $nes-sombra;
+    box-shadow: none;
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: $nes-borde solid $primary;
+    outline-offset: 2px;
+    box-shadow: none;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Inputs
+// ---------------------------------------------------------------------------
+.form-control,
+.form-select,
+.selectize-input,
+.selectize-dropdown,
+.input-group-text {
+  @include nes-borde($body-color);
+  background-color: $card-bg;
+  color: $body-color;
+  box-shadow: none;
+
+  &:focus,
+  &.focus {
+    border-color: $primary;
+    box-shadow: none;
+    outline: none;
+  }
+}
+
+// Checkbox / radio cuadrados (Bootstrap los hace redondos por defecto)
+.form-check-input {
+  border-radius: 0 !important;
+  border: 3px solid $body-color;
+
+  &:checked {
+    background-color: $primary;
+    border-color: $body-color;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sliders (ionRangeSlider, el que usa sliderInput)
+//
+// OJO con el !important: Shiny inyecta la hoja de ionRangeSlider como
+// dependencia HTML, y esa dependencia se carga DESPUES del CSS del tema
+// bslib. Sin !important gana el azul por defecto de ion.rangeSlider aunque
+// nuestra regla sea mas especifica. Es el unico bloque del archivo que lo
+// necesita: el resto son clases de Bootstrap, que si compilan con el tema.
+// ---------------------------------------------------------------------------
+.irs--shiny {
+  .irs-bar,
+  .irs-line {
+    border-radius: 0 !important;
+    height: 12px !important;
+    top: 27px !important;
+  }
+
+  .irs-line {
+    background: $card-bg !important;
+    border: 3px solid $body-color !important;
+  }
+
+  .irs-bar {
+    background: $primary !important;
+    border: 3px solid $body-color !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  .irs-handle {
+    border-radius: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    top: 23px !important;
+    background: $body-color !important;
+    border: 3px solid $body-color !important;
+    box-shadow: none !important;
+    // ion.rangeSlider le pone un > interno que se ve como flechita.
+    > i { display: none !important; }
+  }
+
+  .irs-from,
+  .irs-to,
+  .irs-single {
+    border-radius: 0 !important;
+    background-color: $primary !important;
+    color: color-contrast($primary) !important;
+    &:before { display: none !important; }   // triangulito redondeado
+  }
+
+  .irs-min,
+  .irs-max {
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: $body-color !important;
+    border: 2px solid $body-color !important;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Navbar / tabs
+// ---------------------------------------------------------------------------
+.navbar {
+  @include nes-borde($body-color);
+  border-width: 0 0 $nes-borde 0;
+}
+
+.nav-tabs {
+  border-bottom: $nes-borde solid $body-color;
+
+  .nav-link {
+    border-radius: 0;
+    border: $nes-borde solid transparent;
+    margin-bottom: -$nes-borde;
+
+    &.active {
+      @include nes-borde($body-color);
+      border-bottom-color: $card-bg;
+      background-color: $primary;
+      color: color-contrast($primary);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Tablas (DT incluido)
+// ---------------------------------------------------------------------------
+.table,
+table.dataTable {
+  @include nes-borde($body-color);
+
+  th, td {
+    border-color: $body-color;
+    border-width: 0 0 2px 0;
+  }
+
+  thead th {
+    border-bottom-width: $nes-borde;
+    text-transform: none;
+  }
+}
+
+// Controles de DT (search box, paginacion)
+.dataTables_wrapper {
+  .dataTables_filter input,
+  .dataTables_length select {
+    @include nes-borde($body-color);
+  }
+
+  .paginate_button {
+    border-radius: 0 !important;
+    border: 3px solid $body-color !important;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Alerts / notificaciones / progress
+// ---------------------------------------------------------------------------
+.alert,
+.shiny-notification {
+  @include nes-borde($body-color);
+  @include nes-sombra();
+  border-radius: 0;
+}
+
+.progress {
+  border-radius: 0;
+  border: 3px solid $body-color;
+  height: 1.5rem;
+
+  .progress-bar {
+    border-radius: 0;
+    background-color: $primary;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Popovers / tooltips / accordion / modales
+// ---------------------------------------------------------------------------
+.popover,
+.tooltip-inner,
+.modal-content {
+  border-radius: 0;
+  @include nes-borde($body-color);
+}
+
+.accordion-item,
+.accordion-button {
+  border-radius: 0 !important;
+  border-color: $body-color;
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: $primary;
+  color: color-contrast($primary);
+  box-shadow: none;
+}
+
+// ---------------------------------------------------------------------------
+// Codigo / verbatimTextOutput
+//
+// OJO: NO incluir aqui .shiny-text-output. Esa clase la lleva todo textOutput,
+// incluido el que va dentro de un value_box(). Al darle fondo $card-bg (claro)
+// el texto de un value_box con tema oscuro (secondary/dark), que bslib pinta
+// de blanco, quedaba blanco sobre blanco: la caja se veia VACIA aunque el
+// server estuviera devolviendo el valor correcto.
+// verbatimTextOutput ya renderiza como <pre>, asi que queda cubierto igual.
+// ---------------------------------------------------------------------------
+pre,
+code {
+  @include nes-borde($body-color);
+  border-radius: 0;
+  background-color: $card-bg;
+  color: $body-color;
+  // Press Start 2P en bloques largos de texto es ilegible: bajamos el tamano.
+  font-size: 0.85em;
+  line-height: 1.7;
+}

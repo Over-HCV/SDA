@@ -1,0 +1,4 @@
+# Bundle shinylive: 86 MB de runtime webR, se regenera con build.R
+docs/
+# Staging del export (ver build.R)
+.build/

@@ -1,0 +1,34 @@
+---
+title: "Análisis Avanzado de Datos"
+author: "Profesor: Nicolás López"
+output:
+  rmdformats::downcute
+---
+
+<br>
+
+**Resumen** 
+
+Este curso presenta modelos estadísticos avanzados para el análisis de datos, sus fundamentos teóricos y aplicaciones en el software R. El curso cubre generalizaciones al modelo de regresión lineal que permiten mayor flexibilidad de estimación y técnicas de evaluación de modelos. El curso también introduce modelos de datos estructurados y variables latentes.
+
+<br>
+
+**Introducción**
+
+- [Laboratorios de programación](https://anlopezl.github.io/files/AAD/Laboratorios.html)
+
+**Clases**
+
+- Capítulo 1: [Herramientas estadísticas avanzadas](https://anlopezl.github.io/files/AAD/SL_1.pdf)
+- Capítulo 2: [Evaluación de modelos y bootstrap](https://anlopezl.github.io/files/AAD/SL_2.pdf)
+- Capítulo 3: [Métodos de suavización. Splines](https://anlopezl.github.io/files/AAD/SL_3.pdf)
+- Capítulo 4: [Métodos de Kernel](https://anlopezl.github.io/files/AAD/SL_4.pdf)
+- Capítulo 5: [Modelos generalizados. Regresión logística](https://anlopezl.github.io/files/AAD/SL_5.pdf)
+<!-- - Capítulo 6.1: [Variables latentes y datos estructurados](https://anlopezl.github.io/files/AAD/SL_6.pdf) -->
+<!-- - Capítulo 6.2: [Variables latentes y datos no estructurados](https://anlopezl.github.io/files/AAD/SL_7.pdf) -->
+
+**Talleres**
+
+- Taller 1: Herramientas estadísticas avanzadas, evaluación de modelos.
+- Taller 2: Evaluación de modelos. Métodos de suavización. Splines y métodos de kernel.
+- Taller 3: Modelos generalizados. Regresión logística, variables latentes y datos estructurados.

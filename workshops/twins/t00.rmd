@@ -1,0 +1,213 @@
+---
+title: "Análisis Estadístico de Datos"
+author: "Alumno: Over H. C. V."
+output:
+  rmdformats::downcute
+---
+
+# Dependencias
+
+Para la ejecución de este cuaderno, debe instalar con anterioridad los siguientes paquetes desde la consola de R o usando el menú Tools\>Install Packages en RStudio:
+
+-   `install.packages("rmdformats")`.
+
+# Instrucciones
+
+-   El taller presenta un ejemplo ilustrativo de evaluación a través del lenguaje R y usando RMD para la presentación del mismo. 
+-   Recuerde indicar y cargar los paquetes necesarios para la elaboración del taller.
+-   Múltiples ayudas se encuentran a lo largo de los ejercicios del taller. Estas dan indicios para la solución de los puntos, pero no necesariamente deben ser usados para solucionar las preguntas. Puede haber diferentes formas de dar solución a la pregunta.
+
+# Calificación
+
+-   El taller no es calificable.
+
+# Estudio de gemelos
+
+Se desea estudiar el fenómeno que tienen los años de educación en el ingreso, para lo cual, se cuenta con la información de pares de trabajadores que son además [gemelos monocigóticos](https://www.genome.gov/es/genetics-glossary/Gemelos-identicos#:~:text=Definici%C3%B3n,siempre%20son%20del%20mismo%20sexo). Estos son gemelos mayores de 18 años y son medidos respecto a diversas variables sociodemográficas de interés. Este estudio fue publicado en la revista *The American Economic Review* y puede encontrarse como: *Ashenfelter, Orley and Krueger, Alan. Estimates of the Economic Return to Schooling from a New Sample of Twins. The American Economic Review 84.5 (Dic. 1994) 1157-1173*.
+
+Desde un punto de vista estadístico, el diseño de este estudio es muy interesante, ya que al contar con gemelos idénticos, la asociación encontrada entre años de estudio y salario no se verá afectada por posibles *factores de confusión*, como por ejemplo las habilidades individuales de los trabajadores. La tabla **twins.csv** contiene en cada fila la información acerca de cada par de gemelos para 16 diferentes variables. Cada individuo en la pareja es asignado de manera aleatoria como el gemelo 1 o el gemelo 2. Datos perdidos se indican con un punto (.) en la tabla. A continuación se presentan las interrogantes que lo guiarán en el estudio de la pregunta de investigación mediante los métodos estadísticos de clase.
+
+## Librerías
+```{r}
+library('tidyverse')
+```
+
+## Pregunta 1.
+Importe la base de datos a R y determine el número de UE y de variables en la base de datos. ¿cuántas UE tienen al menos un dato faltante y cuántas tienen la información completa?.
+
+**Ayuda**:
+
+-   Desde R, la función: `is.na(x)` devuelve un vector de la misma longitud de `x`, indicando como `True` las posiciones en las cuales se encuentran valores faltantes, por tanto aplicar la función `sum()` a `is.na(x)`, es decir, `sum(is.na(x))` determina la cantidad total de valores faltantes en el vector `x`.
+
+-   Se nota que `is.na()` puede usarse sobre objetos más complejos que vectores, como por ejemplo una tabla de datos. 
+
+-   La función `apply(datos,MARGIN=1,FUN=funcion_x)` aplica a cada fila (`MARGIN=1`) de la tabla `datos` la función `funcion_x`.
+
+```{r}
+gemelos = read_csv('twins.csv',na= '.')
+# Numero de registros
+nrow(gemelos)
+# Numero de variables
+ncol(gemelos)
+# Registros con al menos un faltante
+num_faltantes = apply(is.na(gemelos),MARGIN=1,FUN=sum)
+sum(num_faltantes>=1)
+# Registros con información completa
+sum(num_faltantes==0)
+```
+
+
+
+
+## Pregunta 2.
+Remueva de la base de datos los registros con al menos un dato faltante. ¿cuál es la dimensión de la tabla resultante?. **Nota importante: trabaje ÚNICAMENTE con la tabla de registros con información completa para los siguientes puntos del taller**.
+
+```{r}
+gemelos_completo = gemelos[num_faltantes==0,]
+```
+
+
+## Pregunta 3.
+Clasifique las variables EDUCL, EDUCH, HRWAGEL, HRWAGEH según su escala y clase, teniendo en cuenta que:
+
+-   EDUCL
+    Educación auto-reportada (en años) del gemelo 1.
+-   EDUCH
+    Educación auto-reportada (en años) del gemelo 2.
+-   HRWAGEL
+    Salario por hora (en dólares) del gemelo 1.
+-   HRWAGEH
+    Salario por hora (en dólares) del gemelo 2.
+
+```{r}
+# EDUCL. Escala - Razón. Clase. Cuantitativa
+# EDUCH. Escala - Razón. Clase. Cuantitativa
+# HRWAGEL. Escala - Razón. Clase. Cuantitativa
+# HRWAGEH. Escala - Razón. Clase. Cuantitativa
+```
+
+
+## Pregunta 4.
+Describa de manera gráfica el salario por hora autoreportado por el gemelo 1 y por el gemelo 2 univariadamente a partir de un diagrama de caja. ¿Qué características observa los datos en términos de centro, localización y dispersión?.
+
+```{r}
+bp1 = boxplot(gemelos_completo$HRWAGEL,main='Salario por hora. Gemelo 1')
+bp2 = boxplot(gemelos_completo$HRWAGEH,main='Salario por hora. Gemelo 2')
+```
+
+
+## Pregunta 5.
+Determine las observaciones atípicas univariadas para la variables HRWAGEL y HRWAGEH usando el diagrama de caja de Tukey. ¿cuál variable presenta mayor número de atipicidades?
+
+**Ayuda**: 
+
+ - Desde R, aplicar `$out` a la función `boxplot()` como sigue: `boxplot(variable,plot=FALSE)$out`, permite determinar las observaciones atípicas mediante el criterio de diagrama de caja de Tukey.
+ 
+```{r}
+# Número de atípicos HRWAGEL
+length(bp1$out)
+# Número de atípicos HRWAGEH
+length(bp2$out)
+```
+ 
+
+##  Pregunta 6.
+Describa de manera gráfica el salario por hora autoreportado por el gemelo 1 y por el gemelo 2 bivariadamente a partir de un diagrama de dispersión entre las variables. Añada la estimación kernel de la densidad marginal de cada variable.
+
+```{r}
+library(ggplot2)
+library(ggExtra)
+g_base = ggplot(gemelos_completo, aes(x = HRWAGEL,
+                                      y = HRWAGEH)) + 
+         labs(title="Diagrama de dispersión de parejas de gemelos") +
+         xlab("Salario por hora del gemelo 1") + 
+         ylab("Salario por hora del gemelo 2") +
+         geom_point()
+
+g_plot = ggMarginal(g_base, type = "density")
+g_plot
+```
+
+##  Pregunta 7.
+Categorice las variables EDUCL y EDUCH como sigue
+
+ - $[0,12)$. Primaria y secundaria.
+ - $[12,16)$. Pregrado.
+ - $[16,24]$. Posgrado.
+
+Dada esta nueva categorización de las variables ¿cuántos pares de gemelos tienen niveles educativos diferentes? ¿cuántos tienen niveles educativos iguales?.
+
+**Ayuda**:
+
+-   Desde R, la función: `cut(x,breaks=intervalo)` devuelve un vector de la misma longitud de `x`, discretizando la variable `x` en los intervalos dados por `intervalo`.
+
+-   Los argumentos `right` y `include.lowest` de la función `cut()` lo ayudarán a discretizar la variable de la forma que es requerida en el enunciado.
+
+-   La función `table()` no solamente es usada para determinar la distribución de variables univariadas (como se hizo en el primer cuaderno). `table(x,y)` le permitirá encontrar las frecuencias absolutas de los valores conjuntos para las variables `x` y `y`.
+
+```{r}
+intervalo          = c(0,12,16,Inf)
+variable_discreta1 = cut(gemelos_completo$EDUCL,
+                         breaks=intervalo,
+                         right=F,
+                         include.lowest=F)
+variable_discreta2 = cut(gemelos_completo$EDUCH,
+                         breaks=intervalo,
+                         right=F,
+                         include.lowest=F)
+
+t_contingencia_educ = table(variable_discreta1,variable_discreta2)
+```
+
+```{r}
+nvl_igual = sum(diag(t_contingencia_educ))
+nvl_igual
+```
+
+```{r}
+nvl_diff  = sum(t_contingencia_educ) - nvl_igual
+nvl_diff
+```
+
+##  Pregunta 8.
+Para el siguiente punto considere la discretización del punto anterior y seleccione aquellos gemelos con el mismo nivel de estudio. Considerando únicamente las parejas de gemelos con educación superior (pregrado y posgrado), realice un diagrama de dispersión para el salario por hora autoreportado por el gemelo 1 y por el gemelo 2. Diferencie el color de los puntos por el nivel de escolaridad alcanzado. ¿Observa diferencias entre las distribuciones bivariadas de los dos grupos? ¿Qué puede concluir acerca de la relación entre el nivel educativo y los ingresos?.
+
+**Ayuda**:
+
+-   Con la función `tabla %>% add_column(variable)` anexa la columna `variable` a una `tabla` existente.
+
+-   Con la función `filter(tabla,condicion)` puede filtrar las filas de una `tabla` existente bajo una `condición` determinada.
+
+-   El gráfico de contorno puede servirle para contrastar más fácilmente las distribuciónes bivariadas. Considere este gráfico para los dos grupos de escolaridad.
+
+Tenga en cuenta que `tabla` debe ser un objeto tibble.
+
+```{r}
+gemelos_completo = gemelos_completo %>%
+                     add_column(EDUCL_DISCRETA = variable_discreta1,
+                                EDUCH_DISCRETA = variable_discreta2)
+gemelos_completo_igual = gemelos_completo %>%
+                           filter(EDUCL_DISCRETA == EDUCH_DISCRETA)
+
+gemelos_completo_igual = gemelos_completo_igual %>%
+                           filter(EDUCL_DISCRETA%in%c('[12,16)','[16,Inf)'))
+
+g_base2 = ggplot(data=gemelos_completo_igual,aes(x=HRWAGEH,y=HRWAGEL))
+
+g_base2 + geom_point(aes(colour=EDUCL_DISCRETA)) +
+          labs(title="Diagrama de dispersión de parejas de gemelos") +
+          xlab("Salario por hora del gemelo 1") +
+          ylab("Salario por hora del gemelo 2")
+```
+
+
+Un gráfico de contorno se presenta a continuación
+
+
+```{r}
+g_base2 + geom_density_2d(aes(group=EDUCL_DISCRETA,colour=EDUCL_DISCRETA)) +
+          labs(title="Diagrama de contorno de parejas de gemelos") +
+          xlab("Salario por hora del gemelo 1") +
+          ylab("Salario por hora del gemelo 2")
+```
+
