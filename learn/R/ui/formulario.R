@@ -73,16 +73,10 @@ valores_hiper <- function(input, clave) {
   stats::setNames(valores, names(hiper))
 }
 
-#' Valores por defecto sin pasar por la UI. Lo usa run_headless.R para que el
-#' batch arranque exactamente igual que la app (C11).
-hiper_por_defecto <- function(clave) {
-  hiper <- metodo(clave)$hiper
-  if (!length(hiper)) return(list())
-  valores <- lapply(hiper, function(spec) {
-    if (identical(spec$escala, "log10")) 10^spec$def else spec$def
-  })
-  stats::setNames(valores, names(hiper))
-}
+#' `hiper_por_defecto()` vivía acá y se mudó a nucleo/registro.R: es una
+#' consulta al registro, no una pieza de UI, y run_headless.R corre con
+#' `cargar_sda(con_ui = FALSE)`, que no sourcea esta carpeta. Tenerla acá hacía
+#' que el batch no pudiera arrancar igual que la app — justo lo que C11 pide.
 
 #' Formulario del optimizador (fase 3). Sale de `optimizador` del catálogo, no
 #' de `hiper`: son cosas distintas y la app las separa en fases distintas.

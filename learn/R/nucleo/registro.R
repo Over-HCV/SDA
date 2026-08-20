@@ -114,6 +114,21 @@ filtrar_metodos <- function(objetivo = NULL, sesion = NULL, estado = NULL,
   Filter(coincide, claves)
 }
 
+#' Los hiperparámetros de un método en sus valores por defecto.
+#'
+#' Vive en el núcleo y no en `ui/formulario.R` porque es una consulta al
+#' registro: `run_headless.R` corre con `cargar_sda(con_ui = FALSE)` y tiene que
+#' poder arrancar con exactamente los mismos valores que muestra la app. Esa
+#' igualdad es la regla de las tres partes (C11).
+hiper_por_defecto <- function(clave) {
+  hiper <- metodo(clave)$hiper
+  if (!length(hiper)) return(list())
+  valores <- lapply(hiper, function(spec) {
+    if (identical(spec$escala, "log10")) 10^spec$def else spec$def
+  })
+  stats::setNames(valores, names(hiper))
+}
+
 #' ¿Se puede ejecutar este método en el modo actual?
 #' Un método activo pero no-wasm es ejecutable en servidor y no en navegador.
 ejecutable <- function(clave) {

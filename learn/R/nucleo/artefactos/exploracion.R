@@ -79,6 +79,17 @@ poblar_artefactos_exploracion <- function() {
   # Los de preparación de la fase 1 (fuente, diccionario, calidad,
   # transformación, partición, balanceo) viven en artefactos/preparacion.R.
 
+  # --- Fase 2 · Especificar el modelo ------------------------------------
+  registrar_artefacto("f2.especificacion.matriz_diseno", "Matriz de diseño",
+    grafico = "R/ui/f2/especificacion.R::salida_especificacion",
+    logica  = "R/logica/modelo_geometria.R::resumen_matriz_diseno",
+    descripcion = "Qué columnas entran al modelo, con qué dimensiones y si son linealmente independientes.")
+
+  registrar_artefacto("f2.supuestos.semaforo", "Semáforo de supuestos",
+    grafico = "R/ui/f2/supuestos.R::salida_supuestos",
+    logica  = "R/logica/supuestos.R::evaluar_supuestos",
+    descripcion = "Lo que el método exige, evaluado sobre este dataset antes de ajustar.")
+
   # --- Fase 2 · Geometría antes de ajustar -------------------------------
   registrar_artefacto("f2.analisis.espacio_hipotesis", "Espacio de hipótesis",
     grafico = "R/graficos/modelo.R::graficar_espacio_hipotesis",
@@ -118,7 +129,7 @@ poblar_artefactos_exploracion <- function() {
 
   registrar_artefacto("f3.analisis.trayectoria", "Trayectoria de parámetros",
     grafico = "R/graficos/convergencia.R::graficar_trayectoria",
-    logica  = "R/logica/traza.R::traza_a_tabla",
+    logica  = "R/logica/traza.R::parametros_a_tabla",
     descripcion = "Cada parámetro contra la iteración; cuál tardó en estabilizarse.")
 
   registrar_artefacto("f3.analisis.camino_superficie", "Camino sobre la superficie",

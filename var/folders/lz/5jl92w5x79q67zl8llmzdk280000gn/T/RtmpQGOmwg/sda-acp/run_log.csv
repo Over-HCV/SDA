@@ -1,0 +1,2 @@
+"timestamp","proyecto","escenario","params_json","metrica_principal","plot"
+"2026-08-14T07:42:10-0500","sda-lab","prueba-acp","{""n_componentes"":3,""matriz"":""correlacion"",""optimizador"":""potencia"",""tol"":1e-08,""maxit"":500,""semilla"":42,""fuente"":""memoria"",""columnas"":""a,b,c,d""}",200,"/Users/oh/World/External/Study/UR/SDA//var/folders/lz/5jl92w5x79q67zl8llmzdk280000gn/T//RtmpQGOmwg/sda-acp/prueba-acp.png"

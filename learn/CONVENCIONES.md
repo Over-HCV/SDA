@@ -128,41 +128,72 @@ Ningún párrafo explicativo dentro de un `.R`.
   `f1.analisis.histograma` → `textos/f1/analisis/histograma.md`. La ruta la
   calcula `ruta_texto_de()`; con 79 artefactos una carpeta plana no se navega.
 - Contenido **genérico**: explica el gráfico, no los datos del usuario.
-- Estructura fija de tres bloques:
+- Estructura fija de cuatro bloques:
 
 ```markdown
+## Para qué sirve
 ## Qué muestra
 ## Qué buscar
 ## Cuándo engaña
 ```
 
-- Si el archivo no existe, `texto(clave)` devuelve un aviso discreto y **la UI
-  no falla**. Los textos se escriben incrementalmente; son muchos.
+- Los bloques **no se muestran juntos**. `bloques_md()` parte el archivo por
+  encabezado y cada mitad va a un sitio distinto:
+
+| Bloque | Dónde sale | Responde |
+|---|---|---|
+| Para qué sirve | sello ⓘ del encabezado | qué decisión alimenta esta card |
+| Qué muestra · Qué buscar · Cuándo engaña | «¿Cómo se lee?», plegado en el pie | cómo interpretarla |
+
+  El sello ⓘ **no repite la traza**: clave y rutas ya están completas en el
+  bloque «Contexto», y las 25 cards lo ofrecen. Un metadato mostrado dos veces
+  no es redundancia inofensiva, es una card que desperdicia el único lugar
+  donde cabía otra cosa.
+
+- «Para qué sirve» son **dos o tres frases**: entra en un popover.
+- Si el archivo o el bloque no existen, `texto()` y `texto_bloque()` devuelven
+  un aviso discreto y **la UI no falla**. Los textos se escriben
+  incrementalmente; son muchos. Un `.md` viejo de tres bloques sigue
+  funcionando: se pierde el sello, no la card.
 
 Lo mismo para las fichas de método: `learn/fichas/<clave>.md`.
 
-### Sin LaTeX en los textos
+### LaTeX en los textos
 
-`commonmark` no renderiza matemáticas, y traer MathJax o KaTeX significaría una
-dependencia de red que en el navegador (wasm, servido como archivos estáticos)
-no está garantizada — además de JavaScript propio, que C10 prohíbe.
+**Se escribe LaTeX, y se ve como LaTeX.** `$...$` en línea, `$$...$$` en
+bloque, con la sintaxis de siempre:
 
-Un `$$\sum x_i$$` sin renderizar no es una fórmula: es ruido que estorba.
-Entonces la notación se escribe con **Unicode y código**, igual que en
-`notes/tree.md`:
+```markdown
+La distancia de Mahalanobis es $d^2(x) = (x - \bar{x})^{\mathsf{T}} S^{-1} (x - \bar{x})$.
 
-| En vez de | Escribir |
-|---|---|
-| `$\lambda_i$` | `λᵢ` |
-| `$\sum_{i=1}^{n} x_i$` | `Σᵢ xᵢ` |
-| `$\lVert x - \mu \rVert^2$` | `‖x − μ‖²` |
-| bloque `$$...$$` | bloque de código con la fórmula en una línea |
-
-Para una fórmula que necesita aire, un bloque de código:
-
+$$
+W = \sum_{k=1}^{K} \sum_{i \in C_k} \lVert x_i - \mu_k \rVert^2
+$$
 ```
-W = Σₖ Σ_{i ∈ Cₖ} ‖xᵢ − μₖ‖²
-```
+
+Antes esto estaba prohibido y la notación se escribía con Unicode dentro de una
+valla ` ``` `. Se cayó por dos razones: las fórmulas salían monoespaciadas y en
+caja gris, indistinguibles del código R de al lado, y **no hay forma de escribir
+una matriz** con subíndices Unicode.
+
+Cómo funciona, porque el orden importa:
+
+1. `proteger_formulas()` (`R/nucleo/formulas.R`) saca las fórmulas del markdown
+   **antes** de commonmark y deja marcadores alfanuméricos.
+2. commonmark convierte el resto.
+3. `restaurar_formulas()` reinyecta el TeX literal en `<div class="formula-bloque">`
+   o `<span class="formula-linea">`.
+4. KaTeX los pinta en el cliente.
+
+El paso 1 no es una optimización: **CommonMark se come el `\\`**, que es el
+separador de filas de una matriz, y lee el `_` de un subíndice como énfasis. Un
+`\begin{pmatrix}` que atraviese el parser de markdown llega roto al navegador,
+sin error y sin aviso. Hay una aserción dedicada a eso en `test_headless.R`.
+
+Sigue habiendo vallas ` ``` `, y son para lo que siempre fueron: **código R** y
+enumeraciones. Una fórmula en una valla es un error de formato.
+
+Verifica: `Rscript learn/R/pruebas/test_app_piezas.R`
 
 ---
 
@@ -214,6 +245,28 @@ En vez de "copiar al portapapeles": bloque seleccionable + `downloadHandler`.
 Si más adelante duele de verdad, se añade `rclipboard` (una dependencia
 testeada) antes que escribir JS a mano.
 
+### La excepción: `learn/www/katex/enganche.js`
+
+Es el único JS nuestro del proyecto, y está acá para que se discuta y no para
+que se copie.
+
+**Por qué no había alternativa.** El paquete R `katex` necesita V8, que no
+compila en webR. MathJax o KaTeX por CDN sería una petición de red que el modo
+wasm no garantiza. Queda vendorizar KaTeX y llamarlo desde el cliente.
+
+**Por qué es aceptable pese a C10.** Lo que C10 protege es que no haya lógica
+que R no pueda ver romperse. Acá:
+
+- La lógica está en R y es **pura**: `R/nucleo/formulas.R` decide qué es una
+  fórmula y la marca. `test_headless.R` la prueba sin navegador.
+- El JS no decide nada. Recorre nodos ya marcados y llama a `katex.render()`.
+- **Se asevera en un navegador de verdad**: `test_app_piezas.R` comprueba que
+  hay nodos `.katex` pintados y que la consola queda limpia.
+- `verificar_bundle.R` comprueba que los assets llegaron al bundle wasm.
+
+Si aparece un segundo candidato a excepción, la vara es esa: lógica en R,
+prueba en navegador, y escrito acá con su razón.
+
 ---
 
 ## C11 · La regla de las tres partes
@@ -257,7 +310,11 @@ reproducir no es un resultado.
 
 - `pruebas/test_headless.R` — núcleo, contratos y exportadores, sin GUI.
 - `pruebas/test_fase1.R` — lógica y gráficos de la fase 1, también sin GUI.
-- `pruebas/test_app.R` — UI **y consola del navegador** (`app$get_logs()`).
+- `pruebas/test_app.R` — el flujo de la fase 1 en navegador, **y su consola**
+  (`app$get_logs()`).
+- `pruebas/test_app_piezas.R` — la envoltura que comparten todas las cards:
+  sello ⓘ, fórmulas y sidebar. Va aparte de `test_app.R` por C2: prueba las
+  piezas transversales, no el recorrido de una fase.
 
 Que un gráfico devuelva un `ggplot` no prueba nada: hay que construirlo con
 `ggplot2::ggplot_build()`, que es donde de verdad se evalúa el `aes()`.
@@ -280,4 +337,5 @@ Rscript learn/R/pruebas/verificar_mapa.R     # C9
 Rscript learn/R/pruebas/test_headless.R      # C3, C11, C13
 Rscript learn/R/pruebas/test_fase1.R         # C3, C8, C13
 Rscript learn/R/pruebas/test_app.R           # C14
+Rscript learn/R/pruebas/test_app_piezas.R    # C6, C10, C14
 ```

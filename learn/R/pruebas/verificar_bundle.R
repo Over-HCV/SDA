@@ -27,8 +27,39 @@ ESPERADOS <- list(
   ".navbar"       = 1L,   # el shell arrancó
   ".nav-link"     = 7L,   # las 7 secciones
   ".progress-bar" = 8L,   # el mapa del curso: una barra por sesión
-  ".card"         = 4L    # las tarjetas del Inicio
+  ".card"         = 4L,   # las tarjetas del Inicio
+  # KaTeX va vendorizado y viaja por htmlDependency. Se comprueba el enganche y
+  # no una fórmula pintada porque el Inicio no tiene ninguna: las fórmulas
+  # viven dentro de las fases, y llegar hasta ahí desde webR es minutos. Si el
+  # asset no se copió, estos dos dan cero y el fallo aparece acá en vez de
+  # aparecer como TeX crudo en la pantalla de alguien.
+  "script[src*='katex']" = 1L,
+  "link[href*='katex']"  = 1L
 )
+
+# Los assets que build.R tiene que haber metido en app.json. Se comprueban
+# sobre el archivo, antes de arrancar el navegador: es instantáneo y dice
+# exactamente qué falta.
+ASSETS_KATEX <- c("www/katex/katex.min.js", "www/katex/katex.min.css",
+                  "www/katex/enganche.js")
+
+#' Los assets vendorizados están dentro del bundle exportado.
+verificar_assets <- function(destino) {
+  manifiesto <- file.path(destino, "app.json")
+  if (!file.exists(manifiesto)) return(FALSE)
+  contenido <- paste(readLines(manifiesto, warn = FALSE), collapse = "")
+  faltan <- ASSETS_KATEX[!vapply(ASSETS_KATEX, grepl, logical(1),
+                                 x = contenido, fixed = TRUE)]
+  # Las fuentes van por su cuenta: sin ellas KaTeX pinta, pero con la
+  # tipografía del sistema, que es justo lo que no se quiere.
+  fuentes <- lengths(regmatches(contenido, gregexpr("www/katex/fonts/",
+                                                    contenido, fixed = TRUE)))
+  cat(sprintf("[bundle] assets de KaTeX: %d/%d · %d fuentes\n",
+              length(ASSETS_KATEX) - length(faltan), length(ASSETS_KATEX),
+              fuentes))
+  if (length(faltan)) cat("    faltan:", paste(faltan, collapse = ", "), "\n")
+  length(faltan) == 0L && fuentes > 0L
+}
 
 .JS_COLECTOR <- "
   window.__sda_errores = [];
@@ -111,6 +142,8 @@ verificar_bundle <- function(destino = ruta_app("docs"), espera = ESPERA_WEBR) {
     stop("No hay bundle en ", destino, ". Construilo con: ",
          "Rscript -e 'source(\"learn/build.R\"); construir_bundle()'")
 
+  assets_ok <- verificar_assets(destino)
+
   puerto <- .puerto_libre()
   servidor <- processx::process$new(
     "python3", c("-m", "http.server", as.character(puerto),
@@ -170,7 +203,7 @@ verificar_bundle <- function(destino = ruta_app("docs"), espera = ESPERA_WEBR) {
     for (e in utils::head(errores, 15)) cat("    ", e, "\n")
   }
 
-  ok <- listo && length(errores) == 0
+  ok <- listo && assets_ok && length(errores) == 0
   cat(sprintf("[bundle] %s\n", if (ok) "OK" else "FALLA"))
   invisible(ok)
 }

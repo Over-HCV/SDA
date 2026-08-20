@@ -116,9 +116,19 @@ modelo <- almacen_obtener(almacen, "modelo", id_modelo)
 
 probar("sin dataset y sin modelo se reportan los dos faltantes",
        length(validar_compatibilidad()) >= 2)
-probar("ACP sobre un dataset pendiente no es componible", {
+probar("ACP sobre un dataset válido sí es componible", {
+  # Desde el Hito 3 el ACP está "activo": esta prueba pasó de negativa a
+  # positiva, que es exactamente lo que significa implementar un método.
   avisos <- validar_compatibilidad(dataset, modelo)
-  !componible(avisos)   # acp está "pendiente" en el Hito 1
+  componible(avisos)
+})
+probar("un método todavía pendiente no es componible", {
+  # El bloqueo por estado sigue existiendo; ahora lo prueba otro método. Sin
+  # esta pareja, activar un método apagaría la comprobación sin que se note.
+  avisos <- validar_compatibilidad(
+    dataset, nuevo_modelo("mx", "MDS", "mds"))
+  !componible(avisos) &&
+    any(vapply(avisos, function(a) a$clave == "pendiente", logical(1)))
 })
 probar("un dataset con pocas numéricas dispara el aviso de min_p", {
   flaco <- nuevo_dataset("dx", "flaco", data.frame(a = 1:20))

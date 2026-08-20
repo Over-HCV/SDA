@@ -37,7 +37,7 @@
 #'   error_reconstruccion, traza, convergio y los parámetros con que se ajustó
 ajustar_acp <- function(datos, columnas = NULL, n_componentes = 2L,
                         matriz = "correlacion", optimizador = "potencia",
-                        tol = 1e-8, maxit = 200L, semilla = 42L,
+                        tol = 1e-8, maxit = 500L, semilla = 42L,
                         registrar_traza = TRUE) {
   matriz <- match.arg(matriz, c("correlacion", "covarianza"))
   optimizador <- match.arg(optimizador, c("potencia", "svd"))
@@ -87,7 +87,13 @@ ajustar_acp <- function(datos, columnas = NULL, n_componentes = 2L,
     matriz = matriz, optimizador = optimizador,
     tol = tol, maxit = maxit, semilla = semilla,
     iteraciones = resultado$iteraciones,
-    convergio = resultado$convergio,
+    # Converger se juzga sobre las componentes que se RETIENEN. Las del final
+    # de la cola tienen valores propios casi iguales entre sí, y ahí la
+    # iteración de potencia avanza a paso de tortuga: es una limitación real
+    # del método, no un fallo del ajuste, y descartarlas es justamente lo que
+    # se decidió al elegir k. El detalle por componente queda a la vista.
+    convergio = all(resultado$convergio_por_componente[seq_len(k)]),
+    convergio_por_componente = resultado$convergio_por_componente,
     traza = resultado$traza)
 }
 
@@ -138,8 +144,8 @@ ajustar_acp <- function(datos, columnas = NULL, n_componentes = 2L,
 
 .acp_por_svd <- function(z) {
   ajuste <- stats::prcomp(z, center = FALSE, scale. = FALSE)
-  list(vectores = ajuste$rotation, valores = ajuste$sdev^2,
-       iteraciones = 0L, convergio = TRUE, traza = NULL)
+  list(vectores = ajuste$rotation, valores = ajuste$sdev^2, iteraciones = 0L,
+       convergio_por_componente = rep(TRUE, ncol(z)), traza = NULL)
 }
 
 # Iteración de potencia con deflación. El objetivo que se registra es la
@@ -159,7 +165,7 @@ ajustar_acp <- function(datos, columnas = NULL, n_componentes = 2L,
   residual <- covarianzas
   restante <- varianza_total
   iteraciones <- 0L
-  convergio <- TRUE
+  convergio_por_componente <- logical(p)
 
   for (j in seq_len(p)) {
     v <- stats::rnorm(p)
@@ -190,7 +196,7 @@ ajustar_acp <- function(datos, columnas = NULL, n_componentes = 2L,
       if (delta < tol) { convergio_j <- TRUE; break }
     }
 
-    convergio <- convergio && convergio_j
+    convergio_por_componente[j] <- convergio_j
     vectores[, j] <- v
     valores[j] <- max(lambda, 0)
     restante <- max(restante - valores[j], 0)
@@ -199,5 +205,7 @@ ajustar_acp <- function(datos, columnas = NULL, n_componentes = 2L,
 
   orden <- order(valores, decreasing = TRUE)
   list(vectores = vectores[, orden, drop = FALSE], valores = valores[orden],
-       iteraciones = iteraciones, convergio = convergio, traza = traza)
+       iteraciones = iteraciones,
+       convergio_por_componente = convergio_por_componente[orden],
+       traza = traza)
 }

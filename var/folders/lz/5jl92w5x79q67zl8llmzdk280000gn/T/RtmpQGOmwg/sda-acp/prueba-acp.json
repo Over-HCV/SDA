@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-08-14T07:42:10-0500",
+  "proyecto": "sda-lab",
+  "escenario": "prueba-acp",
+  "params": {
+    "n_componentes": 3,
+    "matriz": "correlacion",
+    "optimizador": "potencia",
+    "tol": 1e-08,
+    "maxit": 500,
+    "semilla": 42,
+    "fuente": "memoria",
+    "columnas": "a,b,c,d"
+  },
+  "metricas": {
+    "n": 200,
+    "p": 4,
+    "k": 3,
+    "varianza_acumulada": 0.983,
+    "primer_valor_propio": 1.9312,
+    "error_reconstruccion": 0.0681,
+    "error_relativo": 0.017,
+    "iteraciones": 228,
+    "convergio": true
+  },
+  "archivos": {
+    "plot": "/Users/oh/World/External/Study/UR/SDA//var/folders/lz/5jl92w5x79q67zl8llmzdk280000gn/T//RtmpQGOmwg/sda-acp/prueba-acp.png",
+    "datos": "/Users/oh/World/External/Study/UR/SDA//var/folders/lz/5jl92w5x79q67zl8llmzdk280000gn/T//RtmpQGOmwg/sda-acp/prueba-acp.csv"
+  },
+  "notas": "Análisis de componentes principales sobre datos dados (n = 200) · Análisis de componentes principales es sensible a la escala y el dataset no está estandarizado."
+}

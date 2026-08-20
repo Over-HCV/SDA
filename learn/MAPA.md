@@ -11,9 +11,9 @@ Todas las rutas son relativas a `learn/`.
 
 ## Resumen
 
-- **Métodos**: 54 registrados — 0 activos, 48 pendientes, 6 bloqueados
-- **Artefactos**: 79 registrados
-- **Textos escritos**: 25 de 79
+- **Métodos**: 54 registrados — 1 activos, 47 pendientes, 6 bloqueados
+- **Artefactos**: 81 registrados
+- **Textos escritos**: 36 de 81
 - **Fichas escritas**: 3 de 54
 
 ## Artefactos
@@ -48,18 +48,20 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f1.transformacion.antes_despues` | Antes y después | `R/graficos/preparacion.R::graficar_antes_despues` | `R/logica/datos/transformacion.R::aplicar_transformaciones` | `textos/f1/transformacion/antes_despues.md` |
 | `f1.transformacion.perfil_boxcox` | Perfil de lambda (Box-Cox) | `R/graficos/preparacion.R::graficar_perfil_boxcox` | `R/logica/datos/transformacion.R::perfil_boxcox` | `textos/f1/transformacion/perfil_boxcox.md` |
 | `f2.analisis.curva_potencia` | Curva de potencia | `R/graficos/modelo.R::graficar_potencia` | `R/logica/potencia.R::calcular_potencia` | *pendiente* |
-| `f2.analisis.espacio_hipotesis` | Espacio de hipótesis | `R/graficos/modelo.R::graficar_espacio_hipotesis` | `R/logica/modelo_geometria.R::familia_candidatas` | *pendiente* |
+| `f2.analisis.espacio_hipotesis` | Espacio de hipótesis | `R/graficos/modelo.R::graficar_espacio_hipotesis` | `R/logica/modelo_geometria.R::familia_candidatas` | `textos/f2/analisis/espacio_hipotesis.md` |
 | `f2.analisis.frontera_decision` | Frontera de decisión | `R/graficos/modelo.R::graficar_frontera` | `R/logica/modelo_geometria.R::malla_decision` | *pendiente* |
-| `f2.analisis.modelo_manual` | Modelo manual | `R/graficos/modelo.R::graficar_modelo_manual` | `R/logica/modelo_geometria.R::evaluar_objetivo` | *pendiente* |
-| `f2.analisis.presupuesto_parametros` | Presupuesto de parámetros | `R/graficos/modelo.R::graficar_presupuesto` | `R/logica/modelo_geometria.R::contar_parametros` | *pendiente* |
+| `f2.analisis.modelo_manual` | Modelo manual | `R/graficos/modelo.R::graficar_modelo_manual` | `R/logica/modelo_geometria.R::evaluar_objetivo` | `textos/f2/analisis/modelo_manual.md` |
+| `f2.analisis.presupuesto_parametros` | Presupuesto de parámetros | `R/graficos/modelo.R::graficar_presupuesto` | `R/logica/modelo_geometria.R::contar_parametros` | `textos/f2/analisis/presupuesto_parametros.md` |
 | `f2.analisis.superficie_perdida` | Superficie de pérdida | `R/graficos/modelo.R::graficar_superficie_perdida` | `R/logica/modelo_geometria.R::malla_objetivo` | *pendiente* |
+| `f2.especificacion.matriz_diseno` | Matriz de diseño | `R/ui/f2/especificacion.R::salida_especificacion` | `R/logica/modelo_geometria.R::resumen_matriz_diseno` | `textos/f2/especificacion/matriz_diseno.md` |
+| `f2.supuestos.semaforo` | Semáforo de supuestos | `R/ui/f2/supuestos.R::salida_supuestos` | `R/logica/supuestos.R::evaluar_supuestos` | `textos/f2/supuestos/semaforo.md` |
 | `f3.analisis.camino_superficie` | Camino sobre la superficie | `R/graficos/convergencia.R::graficar_camino` | `R/logica/traza.R::traza_a_tabla` | *pendiente* |
 | `f3.analisis.convergencia` | Traza de convergencia | `R/graficos/convergencia.R::graficar_convergencia` | `R/logica/traza.R::registrar_iteracion` | `textos/f3/analisis/convergencia.md` |
 | `f3.analisis.curva_aprendizaje` | Curva de aprendizaje | `R/graficos/convergencia.R::graficar_curva_aprendizaje` | `R/logica/validacion.R::curva_aprendizaje` | *pendiente* |
 | `f3.analisis.perfil_verosimilitud` | Perfil de verosimilitud | `R/graficos/convergencia.R::graficar_perfil` | `R/logica/verosimilitud.R::perfil_parametro` | *pendiente* |
 | `f3.analisis.ruta_regularizacion` | Ruta de regularización | `R/graficos/convergencia.R::graficar_ruta_lambda` | `R/logica/regularizacion.R::ruta_coeficientes` | *pendiente* |
 | `f3.analisis.sensibilidad_semilla` | Sensibilidad a la semilla | `R/graficos/convergencia.R::graficar_reinicios` | `R/logica/traza.R::comparar_reinicios` | *pendiente* |
-| `f3.analisis.trayectoria` | Trayectoria de parámetros | `R/graficos/convergencia.R::graficar_trayectoria` | `R/logica/traza.R::traza_a_tabla` | *pendiente* |
+| `f3.analisis.trayectoria` | Trayectoria de parámetros | `R/graficos/convergencia.R::graficar_trayectoria` | `R/logica/traza.R::parametros_a_tabla` | `textos/f3/analisis/trayectoria.md` |
 | `f4.comparacion.hiperparametros` | Hiperparámetros contra métrica | `R/graficos/comparacion.R::graficar_paralelas_hiper` | `R/logica/comparacion.R::rejilla_hiperparametros` | *pendiente* |
 | `f4.comparacion.metricas` | Métricas lado a lado | `R/graficos/comparacion.R::tabla_comparacion` | `R/logica/comparacion.R::comparar_corridas` | *pendiente* |
 | `f4.desempeno.ajuste` | Ajuste sobre los datos | `R/graficos/desempeno.R::graficar_ajuste` | `R/logica/metricas_regresion.R::metricas_regresion` | *pendiente* |
@@ -87,19 +89,19 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f4.diagnostico.qq_normal` | Q-Q normal de residuos | `R/graficos/diagnostico.R::graficar_qq_residuos` | `R/logica/normalidad.R::evaluar_normalidad` | *pendiente* |
 | `f4.diagnostico.residuos` | Residuos contra ajustados | `R/graficos/diagnostico.R::graficar_residuos` | `R/logica/diagnostico_regresion.R::calcular_residuos` | *pendiente* |
 | `f4.diagnostico.residuos_estandarizados` | Residuos estandarizados | `R/graficos/diagnostico.R::graficar_residuos_contingencia` | `R/logica/contingencia.R::residuos_estandarizados` | *pendiente* |
-| `f4.diagnostico.scree` | Gráfico de sedimentación | `R/graficos/diagnostico.R::graficar_scree` | `R/logica/metricas_reduccion.R::varianza_explicada` | *pendiente* |
+| `f4.diagnostico.scree` | Gráfico de sedimentación | `R/graficos/diagnostico.R::graficar_scree` | `R/logica/metricas_reduccion.R::varianza_explicada` | `textos/f4/diagnostico/scree.md` |
 | `f4.diagnostico.silueta` | Silueta | `R/graficos/diagnostico.R::graficar_silueta` | `R/logica/metricas_grupos.R::silueta` | *pendiente* |
 | `f4.diagnostico.vif` | Factor de inflación de varianza | `R/graficos/diagnostico.R::graficar_vif` | `R/logica/diagnostico_regresion.R::calcular_vif` | *pendiente* |
-| `f4.explicabilidad.biplot` | Biplot | `R/graficos/explicabilidad.R::graficar_biplot` | `R/logica/metricas_reduccion.R::coordenadas_biplot` | *pendiente* |
-| `f4.explicabilidad.cargas` | Cargas | `R/graficos/explicabilidad.R::graficar_cargas` | `R/logica/metricas_reduccion.R::cargas` | *pendiente* |
-| `f4.explicabilidad.circulo_correlaciones` | Círculo de correlaciones | `R/graficos/explicabilidad.R::graficar_circulo` | `R/logica/metricas_reduccion.R::correlaciones_componentes` | *pendiente* |
+| `f4.explicabilidad.biplot` | Biplot | `R/graficos/explicabilidad.R::graficar_biplot` | `R/logica/metricas_reduccion.R::coordenadas_biplot` | `textos/f4/explicabilidad/biplot.md` |
+| `f4.explicabilidad.cargas` | Cargas | `R/graficos/explicabilidad.R::graficar_cargas` | `R/logica/metricas_reduccion.R::cargas` | `textos/f4/explicabilidad/cargas.md` |
+| `f4.explicabilidad.circulo_correlaciones` | Círculo de correlaciones | `R/graficos/explicabilidad.R::graficar_circulo` | `R/logica/metricas_reduccion.R::correlaciones_componentes` | `textos/f4/explicabilidad/circulo_correlaciones.md` |
 | `f4.explicabilidad.coeficientes` | Coeficientes estimados | `R/graficos/explicabilidad.R::graficar_coeficientes` | `R/logica/metricas_regresion.R::tabla_coeficientes` | *pendiente* |
 | `f4.explicabilidad.efectos_aleatorios` | Efectos aleatorios | `R/graficos/explicabilidad.R::graficar_efectos_aleatorios` | `R/logica/metricas_mixtos.R::efectos_aleatorios` | *pendiente* |
 | `f4.explicabilidad.grafo` | Grafo de comunidades | `R/graficos/explicabilidad.R::graficar_grafo` | `R/logica/grafos.R::construir_grafo` | *pendiente* |
 | `f4.explicabilidad.heatmap_bicluster` | Mapa de calor de biclusters | `R/graficos/explicabilidad.R::graficar_heatmap_bicluster` | `R/logica/metricas_grupos.R::biclusters` | *pendiente* |
 | `f4.explicabilidad.importancia` | Importancia por permutación | `R/graficos/explicabilidad.R::graficar_importancia` | `R/logica/explicabilidad.R::importancia_permutacion` | *pendiente* |
 | `f4.explicabilidad.local` | Explicación local (LIME / SHAP) | `R/graficos/explicabilidad.R::graficar_explicacion_local` | `R/logica/explicabilidad.R::explicar_observacion` | *pendiente* |
-| `f4.explicabilidad.mapa_2d` | Mapa en dos dimensiones | `R/graficos/explicabilidad.R::graficar_mapa_2d` | `R/logica/metricas_reduccion.R::coordenadas_2d` | *pendiente* |
+| `f4.explicabilidad.mapa_2d` | Mapa en dos dimensiones | `R/graficos/explicabilidad.R::graficar_mapa_2d` | `R/logica/metricas_reduccion.R::coordenadas_2d` | `textos/f4/explicabilidad/mapa_2d.md` |
 | `f4.explicabilidad.pdp` | Dependencia parcial (PDP / ICE) | `R/graficos/explicabilidad.R::graficar_pdp` | `R/logica/explicabilidad.R::dependencia_parcial` | *pendiente* |
 | `f4.explicabilidad.series_por_grupo` | Series por grupo | `R/graficos/explicabilidad.R::graficar_series_grupo` | `R/logica/metricas_grupos.R::centroides_series` | *pendiente* |
 
@@ -126,7 +128,7 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `acp_faltantes` | ACP con datos faltantes | 4 | reducir | pendiente | no | `fichas/acp_faltantes.md` | `090-reduccion/020-acp` |
 | `fpca` | ACP funcional | 4 | reducir | pendiente | no | `fichas/fpca.md` | `150-extensiones/070-datos-funcionales` |
 | `acp_robusto` | ACP robusto | 4 | reducir | pendiente | no | `fichas/acp_robusto.md` | `090-reduccion/020-acp/050-decisiones/020-outliers` |
-| `acp` | Análisis de componentes principales | 4 | reducir | pendiente | sí | `fichas/acp.md` | `090-reduccion/020-acp` |
+| `acp` | Análisis de componentes principales | 4 | reducir | activo | sí | `fichas/acp.md` | `090-reduccion/020-acp` |
 | `efa` | Análisis factorial exploratorio | 4 | reducir | pendiente | no | `fichas/efa.md` | `090-reduccion/030-emparentados/010-analisis-factorial` |
 | `mds` | Escalamiento multidimensional | 4 | reducir | pendiente | sí | `fichas/mds.md` | `090-reduccion/030-emparentados/020-mds` |
 | `kernel_pca` | Kernel PCA | 4 | reducir | pendiente | no | `fichas/kernel_pca.md` | `090-reduccion/030-emparentados/040-no-lineal` |

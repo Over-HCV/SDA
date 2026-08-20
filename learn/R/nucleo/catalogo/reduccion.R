@@ -9,6 +9,7 @@ poblar_catalogo_reduccion <- function() {
     clave = "acp", nombre = "Análisis de componentes principales",
     objetivo = "reducir", supervision = "no_supervisado", sesion = 4,
     nodo = "090-reduccion/020-acp",
+    estado = "activo", ajustar = ajustar_acp,
     entrada = list(tipo = "matriz_numerica", min_p = 2L, min_n = 5L,
                    faltantes = FALSE, escalado = TRUE),
     hiper = list(
@@ -17,11 +18,18 @@ poblar_catalogo_reduccion <- function() {
       matriz = list(tipo = "opcion", opciones = c("correlacion", "covarianza"),
                     def = "correlacion",
                     etiqueta = "Descomponer R (escalado) o S (crudo)")),
-    optimizador = list(metodos = c("SVD", "descomposicion espectral"),
-                       traza = FALSE, paso_a_paso = FALSE),
-    artefactos = c("f4.diagnostico.scree", "f4.explicabilidad.biplot",
+    # El ACP tiene solución cerrada, pero eso no lo deja fuera de la fase 3: la
+    # iteración de potencia llega al mismo sitio dando pasos que se pueden
+    # mirar. `svd` queda como el camino rápido, sin traza y diciéndolo.
+    optimizador = list(metodos = c("potencia", "svd"),
+                       traza = TRUE, paso_a_paso = TRUE),
+    artefactos = c("f2.especificacion.matriz_diseno", "f2.supuestos.semaforo",
+                   "f2.analisis.espacio_hipotesis", "f2.analisis.modelo_manual",
+                   "f2.analisis.presupuesto_parametros",
+                   "f3.analisis.convergencia", "f3.analisis.trayectoria",
+                   "f4.diagnostico.scree", "f4.explicabilidad.cargas",
                    "f4.explicabilidad.circulo_correlaciones",
-                   "f4.explicabilidad.cargas"),
+                   "f4.explicabilidad.biplot", "f4.explicabilidad.mapa_2d"),
     supuestos = c("escalado_previo", "estructura_lineal", "sin_atipicos"))
 
   registrar_metodo(

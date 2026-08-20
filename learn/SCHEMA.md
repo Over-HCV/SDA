@@ -361,13 +361,23 @@ Tres pestañas por dimensionalidad, cada gráfico con su ficha de "cómo se lee"
 │ ☑ atípicos        │  x̄ 312.4 │ Me 180.0 │ s 501.2 │ CV 1.60 │ g₁ 2.8    │
 │ ☐ log en x        │                                                      │
 │                   │  ▸ ¿Cómo se lee?                                      │
-│ Agrupar [Unit ▾]  │  ▸ ¿Por qué importa?                                  │
-│                   │  ▸ contexto                              │
+│ Agrupar [Unit ▾]  │  ▸ Contexto                                           │
+│                   │                                                       │
 └───────────────────┴──────────────────────────────────────────────────────┘
 ```
 
-Al abrir **¿Cómo se lee?** aparece el texto del artefacto, con la fórmula y la
-trampa del gráfico:
+El ⓘ del encabezado no repite la traza —esa está entera en **Contexto**—: dice
+para qué sirve la card, que es lo que ninguna otra parte responde.
+
+```
+ⓘ ¿Para qué sirve?
+  Formarse la primera idea de una variable antes de decidir cualquier
+  otra cosa sobre ella. Es la card que se abre primero y la que más
+  veces termina cambiando el plan.
+```
+
+Al abrir **¿Cómo se lee?** aparecen los otros tres bloques del artefacto, con
+la fórmula —LaTeX de verdad, pintado por KaTeX— y la trampa del gráfico:
 
 ```
 │ ▾ ¿Cómo se lee?                                                          │
@@ -383,8 +393,10 @@ trampa del gráfico:
 | **Bivariado** | dispersión (+ jitter, alfa, hexbin) · densidad conjunta con curvas de nivel · boxplot agrupado · mosaico · tabla de contingencia con residuos estandarizados | selector de par + slider de transparencia; el sobreploteo se ve y se cura |
 | **Multivariado** | matriz de dispersión · mapa de calor de `R` (con reordenamiento) · coordenadas paralelas · elipsoide de concentración · Q–Q de distancias de Mahalanobis · superficie de densidad bivariada 3D | multi-select de variables; el elipsoide se deforma con la correlación |
 
-Cada gráfico lleva su plegable con la estructura fija **qué muestra · qué
-buscar · cuándo engaña**. Los textos viven en `learn/textos/<fase>/<subseccion>/<artefacto>.md`, uno por
+Cada gráfico lleva su texto con la estructura fija **para qué sirve · qué
+muestra · qué buscar · cuándo engaña**. El primero va al sello ⓘ del
+encabezado; los otros tres al plegable «¿Cómo se lee?». Los textos viven en
+`learn/textos/<fase>/<subseccion>/<artefacto>.md`, uno por
 artefacto, y se escriben incrementalmente: si falta el archivo, la UI lo avisa
 en gris y no falla. Son 71 y llevan tiempo; la cobertura se ve en el Inicio y en
 `MAPA.md`.
