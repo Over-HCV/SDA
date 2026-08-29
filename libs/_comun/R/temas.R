@@ -36,7 +36,12 @@ paleta_cat <- function(n = 8) {
     "#F0E442",  # amarillo
     "#000000"   # negro
   )
-  if (n <= length(okabe_ito)) okabe_ito[seq_len(n)] else okabe_ito
+  # Con más de 8 series hay que devolver 8 + lo que falte, no 8 a secas:
+  # scale_*_manual() con menos valores que niveles no avisa al construir el
+  # gráfico, revienta al pintarlo. Se interpola sobre la misma base para que
+  # los ocho primeros sigan siendo exactamente los de Okabe-Ito.
+  if (n <= length(okabe_ito)) return(okabe_ito[seq_len(n)])
+  grDevices::colorRampPalette(okabe_ito)(n)
 }
 
 # Atajos listos para +ggplot

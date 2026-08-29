@@ -142,9 +142,11 @@ mod_ajuste_server <- function(id, almacen = NULL) {
       corrida <- nueva_corrida(
         NULL, dataset()$id, modelo()$id, id_receta, modelo()$metodo,
         ajuste = a, traza = a$traza, metricas = metricas_de_corrida(a),
-        params = c(modelo()$hiper, list(optimizador = a$optimizador,
-                                        tol = a$tol, maxit = a$maxit,
-                                        semilla = a$semilla)),
+        params = c(modelo()$hiper,
+                   list(optimizador = a$optimizador,
+                        inicializacion = a$inicializacion %||% NA_character_,
+                        reinicios = a$reinicios %||% 1L,
+                        tol = a$tol, maxit = a$maxit, semilla = a$semilla)),
         estado = "listo")
       guardado <- almacen_agregar(con_receta, corrida)
       almacen(guardado)
@@ -163,13 +165,18 @@ mod_ajuste_server <- function(id, almacen = NULL) {
 # el ajuste se arme igual acá, en run_headless.R y en la fase 4 es la regla de
 # las tres partes funcionando (C11).
 .ajustar_modelo <- function(ds, mo, input) {
-  do.call(metodo(mo$metodo)$ajustar, c(
+  # `argumentos_ajuste()` filtra por la firma del método: la fase arma un solo
+  # bloque de mandos y cada familia toma los suyos. Sin ese filtro, elegir
+  # k-medias reventaría con "unused argument (inicializacion)".
+  do.call(metodo(mo$metodo)$ajustar, argumentos_ajuste(mo$metodo, c(
     list(datos = ds$df, columnas = mo$spec),
     mo$hiper,
     list(optimizador = input$optimizador %||% "potencia",
+         inicializacion = input$inicializacion %||% NULL,
+         reinicios = input$reinicios %||% 1L,
          tol = tolerancia_de(input), maxit = input$maxit %||% 500L,
          semilla = input$semilla %||% 42L,
-         registrar_traza = isTRUE(input$registrar_traza))))
+         registrar_traza = isTRUE(input$registrar_traza)))))
 }
 
 .receta_de <- function(input) {
@@ -177,7 +184,9 @@ mod_ajuste_server <- function(id, almacen = NULL) {
     NULL, sprintf("%s tol %.0e", input$optimizador %||% "potencia",
                   tolerancia_de(input)),
     optimizador = input$optimizador %||% NA_character_,
-    control = list(tol = tolerancia_de(input), maxit = input$maxit %||% 500L),
+    control = list(tol = tolerancia_de(input), maxit = input$maxit %||% 500L,
+                   inicializacion = input$inicializacion %||% NA_character_,
+                   reinicios = input$reinicios %||% 1L),
     semilla = input$semilla %||% 42L)
 }
 
@@ -192,12 +201,14 @@ mod_ajuste_server <- function(id, almacen = NULL) {
   if (is.null(ajuste))
     return(franja_estado(list("ajuste" = "sin correr",
                               "optimizador" = input$optimizador %||% "-")))
-  franja_estado(list(
-    "optimizador" = ajuste$optimizador,
-    "estado" = if (isTRUE(ajuste$convergio)) "convergio" else "agoto iteraciones",
-    "iteraciones" = ajuste$iteraciones,
-    "tolerancia" = format(ajuste$tol, scientific = TRUE),
-    "semilla" = ajuste$semilla,
-    "explicado" = sprintf("%.1f %%",
-                          100 * sum(ajuste$varianza_explicada[seq_len(ajuste$k)]))))
+  franja_estado(c(
+    list("optimizador" = ajuste$optimizador,
+         "estado" = if (isTRUE(ajuste$convergio)) "convergio"
+                    else "agoto iteraciones",
+         "iteraciones" = ajuste$iteraciones,
+         "tolerancia" = format(ajuste$tol, scientific = TRUE),
+         "semilla" = ajuste$semilla),
+    # Lo que resume un ajuste depende de la familia y lo contesta el ajuste,
+    # no la vista (R/logica/metricas.R).
+    resumen_ajuste(ajuste)))
 }

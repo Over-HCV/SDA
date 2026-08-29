@@ -9,18 +9,26 @@ poblar_catalogo_agrupamiento <- function() {
     clave = "kmeans", nombre = "K-medias",
     objetivo = "agrupar", supervision = "no_supervisado", sesion = 5,
     nodo = "100-agrupamiento/020-kmeans",
+    estado = "activo", ajustar = ajustar_kmeans,
     entrada = list(tipo = "matriz_numerica", min_p = 2L, min_n = 10L,
                    faltantes = FALSE, escalado = TRUE),
     hiper = list(
       k = list(tipo = "entero", min = 2, max = 12, def = 3, paso = 1,
-               etiqueta = "Número de grupos (k)")),
+               etiqueta = "Número de grupos (k)"),
+      escalar = list(tipo = "logico", def = TRUE,
+                     etiqueta = "Estandarizar antes de medir distancias")),
+    # Hartigan-Wong no está: implementarlo a mano es otro hito y despacharlo a
+    # stats::kmeans() devolvería un resultado sin traza, que es justo lo que la
+    # fase 3 muestra. El catálogo promete lo que puede correr.
     optimizador = list(
-      metodos = c("Lloyd", "MacQueen", "Hartigan-Wong"),
+      metodos = c("Lloyd", "MacQueen"),
       inicializaciones = c("k-means++", "aleatoria", "Forgy"),
       traza = TRUE, paso_a_paso = TRUE),
-    artefactos = c("f3.analisis.convergencia", "f3.analisis.trayectoria",
-                   "f4.diagnostico.silueta", "f4.diagnostico.codo",
-                   "f4.explicabilidad.mapa_2d"),
+    artefactos = c("f3.consola.estado", "f3.analisis.convergencia",
+                   "f3.analisis.trayectoria",
+                   "f4.desempeno.grupos", "f4.diagnostico.silueta",
+                   "f4.diagnostico.codo", "f4.explicabilidad.mapa_2d",
+                   "f4.explicabilidad.centroides"),
     supuestos = c("escalado_previo", "grupos_esfericos", "tamanos_similares",
                   "sin_atipicos"))
 

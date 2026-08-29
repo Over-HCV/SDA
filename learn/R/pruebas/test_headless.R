@@ -212,6 +212,25 @@ probar("un texto sin formulas pasa igual que antes",
                                            extensions = TRUE, smart = TRUE)))
 
 # ---------------------------------------------------------------------------
+cat("\n[despacho por familia]\n")
+
+probar("cada familia contesta las genericas con lo suyo", {
+  set.seed(3)
+  marco <- data.frame(a = stats::rnorm(60), b = stats::rnorm(60),
+                      c = stats::rnorm(60))
+  reduccion <- ajustar_acp(marco, n_componentes = 2L, optimizador = "svd")
+  particion <- ajustar_kmeans(marco, k = 2L, reinicios = 2L)
+  !identical(names(metricas_de_corrida(reduccion)),
+             names(metricas_de_corrida(particion))) &&
+    "varianza_acumulada" %in% names(metricas_de_corrida(reduccion)) &&
+    "inercia" %in% names(metricas_de_corrida(particion))
+})
+
+probar("un ajuste sin familia no dibuja una vista vacia: falla y explica", {
+  suelto <- tryCatch(metricas_de_corrida(list(k = 2)), error = function(e) e)
+  inherits(suelto, "error") && grepl("ajustar_", conditionMessage(suelto))
+})
+
 cat("\n[exportadores]\n")
 directorio <- file.path(tempdir(), "sda-pruebas")
 dir.create(directorio, showWarnings = FALSE, recursive = TRUE)

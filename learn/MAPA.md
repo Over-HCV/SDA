@@ -11,9 +11,9 @@ Todas las rutas son relativas a `learn/`.
 
 ## Resumen
 
-- **Métodos**: 54 registrados — 1 activos, 47 pendientes, 6 bloqueados
-- **Artefactos**: 81 registrados
-- **Textos escritos**: 36 de 81
+- **Métodos**: 54 registrados — 2 activos, 46 pendientes, 6 bloqueados
+- **Artefactos**: 84 registrados
+- **Textos escritos**: 41 de 84
 - **Fichas escritas**: 3 de 54
 
 ## Artefactos
@@ -62,12 +62,14 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f3.analisis.ruta_regularizacion` | Ruta de regularización | `R/graficos/convergencia.R::graficar_ruta_lambda` | `R/logica/regularizacion.R::ruta_coeficientes` | *pendiente* |
 | `f3.analisis.sensibilidad_semilla` | Sensibilidad a la semilla | `R/graficos/convergencia.R::graficar_reinicios` | `R/logica/traza.R::comparar_reinicios` | *pendiente* |
 | `f3.analisis.trayectoria` | Trayectoria de parámetros | `R/graficos/convergencia.R::graficar_trayectoria` | `R/logica/traza.R::parametros_a_tabla` | `textos/f3/analisis/trayectoria.md` |
+| `f3.consola.estado` | El ajuste, iteración por iteración | `R/graficos/explicabilidad.R::graficar_mapa_2d` | `R/logica/metricas.R::coordenadas_2d` | `textos/f3/consola/estado.md` |
 | `f4.comparacion.hiperparametros` | Hiperparámetros contra métrica | `R/graficos/comparacion.R::graficar_paralelas_hiper` | `R/logica/comparacion.R::rejilla_hiperparametros` | *pendiente* |
 | `f4.comparacion.metricas` | Métricas lado a lado | `R/graficos/comparacion.R::tabla_comparacion` | `R/logica/comparacion.R::comparar_corridas` | *pendiente* |
 | `f4.desempeno.ajuste` | Ajuste sobre los datos | `R/graficos/desempeno.R::graficar_ajuste` | `R/logica/metricas_regresion.R::metricas_regresion` | *pendiente* |
 | `f4.desempeno.calibracion` | Curva de calibración | `R/graficos/desempeno.R::graficar_calibracion` | `R/logica/metricas_clasificacion.R::calibracion` | *pendiente* |
 | `f4.desempeno.distribucion_bootstrap` | Distribución bootstrap | `R/graficos/desempeno.R::graficar_bootstrap` | `R/logica/remuestreo.R::distribucion_bootstrap` | *pendiente* |
 | `f4.desempeno.distribucion_nula` | Distribución nula | `R/graficos/desempeno.R::graficar_nula` | `R/logica/remuestreo.R::distribucion_permutacion` | *pendiente* |
+| `f4.desempeno.grupos` | Tamaño de los grupos | `R/graficos/grupos.R::graficar_tamanos` | `R/logica/metricas_grupos.R::resumen_grupos` | `textos/f4/desempeno/grupos.md` |
 | `f4.desempeno.intervalos_tukey` | Intervalos de Tukey | `R/graficos/desempeno.R::graficar_tukey` | `R/logica/metricas_anova.R::comparaciones_multiples` | *pendiente* |
 | `f4.desempeno.matriz_confusion` | Matriz de confusión | `R/graficos/desempeno.R::graficar_confusion` | `R/logica/metricas_clasificacion.R::matriz_confusion` | *pendiente* |
 | `f4.desempeno.precision_exhaustividad` | Precisión-exhaustividad | `R/graficos/desempeno.R::graficar_pr` | `R/logica/metricas_clasificacion.R::calcular_pr` | *pendiente* |
@@ -77,7 +79,7 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f4.desempeno.tabla_contingencia` | Tabla de contingencia | `R/graficos/desempeno.R::tabla_contingencia_formateada` | `R/logica/contingencia.R::tabla_contingencia` | *pendiente* |
 | `f4.desempeno.tamano_efecto` | Tamaño del efecto | `R/graficos/desempeno.R::graficar_tamano_efecto` | `R/logica/metricas_anova.R::tamano_efecto` | *pendiente* |
 | `f4.diagnostico.bic` | BIC por modelo | `R/graficos/diagnostico.R::graficar_bic` | `R/logica/metricas_grupos.R::bic_mezclas` | *pendiente* |
-| `f4.diagnostico.codo` | Codo de la inercia | `R/graficos/diagnostico.R::graficar_codo` | `R/logica/metricas_grupos.R::inercia_por_k` | *pendiente* |
+| `f4.diagnostico.codo` | Codo de la inercia | `R/graficos/diagnostico.R::graficar_codo` | `R/logica/metricas_grupos.R::inercia_por_k` | `textos/f4/diagnostico/codo.md` |
 | `f4.diagnostico.cofenetico` | Correlación cofenética | `R/graficos/diagnostico.R::graficar_cofenetico` | `R/logica/metricas_grupos.R::cofenetico` | *pendiente* |
 | `f4.diagnostico.dendrograma` | Dendrograma | `R/graficos/diagnostico.R::graficar_dendrograma` | `R/logica/metricas_grupos.R::arbol_jerarquico` | *pendiente* |
 | `f4.diagnostico.esfericidad` | Esfericidad | `R/graficos/diagnostico.R::graficar_esfericidad` | `R/logica/metricas_anova.R::prueba_esfericidad` | *pendiente* |
@@ -90,10 +92,11 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f4.diagnostico.residuos` | Residuos contra ajustados | `R/graficos/diagnostico.R::graficar_residuos` | `R/logica/diagnostico_regresion.R::calcular_residuos` | *pendiente* |
 | `f4.diagnostico.residuos_estandarizados` | Residuos estandarizados | `R/graficos/diagnostico.R::graficar_residuos_contingencia` | `R/logica/contingencia.R::residuos_estandarizados` | *pendiente* |
 | `f4.diagnostico.scree` | Gráfico de sedimentación | `R/graficos/diagnostico.R::graficar_scree` | `R/logica/metricas_reduccion.R::varianza_explicada` | `textos/f4/diagnostico/scree.md` |
-| `f4.diagnostico.silueta` | Silueta | `R/graficos/diagnostico.R::graficar_silueta` | `R/logica/metricas_grupos.R::silueta` | *pendiente* |
+| `f4.diagnostico.silueta` | Silueta | `R/graficos/diagnostico.R::graficar_silueta` | `R/logica/metricas_grupos.R::silueta` | `textos/f4/diagnostico/silueta.md` |
 | `f4.diagnostico.vif` | Factor de inflación de varianza | `R/graficos/diagnostico.R::graficar_vif` | `R/logica/diagnostico_regresion.R::calcular_vif` | *pendiente* |
 | `f4.explicabilidad.biplot` | Biplot | `R/graficos/explicabilidad.R::graficar_biplot` | `R/logica/metricas_reduccion.R::coordenadas_biplot` | `textos/f4/explicabilidad/biplot.md` |
 | `f4.explicabilidad.cargas` | Cargas | `R/graficos/explicabilidad.R::graficar_cargas` | `R/logica/metricas_reduccion.R::cargas` | `textos/f4/explicabilidad/cargas.md` |
+| `f4.explicabilidad.centroides` | Perfil de los grupos | `R/graficos/grupos.R::graficar_centroides` | `R/logica/metricas_grupos.R::centroides_tabla` | `textos/f4/explicabilidad/centroides.md` |
 | `f4.explicabilidad.circulo_correlaciones` | Círculo de correlaciones | `R/graficos/explicabilidad.R::graficar_circulo` | `R/logica/metricas_reduccion.R::correlaciones_componentes` | `textos/f4/explicabilidad/circulo_correlaciones.md` |
 | `f4.explicabilidad.coeficientes` | Coeficientes estimados | `R/graficos/explicabilidad.R::graficar_coeficientes` | `R/logica/metricas_regresion.R::tabla_coeficientes` | *pendiente* |
 | `f4.explicabilidad.efectos_aleatorios` | Efectos aleatorios | `R/graficos/explicabilidad.R::graficar_efectos_aleatorios` | `R/logica/metricas_mixtos.R::efectos_aleatorios` | *pendiente* |
@@ -101,7 +104,7 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f4.explicabilidad.heatmap_bicluster` | Mapa de calor de biclusters | `R/graficos/explicabilidad.R::graficar_heatmap_bicluster` | `R/logica/metricas_grupos.R::biclusters` | *pendiente* |
 | `f4.explicabilidad.importancia` | Importancia por permutación | `R/graficos/explicabilidad.R::graficar_importancia` | `R/logica/explicabilidad.R::importancia_permutacion` | *pendiente* |
 | `f4.explicabilidad.local` | Explicación local (LIME / SHAP) | `R/graficos/explicabilidad.R::graficar_explicacion_local` | `R/logica/explicabilidad.R::explicar_observacion` | *pendiente* |
-| `f4.explicabilidad.mapa_2d` | Mapa en dos dimensiones | `R/graficos/explicabilidad.R::graficar_mapa_2d` | `R/logica/metricas_reduccion.R::coordenadas_2d` | `textos/f4/explicabilidad/mapa_2d.md` |
+| `f4.explicabilidad.mapa_2d` | Mapa en dos dimensiones | `R/graficos/explicabilidad.R::graficar_mapa_2d` | `R/logica/metricas.R::coordenadas_2d` | `textos/f4/explicabilidad/mapa_2d.md` |
 | `f4.explicabilidad.pdp` | Dependencia parcial (PDP / ICE) | `R/graficos/explicabilidad.R::graficar_pdp` | `R/logica/explicabilidad.R::dependencia_parcial` | *pendiente* |
 | `f4.explicabilidad.series_por_grupo` | Series por grupo | `R/graficos/explicabilidad.R::graficar_series_grupo` | `R/logica/metricas_grupos.R::centroides_series` | *pendiente* |
 
@@ -140,7 +143,7 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `biclustering` | Biclustering | 5 | agrupar | pendiente | no | `fichas/biclustering.md` | `100-agrupamiento/040-otros-enfoques` |
 | `dbscan` | DBSCAN | 5 | agrupar | pendiente | sí | `fichas/dbscan.md` | `100-agrupamiento/040-otros-enfoques/010-dbscan` |
 | `comunidades` | Detección de comunidades | 5 | agrupar | pendiente | no | `fichas/comunidades.md` | `150-extensiones/090-no-estructurados` |
-| `kmeans` | K-medias | 5 | agrupar | pendiente | sí | `fichas/kmeans.md` | `100-agrupamiento/020-kmeans` |
+| `kmeans` | K-medias | 5 | agrupar | activo | sí | `fichas/kmeans.md` | `100-agrupamiento/020-kmeans` |
 | `validacion_grupos` | Validación de grupos | 5 | agrupar | pendiente | sí | `fichas/validacion_grupos.md` | `100-agrupamiento/050-validacion` |
 | `regresion_multiple` | Regresión lineal múltiple | 6 | predecir | pendiente | sí | `fichas/regresion_multiple.md` | `120-regresion/040-multiple` |
 | `regresion_simple` | Regresión lineal simple | 6 | predecir | pendiente | sí | `fichas/regresion_simple.md` | `120-regresion/030-simple` |

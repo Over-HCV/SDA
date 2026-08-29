@@ -9,6 +9,10 @@
 #
 # Sirve para ACP y, sin cambios, para cualquier método que devuelva cargas,
 # puntuaciones y valores propios: análisis factorial, ACP robusto, MDS métrico.
+#
+# Las cinco funciones con sufijo `.ajuste_acp` son los métodos S3 de las
+# genéricas de `metricas.R`: son la cara de esta familia hacia la UI, que no
+# sabe ni tiene que saber qué método produjo el ajuste que está pintando.
 
 #' Las métricas de un ajuste de reducción, como lista plana.
 #'
@@ -19,7 +23,7 @@
 #'
 #' Cuando entren métodos de otra familia tendrán su propia función hermana; el
 #' nombre dice a qué familia pertenece esta.
-metricas_de_corrida <- function(ajuste) {
+metricas_de_corrida.ajuste_acp <- function(ajuste) {
   retenidas <- seq_len(ajuste$k)
   list(n = ajuste$n, p = ajuste$p, k = ajuste$k,
        varianza_acumulada = sum(ajuste$varianza_explicada[retenidas]),
@@ -81,7 +85,8 @@ correlaciones_componentes <- function(ajuste, ejes = c(1L, 2L)) {
 #'
 #' @param grupo vector con una entrada por fila usada en el ajuste, o NULL
 #' @return data.frame(fila, x, y, grupo)
-coordenadas_2d <- function(ajuste, ejes = c(1L, 2L), grupo = NULL) {
+coordenadas_2d.ajuste_acp <- function(ajuste, ejes = c(1L, 2L), grupo = NULL,
+                                      ...) {
   ejes <- .ejes_validos(ajuste, ejes)
   puntuaciones <- ajuste$puntuaciones
   tabla <- data.frame(fila = seq_len(nrow(puntuaciones)),
@@ -132,4 +137,37 @@ componentes_sugeridas <- function(ajuste, umbral_acumulado = 0.8) {
   if (any(ejes < 1L) || any(ejes > ajuste$k))
     stop(sprintf("solo hay %d componentes retenidas", ajuste$k))
   ejes
+}
+
+# ---------------------------------------------------------------------------
+# La cara de la familia hacia la UI (genéricas de metricas.R)
+# ---------------------------------------------------------------------------
+
+#' El resultado principal del ACP es cuánto conserva cada componente.
+tabla_resultado.ajuste_acp <- function(ajuste) varianza_explicada(ajuste)
+
+grafico_resultado.ajuste_acp <- function(ajuste, ...) {
+  graficar_scree(varianza_explicada(ajuste), k = ajuste$k, ...)
+}
+
+resumen_ajuste.ajuste_acp <- function(ajuste) {
+  retenidas <- seq_len(ajuste$k)
+  list("componentes" = sprintf("%d de %d", ajuste$k, ajuste$p),
+       "explicado" = sprintf("%.1f %%",
+                             100 * sum(ajuste$varianza_explicada[retenidas])),
+       "error relativo" = sprintf("%.1f %%", 100 * ajuste$error_relativo))
+}
+
+lectura_resultado.ajuste_acp <- function(ajuste, umbral = 0.8, ...) {
+  umbral <- umbral %||% 0.8
+  necesarias <- componentes_sugeridas(ajuste, umbral)
+  tabla <- varianza_explicada(ajuste)
+  sprintf(paste("Para llegar al %.0f %% hacen falta %d componentes; con las %d",
+                "que retuviste llevas %.1f %%."),
+          100 * umbral, necesarias, ajuste$k,
+          100 * tabla$acumulada[ajuste$k])
+}
+
+etiquetas_ejes.ajuste_acp <- function(ajuste) {
+  colnames(ajuste$cargas)[seq_len(ajuste$k)]
 }

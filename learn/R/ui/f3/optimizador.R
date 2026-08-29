@@ -13,11 +13,28 @@ controles_optimizador <- function(ns) {
   shiny::tagList(
     shiny::radioButtons(ns("optimizador"), "Algoritmo",
                         choices = c("sin metodo elegido" = "")),
+    # Los métodos iterativos que arrancan de un punto (k-medias) tienen una
+    # perilla más que los que arrancan de la matriz entera (ACP). El control
+    # existe siempre y se muestra según el registro: reconstruirlo con
+    # renderUI le costaría el binding (AGENT.md).
+    shiny::conditionalPanel(
+      condition = "output.hay_inicializacion", ns = ns,
+      shiny::radioButtons(ns("inicializacion"), "Inicialización",
+                          choices = c("por defecto" = ""))),
     shiny::uiOutput(ns("nota_optimizador")))
 }
 
 actualizar_optimizador <- function(session, clave, previos = list()) {
-  disponibles <- metodo(clave)$optimizador$metodos %||% character(0)
+  m <- metodo(clave)
+  arranques <- m$optimizador$inicializaciones %||% character(0)
+  if (length(arranques)) {
+    previo_arranque <- previos$inicializacion
+    shiny::updateRadioButtons(
+      session, "inicializacion", choices = arranques,
+      selected = if (!is.null(previo_arranque) && previo_arranque %in% arranques)
+                   previo_arranque else arranques[1])
+  }
+  disponibles <- m$optimizador$metodos %||% character(0)
   if (!length(disponibles)) return(invisible(FALSE))
   previo <- previos$optimizador
   shiny::updateRadioButtons(
@@ -48,9 +65,27 @@ salida_optimizador <- function(ns) {
   svd = c(
     "Descomponer la matriz de una sola vez, sin iterar.",
     "Los valores singulares al cuadrado son los valores propios.",
-    "No hay nada que mirar mientras corre: termina o falla."))
+    "No hay nada que mirar mientras corre: termina o falla."),
+  Lloyd = c(
+    "Colocar k centroides segun la inicializacion elegida.",
+    "Asignar cada observacion al centroide mas cercano.",
+    "Recalcular cada centroide como el promedio de los suyos.",
+    "Repetir: los dos pasos bajan la inercia por separado.",
+    "Parar cuando nadie cambia de grupo o la inercia deja de bajar."),
+  MacQueen = c(
+    "Colocar k centroides segun la inicializacion elegida.",
+    "Recorrer las observaciones de a una, en orden.",
+    "Mover la observacion al centroide mas cercano y recentrar en el acto.",
+    "Converge en menos barridos, y depende del orden de las filas.",
+    "Parar cuando un barrido completo no mueve a nadie."))
 
 servidor_optimizador <- function(input, output, session, clave_metodo) {
+  output$hay_inicializacion <- shiny::reactive({
+    m <- tryCatch(metodo(clave_metodo()), error = function(e) NULL)
+    !is.null(m) && length(m$optimizador$inicializaciones %||% character(0)) > 0
+  })
+  shiny::outputOptions(output, "hay_inicializacion", suspendWhenHidden = FALSE)
+
   output$descripcion_optimizador <- shiny::renderUI({
     elegido <- input$optimizador
     shiny::validate(shiny::need(nzchar(elegido %||% ""),
@@ -79,9 +114,9 @@ servidor_optimizador <- function(input, output, session, clave_metodo) {
       mensaje = paste("Este algoritmo resuelve en un paso: no hay iteraciones",
                       "que mirar, así que la traza de convergencia va a estar",
                       "vacía."),
-      sugerencia = paste("Elegí 'potencia' para ver el mismo resultado",
-                         "construyéndose. Los dos coinciden hasta el signo, y",
-                         "eso lo comprueba test_acp.R."))))
+      sugerencia = paste("Si el método ofrece un algoritmo iterativo, elegilo",
+                         "para ver el mismo resultado construyéndose: las",
+                         "pruebas del método comprueban que coinciden."))))
   })
   invisible(TRUE)
 }

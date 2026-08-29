@@ -8,6 +8,11 @@
 # Vive aparte de test_app.R por C2: aquel recorre el shell y la fase 1, este
 # recorre fases 2, 3 y 4 con el ACP. Los dos arrancan su propio AppDriver.
 #
+# Un archivo por método, como en las pruebas sin GUI: k-medias tiene el suyo en
+# test_app_kmeans.R. Parametrizar los dos recorridos en uno solo sonaba bien y
+# no lo es — cada método toca controles distintos y espera textos distintos, y
+# el archivo unificado pasaba de 300 LOC (C2) para no compartir casi nada.
+#
 # Qué prueba que ningún harness sin GUI puede probar: que los controles nuevos
 # estén ENLAZADOS. La trampa del Hito 2 fue exactamente esa — el HTML aparecía,
 # Shiny no volvía a atar los inputs, y la consola del navegador quedaba limpia.
@@ -19,6 +24,12 @@
 
 suppressPackageStartupMessages(library(shinytest2))
 Sys.setenv(NOT_CRAN = "true")
+
+# Solo para `bandera_artefacto()`: la prueba compara contra el mismo nombre de
+# output que construye la UI, en vez de reescribirlo a mano y que se caiga sola
+# el día que cambie.
+source("learn/R/cargar.R")
+cargar_sda(con_ui = FALSE)
 
 .FALLOS <- 0L
 
@@ -244,9 +255,9 @@ probar("la compatibilidad se valida antes de correr",
 
 app$click("evaluacion-correr")
 app$wait_for_idle(duration = 2000, timeout = 60000)
-html_corrida <- esperar_html(app, "retenido")
+html_corrida <- esperar_html(app, "explicado")
 probar("correr produce una corrida con su resumen",
-       grepl("retenido", html_corrida, fixed = TRUE))
+       grepl("explicado", html_corrida, fixed = TRUE))
 
 html_desem <- ir_a_pestana(app, "evaluacion-pestana", "Desempeño",
                            "error de reconstruccion")
@@ -266,11 +277,29 @@ probar("el scree se dibuja con su corte",
 
 html_expl <- ir_a_pestana(app, "evaluacion-pestana", "Explicabilidad",
                           "Componente horizontal")
-probar("las cuatro vistas de explicabilidad están", {
+probar("las cuatro vistas que el ACP declara están", {
   faltan <- Filter(function(p) !grepl(p, html_expl, fixed = TRUE),
                    c("Cargas", "Círculo de correlaciones", "Biplot",
                      "Mapa en dos dimensiones"))
   length(faltan) == 0
+})
+# Las cards que el método no declara siguen en el DOM, ocultas por
+# conditionalPanel: el HTML no distingue. Lo que se asevera es la bandera que
+# gobierna la visibilidad, que es el mecanismo de verdad.
+probar("el registro apaga las vistas que el ACP no produce", {
+  apagadas <- vapply(c("f4.diagnostico.codo", "f4.diagnostico.silueta",
+                       "f4.explicabilidad.centroides", "f4.desempeno.grupos"),
+                     function(clave) isTRUE(app$get_value(
+                       output = paste0("evaluacion-", bandera_artefacto(clave)))),
+                     logical(1))
+  !any(apagadas)
+})
+probar("y enciende las que sí", {
+  encendidas <- vapply(c("f4.diagnostico.scree", "f4.explicabilidad.biplot"),
+                       function(clave) isTRUE(app$get_value(
+                         output = paste0("evaluacion-", bandera_artefacto(clave)))),
+                       logical(1))
+  all(encendidas)
 })
 
 html_ejes <- mover(app, `evaluacion-eje_y` = "3")

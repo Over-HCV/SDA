@@ -11,6 +11,11 @@ poblar_artefactos_evaluacion <- function() {
     logica  = "R/logica/metricas_regresion.R::metricas_regresion",
     descripcion = "Observado contra predicho, con la recta de identidad.")
 
+  registrar_artefacto("f4.desempeno.grupos", "Tamaño de los grupos",
+    grafico = "R/graficos/grupos.R::graficar_tamanos",
+    logica  = "R/logica/metricas_grupos.R::resumen_grupos",
+    descripcion = "Cuántos cayeron en cada grupo y qué tan apretado quedó.")
+
   registrar_artefacto("f4.desempeno.roc", "Curva ROC",
     grafico = "R/graficos/desempeno.R::graficar_roc",
     logica  = "R/logica/metricas_clasificacion.R::calcular_roc",
@@ -183,9 +188,14 @@ poblar_artefactos_evaluacion <- function() {
     logica  = "R/logica/metricas_reduccion.R::correlaciones_componentes",
     descripcion = "Correlación de cada variable con las dos primeras componentes.")
 
+  registrar_artefacto("f4.explicabilidad.centroides", "Perfil de los grupos",
+    grafico = "R/graficos/grupos.R::graficar_centroides",
+    logica  = "R/logica/metricas_grupos.R::centroides_tabla",
+    descripcion = "En qué variables se aparta cada grupo del promedio.")
+
   registrar_artefacto("f4.explicabilidad.mapa_2d", "Mapa en dos dimensiones",
     grafico = "R/graficos/explicabilidad.R::graficar_mapa_2d",
-    logica  = "R/logica/metricas_reduccion.R::coordenadas_2d",
+    logica  = "R/logica/metricas.R::coordenadas_2d",
     descripcion = "La proyección al plano, coloreada por grupo o por etiqueta.")
 
   registrar_artefacto("f4.explicabilidad.series_por_grupo", "Series por grupo",

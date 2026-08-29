@@ -36,6 +36,15 @@ salida_consola <- function(ns) {
       bslib::card_body(
         shiny::uiOutput(ns("progreso")),
         shiny::verbatimTextOutput(ns("registro")))),
+    # Solo para los métodos cuyo estado se puede dibujar en el plano. En
+    # k-medias es donde se ven los centroides caminar; el ACP no lo declara
+    # porque su estado es una dirección, no una partición.
+    shiny::conditionalPanel(
+      condition = "output.hay_estado_paso", ns = ns,
+      panel_resultado(
+        "f3.consola.estado",
+        shiny::plotOutput(ns("estado_paso"), height = "340px"),
+        contexto = salida_contexto(ns, "contexto_estado"))),
     panel_resultado(
       "f3.analisis.trayectoria",
       shiny::plotOutput(ns("trayectoria_paso"), height = "320px"),
@@ -45,6 +54,12 @@ salida_consola <- function(ns) {
 #' @param ajuste  reactiveVal donde queda el resultado del ajuste
 #' @param paso    reactiveVal con la iteración que se está reproduciendo
 servidor_consola <- function(input, output, session, ajuste, paso) {
+  output$hay_estado_paso <- shiny::reactive({
+    a <- ajuste()
+    !is.null(a) && !is.null(a$asignaciones_por_iter)
+  })
+  shiny::outputOptions(output, "hay_estado_paso", suspendWhenHidden = FALSE)
+
   tabla_primera <- shiny::reactive({
     a <- ajuste()
     shiny::req(a, !is.null(a$traza))
@@ -93,12 +108,11 @@ servidor_consola <- function(input, output, session, ajuste, paso) {
     shiny::tagList(
       barra_progreso(min(paso(), max(total, 1L)), max(total, 1L),
                      etiqueta = "reproduccion"),
-      franja_estado(list(
-        "estado" = if (isTRUE(a$convergio)) "convergio" else "agoto iteraciones",
-        "iteraciones" = a$iteraciones,
-        "componentes" = sprintf("%d de %d", a$k, a$p),
-        "explicado" = sprintf("%.1f %%",
-                              100 * sum(a$varianza_explicada[seq_len(a$k)])))))
+      franja_estado(c(
+        list("estado" = if (isTRUE(a$convergio)) "convergio"
+                        else "agoto iteraciones",
+             "iteraciones" = a$iteraciones),
+        resumen_ajuste(a))))
   })
 
   output$registro <- shiny::renderText({
@@ -106,6 +120,28 @@ servidor_consola <- function(input, output, session, ajuste, paso) {
     shiny::validate(shiny::need(!is.null(a), "sin ajuste todavia"))
     .lineas_registro(a, paso())
   })
+
+  # Reproducir, no recalcular: la columna de asignaciones de esa iteración ya
+  # está en el ajuste. Recalcular por clic cruzaría la frontera R-navegador en
+  # cada paso, y en wasm eso es insufrible (ver la cabecera de este archivo).
+  output$estado_paso <- shiny::renderPlot({
+    a <- ajuste()
+    shiny::validate(shiny::need(!is.null(a$asignaciones_por_iter),
+                                "Este ajuste no registro su estado por iteracion."))
+    columna <- min(paso() + 1L, ncol(a$asignaciones_por_iter))
+    graficar_mapa_2d(coordenadas_2d(a, grupo = a$asignaciones_por_iter[, columna]),
+                     ejes = etiquetas_ejes(a))
+  })
+
+  dibujar_contexto(output, "f3.consola.estado",
+                   params = shiny::reactive({
+                     a <- ajuste()
+                     if (is.null(a)) return(NULL)
+                     list(iteracion_mostrada = paso(),
+                          iteraciones_totales = iteraciones_totales(),
+                          semilla = a$semilla)
+                   }),
+                   sufijo = "contexto_estado")
 
   output$trayectoria_paso <- shiny::renderPlot({
     a <- ajuste()
@@ -149,8 +185,9 @@ servidor_consola <- function(input, output, session, ajuste, paso) {
   tabla <- tabla[tabla$componente == 1L & tabla$iter <= paso, , drop = FALSE]
   if (!nrow(tabla)) return("sin iteraciones registradas")
   ultimas <- utils::tail(tabla, ventana)
-  cuerpo <- sprintf("iter %3d  sin explicar=%.6f  delta=%.3e",
-                    ultimas$iter, ultimas$objetivo, ultimas$delta)
+  cuerpo <- sprintf("iter %3d  %s=%.6f  delta=%.3e",
+                    ultimas$iter, ajuste$traza$objetivo, ultimas$objetivo,
+                    ultimas$delta)
   cierre <- sprintf("tolerancia=%.1e  ->  %s", ajuste$tol,
                     if (isTRUE(ajuste$convergio)) "convergio"
                     else "se agotaron las iteraciones")

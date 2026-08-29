@@ -133,3 +133,47 @@ dibujar_contexto <- function(output, clave, params = NULL, metricas = NULL,
   })
   invisible(TRUE)
 }
+
+# ---------------------------------------------------------------------------
+# Paneles gobernados por el registro
+# ---------------------------------------------------------------------------
+#
+# Con un solo método implementado, la fase 4 podía dibujar sus cuatro cards
+# siempre: todas eran del ACP. Con dos familias en el catálogo, un scree sobre
+# una partición no es un gráfico vacío, es un gráfico equivocado.
+#
+# SCHEMA.md ya lo prometía: "las pestañas de análisis de la fase 4 se generan
+# desde `artefactos`". Estas dos funciones lo cumplen sin renderUI: la card se
+# construye una vez y se muestra según lo que el método declara (la trampa del
+# sidebar rendido está documentada en AGENT.md).
+
+#' El id del output booleano que gobierna la visibilidad de una clave.
+bandera_artefacto <- function(clave) paste0("declara_", gsub("[.]", "_", clave))
+
+#' Un panel de resultado que solo aparece si el método de la corrida declara
+#' esa clave de artefacto.
+panel_si_declara <- function(ns, clave, contenido, contexto = NULL) {
+  shiny::conditionalPanel(
+    condition = sprintf("output.%s", bandera_artefacto(clave)), ns = ns,
+    panel_resultado(clave, contenido, contexto = contexto))
+}
+
+#' Publica las banderas que consumen los `panel_si_declara()` de una vista.
+#'
+#' @param claves        claves de artefacto que la vista puede dibujar
+#' @param clave_metodo   reactive que devuelve la clave del método, o NULL
+declarar_artefactos <- function(output, claves, clave_metodo) {
+  for (clave in claves) local({
+    esta <- clave
+    bandera <- bandera_artefacto(esta)
+    output[[bandera]] <- shiny::reactive({
+      elegido <- tryCatch(clave_metodo(), error = function(e) NULL)
+      if (!length(elegido) || !nzchar(elegido)) return(FALSE)
+      declarados <- tryCatch(metodo(elegido)$artefactos,
+                             error = function(e) character(0))
+      esta %in% declarados
+    })
+    shiny::outputOptions(output, bandera, suspendWhenHidden = FALSE)
+  })
+  invisible(TRUE)
+}

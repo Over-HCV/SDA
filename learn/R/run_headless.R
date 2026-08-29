@@ -14,9 +14,13 @@
 #   Rscript -e 'source("learn/R/run_headless.R"); correr("acp-twins")'
 #   Rscript -e 'source("learn/R/run_headless.R");
 #               correr("acp-cov", hiper = list(matriz = "covarianza"))'
+#   Rscript -e 'source("learn/R/run_headless.R");
+#               correr("kmeans-twins", metodo = "kmeans")'
 #
-# No sabe nada del ACP en particular: recorre el registro. Cuando entre
-# k-medias, este archivo no se toca.
+# No sabe nada de ningún método en particular: recorre el registro y le hace al
+# ajuste las preguntas genéricas de `logica/metricas.R`. Con un solo método esa
+# distinción no se notaba y este archivo llamaba a `graficar_scree()` por su
+# nombre; el hito 4 lo destapó.
 
 # Como todo en este repo, se invoca desde la raíz (ver AGENT.md). El segundo
 # candidato cubre el caso de sourcearlo estando dentro de learn/.
@@ -40,9 +44,9 @@ local({
 #' @param out_dir   relativo a la raíz del repo
 #' @return la corrida (invisible)
 correr <- function(escenario, metodo = "acp", fuente = "twins", columnas = NULL,
-                   hiper = list(), optimizador = NULL, tol = 1e-8,
-                   maxit = 500L, semilla = 42L, registrar_traza = TRUE,
-                   out_dir = "learn/outputs") {
+                   hiper = list(), optimizador = NULL, inicializacion = NULL,
+                   reinicios = 1L, tol = 1e-8, maxit = 500L, semilla = 42L,
+                   registrar_traza = TRUE, out_dir = "learn/outputs") {
   cargar_sda(con_ui = FALSE)
 
   m <- metodo(metodo)
@@ -52,26 +56,32 @@ correr <- function(escenario, metodo = "acp", fuente = "twins", columnas = NULL,
   dataset <- .dataset_para_correr(fuente, semilla)
   parametros <- utils::modifyList(hiper_por_defecto(metodo), as.list(hiper))
   optimizador <- optimizador %||% (m$optimizador$metodos %||% NA_character_)[1]
+  inicializacion <- inicializacion %||%
+    (m$optimizador$inicializaciones %||% NA_character_)[1]
 
   modelo <- nuevo_modelo("m1", sprintf("%s (headless)", m$nombre), metodo,
                          spec = columnas, hiper = parametros)
   receta <- nueva_receta("r1", "headless", optimizador = optimizador,
-                         control = list(tol = tol, maxit = maxit),
+                         control = list(tol = tol, maxit = maxit,
+                                        inicializacion = inicializacion,
+                                        reinicios = reinicios),
                          semilla = semilla)
   avisos <- validar_compatibilidad(dataset, modelo, receta)
 
   inicio <- Sys.time()
-  ajuste <- do.call(m$ajustar, c(
+  ajuste <- do.call(m$ajustar, argumentos_ajuste(metodo, c(
     list(datos = dataset$df, columnas = columnas),
     parametros,
-    list(optimizador = optimizador, tol = tol, maxit = maxit,
-         semilla = semilla, registrar_traza = registrar_traza)))
+    list(optimizador = optimizador, inicializacion = inicializacion,
+         reinicios = reinicios, tol = tol, maxit = maxit,
+         semilla = semilla, registrar_traza = registrar_traza))))
   duracion <- as.numeric(difftime(Sys.time(), inicio, units = "secs"))
 
   corrida <- nueva_corrida("c1", dataset$id, modelo$id, receta$id, metodo,
                            ajuste = ajuste, traza = ajuste$traza,
                            metricas = metricas_de_corrida(ajuste),
                            params = .params_de_corrida(parametros, optimizador,
+                                                       inicializacion, reinicios,
                                                        tol, maxit, semilla,
                                                        dataset, columnas),
                            duracion = duracion, estado = "listo")
@@ -79,14 +89,15 @@ correr <- function(escenario, metodo = "acp", fuente = "twins", columnas = NULL,
   escribir_salida(
     proyecto = "sda-lab", escenario = escenario,
     params = corrida$params, metricas = corrida$metricas,
-    plot_obj = graficar_scree(varianza_explicada(ajuste), k = ajuste$k),
-    datos_df = varianza_explicada(ajuste),
+    plot_obj = grafico_resultado(ajuste),
+    datos_df = tabla_resultado(ajuste),
     notas = .notas_de_corrida(m, dataset, avisos),
     out_dir = out_dir)
 
-  cat(sprintf("[correr] %s · %s · %d de %d componentes · %.1f%% explicado · %.2fs\n",
-              escenario, metodo, ajuste$k, ajuste$p,
-              100 * sum(ajuste$varianza_explicada[seq_len(ajuste$k)]), duracion))
+  resumen <- resumen_ajuste(ajuste)
+  cat(sprintf("[correr] %s · %s · %s · %.2fs\n", escenario, metodo,
+              paste(sprintf("%s %s", names(resumen), unlist(resumen)),
+                    collapse = " · "), duracion))
   invisible(corrida)
 }
 
@@ -104,10 +115,12 @@ correr <- function(escenario, metodo = "acp", fuente = "twins", columnas = NULL,
 
 # Todo lo que hace falta para repetir la corrida exactamente: los hiper del
 # registro, el control del optimizador, la semilla (C13) y qué datos entraron.
-.params_de_corrida <- function(parametros, optimizador, tol, maxit, semilla,
+.params_de_corrida <- function(parametros, optimizador, inicializacion,
+                               reinicios, tol, maxit, semilla,
                                dataset, columnas) {
   c(parametros,
-    list(optimizador = optimizador, tol = tol, maxit = maxit, semilla = semilla,
+    list(optimizador = optimizador, inicializacion = inicializacion,
+         reinicios = reinicios, tol = tol, maxit = maxit, semilla = semilla,
          fuente = dataset$fuente,
          columnas = paste(columnas %||% columnas_numericas(dataset),
                           collapse = ",")))

@@ -2,12 +2,14 @@
 #
 # Responsabilidad: subsección Explicabilidad — qué dice el ajuste.
 #
-# Cuatro vistas de la misma cosa: cargas (qué variables forman cada eje),
-# círculo (cómo se correlacionan con él), mapa 2D (dónde cayeron las
-# observaciones) y biplot (las dos cosas juntas).
+# Vistas de la misma cosa: cargas (qué variables forman cada eje), círculo
+# (cómo se correlacionan con él), mapa 2D (dónde cayeron las observaciones),
+# biplot (las dos juntas) y el perfil de los grupos cuando el método parte en
+# vez de proyectar.
 #
-# El par de ejes es un control compartido por los cuatro paneles: mirarlos con
-# ejes distintos sería comparar cosas que no se comparan.
+# Cuál se dibuja lo dice el registro: cada card aparece si el método declara su
+# clave. El par de ejes es un control compartido por los paneles que lo usan:
+# mirarlos con ejes distintos sería comparar cosas que no se comparan.
 
 controles_explicabilidad <- function(ns) {
   shiny::tagList(
@@ -24,17 +26,18 @@ controles_explicabilidad <- function(ns) {
                         "separan, es un hallazgo.")))
 }
 
-#' Los ejes disponibles son las componentes RETENIDAS, no todas: pedir la
-#' quinta cuando se guardaron dos no es un error del usuario, es una opción que
-#' no debería existir.
+#' Los ejes disponibles los declara la familia del ajuste: las componentes
+#' RETENIDAS en el ACP —pedir la quinta cuando se guardaron dos no es un error
+#' del usuario, es una opción que no debería existir— y los dos del plano en
+#' una partición.
 actualizar_explicabilidad <- function(session, corrida, dataset,
                                       previos = list()) {
   if (is.null(corrida)) return(invisible(FALSE))
-  k <- corrida$ajuste$k
-  opciones <- stats::setNames(as.character(seq_len(k)), paste0("CP", seq_len(k)))
+  nombres <- etiquetas_ejes(corrida$ajuste)
+  opciones <- stats::setNames(as.character(seq_along(nombres)), nombres)
   .rellenar_selector(session, "eje_x", opciones, previos$eje_x %||% "1")
   .rellenar_selector(session, "eje_y", opciones,
-                     previos$eje_y %||% as.character(min(2L, k)))
+                     previos$eje_y %||% as.character(min(2L, length(nombres))))
 
   candidatas <- if (is.null(dataset)) character(0) else
     c(columnas_con_rol(dataset, "grupo"),
@@ -48,18 +51,21 @@ actualizar_explicabilidad <- function(session, corrida, dataset,
 
 salida_explicabilidad <- function(ns) {
   shiny::tagList(
-    panel_resultado("f4.explicabilidad.cargas",
-                    shiny::plotOutput(ns("cargas"), height = "300px"),
-                    contexto = salida_contexto(ns, "contexto_cargas")),
-    panel_resultado("f4.explicabilidad.circulo_correlaciones",
-                    shiny::plotOutput(ns("circulo"), height = "380px"),
-                    contexto = salida_contexto(ns, "contexto_circulo")),
-    panel_resultado("f4.explicabilidad.mapa_2d",
-                    shiny::plotOutput(ns("mapa"), height = "380px"),
-                    contexto = salida_contexto(ns, "contexto_mapa")),
-    panel_resultado("f4.explicabilidad.biplot",
-                    shiny::plotOutput(ns("biplot"), height = "420px"),
-                    contexto = salida_contexto(ns, "contexto_biplot")))
+    panel_si_declara(ns, "f4.explicabilidad.mapa_2d",
+                     shiny::plotOutput(ns("mapa"), height = "380px"),
+                     contexto = salida_contexto(ns, "contexto_mapa")),
+    panel_si_declara(ns, "f4.explicabilidad.centroides",
+                     shiny::plotOutput(ns("centroides"), height = "400px"),
+                     contexto = salida_contexto(ns, "contexto_centroides")),
+    panel_si_declara(ns, "f4.explicabilidad.cargas",
+                     shiny::plotOutput(ns("cargas"), height = "300px"),
+                     contexto = salida_contexto(ns, "contexto_cargas")),
+    panel_si_declara(ns, "f4.explicabilidad.circulo_correlaciones",
+                     shiny::plotOutput(ns("circulo"), height = "380px"),
+                     contexto = salida_contexto(ns, "contexto_circulo")),
+    panel_si_declara(ns, "f4.explicabilidad.biplot",
+                     shiny::plotOutput(ns("biplot"), height = "420px"),
+                     contexto = salida_contexto(ns, "contexto_biplot")))
 }
 
 servidor_explicabilidad <- function(input, output, session, corrida, dataset) {
@@ -74,7 +80,10 @@ servidor_explicabilidad <- function(input, output, session, corrida, dataset) {
     c(as.integer(input$eje_x %||% "1"), as.integer(input$eje_y %||% "2"))
   })
 
-  etiquetas <- shiny::reactive(paste0("CP", ejes()))
+  etiquetas <- shiny::reactive({
+    nombres <- etiquetas_ejes(ajuste())
+    nombres[pmin(ejes(), length(nombres))]
+  })
 
   # El color se recorta a las filas que de verdad entraron al ajuste: las que
   # tenían un faltante se descartaron y desalinear el vector pintaría cada
@@ -111,6 +120,9 @@ servidor_explicabilidad <- function(input, output, session, corrida, dataset) {
                      alfa = input$alfa %||% 0.7)
   })
 
+  output$centroides <- shiny::renderPlot(
+    graficar_centroides(centroides_tabla(ajuste())))
+
   output$biplot <- shiny::renderPlot({
     .exigir_ejes()
     graficar_biplot(coordenadas_biplot(ajuste(), ejes(), grupo()), etiquetas(),
@@ -131,6 +143,7 @@ servidor_explicabilidad <- function(input, output, session, corrida, dataset) {
   for (par in list(c("f4.explicabilidad.cargas", "contexto_cargas"),
                    c("f4.explicabilidad.circulo_correlaciones", "contexto_circulo"),
                    c("f4.explicabilidad.mapa_2d", "contexto_mapa"),
+                   c("f4.explicabilidad.centroides", "contexto_centroides"),
                    c("f4.explicabilidad.biplot", "contexto_biplot")))
     dibujar_contexto(output, par[1], params = parametros, metricas = metricas,
                      corrida = shiny::reactive(corrida()), sufijo = par[2])

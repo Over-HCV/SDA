@@ -5,10 +5,10 @@
 #
 # Uso:  Rscript learn/R/pruebas/test_contrato.R
 #
-# Vive aparte de test_acp.R porque lo que se prueba acá no es el ACP: es
+# Vive aparte de test_acp.R porque lo que se prueba acá no es un método: es
 # `run_headless.R`, el contrato S2 de libs/sdd.md y la regla de las tres partes
-# (C11). El ACP es solo el método que hoy los ejercita; cuando entre k-medias,
-# este archivo cambia de datos y no de aserciones.
+# (C11). Con dos familias en el catálogo las mismas aserciones se corren dos
+# veces, y ahí es donde se vería que el corredor sabe de más sobre una de ellas.
 #
 # Qué garantiza C11: todo hiperparámetro existe a la vez en la función pura, en
 # `correr()` y en la UI. Las dos primeras se comprueban acá. La tercera la
@@ -51,6 +51,11 @@ corrida <- correr("prueba-acp", fuente = nube, hiper = list(n_componentes = 3L),
 json <- file.path(salida_abs, "prueba-acp.json")
 leido <- jsonlite::fromJSON(json)
 
+grupal <- correr("prueba-kmeans", metodo = "kmeans", fuente = nube,
+                 hiper = list(k = 3L), reinicios = 3L, maxit = 100L,
+                 out_dir = salida)
+leido_grupal <- jsonlite::fromJSON(file.path(salida_abs, "prueba-kmeans.json"))
+
 # ---------------------------------------------------------------------------
 cat("\n[contrato S2 · los archivos]\n")
 
@@ -77,6 +82,18 @@ probar("el JSON identifica proyecto y escenario",
 probar("las notas dicen sobre que datos corrio y con que avisos",
        grepl("componentes principales", leido$notas))
 
+probar("el corredor escribe los mismos tres archivos para la otra familia", {
+  todos <- file.path(salida_abs,
+                     paste0("prueba-kmeans", c(".json", ".csv", ".png")))
+  all(file.exists(todos))
+})
+
+probar("el CSV de una particion trae la tabla de grupos, no la de componentes", {
+  tabla <- utils::read.csv(file.path(salida_abs, "prueba-kmeans.csv"))
+  all(c("grupo", "n", "inercia") %in% names(tabla)) &&
+    !("componente" %in% names(tabla))
+})
+
 # ---------------------------------------------------------------------------
 cat("\n[C11 · la regla de las tres partes]\n")
 
@@ -92,6 +109,18 @@ probar("correr() acepta pisar cualquier hiperparametro por nombre", {
                  hiper = list(matriz = "covarianza"), out_dir = salida)
   otra$params$matriz == "covarianza"
 })
+
+probar("C11 vale igual para el segundo metodo, sin aserciones nuevas",
+       all(names(metodo("kmeans")$hiper) %in%
+             names(formals(metodo("kmeans")$ajustar))) &&
+         all(names(metodo("kmeans")$hiper) %in% names(leido_grupal$params)))
+
+probar("el control propio de la otra familia tambien viaja al JSON",
+       all(c("inicializacion", "reinicios") %in% names(leido_grupal$params)))
+
+probar("el corredor no le pasa a un metodo los mandos del otro",
+       !("matriz" %in% names(leido_grupal$params)) &&
+         !("reinicios" %in% names(formals(metodo("acp")$ajustar))))
 
 probar("el batch usa los mismos valores por defecto que la app", {
   por_defecto <- hiper_por_defecto("acp")
@@ -114,6 +143,14 @@ probar("queda escrito que columnas entraron",
 probar("las metricas del JSON son las de la corrida",
        abs(leido$metricas$varianza_acumulada -
              corrida$metricas$varianza_acumulada) < 1e-4)
+
+probar("la semilla de la otra familia tambien viaja, y con ella la particion", {
+  repetida <- correr("prueba-kmeans-2", metodo = "kmeans", fuente = nube,
+                     hiper = list(k = 3L), reinicios = 3L, maxit = 100L,
+                     out_dir = salida)
+  leido_grupal$params$semilla == 42 &&
+    abs(repetida$metricas$inercia - grupal$metricas$inercia) < 1e-12
+})
 
 probar("dos corridas con la misma semilla dan la misma metrica", {
   repetida <- correr("prueba-repetida", fuente = nube,

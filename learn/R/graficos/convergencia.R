@@ -73,16 +73,42 @@ graficar_trayectoria <- function(tabla, componente = NULL) {
   if (!nrow(tabla))
     return(.grafico_vacio(sprintf("la componente %s no tiene traza", componente)))
 
+  # Con un ACP de 16 columnas o un k-medias de 4 grupos por 8 variables, la
+  # trayectoria son decenas de lineas y no se lee ninguna. Se muestran las que
+  # mas se movieron, que son las que contestan la pregunta de esta vista, y el
+  # subtitulo dice cuantas quedaron fuera.
+  total <- length(unique(tabla$parametro))
+  tabla <- .parametros_mas_moviles(tabla, maximo = 8L)
   n_parametros <- length(unique(tabla$parametro))
+
   ggplot2::ggplot(tabla, ggplot2::aes(x = .data$iter, y = .data$valor,
                                       color = .data$parametro)) +
     ggplot2::geom_hline(yintercept = 0, color = "grey80", linewidth = 0.4) +
     ggplot2::geom_line(linewidth = 0.8) +
     scale_color_cat(n_parametros, name = NULL) +
-    ggplot2::labs(x = "iteracion", y = "valor de la carga",
-                  subtitle = sprintf("componente %s · %d parametros",
-                                     componente, n_parametros)) +
+    ggplot2::labs(x = "iteracion", y = "valor del parametro",
+                  subtitle = .subtitulo_trayectoria(componente, n_parametros,
+                                                    total)) +
     tema_ggplot()
+}
+
+.parametros_mas_moviles <- function(tabla, maximo) {
+  nombres <- unique(tabla$parametro)
+  if (length(nombres) <= maximo) return(tabla)
+  recorrido <- vapply(nombres, function(nombre) {
+    valores <- tabla$valor[tabla$parametro == nombre]
+    if (length(valores) < 2L) return(0)
+    diff(range(valores, na.rm = TRUE))
+  }, numeric(1))
+  elegidos <- names(sort(recorrido, decreasing = TRUE))[seq_len(maximo)]
+  tabla[tabla$parametro %in% elegidos, , drop = FALSE]
+}
+
+.subtitulo_trayectoria <- function(componente, mostrados, total) {
+  if (mostrados == total)
+    return(sprintf("componente %s · %d parametros", componente, total))
+  sprintf("componente %s · los %d parametros que mas se movieron, de %d",
+          componente, mostrados, total)
 }
 
 #' Cuánto cambió el vector en cada paso: el criterio de parada, dibujado.

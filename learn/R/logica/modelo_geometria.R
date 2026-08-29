@@ -132,6 +132,14 @@ evaluar_objetivo <- function(datos, columnas, angulo) {
 #' Un ACP con k componentes estima p·k cargas, menos k(k−1)/2 por la
 #' ortogonalidad que ya no es libre, más las p medias del centrado.
 #'
+#' El "k" de un modelo: cuántas piezas se estiman.
+#'
+#' Cada familia lo llama distinto en su `hiper` —componentes en reducción,
+#' grupos en agrupamiento— y el presupuesto de parámetros necesita el número,
+#' no el nombre. Que la vista tuviera escrito `hiper$n_componentes` era la
+#' última suposición del ACP que quedaba en la fase 2.
+k_del_modelo <- function(hiper) hiper$n_componentes %||% hiper$k
+
 #' @return list(parametros, observaciones, razon, veredicto, detalle)
 contar_parametros <- function(clave, p, n, k = NULL) {
   p <- as.integer(p); n <- as.integer(n)

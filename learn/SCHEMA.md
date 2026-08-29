@@ -183,7 +183,7 @@ combina. Una **Corrida** es lo único que produce resultados.
                        ▼
                  ┌───────────┐
                  │  CORRIDA  │   fase 4
-                 │  (fit +    │
+                 │  (fit +   │
                  │  métricas)│
                  └───────────┘
 ```
@@ -218,7 +218,7 @@ hecha en la UI y una hecha por `Rscript run_headless.R` producen el mismo JSON.
 ### 2.5 Trazabilidad — de un resultado a su código
 
 El caso de uso: ves un número que no entendés, abrís un chat y preguntás *¿por
-qué la ROC me dio esto?*. Para que un agente pueda contestar sin adivinar, hace
+qué la ROC me dio esto?*. Para que un sistema agéntico pueda contestar sin adivinar, hace
 falta un puente del gráfico al archivo.
 
 Cada artefacto visual tiene una **clave estable** `fase.subseccion.artefacto`
@@ -651,7 +651,7 @@ registrar_metodo(
   deps        = character(0),
   entrada     = list(tipo = "matriz_numerica", min_p = 2, faltantes = FALSE),
   hiper       = list(k = list(tipo="entero", min=2, max=10, def=3)),
-  optimizador = list(metodos = c("Lloyd","MacQueen","Hartigan-Wong"),
+  optimizador = list(metodos = c("Lloyd","MacQueen"),   # solo lo implementado
                      traza = TRUE, paso_a_paso = TRUE),
   supuestos   = c("escalado_previo","grupos_esfericos","tamanos_similares"),
   artefactos  = c("f3.analisis.convergencia", "f4.diagnostico.silueta",
@@ -673,12 +673,16 @@ Consecuencias directas:
   implementar* (pendiente) y *No ejecutable* (bloqueado, con su motivo). La
   tarjeta se atenúa; no hay iconos de candado repitiendo el mensaje.
 - El **checklist de supuestos** de la fase 2 se genera desde `supuestos`.
-- Las **pestañas de análisis** de la fase 4 se generan desde `artefactos`, y
+- Las **cards** de las fases 3 y 4 se generan desde `artefactos`: cada una vive
+  dentro de un `panel_si_declara()` y aparece solo si el método la promete.
   `verificar_mapa.R` falla si un método promete un artefacto no registrado.
+- Lo que cada card **dice** —métricas, tabla, franja, lectura, ejes— sale de
+  las genéricas S3 de `R/logica/metricas.R`, no del registro: son preguntas al
+  ajuste, y el ajuste las contesta según su familia (C3b).
 - `run_headless.R` recorre el mismo registro → app y batch nunca divergen (S2).
 
-**Estado actual**: 54 métodos registrados (1 activo, 47 pendientes, 6
-bloqueados) y 81 artefactos. Poblados desde `libs/topics-map.md`, los seis cuadernos de
+**Estado actual**: 54 métodos registrados (2 activos, 46 pendientes, 6
+bloqueados) y 84 artefactos. Poblados desde `libs/topics-map.md`, los seis cuadernos de
 `notes/SDA/` y el temario de `guide-eda-26A.md`. El inventario vivo está en
 `MAPA.md`; este documento no lo repite para no quedar desactualizado.
 

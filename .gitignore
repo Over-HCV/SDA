@@ -72,6 +72,11 @@ _probe_files/
 # ── Artefactos de corridas (todos los motores) ──
 outputs/
 
+# Salida de pruebas que se coló al repo por un out_dir absoluto: escribir_salida()
+# resuelve la ruta contra la raíz, así que un tempdir de macOS creaba
+# <raiz>/var/folders/... y quedaba versionado.
+var/folders/
+
 # ── Python (anlopez/) ──
 __pycache__/
 *.py[cod]

@@ -14,6 +14,17 @@ SUBSECCIONES_EVALUACION <- c("Composición", "Desempeño", "Diagnóstico",
                              "Explicabilidad", "Comparación",
                              ETIQUETA_ANALISIS)
 
+# Todo lo que la fase 4 sabe dibujar. Cada card se muestra si el método de la
+# corrida la declara en `artefactos` (SCHEMA.md §4).
+CLAVES_EVALUACION <- c("f4.desempeno.grupos",
+                       "f4.diagnostico.scree", "f4.diagnostico.codo",
+                       "f4.diagnostico.silueta",
+                       "f4.explicabilidad.cargas",
+                       "f4.explicabilidad.circulo_correlaciones",
+                       "f4.explicabilidad.mapa_2d",
+                       "f4.explicabilidad.biplot",
+                       "f4.explicabilidad.centroides")
+
 DETALLE_COMPARACION <- paste(
   "Métricas de varias corridas lado a lado, coordenadas paralelas de",
   "hiperparámetros contra métrica y superposición de curvas. Necesita más de",
@@ -80,6 +91,13 @@ mod_evaluacion_server <- function(id, almacen = NULL) {
     })
 
     dataset <- shiny::reactive(piezas()$dataset)
+    # Qué vistas tiene sentido dibujar sale del registro, no del código de cada
+    # subsección: `metodo(clave)$artefactos` es la lista de lo que este método
+    # produce (SCHEMA.md §4).
+    clave_metodo <- shiny::reactive({
+      mo <- piezas()$modelo
+      if (is.null(mo)) NULL else mo$metodo
+    })
 
     shiny::observeEvent(almacen(), {
       for (tipo in c("dataset", "modelo", "receta"))
@@ -99,6 +117,12 @@ mod_evaluacion_server <- function(id, almacen = NULL) {
     })
 
     output$estado <- shiny::renderUI(.franja_corrida(corrida(), piezas()))
+
+    # Las banderas que gobiernan qué cards se ven se publican una sola vez para
+    # toda la fase: dos subsecciones comparten claves (el scree lo miran
+    # Desempeño y Diagnóstico) y asignar el mismo output dos veces lo
+    # reemplazaría en silencio.
+    declarar_artefactos(output, CLAVES_EVALUACION, clave_metodo)
 
     servidor_composicion(input, output, session, piezas, corrida)
     servidor_desempeno(input, output, session, corrida)
@@ -131,10 +155,11 @@ mod_evaluacion_server <- function(id, almacen = NULL) {
       "faltan" = if (length(faltan)) paste(faltan, collapse = ", ") else "nada")))
   }
   m <- corrida$metricas
-  franja_estado(list(
-    "corrida" = corrida$id %||% "sin guardar",
-    "composicion" = sprintf("%s x %s", corrida$dataset_id, corrida$modelo_id),
-    "n" = m$n, "p" = m$p, "componentes" = m$k,
-    "retenido" = sprintf("%.1f %%", 100 * m$varianza_acumulada),
-    "duracion" = sprintf("%.2f s", corrida$duracion)))
+  franja_estado(c(
+    list("corrida" = corrida$id %||% "sin guardar",
+         "composicion" = sprintf("%s x %s", corrida$dataset_id,
+                                 corrida$modelo_id),
+         "n" = m$n, "p" = m$p),
+    resumen_ajuste(corrida$ajuste),
+    list("duracion" = sprintf("%.2f s", corrida$duracion))))
 }

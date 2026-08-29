@@ -71,7 +71,7 @@ ajustar_acp <- function(datos, columnas = NULL, n_componentes = 2L,
   # varianza); que sean el mismo número no es casualidad, es Pitágoras.
   descartada <- sum(valores[seq_len(p) > k])
 
-  list(
+  structure(list(
     cargas = cargas,
     puntuaciones = puntuaciones[, seq_len(k), drop = FALSE],
     valores_propios = valores,
@@ -94,7 +94,10 @@ ajustar_acp <- function(datos, columnas = NULL, n_componentes = 2L,
     # se decidió al elegir k. El detalle por componente queda a la vista.
     convergio = all(resultado$convergio_por_componente[seq_len(k)]),
     convergio_por_componente = resultado$convergio_por_componente,
-    traza = resultado$traza)
+    traza = resultado$traza),
+    # La clase es lo que hace que la fase 4 sepa qué preguntas puede hacerle a
+    # este ajuste sin conocer el método. Ver R/logica/metricas.R.
+    class = c("ajuste_acp", "ajuste_sda"))
 }
 
 # ---------------------------------------------------------------------------

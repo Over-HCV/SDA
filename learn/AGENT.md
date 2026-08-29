@@ -88,20 +88,28 @@ Rscript learn/R/pruebas/test_fase1.R
 
 # One file per implemented method, no GUI
 Rscript learn/R/pruebas/test_acp.R
+Rscript learn/R/pruebas/test_kmeans.R
 
 # S2 output contract + the three-parts rule (C11), no GUI
 Rscript learn/R/pruebas/test_contrato.R
 
-# UI + browser console (mandatory, spec S2b). Two drivers, two files:
+# UI + browser console (mandatory, spec S2b). One driver per file:
 #   test_app.R         shell + phase 1
-#   test_app_metodo.R  one method walked through phases 2 -> 3 -> 4
+#   test_app_piezas.R  the chrome every card shares: seal, formulas, sidebar
+#   test_app_metodo.R  ACP walked through phases 2 -> 3 -> 4
+#   test_app_kmeans.R  k-means, same walk, different family
 Rscript learn/R/pruebas/test_app.R
+Rscript learn/R/pruebas/test_app_piezas.R
 Rscript learn/R/pruebas/test_app_metodo.R
+Rscript learn/R/pruebas/test_app_kmeans.R
 
 # Run a method outside the app: same JSON the UI produces (S2)
 Rscript -e 'source("learn/R/run_headless.R"); correr("acp-twins")'
 Rscript -e 'source("learn/R/run_headless.R");
             correr("acp-cov", hiper = list(matriz = "covarianza"))'
+Rscript -e 'source("learn/R/run_headless.R");
+            correr("kmeans-twins", metodo = "kmeans", hiper = list(k = 4L),
+                   reinicios = 10L)'
 
 # Interactive
 Rscript -e 'shiny::runApp("learn/R/app.R", launch.browser = TRUE)'
@@ -128,27 +136,43 @@ Rscript -e 'source("libs/_comun/R/pruebas_web.R"); verificar_html("http://localh
 
 ## Adding a method
 
-Use `acp` as the worked example: `learn/metodos/acp.R`, its row in
-`learn/R/nucleo/catalogo/reduccion.R`, and `learn/R/pruebas/test_acp.R`. The
-phase 2/3/4 UI is method-agnostic and should not need changes.
+Two worked examples, one per family: `acp` (reduction) and `kmeans`
+(clustering). Copy whichever is closer — `learn/metodos/<clave>.R`, its row in
+`learn/R/nucleo/catalogo/`, and `learn/R/pruebas/test_<clave>.R`.
+
+The phase 2/3/4 UI is method-agnostic, and since Hito 4 that is enforced rather
+than asserted: what a view draws comes from `metodo(clave)$artefactos` through
+`panel_si_declara()`, and what it *says* comes from the S3 generics in
+`R/logica/metricas.R`. A new method in an existing family needs no UI change; a
+new **family** needs a `metricas_<familia>.R` with its S3 methods, and nothing
+else.
 
 1. Add a row in `learn/R/nucleo/catalogo/<macro-tema>.R` via
    `registrar_metodo()`, with `estado = "activo"` and `ajustar = <fn>`.
+   Declare only the optimisers you actually implemented.
 2. Write the pure fit function in `learn/metodos/<clave>.R` — no `input`,
    no `reactive`, no `session`. It is sourced **last** by `cargar.R`, so the
    registration call must stay in `catalogo/`, never in `metodos/`.
    Iterative optimisers record their trace with `R/logica/traza.R`; that is
-   what makes phase 3 show anything.
-3. Write `learn/fichas/<clave>.md`.
-4. Register each plot it produces with `registrar_artefacto()` and write its
+   what makes phase 3 show anything. Return the list with
+   `class = c("ajuste_<clave>", "ajuste_sda")` — without it the phase-4 views
+   fail loudly, which is the point.
+3. Answer the generics of `R/logica/metricas.R` for the family, in
+   `R/logica/metricas_<familia>.R`. If the family already exists, this step is
+   free.
+4. Write `learn/fichas/<clave>.md`.
+5. Register each plot it produces with `registrar_artefacto()` and write its
    text in `learn/textos/<fase>/<subseccion>/<artefacto>.md` — the path
    `ruta_texto_de()` derives from the key (`f1.analisis.histograma` →
    `textos/f1/analisis/histograma.md`).
-5. Three-parts rule (C11): every hyperparameter exists in the pure function,
+6. Three-parts rule (C11): every hyperparameter exists in the pure function,
    in `correr()` of `run_headless.R` including its `params` block, **and** as a
-   UI input. Miss one and app and batch diverge silently.
-6. `Rscript learn/R/mapa.R` to refresh `MAPA.md`.
-7. Both harnesses green.
+   UI input. Miss one and app and batch diverge silently. Controls that only
+   some families have (`inicializacion`, `reinicios`, `matriz`) are filtered by
+   `argumentos_ajuste()`, so `do.call` never sees an argument the method does
+   not take.
+7. `Rscript learn/R/mapa.R` to refresh `MAPA.md`.
+8. Both harnesses green, including a new `test_app_<clave>.R`.
 
 ## Known traps
 
@@ -238,9 +262,21 @@ Every one of these was hit while building Hito 1. They cost real time.
 
 ### Content
 
-- **No LaTeX in `textos/` or `fichas/`.** `commonmark` does not render math and
-  MathJax would need network plus hand-written JS (C10 forbids it). Use Unicode
-  and code blocks, like `notes/tree.md`.
+- **LaTeX in `textos/` and `fichas/` is written as LaTeX.** `$...$` and
+  `$$...$$`. `R/nucleo/formulas.R` pulls the formulas out before commonmark
+  —which eats the `\\` of a matrix row and reads `_` as emphasis— and vendored
+  KaTeX paints them client-side. A formula inside a ``` fence is a formatting
+  error. See C6 and the C10 exception.
+- **A card title in the DOM proves nothing.** `page_navbar` keeps all four
+  phases in the DOM, and `conditionalPanel` hides rather than removes. Two
+  consequences for browser tests: wait for a string that only the view you are
+  about to touch produces (waiting for "inercia" matches the phase-3 log), and
+  assert visibility through the flag output (`bandera_artefacto()`), never
+  through the presence of the text.
+- **A `selectInput`'s choices are not in the DOM.** selectize keeps them in
+  JavaScript and leaves only the selected `<option>`. Assert on
+  `get_value(input = ...)`, or headless on the function that produces the
+  labels.
 - **Clean render + HTTP 200 proves nothing.** `libs/sdd.md` S2b lists four bugs
   that passed both and only showed up in the browser console or the error DOM.
   Assertions must be positive, not just absence-of-errors.

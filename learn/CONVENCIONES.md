@@ -68,6 +68,29 @@ Hereda S1 de `libs/sdd.md`.
 Regla operativa: si borrás Shiny del proyecto, todo lo que hay en `logica/`,
 `graficos/` y `metodos/` debe seguir corriendo con `Rscript`.
 
+### C3b · La UI pregunta qué mide, no de qué método es
+
+Corolario que el segundo método hizo obligatorio. Toda `ajustar_*()` devuelve
+su lista con `class = c("ajuste_<clave>", "ajuste_sda")`, y contesta en
+`R/logica/metricas_<familia>.R` las genéricas que declara
+`R/logica/metricas.R`:
+
+| Genérica | Qué contesta |
+|---|---|
+| `metricas_de_corrida()` | los números que van al JSON y a las value boxes |
+| `tabla_resultado()` | la tabla que hay detrás del resultado principal (CSV) |
+| `grafico_resultado()` | el gráfico que resume la corrida cuando cabe uno |
+| `resumen_ajuste()` | los pares que van a la franja de estado |
+| `lectura_resultado()` | la frase que interpreta, con el número a la vista |
+| `coordenadas_2d()` | las observaciones en un plano |
+| `etiquetas_ejes()` | cómo se llaman esos ejes |
+
+Ningún módulo de `ui/` puede preguntar `if (clave == "acp")` ni leer un campo
+que solo una familia tiene. Qué **cards** se dibujan sale del registro
+(`metodo(clave)$artefactos` vía `panel_si_declara()`); qué **dicen** sale de
+estas genéricas. El método por defecto de cada una falla y explica: un ajuste
+sin clase es un método a medio escribir, y una vista vacía lo escondería.
+
 ---
 
 ## C4 · Layout: tabs y toggles, no columnas fijas
@@ -310,7 +333,8 @@ reproducir no es un resultado.
 
 Sin GUI:
 
-- `pruebas/test_headless.R` — núcleo, contratos y exportadores.
+- `pruebas/test_headless.R` — núcleo, contratos, exportadores y el despacho
+  por familia (C3b).
 - `pruebas/test_fase1.R` — lógica y gráficos de la fase 1.
 - `pruebas/test_<metodo>.R` — uno por método implementado, con sus gráficos.
 - `pruebas/test_contrato.R` — el contrato S2 de la salida y la regla de las
@@ -319,8 +343,12 @@ Sin GUI:
 En navegador **y con su consola** (`app$get_logs()`):
 
 - `pruebas/test_app.R` — el flujo de la fase 1.
-- `pruebas/test_app_metodo.R` — un método por las fases 2, 3 y 4. Cierra C11:
-  mueve cada hiperparámetro para probar que además está enlazado.
+- `pruebas/test_app_<metodo>.R` — un archivo por método, recorriendo las fases
+  2, 3 y 4. Cierra C11: mueve cada hiperparámetro para probar que además está
+  enlazado. Uno solo parametrizado sonaba mejor y no lo era: cada método toca
+  controles distintos y espera textos distintos, y el archivo unificado pasaba
+  de 300 LOC para no compartir casi nada. (`test_app_metodo.R` es el del ACP;
+  conserva el nombre porque es el que la documentación cita desde el Hito 3.)
 - `pruebas/test_app_piezas.R` — la envoltura que comparten todas las cards:
   sello ⓘ, fórmulas y sidebar. Va aparte de `test_app.R` por C2: prueba las
   piezas transversales, no el recorrido de una fase.
@@ -334,6 +362,15 @@ contento, responde 200, y la funcionalidad queda muerta en silencio.
 
 Ambos harness incluyen **aserciones positivas** (que el contenido esperado esté
 presente), no solo ausencia de errores.
+
+Y una advertencia que costó una tarde: **en el navegador, que un texto esté en
+el DOM no prueba que se vea.** `page_navbar` deja las cuatro fases montadas y
+`conditionalPanel` oculta en vez de quitar, así que el título de una card
+aparece aunque su método no la declare, y el log de la fase 3 hace casar un
+patrón de la fase 4. Las aserciones de visibilidad van contra la bandera que la
+gobierna (`bandera_artefacto()`); las de espera, contra un texto que solo
+produzca la vista que se va a tocar. Y las opciones de un `selectInput` no
+están en el DOM: selectize las guarda en JavaScript.
 
 ---
 

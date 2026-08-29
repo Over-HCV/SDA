@@ -76,7 +76,7 @@ nombre_supuesto <- function(supuesto) {
                   sprintf("Escalado previo: las desviaciones son comparables (la mayor es %.1f veces la menor).",
                           razon)))
   .aviso("aviso", "escalado_previo",
-         sprintf("Escalado previo: %s varia %.0f veces mas que %s, y va a dominar las primeras componentes.",
+         sprintf("Escalado previo: %s varia %.0f veces mas que %s, y va a dominar el resultado.",
                  names(which.max(desviaciones)), razon,
                  names(which.min(desviaciones))),
          "Descomponer la correlacion (R) equivale a estandarizar, o aplica 'escalar' en Datos - Transformacion.")
@@ -96,7 +96,7 @@ nombre_supuesto <- function(supuesto) {
   maxima <- max(fuera)
   if (maxima < 0.3)
     return(.aviso("aviso", "estructura_lineal",
-                  sprintf("Estructura lineal: la correlacion mas alta es %.2f. Con variables casi independientes el ACP no tiene redundancia que resumir.",
+                  sprintf("Estructura lineal: la correlacion mas alta es %.2f. Con variables casi independientes no hay redundancia que resumir.",
                           maxima),
                   "Mira el mapa de calor en Datos - Analisis: si no hay bloques, reducir no va a ganar mucho."))
   .aviso("ok", "estructura_lineal",
@@ -128,7 +128,55 @@ nombre_supuesto <- function(supuesto) {
          "Miralos en Datos - Calidad con el criterio de Mahalanobis antes de ajustar.")
 }
 
+
+# k-medias corta el espacio con esferas del mismo tamaño: asigna cada punto al
+# centroide más cercano en distancia euclidiana. Si la nube es un cigarro, la
+# frontera correcta no es una esfera y la partición sale cortando el cigarro a
+# lo ancho. La razón entre el mayor y el menor valor propio de la correlación
+# mide justamente eso.
+.supuesto_esfericos <- function(dataset, columnas) {
+  if (length(columnas) < 2L)
+    return(.aviso("aviso", "grupos_esfericos",
+                  "Grupos esfericos: hacen falta al menos dos variables numericas."))
+  matriz <- stats::cor(dataset$df[columnas], use = "pairwise.complete.obs")
+  valores <- tryCatch(eigen(matriz, symmetric = TRUE, only.values = TRUE)$values,
+                      error = function(e) NULL)
+  valores <- valores[is.finite(valores) & valores > 1e-10]
+  if (length(valores) < 2L)
+    return(.aviso("aviso", "grupos_esfericos",
+                  "Grupos esfericos: la correlacion es singular, hay colinealidad exacta.",
+                  "Quita una de las columnas repetidas en Datos - Diccionario."))
+
+  razon <- max(valores) / min(valores)
+  if (razon < 20)
+    return(.aviso("ok", "grupos_esfericos",
+                  sprintf("Grupos esfericos: la nube no esta muy alargada (razon de valores propios %.1f).",
+                          razon)))
+  .aviso("aviso", "grupos_esfericos",
+         sprintf("Grupos esfericos: la nube es %.0f veces mas larga en una direccion que en otra. Las esferas de k-medias van a cortarla a lo ancho.",
+                 razon),
+         "Mira el elipsoide en Datos - Analisis - Multivariado, o reduce con ACP antes de agrupar.")
+}
+
+# Antes de ajustar no hay grupos cuyos tamaños comparar. Lo que sí se puede
+# mirar es si el dataset da para los grupos que se van a pedir: con n < 2k, el
+# tamaño medio de grupo es menor que dos y la partición no significa nada.
+.supuesto_tamanos <- function(dataset, columnas) {
+  n <- nrow(dataset$df)
+  techo <- n %/% 2L
+  if (techo < 2L)
+    return(.aviso("error", "tamanos_similares",
+                  sprintf("Tamanos de grupo similares: con %d filas no alcanza para dos grupos.",
+                          n)))
+  .aviso("ok", "tamanos_similares",
+         sprintf("Tamanos de grupo similares: %d filas dan para k hasta %d sin que un grupo quede con menos de dos observaciones.",
+                 n, techo),
+         "k-medias parte antes un grupo grande que dejar uno pequeno: revisa los tamanos en Evaluacion - Desempeno.")
+}
+
 .COMPROBACIONES_SUPUESTO <- list(
   escalado_previo = .supuesto_escalado,
   estructura_lineal = .supuesto_lineal,
-  sin_atipicos = .supuesto_atipicos)
+  sin_atipicos = .supuesto_atipicos,
+  grupos_esfericos = .supuesto_esfericos,
+  tamanos_similares = .supuesto_tamanos)

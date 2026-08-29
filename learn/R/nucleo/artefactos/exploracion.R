@@ -127,6 +127,11 @@ poblar_artefactos_exploracion <- function() {
     logica  = "R/logica/traza.R::registrar_iteracion",
     descripcion = "La función objetivo por iteración. Responde: ¿convergió o se agotó?")
 
+  registrar_artefacto("f3.consola.estado", "El ajuste, iteración por iteración",
+    grafico = "R/graficos/explicabilidad.R::graficar_mapa_2d",
+    logica  = "R/logica/metricas.R::coordenadas_2d",
+    descripcion = "El estado del modelo en la iteración que se reproduce.")
+
   registrar_artefacto("f3.analisis.trayectoria", "Trayectoria de parámetros",
     grafico = "R/graficos/convergencia.R::graficar_trayectoria",
     logica  = "R/logica/traza.R::parametros_a_tabla",

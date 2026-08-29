@@ -16,12 +16,17 @@ es necesario.
 
 ## Estado
 
-**Hito 2 hecho**: la fase 1 calcula de verdad. Se carga un dataset (de los del
-curso, sintético o un CSV propio), se declara qué es cada columna, se limpia, se
-transforma, se parte y se balancea, y se mira en univariado, bivariado y
-multivariado. Las fases 2, 3 y 4 siguen siendo andamio, salvo el catálogo.
-El avance vive en [`PLAN.md`](PLAN.md) — este README no lo repite para no quedar
-desactualizado.
+**Hito 4 hecho**: las cuatro fases se recorren enteras con dos métodos de
+familias distintas. Se carga un dataset (de los del curso, sintético o un CSV
+propio), se limpia y se transforma; se elige **ACP** o **K-medias** en el
+catálogo, se mira el semáforo de supuestos y se fijan los hiperparámetros; se
+ajusta viendo bajar el objetivo y se reproduce iteración por iteración; y se lee
+el resultado en las vistas que ese método produce y no en las del otro.
+
+El segundo método es lo que hace honesta la frase «el marco es genérico»: hasta
+el Hito 3, «las métricas de la corrida» y «las métricas del ACP» eran la misma
+cosa. El avance vive en [`PLAN.md`](PLAN.md) — este README no lo repite para no
+quedar desactualizado.
 
 ## Correr
 
@@ -47,13 +52,16 @@ Rscript learn/R/pruebas/verificar_mapa.R     # MAPA.md al día (C9)
 Rscript learn/R/pruebas/test_headless.R      # núcleo, sin Shiny
 Rscript learn/R/pruebas/test_fase1.R         # lógica y gráficos de la fase 1
 Rscript learn/R/pruebas/test_acp.R           # el método ACP, sin Shiny
+Rscript learn/R/pruebas/test_kmeans.R        # el método K-medias, sin Shiny
 Rscript learn/R/pruebas/test_contrato.R      # contrato S2 y regla de tres partes
 Rscript learn/R/pruebas/test_app.R           # UI de la fase 1 + consola
-Rscript learn/R/pruebas/test_app_metodo.R    # un método por las fases 2, 3 y 4
+Rscript learn/R/pruebas/test_app_piezas.R    # la envoltura que comparten las cards
+Rscript learn/R/pruebas/test_app_metodo.R    # el ACP por las fases 2, 3 y 4
+Rscript learn/R/pruebas/test_app_kmeans.R    # K-medias, el mismo recorrido
 Rscript learn/R/pruebas/verificar_bundle.R   # el bundle wasm arranca de verdad
 ```
 
-Los tres últimos abren un navegador de verdad. No son opcionales: un render
+Los cinco últimos abren un navegador de verdad. No son opcionales: un render
 limpio y un HTTP 200 no prueban nada (ver `libs/sdd.md` S2b).
 
 ## Correr un método sin la app
@@ -65,6 +73,9 @@ mismo JSON de salida:
 Rscript -e 'source("learn/R/run_headless.R"); correr("acp-twins")'
 Rscript -e 'source("learn/R/run_headless.R");
             correr("acp-cov", hiper = list(matriz = "covarianza"))'
+Rscript -e 'source("learn/R/run_headless.R");
+            correr("kmeans-twins", metodo = "kmeans", hiper = list(k = 4L),
+                   reinicios = 10L)'
 ```
 
 Escribe `learn/outputs/<escenario>.{json,csv,png}` y va acumulando

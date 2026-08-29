@@ -52,7 +52,7 @@ servidor_hiperparametros <- function(input, output, session, dataset,
                                 "Marcá al menos dos columnas en Especificación."))
     graficar_presupuesto(
       presupuesto_por_k(clave_metodo(), p = length(columnas()), n = ds$n),
-      k = hiper()$n_componentes)
+      k = k_del_modelo(hiper()))
   })
 
   dibujar_contexto(output, "f2.analisis.presupuesto_parametros",

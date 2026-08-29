@@ -129,6 +129,22 @@ hiper_por_defecto <- function(clave) {
   stats::setNames(valores, names(hiper))
 }
 
+#' Los argumentos que la función de ajuste de un método acepta de verdad.
+#'
+#' La app y el batch arman UN solo bloque de argumentos (hiper del modelo +
+#' control del optimizador) y se lo pasan al método que toque. Pero no todos
+#' los métodos tienen los mismos mandos: `inicializacion` y `reinicios` son de
+#' k-medias, `matriz` es del ACP. Sin este filtro, `do.call()` revienta con
+#' "unused argument" en cuanto hay dos familias en el catálogo.
+#'
+#' Lo que NO hace es inventar: si un argumento no está en la firma, se cae. La
+#' regla de las tres partes (C11) sigue comprobándose contra `hiper`.
+argumentos_ajuste <- function(clave, argumentos) {
+  acepta <- names(formals(metodo(clave)$ajustar))
+  if ("..." %in% acepta) return(argumentos)
+  argumentos[names(argumentos) %in% acepta]
+}
+
 #' ¿Se puede ejecutar este método en el modo actual?
 #' Un método activo pero no-wasm es ejecutable en servidor y no en navegador.
 ejecutable <- function(clave) {

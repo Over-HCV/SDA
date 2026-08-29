@@ -18,7 +18,7 @@ controles_analisis_evaluacion <- function(ns) {
                           class = "btn-sm btn-outline-primary w-100 mb-2"),
     shiny::downloadButton(ns("bajar_json"), "JSON del contrato",
                           class = "btn-sm btn-outline-primary w-100 mb-2"),
-    shiny::downloadButton(ns("bajar_csv"), "Varianza explicada (CSV)",
+    shiny::downloadButton(ns("bajar_csv"), "Tabla del resultado (CSV)",
                           class = "btn-sm btn-outline-primary w-100 mb-2"),
     shiny::downloadButton(ns("bajar_rds"), "RDS sin pérdida",
                           class = "btn-sm btn-outline-primary w-100"),
@@ -79,7 +79,7 @@ servidor_analisis_evaluacion <- function(input, output, session, piezas,
   output$bajar_csv <- shiny::downloadHandler(
     filename = nombre_de("csv"),
     content = function(archivo)
-      exportar_csv(varianza_explicada(corrida()$ajuste), archivo))
+      exportar_csv(tabla_resultado(corrida()$ajuste), archivo))
 
   output$bajar_rds <- shiny::downloadHandler(
     filename = nombre_de("rds"),

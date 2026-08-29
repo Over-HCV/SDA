@@ -84,11 +84,15 @@ servidor_composicion <- function(input, output, session, piezas, corrida) {
     (m$optimizador$metodos %||% NA_character_)[1] else p$receta$optimizador
 
   inicio <- Sys.time()
-  ajuste <- do.call(m$ajustar, c(
+  ajuste <- do.call(m$ajustar, argumentos_ajuste(p$modelo$metodo, c(
     list(datos = p$dataset$df, columnas = p$modelo$spec),
     p$modelo$hiper,
-    list(optimizador = optimizador, tol = control$tol %||% 1e-8,
-         maxit = control$maxit %||% 500L, semilla = semilla)))
+    list(optimizador = optimizador,
+         inicializacion = control$inicializacion %||%
+           (m$optimizador$inicializaciones %||% NA_character_)[1],
+         reinicios = control$reinicios %||% 1L,
+         tol = control$tol %||% 1e-8,
+         maxit = control$maxit %||% 500L, semilla = semilla))))
 
   nueva_corrida(
     NULL, p$dataset$id, p$modelo$id,
@@ -97,6 +101,8 @@ servidor_composicion <- function(input, output, session, piezas, corrida) {
     metricas = metricas_de_corrida(ajuste),
     params = c(p$modelo$hiper,
                list(optimizador = optimizador, tol = control$tol,
+                    inicializacion = control$inicializacion %||% NA_character_,
+                    reinicios = control$reinicios %||% 1L,
                     maxit = control$maxit, semilla = semilla,
                     columnas = paste(p$modelo$spec %||%
                                        columnas_numericas(p$dataset),
