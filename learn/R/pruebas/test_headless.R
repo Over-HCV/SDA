@@ -141,6 +141,15 @@ probar("los faltantes se detectan", {
   avisos <- validar_compatibilidad(ds, modelo)
   any(vapply(avisos, function(a) a$clave == "faltantes", logical(1)))
 })
+probar("un faltante en una columna que el modelo no usa no bloquea", {
+  # Se valida contra `spec`, no contra todas las numéricas: bloquear por una
+  # columna que el modelo ni mira manda a limpiar datos que no participan.
+  con_na <- datos_prueba
+  con_na$sobrante <- c(NA_real_, stats::rnorm(nrow(con_na) - 1L))
+  ds <- nuevo_dataset("ds", "con sobrante", con_na)
+  acotado <- nuevo_modelo("ma", "ACP acotado", "acp", spec = c("x", "y"))
+  componible(validar_compatibilidad(ds, acotado))
+})
 probar("severidad_maxima ordena bien",
        severidad_maxima(list(list(severidad = "aviso"),
                              list(severidad = "error"))) == "error")

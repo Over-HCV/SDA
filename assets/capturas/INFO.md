@@ -1,4 +1,5 @@
-# Capturas para el README
+# Capturas
+<!-- Para visualización del README -->
 
 Poné acá los PNG y descomentá el bloque correspondiente en `README.md`.
 

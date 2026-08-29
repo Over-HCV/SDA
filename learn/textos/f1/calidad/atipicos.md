@@ -11,7 +11,7 @@ según el criterio elegido. Los tres criterios responden preguntas distintas:
 
 $$
 \begin{aligned}
-\text{IQR} &: && x \notin \left[\, Q_1 - 1{,}5 \cdot \text{RIC} \;,\; Q_3 + 1{,}5 \cdot \text{RIC} \,\right] && \text{robusto, univariado} \\[4pt]
+\text{IQR} &: && x \notin \left[\, Q_1 - 1.5 \cdot \text{RIC} \;,\; Q_3 + 1.5 \cdot \text{RIC} \,\right] && \text{robusto, univariado} \\[4pt]
 z &: && \frac{\lvert x - \bar{x} \rvert}{s} > 3 && \text{no robusto, univariado} \\[4pt]
 \text{Mahalanobis} &: && d^2 > \chi^2_p(\alpha) && \text{multivariado}
 \end{aligned}

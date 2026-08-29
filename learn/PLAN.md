@@ -185,18 +185,135 @@ el muestreo visible (C8) y la escala de medición gobernando la UI.
 - [x] `verificar_bundle.R` verde — el bundle wasm arranca con la fase 1 dentro
 - [x] Cero dependencias nuevas
 
----
-
-## Hitos siguientes
-
 > Completado el 2026-08-13. Pendiente heredado: los métodos de la fase 1 que
 > exigirían dependencias nuevas (MICE, k-NN, SMOTE) siguen sin implementar, a
 > propósito. Entran cuando se decida pagar el peso en el bundle.
 
-- [ ] **Hito 3 · ACP de punta a punta** — primer método por las 4 fases; valida
-      el marco. Teoría en `notes/SDA/NB3/main.md`
-- [ ] **Hito 4 · k-medias** — valida el modo paso a paso y la traza de
-      convergencia, que el ACP no ejercita
+---
+
+## Hito 3 — ACP de punta a punta
+
+Al terminar: se elige ACP en el catálogo, se declara la matriz X, se ve el
+semáforo de supuestos, se fija `k` y S-vs-R, se ajusta con **iteración de
+potencia real** viendo la traza bajar, se compone Dataset × Modelo × Receta en
+una Corrida, y se lee el resultado en scree, cargas, círculo y biplot — con el
+mismo JSON que produce `Rscript learn/R/run_headless.R`.
+
+El primer método existente. Lo que valida no es el ACP: es el marco.
+
+### E11 · Lógica pura del método
+
+- [x] `metodos/acp.R` — `ajustar_acp()` con dos optimizadores: `svd`
+      (`prcomp`) y `potencia` (iteración de potencia con deflación). Convención
+      de signo fija para que coincidan; `test_acp.R` lo comprueba a 1e-6
+- [x] `R/logica/traza.R` — `nueva_traza()`, `registrar_iteracion()`,
+      `traza_a_tabla()`, `parametros_a_tabla()`, `traza_monotona()`,
+      `comparar_reinicios()`. Genérico: k-medias lo reusa sin tocarlo
+- [x] `R/logica/metricas_reduccion.R` — `metricas_de_corrida()`,
+      `varianza_explicada()`, `cargas()`, `correlaciones_componentes()`,
+      `coordenadas_2d()`, `coordenadas_biplot()`, `componentes_sugeridas()`
+- [x] `R/logica/modelo_geometria.R` — `familia_candidatas()`,
+      `proyectar_en_direccion()`, `evaluar_objetivo()`, `contar_parametros()`,
+      `presupuesto_por_k()`, `resumen_matriz_diseno()`
+- [x] `R/logica/supuestos.R` — `evaluar_supuestos()` recorre
+      `metodo(clave)$supuestos` y devuelve avisos con la forma de `contratos.R`
+
+### E12 · Gráficos
+
+- [x] `R/graficos/modelo.R` · `convergencia.R` · `diagnostico.R` ·
+      `explicabilidad.R` — 10 funciones, ggplot puro
+- [x] Biplot y círculo de correlaciones a mano: nada de `factoextra`
+
+### E13 · Registro, artefactos y textos
+
+- [x] `acp` pasa a `estado = "activo"` con `ajustar = ajustar_acp` y 12
+      artefactos declarados. El optimizador declara `potencia` y `svd`
+- [x] Dos claves nuevas: `f2.especificacion.matriz_diseno` y
+      `f2.supuestos.semaforo`
+- [x] 10 textos nuevos en `textos/f2/`, `f3/` y `f4/`, con los cuatro bloques
+
+### E14 · Fase 2 — Modelado
+
+- [x] `R/ui/f2/` — `modelado.R` (cableado) + `especificacion.R` ·
+      `supuestos.R` · `hiperparametros.R` · `analisis.R`
+- [x] El catálogo usa por fin su `al_elegir`: elegir un método lleva a
+      Especificación con el método ya seleccionado
+- [x] «Guardar modelo en Objetos» → `nuevo_modelo()`
+
+### E15 · Fase 3 — Ajuste
+
+- [x] `R/ui/f3/` — `ajuste.R` (cableado) + `optimizador.R` · `control.R` ·
+      `consola.R` · `analisis.R`
+- [x] Modo paso a paso: **reproduce** la traza registrada, no recalcula. Con
+      `invalidateLater` para la reproducción automática, sin JavaScript (C10)
+- [x] «Guardar receta» y «Guardar corrida»
+
+### E16 · Fase 4 — Evaluación
+
+- [x] `R/ui/f4/` — `evaluacion.R` (cableado) + `composicion.R` · `desempeno.R` ·
+      `diagnostico.R` · `explicabilidad.R` · `analisis.R`
+- [x] Composición real: `validar_compatibilidad()` + `lista_avisos()` + Correr
+- [x] El informe compuesto con descargas `.Rmd` · JSON · CSV · RDS
+
+### E17 · `R/run_headless.R`
+
+- [x] `correr()` recorre el registro y escribe el contrato S2 con
+      `escribir_salida()`. No sabe nada del ACP: k-medias no lo va a tocar
+- [x] `hiper_por_defecto()` se mudó de `ui/formulario.R` a `nucleo/registro.R`:
+      el batch corre con `con_ui = FALSE` y no sourcea `ui/`
+
+### E18 · Pruebas y documentación
+
+- [x] `R/pruebas/test_acp.R` — 55 pruebas del método, sin Shiny
+- [x] `R/pruebas/test_contrato.R` — 16 pruebas del contrato S2 y de C11
+- [x] `R/pruebas/test_app_metodo.R` — 44 aserciones en navegador, fases 2→4
+- [x] `test_headless.R` — la aserción de ACP pasó de negativa a positiva
+
+### Definición de "hecho" — Hito 3
+
+- [x] `verificar_loc.R` verde — máximo 261 LOC
+- [x] `verificar_idioma.R` verde
+- [x] `verificar_mapa.R` verde — 81 artefactos, deuda de código 30/47
+- [x] `test_headless.R` · `test_fase1.R` · `test_acp.R` · `test_contrato.R`
+- [x] `test_app.R` y `test_app_metodo.R` verdes, consola del navegador limpia
+- [x] Cero dependencias nuevas
+
+### Tres bugs que este hito destapó
+
+Ninguno era del ACP; los tres estaban esperando a que alguien compusiera las
+fases de verdad.
+
+1. **`layout_sidebar(height=)` aplastaba los gráficos.** Con un alto fijo el
+   cuerpo se vuelve contenedor *fill* y las cards se reparten los píxeles: en
+   la pestaña Calidad cada `plotOutput` quedaba con decenas de píxeles y el
+   device de R abortaba con `figure margins too large`. El alto ahora lo acota
+   el sidebar y nadie más.
+2. **`modelado-estado` estaba duplicado.** El filtro del catálogo y la franja
+   de estado compartían id; Shiny lo avisa por consola y sigue a medias, con
+   `input$estado` devolviendo cualquier cosa. Ahora el filtro es
+   `estado_metodo`.
+3. **`almacen_ids()` devolvía NULL con el almacén vacío**, porque
+   `names(list())` es NULL. Un selector rellenado con eso tiraba "attempt to
+   set an attribute on NULL" en un observer, al arrancar.
+
+Y una decisión de producto que salió de componer: `validar_compatibilidad()`
+valida contra las columnas que el **modelo** usa, no contra todas las numéricas
+del dataset. Bloquear una corrida por faltantes en una columna que el modelo ni
+mira mandaba a limpiar datos que no participan.
+
+---
+
+> Completado el 2026-08-14. El marco quedó validado: añadir un método es un
+> archivo en `metodos/`, una fila en `catalogo/` y sus textos. La UI de las
+> fases 2, 3 y 4 no se toca. Pendiente heredado: la subsección Comparación de
+> la fase 4 espera al Hito 6, porque comparar corridas exige tener más de un
+> método que comparar.
+
+## Hitos siguientes
+
+- [ ] **Hito 4 · k-medias** — valida el modo paso a paso recalculando (el ACP
+      lo resuelve reproduciendo la traza) y la sensibilidad a la semilla, que
+      el ACP no ejercita porque siempre converge al mismo sitio
 - [ ] **Hito 5 · LASSO** — valida barrido de hiperparámetros y ruta de
       regularización; migra `projects/01-lasso/`
 - [ ] **Hito 6 · Evaluación completa** — explicabilidad, comparación de corridas,

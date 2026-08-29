@@ -46,12 +46,31 @@ Rscript learn/R/pruebas/verificar_idioma.R   # español ASCII (C1)
 Rscript learn/R/pruebas/verificar_mapa.R     # MAPA.md al día (C9)
 Rscript learn/R/pruebas/test_headless.R      # núcleo, sin Shiny
 Rscript learn/R/pruebas/test_fase1.R         # lógica y gráficos de la fase 1
-Rscript learn/R/pruebas/test_app.R           # UI + consola del navegador
+Rscript learn/R/pruebas/test_acp.R           # el método ACP, sin Shiny
+Rscript learn/R/pruebas/test_contrato.R      # contrato S2 y regla de tres partes
+Rscript learn/R/pruebas/test_app.R           # UI de la fase 1 + consola
+Rscript learn/R/pruebas/test_app_metodo.R    # un método por las fases 2, 3 y 4
 Rscript learn/R/pruebas/verificar_bundle.R   # el bundle wasm arranca de verdad
 ```
 
-Los dos últimos abren un navegador de verdad. No son opcionales: un render
+Los tres últimos abren un navegador de verdad. No son opcionales: un render
 limpio y un HTTP 200 no prueban nada (ver `libs/sdd.md` S2b).
+
+## Correr un método sin la app
+
+La misma corrida que hace la interfaz, desde la línea de comandos, con el
+mismo JSON de salida:
+
+```bash
+Rscript -e 'source("learn/R/run_headless.R"); correr("acp-twins")'
+Rscript -e 'source("learn/R/run_headless.R");
+            correr("acp-cov", hiper = list(matriz = "covarianza"))'
+```
+
+Escribe `learn/outputs/<escenario>.{json,csv,png}` y va acumulando
+`run_log.csv`. Que app y batch produzcan lo mismo no es casualidad: los dos
+llaman a la misma función pura de `learn/metodos/`, y `test_contrato.R` lo
+comprueba.
 
 ## Desplegar
 

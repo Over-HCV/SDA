@@ -308,10 +308,19 @@ reproducir no es un resultado.
 
 ## C14 · Verificación en dos harness, no uno
 
-- `pruebas/test_headless.R` — núcleo, contratos y exportadores, sin GUI.
-- `pruebas/test_fase1.R` — lógica y gráficos de la fase 1, también sin GUI.
-- `pruebas/test_app.R` — el flujo de la fase 1 en navegador, **y su consola**
-  (`app$get_logs()`).
+Sin GUI:
+
+- `pruebas/test_headless.R` — núcleo, contratos y exportadores.
+- `pruebas/test_fase1.R` — lógica y gráficos de la fase 1.
+- `pruebas/test_<metodo>.R` — uno por método implementado, con sus gráficos.
+- `pruebas/test_contrato.R` — el contrato S2 de la salida y la regla de las
+  tres partes (C11), que sin `run_headless.R` no se puede comprobar.
+
+En navegador **y con su consola** (`app$get_logs()`):
+
+- `pruebas/test_app.R` — el flujo de la fase 1.
+- `pruebas/test_app_metodo.R` — un método por las fases 2, 3 y 4. Cierra C11:
+  mueve cada hiperparámetro para probar que además está enlazado.
 - `pruebas/test_app_piezas.R` — la envoltura que comparten todas las cards:
   sello ⓘ, fórmulas y sidebar. Va aparte de `test_app.R` por C2: prueba las
   piezas transversales, no el recorrido de una fase.
@@ -336,6 +345,9 @@ Rscript learn/R/pruebas/verificar_idioma.R   # C1
 Rscript learn/R/pruebas/verificar_mapa.R     # C9
 Rscript learn/R/pruebas/test_headless.R      # C3, C11, C13
 Rscript learn/R/pruebas/test_fase1.R         # C3, C8, C13
+Rscript learn/R/pruebas/test_acp.R           # C3, C13
+Rscript learn/R/pruebas/test_contrato.R      # C11, C13
 Rscript learn/R/pruebas/test_app.R           # C14
+Rscript learn/R/pruebas/test_app_metodo.R    # C11, C14
 Rscript learn/R/pruebas/test_app_piezas.R    # C6, C10, C14
 ```

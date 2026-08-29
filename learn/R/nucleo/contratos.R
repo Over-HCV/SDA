@@ -57,7 +57,11 @@ validar_compatibilidad <- function(dataset = NULL, modelo = NULL, receta = NULL)
                     paste(faltantes, collapse = '","')))
   }
 
-  avisos <- c(avisos, .validar_entrada(dataset, m))
+  # Se valida contra las columnas que el MODELO usa, no contra todas las del
+  # dataset. Un dataset con una columna llena de faltantes que el modelo ni
+  # mira no tiene por qué impedir la corrida, y bloquearla mandaba a limpiar
+  # datos que no participan. `spec` vacío significa "todas las numéricas".
+  avisos <- c(avisos, .validar_entrada(dataset, m, modelo$spec))
   avisos <- c(avisos, .validar_receta(receta, m))
   if (!length(avisos)) avisos <- list(.aviso("ok", "todo", "Composición válida."))
   avisos
@@ -66,12 +70,13 @@ validar_compatibilidad <- function(dataset = NULL, modelo = NULL, receta = NULL)
 # ---------------------------------------------------------------------------
 # Requisitos del método sobre los datos
 # ---------------------------------------------------------------------------
-.validar_entrada <- function(dataset, m) {
+.validar_entrada <- function(dataset, m, columnas = NULL) {
   avisos <- list()
   agregar <- function(...) avisos[[length(avisos) + 1L]] <<- .aviso(...)
   requisitos <- m$entrada
 
   numericas <- columnas_numericas(dataset)
+  if (length(columnas)) numericas <- intersect(columnas, numericas)
   min_p <- requisitos$min_p %||% 0L
   if (length(numericas) < min_p) {
     agregar("error", "min_p",

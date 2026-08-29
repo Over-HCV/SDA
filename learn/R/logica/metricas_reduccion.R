@@ -10,6 +10,26 @@
 # Sirve para ACP y, sin cambios, para cualquier método que devuelva cargas,
 # puntuaciones y valores propios: análisis factorial, ACP robusto, MDS métrico.
 
+#' Las métricas de un ajuste de reducción, como lista plana.
+#'
+#' Es lo que va al JSON de la corrida y a las value boxes de la fase 4. Vive en
+#' `logica/` y no en `run_headless.R` porque la app y el batch tienen que
+#' reportar exactamente los mismos números: si cada uno arma su resumen, la
+#' misma corrida da dos respuestas y ninguna se puede citar.
+#'
+#' Cuando entren métodos de otra familia tendrán su propia función hermana; el
+#' nombre dice a qué familia pertenece esta.
+metricas_de_corrida <- function(ajuste) {
+  retenidas <- seq_len(ajuste$k)
+  list(n = ajuste$n, p = ajuste$p, k = ajuste$k,
+       varianza_acumulada = sum(ajuste$varianza_explicada[retenidas]),
+       primer_valor_propio = unname(ajuste$valores_propios[1]),
+       error_reconstruccion = ajuste$error_reconstruccion,
+       error_relativo = ajuste$error_relativo,
+       iteraciones = ajuste$iteraciones,
+       convergio = isTRUE(ajuste$convergio))
+}
+
 #' Varianza explicada por componente y acumulada.
 #'
 #' @return data.frame(componente, etiqueta, valor_propio, proporcion, acumulada)

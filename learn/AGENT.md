@@ -86,8 +86,22 @@ Rscript learn/R/pruebas/test_headless.R
 # Phase 1 logic and plots, no GUI
 Rscript learn/R/pruebas/test_fase1.R
 
-# UI + browser console (mandatory, spec S2b)
+# One file per implemented method, no GUI
+Rscript learn/R/pruebas/test_acp.R
+
+# S2 output contract + the three-parts rule (C11), no GUI
+Rscript learn/R/pruebas/test_contrato.R
+
+# UI + browser console (mandatory, spec S2b). Two drivers, two files:
+#   test_app.R         shell + phase 1
+#   test_app_metodo.R  one method walked through phases 2 -> 3 -> 4
 Rscript learn/R/pruebas/test_app.R
+Rscript learn/R/pruebas/test_app_metodo.R
+
+# Run a method outside the app: same JSON the UI produces (S2)
+Rscript -e 'source("learn/R/run_headless.R"); correr("acp-twins")'
+Rscript -e 'source("learn/R/run_headless.R");
+            correr("acp-cov", hiper = list(matriz = "covarianza"))'
 
 # Interactive
 Rscript -e 'shiny::runApp("learn/R/app.R", launch.browser = TRUE)'
@@ -114,9 +128,17 @@ Rscript -e 'source("libs/_comun/R/pruebas_web.R"); verificar_html("http://localh
 
 ## Adding a method
 
-1. Add a row in `learn/R/nucleo/catalogo.R` via `registrar_metodo()`.
+Use `acp` as the worked example: `learn/metodos/acp.R`, its row in
+`learn/R/nucleo/catalogo/reduccion.R`, and `learn/R/pruebas/test_acp.R`. The
+phase 2/3/4 UI is method-agnostic and should not need changes.
+
+1. Add a row in `learn/R/nucleo/catalogo/<macro-tema>.R` via
+   `registrar_metodo()`, with `estado = "activo"` and `ajustar = <fn>`.
 2. Write the pure fit function in `learn/metodos/<clave>.R` — no `input`,
-   no `reactive`, no `session`.
+   no `reactive`, no `session`. It is sourced **last** by `cargar.R`, so the
+   registration call must stay in `catalogo/`, never in `metodos/`.
+   Iterative optimisers record their trace with `R/logica/traza.R`; that is
+   what makes phase 3 show anything.
 3. Write `learn/fichas/<clave>.md`.
 4. Register each plot it produces with `registrar_artefacto()` and write its
    text in `learn/textos/<fase>/<subseccion>/<artefacto>.md` — the path
@@ -188,6 +210,27 @@ Every one of these was hit while building Hito 1. They cost real time.
   boring one: build every control once, show them with `conditionalPanel(ns =
   ns)`, and fill their choices with `update*Input()` when the dataset changes.
   `renderUI` is fine for text-only fragments (notices, badges, legends).
+- **`layout_sidebar(height = ...)` squashes every plot in the tab.** A fixed
+  height turns the body into a *fill* container: `navset_card_tab` and its
+  cards then SHARE those pixels instead of growing. With three
+  `panel_resultado()` in one tab each `plotOutput` got a few dozen pixels and
+  R's device aborted with `figure margins too large` — worse in tabs with more
+  cards, which is why it looked random. Bound the **sidebar** instead
+  (`ESTILO_CONTROLES` in `ui/piezas/fase.R`: sticky + `max-height` +
+  `overflow-y`) and pass `fillable = FALSE`.
+- **Duplicate input ids fail quietly.** `modelado-estado` existed twice: the
+  catalogue's state filter and the phase's status bar. Shiny prints
+  "HTML id values are not unique" and keeps going at half speed, with
+  `input$estado` returning whatever. Grep the module's `ns(...)` calls before
+  adding an output named like a common input.
+- **`names(list())` is NULL, not `character(0)`.** `almacen_ids()` returned it
+  straight, and a selector filled with `setNames(NULL, ...)` threw "attempt to
+  set an attribute on NULL" inside an observer — on startup, with an empty
+  store, before anything was visible.
+- **Wait for what you are about to touch.** `esperar_html()` on a sidebar label
+  returns immediately: sidebar controls are in the DOM even when their tab is
+  hidden. Wait for a string produced by the *output* you are asserting on, or
+  the assertion reads a half-rendered page.
 - **A label in the DOM is not a bound control.** `esperar_html()` returning does
   not mean `set_inputs()` will find the widget; bindings attach a cycle later.
   `ir_a_pestana()` in `test_app.R` waits for the pattern **and** for

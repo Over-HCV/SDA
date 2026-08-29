@@ -350,51 +350,8 @@ probar("biplot",
 probar("sin traza, el grafico avisa en vez de romperse",
        dibuja(graficar_convergencia(traza_a_tabla(NULL))))
 
-# ---------------------------------------------------------------------------
-cat("\n[acp · la corrida headless (S2 + C11)]\n")
-
-# `escribir_salida()` resuelve out_dir contra la raíz del repo, así que acá va
-# una ruta RELATIVA: pasarle un tempdir absoluto escribe en
-# <raiz>/var/folders/... y los archivos aparecen donde nadie los busca.
-salida <- file.path("learn", "outputs", "test-acp")
-salida_abs <- ruta_repo(salida)
-on.exit(unlink(salida_abs, recursive = TRUE), add = TRUE)
-source("learn/R/run_headless.R")
-corrida <- correr("prueba-acp", fuente = nube, hiper = list(n_componentes = 3L),
-                  out_dir = salida)
-json <- file.path(salida_abs, "prueba-acp.json")
-
-probar("la corrida queda lista y con duracion medida",
-       corrida$estado == "listo" && is.finite(corrida$duracion))
-
-probar("el JSON, el CSV y el PNG estan escritos", {
-  todos <- file.path(salida_abs, paste0("prueba-acp", c(".json", ".csv", ".png")))
-  all(file.exists(todos)) && file.exists(file.path(salida_abs, "run_log.csv"))
-})
-
-probar("todo hiperparametro del registro viaja al bloque params del JSON", {
-  # La regla de las tres partes (C11), segunda mitad: funcion <-> batch.
-  leido <- jsonlite::fromJSON(json)
-  all(names(metodo("acp")$hiper) %in% names(leido$params))
-})
-
-probar("la semilla viaja al JSON: sin ella no hay reproduccion (C13)",
-       jsonlite::fromJSON(json)$params$semilla == 42)
-
-probar("el batch usa los mismos valores por defecto que la app", {
-  por_defecto <- hiper_por_defecto("acp")
-  identical(por_defecto$n_componentes, metodo("acp")$hiper$n_componentes$def) &&
-    identical(por_defecto$matriz, metodo("acp")$hiper$matriz$def)
-})
-
-probar("las metricas del JSON son las de la corrida", {
-  leido <- jsonlite::fromJSON(json)
-  abs(leido$metricas$varianza_acumulada -
-        corrida$metricas$varianza_acumulada) < 1e-4
-})
-
-probar("un metodo pendiente no se puede correr por batch",
-       falla(correr("no-va", metodo = "mds", fuente = nube, out_dir = salida)))
+# El contrato S2 y la regla de las tres partes se prueban en test_contrato.R:
+# son del corredor headless, no del ACP, aunque sea el ACP quien los ejercita.
 
 # ---------------------------------------------------------------------------
 cat(sprintf("\n[test_acp] %s\n",

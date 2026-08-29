@@ -55,7 +55,14 @@ almacen_listar <- function(almacen, tipo) {
   almacen[[.plural(tipo)]]
 }
 
-almacen_ids <- function(almacen, tipo) names(almacen_listar(almacen, tipo))
+# `names(list())` es NULL, no character(0). Devolverlo tal cual obligaba a cada
+# llamador a acordarse del caso vacío, y el que se olvidó rompió la app entera:
+# un selector que se rellena con setNames(NULL, ...) tira "attempt to set an
+# attribute on NULL" en un observer, y con el almacén vacío eso pasa al
+# arrancar. Un vector vacío es un vector.
+almacen_ids <- function(almacen, tipo) {
+  names(almacen_listar(almacen, tipo)) %||% character(0)
+}
 
 almacen_contar <- function(almacen, tipo) length(almacen_listar(almacen, tipo))
 

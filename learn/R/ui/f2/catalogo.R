@@ -18,8 +18,13 @@ controles_catalogo <- function(ns) {
       ns("sesion"), "Sesión del curso",
       choices = stats::setNames(sesiones, paste("Sesión", sesiones)),
       inline = TRUE),
+    # `estado_metodo` y no `estado`: la franja inferior de la fase se dibuja en
+    # un uiOutput llamado `estado`, y dos elementos con el mismo id dejan a
+    # `input$estado` devolviendo cualquier cosa. Shiny lo avisa por consola con
+    # "HTML id values are not unique" y sigue andando a medias — el filtro
+    # dejaba de encontrar métodos sin que nada fallara.
     shiny::checkboxGroupInput(
-      ns("estado"), "Estado",
+      ns("estado_metodo"), "Estado",
       choices = c("Listo" = "activo", "Pendiente" = "pendiente",
                   "Bloqueado" = "bloqueado")),
     shiny::checkboxInput(ns("solo_ejecutables"),
@@ -46,7 +51,7 @@ claves_filtradas <- function(input) {
   claves <- filtrar_metodos(
     objetivo = if (length(input$objetivo)) input$objetivo else NULL,
     sesion   = if (length(input$sesion)) as.integer(input$sesion) else NULL,
-    estado   = if (length(input$estado)) input$estado else NULL,
+    estado   = if (length(input$estado_metodo)) input$estado_metodo else NULL,
     busqueda = input$busqueda)
   if (isTRUE(input$solo_ejecutables)) claves <- Filter(ejecutable, claves)
   claves
@@ -79,7 +84,7 @@ servidor_catalogo <- function(input, output, session, al_elegir = NULL) {
 
   shiny::observeEvent(input$limpiar, {
     shiny::updateTextInput(session, "busqueda", value = "")
-    for (id in c("objetivo", "sesion", "estado"))
+    for (id in c("objetivo", "sesion", "estado_metodo"))
       shiny::updateCheckboxGroupInput(session, id, selected = character(0))
     shiny::updateCheckboxInput(session, "solo_ejecutables", value = FALSE)
   })

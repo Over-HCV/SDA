@@ -90,19 +90,6 @@ correr <- function(escenario, metodo = "acp", fuente = "twins", columnas = NULL,
   invisible(corrida)
 }
 
-#' Las métricas que van al JSON. Cada método aporta las suyas; las de reducción
-#' son las mismas para ACP, análisis factorial y MDS métrico.
-metricas_de_corrida <- function(ajuste) {
-  retenidas <- seq_len(ajuste$k)
-  list(n = ajuste$n, p = ajuste$p, k = ajuste$k,
-       varianza_acumulada = sum(ajuste$varianza_explicada[retenidas]),
-       primer_valor_propio = unname(ajuste$valores_propios[1]),
-       error_reconstruccion = ajuste$error_reconstruccion,
-       error_relativo = ajuste$error_relativo,
-       iteraciones = ajuste$iteraciones,
-       convergio = isTRUE(ajuste$convergio))
-}
-
 # ---------------------------------------------------------------------------
 # Piezas
 # ---------------------------------------------------------------------------

@@ -677,8 +677,8 @@ Consecuencias directas:
   `verificar_mapa.R` falla si un método promete un artefacto no registrado.
 - `run_headless.R` recorre el mismo registro → app y batch nunca divergen (S2).
 
-**Estado actual**: 54 métodos registrados (48 pendientes, 6 bloqueados) y 79
-artefactos. Poblados desde `libs/topics-map.md`, los seis cuadernos de
+**Estado actual**: 54 métodos registrados (1 activo, 47 pendientes, 6
+bloqueados) y 81 artefactos. Poblados desde `libs/topics-map.md`, los seis cuadernos de
 `notes/SDA/` y el temario de `guide-eda-26A.md`. El inventario vivo está en
 `MAPA.md`; este documento no lo repite para no quedar desactualizado.
 
@@ -852,11 +852,27 @@ Cerradas durante el Hito 2:
 - ~~Publicación en Pages~~ → `.github/workflows/pages.yml` construye el bundle y
   lo sube como artefacto. `learn/docs/` sigue fuera de git.
 
+Cerradas durante el Hito 3:
+
+- ~~¿El marco aguanta un método real?~~ → sí. El ACP entró por las cuatro fases
+  sin que la UI de las fases 2, 3 y 4 tenga una sola línea específica de ACP:
+  el catálogo, el formulario de hiperparámetros, el semáforo de supuestos, el
+  optimizador y las métricas salen todos del registro. Añadir k-medias es un
+  archivo en `metodos/`, una fila en `catalogo/` y sus textos.
+- ~~¿Qué hace la fase 3 con métodos de solución cerrada?~~ → ofrecerlos por los
+  dos caminos. El ACP declara `svd` (un paso, sin traza, y lo dice) y
+  `potencia` (iteración con deflación, traza honesta, reproducible paso a
+  paso). Que los dos den lo mismo hasta el signo lo comprueba `test_acp.R`, y
+  eso es lo que autoriza a usar el lento para enseñar.
+- ~~El paso a paso en wasm~~ → resuelto sin medir nada: no recalcula, reproduce
+  la traza ya registrada. Ninguna iteración cruza la frontera R↔navegador.
+
 Siguen abiertas:
 
-1. **Tamaño del bundle.** Hoy son 3,2 MB de `app.json` más el runtime de webR, y
-   todavía no hay ni un método implementado. Cada dependencia nueva suma. Puede
-   convenir un bundle núcleo más uno por sesión del curso, en vez de uno solo.
+1. **Tamaño del bundle.** Con el primer método dentro son 4,0 MB de `app.json`
+   más el runtime de webR — el ACP costó 1 MB, casi todo en textos y en el
+   KaTeX vendorizado, cero paquetes nuevos. A este ritmo el catálogo completo
+   no cabe en un bundle solo, y va a convenir uno núcleo más uno por sesión.
 2. **Imputación y balanceo serios.** MICE, k-NN y SMOTE quedaron como pendientes
    del catálogo: los tres traen paquetes nuevos al bundle. Hay que decidir si el
    curso los necesita ejecutables o basta con la ficha y el puente.

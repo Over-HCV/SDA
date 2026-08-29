@@ -78,6 +78,8 @@ Usualmente, el primer paso en el análisis es entender qué representa cada una 
 
 Individuo u objeto en el que se mide una variable. Resulta una medición o dato cuando una variable se mide en una unidad experimental. Con las UE entendemos el fenómeno de interés. Para los datos de las naciones unidas, las UE en cada fila albergan un país-área. A continuación los registros para la UE Colombia:
 
+
+
 ```{r}
 charcoal_prd19 %>% filter(Country_Area == "Colombia")
 ```
