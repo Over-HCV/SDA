@@ -13,6 +13,7 @@ controles_multivariado <- function(ns) {
                        choices = character(0), multiple = TRUE),
     shiny::selectInput(ns("grupo_multi"), "Colorear por",
                        choices = c("ninguno" = "")),
+    shiny::uiOutput(ns("nota_grupo_multi")),
     shiny::radioButtons(ns("metodo_cor"), "Correlacion",
                         choices = c("Pearson (lineal)" = "pearson",
                                     "Spearman (monotona)" = "spearman"),
@@ -69,6 +70,9 @@ servidor_multivariado <- function(input, output, session, dataset, muestreo) {
   })
   grupo_activo <- function()
     if (nzchar(input$grupo_multi %||% "")) input$grupo_multi else NULL
+
+  output$nota_grupo_multi <- shiny::renderUI(.nota_grupos(dataset()))
+  shiny::outputOptions(output, "nota_grupo_multi", suspendWhenHidden = FALSE)
 
   # La matriz se calcula sobre el TOTAL: es una métrica, no un dibujo (C8).
   correlaciones <- shiny::reactive({

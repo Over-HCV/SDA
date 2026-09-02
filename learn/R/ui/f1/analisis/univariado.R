@@ -16,6 +16,7 @@ controles_univariado <- function(ns) {
     shiny::checkboxInput(ns("log_x"), "Escala logaritmica en x", FALSE),
     shiny::selectInput(ns("grupo_uni"), "Comparar por grupo",
                        choices = c("ninguno" = "")),
+    shiny::uiOutput(ns("nota_grupo_uni")),
     shiny::uiOutput(ns("nota_escala")))
 }
 
@@ -55,6 +56,8 @@ salida_univariado <- function(ns) {
 servidor_univariado <- function(input, output, session, dataset, muestreo) {
   ns <- session$ns
   ancho_elegido <- function() if ((input$ancho %||% 0) > 0) input$ancho else NULL
+
+  output$nota_grupo_uni <- shiny::renderUI(.nota_grupos(dataset()))
 
   output$nota_escala <- shiny::renderUI({
     ds <- dataset()
@@ -96,14 +99,22 @@ servidor_univariado <- function(input, output, session, dataset, muestreo) {
     tabla[, c("estadistico", "mostrado", "descripcion")]
   })
 
+  # Sin candidatas no se pide lo imposible: se dice por que no las hay (C5).
   output$boxplot_grupos <- shiny::renderPlot({
     ds <- dataset()
     shiny::req(ds, input$variable_uni)
-    shiny::validate(shiny::need(nzchar(input$grupo_uni %||% ""),
-                                "Elegi una columna de grupo en el sidebar."))
+    shiny::validate(shiny::need(
+      nzchar(input$grupo_uni %||% ""),
+      if (length(.grupos_de(ds))) "Elegi una columna de grupo en el sidebar."
+      else .motivo_sin_grupos(ds)))
     .exigir_operacion(ds, input$variable_uni, "boxplot")
-    graficar_boxplot_grupos(muestreo()$datos, input$variable_uni,
-                            input$grupo_uni, violin = TRUE)
+    grafico <- graficar_boxplot_grupos(muestreo()$datos, input$variable_uni,
+                                       input$grupo_uni, violin = TRUE)
+    if (input$grupo_uni %in% .grupos_desbordados(ds))
+      grafico <- grafico + ggplot2::labs(subtitle = sprintf(
+        "%d niveles: mas cajas de las que se comparan de un vistazo",
+        length(unique(muestreo()$datos[[input$grupo_uni]]))))
+    grafico
   })
 
   output$qq <- shiny::renderPlot({
@@ -114,6 +125,13 @@ servidor_univariado <- function(input, output, session, dataset, muestreo) {
   })
 
   output$badge_uni <- shiny::renderUI(.badge_de_muestreo(ns, muestreo()))
+
+  # Las notas del sidebar viven dentro de dos conditionalPanel anidados. Sin
+  # esto Shiny las suspende al cambiar de pestana y no las reanuda al volver:
+  # el texto queda congelado en el del dataset anterior, que es peor que no
+  # tener nota. Recalcular dos parrafos no cuesta nada.
+  for (salida in c("nota_grupo_uni", "nota_escala"))
+    shiny::outputOptions(output, salida, suspendWhenHidden = FALSE)
 
   parametros <- shiny::reactive({
     ds <- dataset()

@@ -11,6 +11,7 @@ controles_bivariado <- function(ns) {
     shiny::selectInput(ns("y_bi"), "Variable Y", choices = character(0)),
     shiny::selectInput(ns("grupo_bi"), "Colorear por",
                        choices = c("ninguno" = "")),
+    shiny::uiOutput(ns("nota_grupo_bi")),
     shiny::sliderInput(ns("alfa"), "Transparencia", 0.05, 1, 0.6, step = 0.05),
     shiny::checkboxInput(ns("jitter"), "Jitter (valores redondeados)", FALSE),
     shiny::checkboxInput(ns("celdas"), "Contar por celda en vez de puntos",
@@ -20,7 +21,8 @@ controles_bivariado <- function(ns) {
     shiny::selectInput(ns("cruce_a"), "Cruce: primera categorica",
                        choices = character(0)),
     shiny::selectInput(ns("cruce_b"), "Cruce: segunda categorica",
-                       choices = character(0)))
+                       choices = character(0)),
+    shiny::uiOutput(ns("nota_cruce_bi")))
 }
 
 actualizar_bivariado <- function(session, ds, previos = list()) {
@@ -58,9 +60,20 @@ salida_bivariado <- function(ns) {
 servidor_bivariado <- function(input, output, session, dataset, muestreo) {
   ns <- session$ns
 
+  # El cruce sale de la misma lista que "Colorear por", pero necesita dos
+  # columnas, no una: por eso lleva su propia nota.
+  output$nota_grupo_bi <- shiny::renderUI(.nota_grupos(dataset()))
+  output$nota_cruce_bi <- shiny::renderUI(.nota_cruce(dataset()))
+  for (salida in c("nota_grupo_bi", "nota_cruce_bi"))
+    shiny::outputOptions(output, salida, suspendWhenHidden = FALSE)
+
   cruce <- shiny::reactive({
     ds <- dataset()
-    shiny::req(ds, input$cruce_a, input$cruce_b)
+    shiny::req(ds)
+    # Sin dos categoricas el panel quedaba mudo con req(): ahora explica (C5).
+    shiny::validate(shiny::need(is.null(.motivo_sin_cruce(ds)),
+                                .motivo_sin_cruce(ds)))
+    shiny::req(input$cruce_a, input$cruce_b)
     tabla_contingencia(ds$df[[input$cruce_a]], ds$df[[input$cruce_b]],
                        input$cruce_a, input$cruce_b)
   })
