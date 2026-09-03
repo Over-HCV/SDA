@@ -8,6 +8,8 @@ output:
     toc_float: true
 ---
 
+<!-- Compilado con: `Rscript -e 'rmarkdown::render("learn/workshops/taller-01.Rmd")'` -->
+
 Cuaderno generado desde SDA Lab. Cada sección corresponde a un panel marcado
 con la casilla **Añadir**: trae su texto explicativo, los parámetros con que
 se produjo y el código R que lo redibuja sobre `datos`.
