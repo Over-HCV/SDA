@@ -52,6 +52,8 @@ ui <- bslib::page_navbar(
                    mod_objetos_ui("objetos")),
   bslib::nav_panel("Referencia", icon = bsicons::bs_icon("info-circle"),
                    mod_referencia_ui("referencia")),
+  bslib::nav_panel("Informe", icon = bsicons::bs_icon("download"),
+                   mod_informe_ui("informe")),
 
   # Un actionLink por preset de libs/_comun/R/temas_bslib.R. Añadir un tema
   # allí lo hace aparecer acá sin tocar este archivo.
@@ -75,13 +77,19 @@ server <- function(input, output, session) {
   # invalidación. Ver R/nucleo/almacen.R.
   almacen <- shiny::reactiveVal(nuevo_almacen())
 
+  # Paneles marcados con la casilla "Añadir": la pestaña Informe los convierte
+  # en un cuaderno .Rmd. Vive acá para que Datos (que los marca) e Informe
+  # (que los exporta) compartan el mismo estado toda la sesión.
+  seleccion <- shiny::reactiveVal(list())
+
   mod_inicio_server("inicio", almacen)
-  mod_datos_server("datos", almacen)
+  estado_datos <- mod_datos_server("datos", almacen, seleccion)
   mod_modelado_server("modelado", almacen)
   mod_ajuste_server("ajuste", almacen)
   mod_evaluacion_server("evaluacion", almacen)
   mod_objetos_server("objetos", almacen)
   mod_referencia_server("referencia")
+  mod_informe_server("informe", seleccion, estado_datos$dataset)
 
   # cambiar_tema() reconstruye el preset COMPLETO en vez de usar
   # bs_theme_update(), para que las reglas Sass y las fuentes del tema anterior

@@ -38,6 +38,7 @@ source("learn/R/cargar.R")
 rutas_datos <- function() {
   candidatas <- c(ruta_repo("data", "charcoal.csv"),
                   ruta_repo("data", "twins.csv"),
+                  ruta_repo("data", "ORI.csv"),
                   ruta_repo("workshops", "twins", "twins.csv"))
   existentes <- candidatas[file.exists(candidatas)]
   # Si twins aparece en los dos sitios, quedarse con uno solo.

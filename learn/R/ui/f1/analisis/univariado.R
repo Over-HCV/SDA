@@ -13,6 +13,8 @@ controles_univariado <- function(ns) {
     shiny::sliderInput(ns("ancho"), "Ancho de banda h (0 = automatico)",
                        0, 5, 0, step = 0.05),
     shiny::checkboxInput(ns("con_densidad"), "Superponer densidad", TRUE),
+    shiny::checkboxInput(ns("con_normal"),
+                         "Superponer normal (media y desvio)", FALSE),
     shiny::checkboxInput(ns("log_x"), "Escala logaritmica en x", FALSE),
     shiny::selectInput(ns("grupo_uni"), "Comparar por grupo",
                        choices = c("ninguno" = "")),
@@ -35,22 +37,28 @@ salida_univariado <- function(ns) {
     panel_resultado("f1.analisis.histograma",
       shiny::plotOutput(ns("histograma"), height = "320px"),
       contexto = salida_contexto(ns, "contexto_histograma"),
-      encabezado_extra = shiny::uiOutput(ns("badge_uni"), inline = TRUE)),
+      encabezado_extra = shiny::tagList(
+        shiny::uiOutput(ns("badge_uni"), inline = TRUE),
+        casilla_informe(ns, "f1.analisis.histograma"))),
     panel_resultado("f1.analisis.densidad",
       shiny::plotOutput(ns("densidad"), height = "280px"),
-      contexto = salida_contexto(ns, "contexto_densidad")),
+      contexto = salida_contexto(ns, "contexto_densidad"),
+      encabezado_extra = casilla_informe(ns, "f1.analisis.densidad")),
     panel_resultado("f1.analisis.boxplot",
       shiny::tagList(
         shiny::plotOutput(ns("boxplot"), height = "200px"),
         shiny::tags$h6(class = "mt-3", "Estadisticos sobre el total de filas"),
         shiny::tableOutput(ns("resumen_uni"))),
-      contexto = salida_contexto(ns, "contexto_boxplot")),
+      contexto = salida_contexto(ns, "contexto_boxplot"),
+      encabezado_extra = casilla_informe(ns, "f1.analisis.boxplot")),
     panel_resultado("f1.analisis.boxplot_grupos",
       shiny::plotOutput(ns("boxplot_grupos"), height = "300px"),
-      contexto = salida_contexto(ns, "contexto_grupos")),
+      contexto = salida_contexto(ns, "contexto_grupos"),
+      encabezado_extra = casilla_informe(ns, "f1.analisis.boxplot_grupos")),
     panel_resultado("f1.analisis.qq_normal_datos",
       shiny::plotOutput(ns("qq"), height = "300px"),
-      contexto = salida_contexto(ns, "contexto_qq")))
+      contexto = salida_contexto(ns, "contexto_qq"),
+      encabezado_extra = casilla_informe(ns, "f1.analisis.qq_normal_datos")))
 }
 
 servidor_univariado <- function(input, output, session, dataset, muestreo) {
@@ -73,14 +81,16 @@ servidor_univariado <- function(input, output, session, dataset, muestreo) {
                         clases = input$clases %||% 30L,
                         densidad = isTRUE(input$con_densidad),
                         ancho = ancho_elegido(),
-                        log_x = isTRUE(input$log_x))
+                        log_x = isTRUE(input$log_x),
+                        normal = isTRUE(input$con_normal))
   })
 
   output$densidad <- shiny::renderPlot({
     ds <- dataset()
     shiny::req(ds, input$variable_uni)
     .exigir_operacion(ds, input$variable_uni, "densidad")
-    graficar_densidad(muestreo()$datos, input$variable_uni, ancho_elegido())
+    graficar_densidad(muestreo()$datos, input$variable_uni, ancho_elegido(),
+                      normal = isTRUE(input$con_normal))
   })
 
   output$boxplot <- shiny::renderPlot({
@@ -139,6 +149,7 @@ servidor_univariado <- function(input, output, session, dataset, muestreo) {
     list(variable = input$variable_uni,
          escala = .escala_de(ds, input$variable_uni),
          clases = input$clases, ancho = input$ancho %||% "automatico",
+         normal = isTRUE(input$con_normal),
          muestreo = descripcion_muestreo(muestreo()) %||% "sin muestreo")
   })
   for (par in list(c("f1.analisis.histograma", "contexto_histograma"),

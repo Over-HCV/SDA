@@ -24,13 +24,15 @@
 # La pila de transformaciones se aplica siempre desde datos_base, que es lo
 # que hace que "deshacer" sea exacto y no aproximado.
 
-SUBSECCIONES_DATOS <- c("Fuente", "Diccionario", "Calidad", "Transformación",
-                        "Partición", "Balanceo", ETIQUETA_ANALISIS)
+SUBSECCIONES_DATOS <- c("Fuente", "Filtro", "Diccionario", "Calidad",
+                        "Transformación", "Partición", "Balanceo",
+                        ETIQUETA_ANALISIS)
 
 mod_datos_ui <- function(id) {
   ns <- shiny::NS(id)
   subsecciones <- list(
     "Fuente"         = salida_fuente(ns),
+    "Filtro"         = salida_filtro(ns),
     "Diccionario"    = salida_diccionario(ns),
     "Calidad"        = salida_calidad(ns),
     "Transformación" = salida_transformacion(ns),
@@ -54,6 +56,7 @@ mod_datos_ui <- function(id) {
 
   shiny::tagList(
     visible_en("Fuente", controles_fuente(ns)),
+    visible_en("Filtro", controles_filtro(ns)),
     visible_en("Diccionario", controles_diccionario(ns)),
     visible_en("Calidad", controles_calidad(ns)),
     visible_en("Transformación", controles_transformacion(ns)),
@@ -63,7 +66,7 @@ mod_datos_ui <- function(id) {
     .controles_comunes(ns))
 }
 
-mod_datos_server <- function(id, almacen = NULL) {
+mod_datos_server <- function(id, almacen = NULL, seleccion = NULL) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     datos_base <- shiny::reactiveVal(NULL)
@@ -87,6 +90,7 @@ mod_datos_server <- function(id, almacen = NULL) {
       ds <- dataset()
       shiny::req(ds)
       previos <- shiny::isolate(shiny::reactiveValuesToList(input))
+      actualizar_filtro(session, ds, previos)
       actualizar_diccionario_ui(session, ds, previos)
       actualizar_calidad(session, ds, previos)
       actualizar_transformacion(session, ds, previos)
@@ -98,12 +102,18 @@ mod_datos_server <- function(id, almacen = NULL) {
     output$estado <- shiny::renderUI(.franja_dataset(dataset()))
 
     servidor_fuente(input, output, session, datos_base, dataset)
+    servidor_filtro(input, output, session, datos_base, dataset)
     servidor_diccionario(input, output, session, dataset)
     servidor_calidad(input, output, session, dataset, muestreo)
     servidor_transformacion(input, output, session, datos_base, dataset)
     servidor_particion(input, output, session, dataset)
     servidor_balanceo(input, output, session, dataset, muestreo)
     servidor_analisis(input, output, session, dataset, muestreo)
+
+    # Casillas "Añadir" de los paneles: eligen qué entra al cuaderno exportado.
+    # `seleccion` vive en app.R para que la pestaña Informe lo comparta.
+    if (!is.null(seleccion))
+      servidor_casillas(input, session, dataset, seleccion)
 
     shiny::observeEvent(input$guardar, {
       ds <- dataset()
@@ -115,6 +125,10 @@ mod_datos_server <- function(id, almacen = NULL) {
         sprintf("Dataset guardado como %s", attr(guardado, "id_nuevo")),
         type = "message", duration = 3)
     })
+
+    # Lo que otras secciones necesitan leer: el dataset vivo (y los crudos).
+    # La pestaña Informe lo usa para el CSV "Datos actuales" y el cuaderno.
+    list(dataset = dataset, datos_base = datos_base)
   })
 }
 

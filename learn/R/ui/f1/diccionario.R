@@ -36,7 +36,8 @@ salida_diccionario <- function(ns) {
       shiny::uiOutput(ns("avisos_dic")),
       salida_tabla(ns, "tabla_dic"),
       shiny::uiOutput(ns("operaciones_dic"))),
-    contexto = salida_contexto(ns, "contexto_dic"))
+    contexto = salida_contexto(ns, "contexto_dic"),
+    encabezado_extra = casilla_informe(ns, "f1.diccionario.tabla"))
 }
 
 servidor_diccionario <- function(input, output, session, dataset) {

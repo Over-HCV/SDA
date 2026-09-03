@@ -25,7 +25,7 @@ ESPERA_WEBR <- as.integer(Sys.getenv("SDA_ESPERA_WEBR", "180"))
 # página en blanco pasa el test.
 ESPERADOS <- list(
   ".navbar"       = 1L,   # el shell arrancó
-  ".nav-link"     = 7L,   # las 7 secciones
+  ".nav-link"     = 8L,   # las 8 secciones
   ".progress-bar" = 8L,   # el mapa del curso: una barra por sesión
   ".card"         = 4L,   # las tarjetas del Inicio
   # KaTeX va vendorizado y viaja por htmlDependency. Se comprueba el enganche y

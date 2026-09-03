@@ -42,7 +42,9 @@ salida_calidad <- function(ns) {
     panel_resultado("f1.calidad.atipicos",
       shiny::plotOutput(ns("atipicos"), height = "300px"),
       contexto = salida_contexto(ns, "contexto_atipicos"),
-      encabezado_extra = shiny::uiOutput(ns("badge_cal"), inline = TRUE)),
+      encabezado_extra = shiny::tagList(
+        shiny::uiOutput(ns("badge_cal"), inline = TRUE),
+        casilla_informe(ns, "f1.calidad.atipicos"))),
     panel_resultado("f1.calidad.duplicados",
       salida_tabla(ns, "duplicados"),
       contexto = salida_contexto(ns, "contexto_duplicados")))

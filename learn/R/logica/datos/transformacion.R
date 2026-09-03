@@ -11,9 +11,14 @@
 TRANSFORMACIONES <- c("centrar", "escalar", "estandarizar", "logaritmo",
                       "raiz", "boxcox", "dummies")
 
+# El filtro de filas no toca columnas pero comparte pila con las demás
+# recetas: es lo que hace que "deshacer", el JSON y el cuaderno exportado lo
+# respeten sin casos especiales.
+TIPOS_PILA <- c(TRANSFORMACIONES, "filtro")
+
 #' Añade una receta al final de la pila. No toca los datos.
 agregar_transformacion <- function(pila, tipo, columnas, params = list()) {
-  if (!tipo %in% TRANSFORMACIONES) stop("transformacion desconocida: ", tipo)
+  if (!tipo %in% TIPOS_PILA) stop("transformacion desconocida: ", tipo)
   c(pila, list(list(tipo = tipo, columnas = columnas, params = params)))
 }
 
@@ -41,6 +46,8 @@ aplicar_transformaciones <- function(datos, pila) {
 #' Una sola transformación. Las columnas que no son numéricas se saltan con
 #' aviso en vez de romper: el usuario puede haber marcado la columna entera.
 aplicar_transformacion <- function(datos, tipo, columnas, params = list()) {
+  if (identical(tipo, "filtro"))
+    return(aplicar_filtro(datos, columnas[1], params$valores %||% character(0)))
   avisos <- list()
   agregar <- function(severidad, mensaje, sugerencia = NA_character_)
     avisos[[length(avisos) + 1L]] <<-
@@ -111,11 +118,48 @@ perfil_boxcox <- function(x, lambdas = seq(-2, 2, by = 0.05)) {
 
 #' Texto de una entrada de la pila, para la tabla de "qué se aplicó".
 describir_transformacion <- function(entrada) {
+  if (identical(entrada$tipo, "filtro"))
+    return(sprintf("filtro %s en [%s]", entrada$columnas[1],
+                   paste(entrada$params$valores, collapse = ", ")))
   detalle <- if (length(entrada$params))
     paste0(" (", paste(names(entrada$params), unlist(entrada$params),
                        sep = "=", collapse = ", "), ")") else ""
   sprintf("%s%s sobre %s", entrada$tipo, detalle,
           paste(entrada$columnas, collapse = ", "))
+}
+
+#' Filtra filas por los valores de una columna. Devuelve los datos intactos y
+#' un aviso de error cuando el resultado quedaría vacío: un data.frame sin
+#' filas rompe todo lo que viene después y en silencio, que es peor.
+#'
+#' Las filas con NA en la columna quedan fuera del filtro: %in% las descarta.
+#' Si eso pasa se avisa, porque "perdió filas" y "no aplicó" se ven igual.
+aplicar_filtro <- function(datos, columna, valores) {
+  if (!columna %in% names(datos))
+    return(list(datos = datos, avisos = list(list(
+      severidad = "error",
+      mensaje = sprintf("la columna '%s' no existe en los datos", columna),
+      sugerencia = "El filtro no se aplicó."))))
+  if (!length(valores))
+    return(list(datos = datos, avisos = list(list(
+      severidad = "error",
+      mensaje = "el filtro no trae valores",
+      sugerencia = "Marcá al menos un valor en el selector."))))
+
+  quedan <- datos[[columna]] %in% valores
+  avisos <- list()
+  if (!any(quedan)) return(list(datos = datos, avisos = list(list(
+    severidad = "error",
+    mensaje = sprintf("ninguna fila tiene %s en [%s]", columna,
+                      paste(valores, collapse = ", ")),
+    sugerencia = "El filtro no se aplicó: el dataset quedó como estaba."))))
+  n_na <- sum(is.na(datos[[columna]]))
+  if (n_na)
+    avisos <- c(avisos, list(list(
+      severidad = "aviso",
+      mensaje = sprintf("%d filas con NA en '%s' quedaron fuera del filtro",
+                        n_na, columna))))
+  list(datos = datos[quedan, , drop = FALSE], avisos = avisos)
 }
 
 .escalar <- function(x) {

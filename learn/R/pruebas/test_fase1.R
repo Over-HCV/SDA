@@ -176,6 +176,69 @@ probar("los pesos de clase suman n / clases",
                  resumir_balance(sintetico, "grupo")$n) - 300) < 1e-8)
 
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+cat("\n[fase 1 · fuente ORI y filtro de filas]\n")
+
+probar("ORI se lee con su separador y su codificacion", {
+  crudo <- cargar_ori()
+  ncol(crudo) == 18L && nrow(crudo) > 4000L &&
+    # Leido como UTF-8 los municipios llegan rotos: esta es la prueba de que
+    # el fileEncoding = "latin1" del cargador sigue puesto.
+    any(grepl("ACAC\u00cdAS", crudo$Municipio)) &&
+    # El encabezado trae "Pronostico " con espacio final en el archivo.
+    "Pronostico" %in% names(crudo)
+})
+probar("cargar_fuente('ori') pasa por el catalogo sin avisos", {
+  resultado <- cargar_fuente("ori")
+  nrow(resultado$datos) == 4543L && length(resultado$avisos) == 0L
+})
+
+ori_medio_dia <- list(valores = "12:00")
+probar("el filtro deja solo las filas del valor elegido", {
+  resultado <- aplicar_filtro(datos_prueba, "g", "a")
+  nrow(resultado$datos) == 25L && all(resultado$datos$g == "a")
+})
+probar("filtrar por una columna inexistente no filtra y lo dice", {
+  resultado <- aplicar_filtro(datos_prueba, "no_existe", "a")
+  identical(resultado$datos, datos_prueba) &&
+    resultado$avisos[[1]]$severidad == "error"
+})
+probar("un filtro sin valores es error, no un dataset vacio", {
+  resultado <- aplicar_filtro(datos_prueba, "g", character(0))
+  identical(resultado$datos, datos_prueba) &&
+    resultado$avisos[[1]]$severidad == "error"
+})
+probar("un filtro que no deja ninguna fila devuelve los datos intactos", {
+  resultado <- aplicar_filtro(datos_prueba, "g", "z")
+  identical(resultado$datos, datos_prueba) &&
+    resultado$avisos[[1]]$severidad == "error"
+})
+probar("las filas con NA en la columna filtrada quedan fuera, con aviso", {
+  con_na <- datos_prueba
+  con_na$g[1] <- NA
+  resultado <- aplicar_filtro(con_na, "g", "a")
+  nrow(resultado$datos) == 24L &&
+    any(grepl("NA", vapply(resultado$avisos, `[[`, "", "mensaje")))
+})
+probar("el filtro comparte pila con las transformaciones, en orden", {
+  pila <- agregar_transformacion(list(), "filtro", "g",
+                                 list(valores = "a"))
+  pila <- agregar_transformacion(pila, "centrar", "x")
+  resultado <- aplicar_transformaciones(datos_prueba, pila)
+  nrow(resultado$datos) == 25L && abs(mean(resultado$datos$x)) < 1e-12
+})
+probar("deshacer el filtro revive exactamente las filas de antes", {
+  pila <- agregar_transformacion(list(), "filtro", "g", list(valores = "a"))
+  vuelta <- aplicar_transformaciones(datos_prueba,
+                                     quitar_transformacion(pila))
+  identical(vuelta$datos, datos_prueba)
+})
+probar("la pila describe el filtro con su columna y sus valores",
+       grepl("filtro Hora en [12:00]", describir_transformacion(
+         list(tipo = "filtro", columnas = "Hora", params = ori_medio_dia)),
+         fixed = TRUE))
+
+# ---------------------------------------------------------------------------
 cat("\n[fase 1 · graficos]\n")
 # Los graficos son funciones puras que devuelven un ggplot: se construyen sin
 # Shiny. ggplot_build() es lo que de verdad los evalua; sin eso, un error de
@@ -235,6 +298,21 @@ probar("nube con las filas remuestreadas", {
   dibuja(graficar_nube_sinteticos(resultado$datos, "valor", "observacion",
                                   resultado$origen))
 })
+probar("histograma con la normal ajustada superpuesta",
+       dibuja(graficar_histograma(muestra, "valor", normal = TRUE)))
+probar("densidad kernel contra la normal ajustada",
+       dibuja(graficar_densidad(muestra, "valor", normal = TRUE)))
+probar("dispersion con histogramas marginales", {
+  compuesto <- graficar_dispersion_marginal(muestra, "valor", "observacion")
+  # No es un ggplot: es el gtable de los tres paneles ya alineados. La prueba
+  # de que sirve es que se DIBUJA, no que se construye.
+  inherits(compuesto, "gtable") &&
+    !inherits(try({
+      grDevices::pdf(NULL); on.exit(grDevices::dev.off())
+      grid::grid.draw(compuesto)
+    }, silent = TRUE), "try-error")
+})
+
 probar("un grafico sin datos suficientes no falla, avisa",
        dibuja(graficar_elipsoide(sintetico[1, ], "valor", "observacion")))
 

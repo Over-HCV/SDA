@@ -64,11 +64,12 @@ preparar_espejo <- function(espejo = file.path(tempdir(), "sda-manifiesto")) {
 
   .copiar(ruta_repo("libs", "_comun"), file.path(espejo, "libs", "_comun"))
   dir.create(file.path(espejo, "data"), showWarnings = FALSE)
-  for (dato in c("charcoal.csv", "twins.csv"))
+  for (dato in c("charcoal.csv", "twins.csv", "ORI.csv"))
     .copiar(ruta_repo("data", dato), file.path(espejo, "data", dato))
 
   faltan <- c("app.R", "learn/R/app.R", "learn/R/cargar.R",
-              "libs/_comun/R/datos.R", "data/charcoal.csv", "data/twins.csv")
+              "libs/_comun/R/datos.R", "data/charcoal.csv", "data/twins.csv",
+              "data/ORI.csv")
   faltan <- faltan[!file.exists(file.path(espejo, faltan))]
   if (length(faltan))
     stop("Espejo incompleto, faltan: ", paste(faltan, collapse = ", "))

@@ -27,7 +27,7 @@ concreta usa pestañas y plegables:
 ```
 ┌─ navbar ── ⌂ ① Datos ② Modelado ③ Ajuste ④ Evaluación ──── 🎨 ⚙ ⓘ ─┐
 ├──────────┬────────────────────────────────────────────────────────┤
-│ ENTRADAS │  [ Fuente ][ Diccionario ][ Calidad ][ … ][ ▣ Análisis ]│ ← tabs
+│ ENTRADAS │  [ Fuente ][ Filtro ][ Diccionario ][ … ][ ▣ Análisis ] │ ← tabs
 │ sidebar  │ ┌────────────────────────────────────────────────────┐ │
 │ plegable │ │                                                    │ │
 │          │ │              RESULTADO (domina)                    │ │
@@ -130,6 +130,7 @@ SDA Lab
 │
 ├─ ①  Datos ........................ Knowledge
 │     ├─ Fuente ................... cargar / elegir / generar
+│     ├─ Filtro ................... quedarse con las filas de la pregunta
 │     ├─ Diccionario .............. qué es cada columna, escala, rol
 │     ├─ Calidad .................. faltantes, atípicos, duplicados, tipos
 │     ├─ Transformación ........... centrar, escalar, log, Box–Cox, dummies
@@ -160,6 +161,9 @@ SDA Lab
 │
 ├─ ⚙  Objetos ...................... CRUD transversal
 │     └─ Datasets · Modelos · Recetas · Ejecuciones
+│
+├─ ⤓  Informe ...................... el laboratorio como cuaderno .Rmd
+│     └─ lo que se marcó con la casilla «Añadir», en orden
 │
 └─ ⓘ  Referencia ................... glosario · árbol de temas · galería · tema
 ```
@@ -304,7 +308,7 @@ el feedback-loop de la fase. Dar clic en la sección denotada [① DATOS] retorn
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ ① DATOS   ▸Fuente  Diccionario  Calidad  Transformación  Partición  ▣Anál│
+│ ① DATOS   ▸Fuente  Filtro  Diccionario  Calidad  Transformación  ▣Anál  │
 ├───────────────────┬──────────────────────────────────────────────────────┤
 │ FUENTE            │  Vista previa                          [DT, 10 filas]│
 │ ○ Del curso       │ ┌──────────────────────────────────────────────────┐ │
@@ -335,6 +339,7 @@ en toda tabla.
 | Subsección | Acciones | Salida visible en vivo |
 |---|---|---|
 | **Fuente** | elegir del curso · generar sintético (tipo, n, efecto, semilla) · subir CSV (delimitador, decimal, encoding, símbolo de NA) | vista previa DT + franja de estado |
+| **Filtro** | elegir columna (hasta 60 niveles) · marcar los valores a conservar · entra en la misma pila que las transformaciones, con deshacer | filas antes / ahora / fuera + la pila completa en orden |
 | **Diccionario** | editar por fila: etiqueta, descripción, escala, clase, rol, unidad · autodetección con revisión manual | tabla editable + badges de conflicto ("marcaste `Year` como razón; es discreta") |
 | **Calidad** | patrón de faltantes (MCAR/MAR/MNAR) · imputar (media, mediana, k-NN, MICE) · duplicados · atípicos (IQR, z, Mahalanobis) · coerción de tipos | matriz de nulidad, mapa de calor de faltantes, tabla de atípicos con su distancia |
 | **Transformación** | centrar `H` · escalar · log · √ · Box–Cox (λ con slider) · dummies + categoría de referencia · interacciones · pila ordenada con deshacer | histograma antes/después lado a lado, en vivo |
@@ -768,8 +773,9 @@ learn/
 ├─ build.R           staging fuera del repo + export + verificaciones
 ├─ R/
 │  ├─ cargar.R              punto único de arranque; resuelve rutas
-│  ├─ app.R                 shell: navbar de 7 secciones. Solo cablea
+│  ├─ app.R                 shell: navbar de 8 secciones. Solo cablea
 │  ├─ mapa.R                genera MAPA.md
+│  ├─ lab.R                CLI: la fase 1 por consola; gráficos como tabla
 │  ├─ nucleo/               sin Shiny en ninguna línea
 │  │   ├─ registro.R            registrar_metodo() + consultas
 │  │   ├─ catalogo/             poblar.R + un archivo por macro-tema
@@ -780,7 +786,9 @@ learn/
 │  │   ├─ contratos.R           validar_compatibilidad()
 │  │   ├─ textos.R              texto() y ficha(), tolerantes a .md ausente
 │  │   ├─ exportar.R            JSON · CSV · PNG · RDS · Rmd · MD
-│  │   ├─ informe.R             armado del cuaderno .Rmd
+│  │   ├─ informe.R             armado del cuaderno .Rmd (corridas, f2-f4)
+│  │   ├─ informe_exploracion.R cuaderno de la fase 1 + CASILLAS_INFORME
+│  │   ├─ informe_codigos.R     un artefacto -> R autónomo para el cuaderno
 │  │   ├─ modo.R                wasm vs servidor
 │  │   └─ tema_app.R            tema_seguro(): sin font_google() en wasm
 │  ├─ logica/               cálculo puro
@@ -796,7 +804,7 @@ learn/
 │  │   ├─ ficha.R  formulario.R
 │  │   ├─ f1/                   un archivo por subsección + analisis/
 │  │   ├─ f0/ f2/ f3/ f4/
-│  │   └─ transversal/          objetos.R · referencia.R
+│  │   └─ transversal/          objetos.R · referencia.R · informe.R
 │  └─ pruebas/
 │      ├─ verificar_loc.R       techo de 300 LOC
 │      ├─ verificar_idioma.R    español ASCII, snake_case, sin raíces inglesas
@@ -804,6 +812,7 @@ learn/
 │      ├─ verificar_bundle.R    webR real en Chrome headless
 │      ├─ test_headless.R       núcleo sin Shiny
 │      ├─ test_fase1.R          lógica y gráficos de la fase 1, sin Shiny
+│      ├─ test_informe.R        el cuaderno exportable y lab.R, sin Shiny
 │      └─ test_app.R            UI + consola del navegador (S2b)
 ├─ metodos/          una función ajustar_*() pura por método
 ├─ fichas/           un .md por método

@@ -17,6 +17,7 @@ controles_bivariado <- function(ns) {
     shiny::checkboxInput(ns("celdas"), "Contar por celda en vez de puntos",
                          FALSE),
     shiny::checkboxInput(ns("suavizado"), "Curva loess", FALSE),
+    shiny::checkboxInput(ns("marginales"), "Histogramas marginales", FALSE),
     shiny::tags$hr(),
     shiny::selectInput(ns("cruce_a"), "Cruce: primera categorica",
                        choices = character(0)),
@@ -45,16 +46,20 @@ salida_bivariado <- function(ns) {
     panel_resultado("f1.analisis.dispersion",
       shiny::plotOutput(ns("dispersion"), height = "340px"),
       contexto = salida_contexto(ns, "contexto_dispersion"),
-      encabezado_extra = shiny::uiOutput(ns("badge_bi"), inline = TRUE)),
+      encabezado_extra = shiny::tagList(
+        shiny::uiOutput(ns("badge_bi"), inline = TRUE),
+        casilla_informe(ns, "f1.analisis.dispersion"))),
     panel_resultado("f1.analisis.densidad_conjunta",
       shiny::plotOutput(ns("densidad_conjunta"), height = "340px"),
-      contexto = salida_contexto(ns, "contexto_conjunta")),
+      contexto = salida_contexto(ns, "contexto_conjunta"),
+      encabezado_extra = casilla_informe(ns, "f1.analisis.densidad_conjunta")),
     panel_resultado("f1.analisis.mosaico",
       shiny::tagList(
         shiny::plotOutput(ns("mosaico"), height = "320px"),
         shiny::tags$h6(class = "mt-3", "Residuos estandarizados"),
         shiny::tableOutput(ns("residuos"))),
-      contexto = salida_contexto(ns, "contexto_mosaico")))
+      contexto = salida_contexto(ns, "contexto_mosaico"),
+      encabezado_extra = casilla_informe(ns, "f1.analisis.mosaico")))
 }
 
 servidor_bivariado <- function(input, output, session, dataset, muestreo) {
@@ -84,11 +89,17 @@ servidor_bivariado <- function(input, output, session, dataset, muestreo) {
     .exigir_operacion(ds, input$x_bi, "dispersion")
     .exigir_operacion(ds, input$y_bi, "dispersion")
     grupo <- if (nzchar(input$grupo_bi %||% "")) input$grupo_bi else NULL
-    graficar_dispersion(muestreo()$datos, input$x_bi, input$y_bi, grupo,
-                        alfa = input$alfa %||% 0.6,
-                        jitter = isTRUE(input$jitter),
-                        celdas = isTRUE(input$celdas),
-                        suavizado = isTRUE(input$suavizado))
+    # Con marginales la funcion devuelve un gtable en vez de un ggplot: por eso
+    # el despacho esta aca y no dentro de graficar_dispersion(), que sigue
+    # devolviendo un objeto al que se le pueden sumar capas.
+    dibujar <- if (isTRUE(input$marginales)) graficar_dispersion_marginal
+               else graficar_dispersion
+    grafico <- dibujar(muestreo()$datos, input$x_bi, input$y_bi, grupo,
+                       alfa = input$alfa %||% 0.6,
+                       jitter = isTRUE(input$jitter),
+                       celdas = isTRUE(input$celdas),
+                       suavizado = isTRUE(input$suavizado))
+    if (inherits(grafico, "gtable")) grid::grid.draw(grafico) else grafico
   })
 
   output$densidad_conjunta <- shiny::renderPlot({
@@ -120,6 +131,8 @@ servidor_bivariado <- function(input, output, session, dataset, muestreo) {
     asociacion <- medir_asociacion(dataset()$df[[input$x_bi]],
                                    dataset()$df[[input$y_bi]])
     list(x = input$x_bi, y = input$y_bi,
+         marginales = isTRUE(input$marginales),
+         covarianza = round(asociacion$covarianza, 4),
          pearson = round(asociacion$pearson, 4),
          spearman = round(asociacion$spearman, 4),
          n = asociacion$n,

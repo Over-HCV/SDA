@@ -12,8 +12,8 @@ Todas las rutas son relativas a `learn/`.
 ## Resumen
 
 - **Métodos**: 54 registrados — 2 activos, 46 pendientes, 6 bloqueados
-- **Artefactos**: 84 registrados
-- **Textos escritos**: 41 de 84
+- **Artefactos**: 85 registrados
+- **Textos escritos**: 42 de 85
 - **Fichas escritas**: 3 de 54
 
 ## Artefactos
@@ -42,6 +42,7 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f1.calidad.duplicados` | Filas duplicadas | `R/ui/f1/calidad.R::salida_duplicados` | `R/logica/datos/calidad.R::marcar_duplicados` | `textos/f1/calidad/duplicados.md` |
 | `f1.calidad.matriz_nulidad` | Matriz de nulidad | `R/graficos/calidad.R::graficar_nulidad` | `R/logica/datos/calidad.R::patron_faltantes` | `textos/f1/calidad/matriz_nulidad.md` |
 | `f1.diccionario.tabla` | Diccionario de columnas | `R/ui/f1/diccionario.R::salida_diccionario` | `R/logica/datos/diccionario.R::avisos_diccionario` | `textos/f1/diccionario/tabla.md` |
+| `f1.filtro.filas` | Filas antes y después del filtro | `R/ui/f1/filtro.R::salida_filtro` | `R/logica/datos/transformacion.R::aplicar_filtro` | `textos/f1/filtro/filas.md` |
 | `f1.fuente.vista_previa` | Vista previa del dataset | `R/ui/f1/fuente.R::salida_fuente` | `R/logica/datos/fuente.R::cargar_fuente` | `textos/f1/fuente/vista_previa.md` |
 | `f1.particion.balance` | Balance por partición | `R/graficos/preparacion.R::graficar_balance_particion` | `R/logica/datos/particion.R::balance_por_particion` | `textos/f1/particion/balance.md` |
 | `f1.particion.tamanos` | Tamaño de cada parte | `R/graficos/preparacion.R::graficar_particion` | `R/logica/datos/particion.R::resumir_particion` | `textos/f1/particion/tamanos.md` |

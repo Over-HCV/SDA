@@ -1763,29 +1763,53 @@
     "data/charcoal.csv": {
       "checksum": "5acace85ed1fb64d3a2a9190700da61c"
     },
+    "data/ORI.csv": {
+      "checksum": "5112a7b56cb0013751761de2666384aa"
+    },
     "data/twins.csv": {
       "checksum": "0065612792abd3bd06580d682829fb6f"
     },
     "learn/fichas/acp.md": {
-      "checksum": "bc1a4c54d1c0026744e531dd69741315"
+      "checksum": "3c8c6fd3c4908b58afad7cc430082df1"
     },
     "learn/fichas/kmeans.md": {
-      "checksum": "39d2a4c4f71a4bbf22123d481e331dae"
+      "checksum": "8a0d0c62912f9de342511f3913c2cde6"
     },
     "learn/fichas/mlp.md": {
-      "checksum": "a4ade0c0c9f87528c1fcda6a9aa66c4f"
+      "checksum": "dccddf0004d5e0d675cc680ecf6407bf"
+    },
+    "learn/metodos/acp.R": {
+      "checksum": "540f07bcde3df0407faad29dde7ec4a6"
+    },
+    "learn/metodos/kmeans.R": {
+      "checksum": "e3ae5d72fe3f11a0fbb0314f7bf31289"
     },
     "learn/R/app.R": {
-      "checksum": "91b7a09b403fa776f7c9dc11b33686cd"
+      "checksum": "805f09671bb9de008491129301cf0def"
     },
     "learn/R/cargar.R": {
       "checksum": "6ac7c11135562c2259ac4075e9f471c9"
     },
     "learn/R/graficos/bivariado.R": {
-      "checksum": "3bc325c9d6dadc735e93574d34a0bf47"
+      "checksum": "ed7e15fc35d4be41873e1f065f6590e6"
     },
     "learn/R/graficos/calidad.R": {
       "checksum": "8c1ce9233173dd80a59a09a28c4281e0"
+    },
+    "learn/R/graficos/convergencia.R": {
+      "checksum": "391ae0a0240485489049316020b0784a"
+    },
+    "learn/R/graficos/diagnostico.R": {
+      "checksum": "70d8fcc2ee2c02f1a21ddc905fb0e57a"
+    },
+    "learn/R/graficos/explicabilidad.R": {
+      "checksum": "2af767380adb35625de69876045cb7e1"
+    },
+    "learn/R/graficos/grupos.R": {
+      "checksum": "00e8376525087a6e2b37ecc7d3c8b6d6"
+    },
+    "learn/R/graficos/modelo.R": {
+      "checksum": "3e8b3b128fdd11004732a4c86195e3a5"
     },
     "learn/R/graficos/multivariado.R": {
       "checksum": "adeb83611387c548609991f0c22cd17d"
@@ -1794,10 +1818,13 @@
       "checksum": "ffcea8c7b22e6365b12bbc01f08a2081"
     },
     "learn/R/graficos/univariado.R": {
-      "checksum": "8f2982df9bb8dacc7bc7a2410fe49c10"
+      "checksum": "e087c517783daa60efd1a6cc77bd963e"
+    },
+    "learn/R/lab.R": {
+      "checksum": "9fe91a2ed73ad537ebac3d95d7e00b6f"
     },
     "learn/R/logica/asociacion.R": {
-      "checksum": "10cdc22bc36c2ac93cfffcfbfcd00b4e"
+      "checksum": "95b99c31fbe2cae03207682cad932b56"
     },
     "learn/R/logica/contingencia.R": {
       "checksum": "ee16ca00aea29843f85e2cd46c2f9a8e"
@@ -1812,19 +1839,31 @@
       "checksum": "0564a9a6311f30285392b48afddad428"
     },
     "learn/R/logica/datos/fuente.R": {
-      "checksum": "566476514b30329a9d08eb9165479911"
+      "checksum": "5b3adbca1307ea046b27a6157f9a3847"
     },
     "learn/R/logica/datos/particion.R": {
       "checksum": "2ba2b0045463da4e301defc96a96395f"
     },
     "learn/R/logica/datos/transformacion.R": {
-      "checksum": "4291e961a3144f61bf85ba18396cd353"
+      "checksum": "f5c28dfa070cb25a10cd29dd102c6405"
     },
     "learn/R/logica/densidad.R": {
       "checksum": "7a76cd9127012afa8f24d19bce94fb9d"
     },
     "learn/R/logica/distancias.R": {
       "checksum": "b3a15b43b76db6a16f8769eb08a19e29"
+    },
+    "learn/R/logica/metricas_grupos.R": {
+      "checksum": "73161b6042dcb817be99b7835177ea27"
+    },
+    "learn/R/logica/metricas_reduccion.R": {
+      "checksum": "9a281680695b2ccbcb2202d02a1cad43"
+    },
+    "learn/R/logica/metricas.R": {
+      "checksum": "fe1f427b58cc74c4bef64fcff2b45edf"
+    },
+    "learn/R/logica/modelo_geometria.R": {
+      "checksum": "7a0dd96acd1ece2dc24003a2e1709314"
     },
     "learn/R/logica/muestreo.R": {
       "checksum": "abf6ecaa279ff9826c79cd4e9e0f1ff6"
@@ -1835,23 +1874,29 @@
     "learn/R/logica/resumen_univariado.R": {
       "checksum": "46da40b7882439f6f8c4533ea60fc4d5"
     },
+    "learn/R/logica/supuestos.R": {
+      "checksum": "c1ab5b81685082e31019459473692cfb"
+    },
+    "learn/R/logica/traza.R": {
+      "checksum": "3233ba7d175ea0889b90ed25023c45b8"
+    },
     "learn/R/nucleo/almacen.R": {
-      "checksum": "dd3a3b4e8faf878f39b871c99453cc59"
+      "checksum": "ae36234320823ac36fc6fab94a49cda3"
     },
     "learn/R/nucleo/artefactos/evaluacion.R": {
-      "checksum": "b247ad8380c378f637d15e80df9f8a9a"
+      "checksum": "66de95db7731234639a12976dce8ddb9"
     },
     "learn/R/nucleo/artefactos/exploracion.R": {
-      "checksum": "b69398d6e34a4f214f89782cf13e1427"
+      "checksum": "5851c5c8873c8350f70dd4406fab395b"
     },
     "learn/R/nucleo/artefactos/poblar.R": {
       "checksum": "3722b4d4d3051c56d56c15444d66ae2c"
     },
     "learn/R/nucleo/artefactos/preparacion.R": {
-      "checksum": "5f8bb575eac94622c69c91283ee0961c"
+      "checksum": "73ee4afee4b30b27c33e7ce017b05cd7"
     },
     "learn/R/nucleo/catalogo/agrupamiento.R": {
-      "checksum": "566dbdbf054626d9033e5b9877ba89de"
+      "checksum": "4e7b56162a0fdd7b15acec3f998f74e8"
     },
     "learn/R/nucleo/catalogo/anova.R": {
       "checksum": "b450499e335402973d0b605c97e19e1f"
@@ -1869,7 +1914,7 @@
       "checksum": "9b8959b77b9ea781d3df6c9588d63a4f"
     },
     "learn/R/nucleo/catalogo/reduccion.R": {
-      "checksum": "5148b7b7f2a4d37522e88e59af80f8b7"
+      "checksum": "017c3215e38b96fbf8dadf9c25f57773"
     },
     "learn/R/nucleo/catalogo/regresion.R": {
       "checksum": "8cf5e108f1fa4acce691ff2b9e1519f2"
@@ -1878,13 +1923,22 @@
       "checksum": "7db30f1095c75ab41f855bcd33b77466"
     },
     "learn/R/nucleo/contratos.R": {
-      "checksum": "99cb318a82375cc0b7a2bda731d84ed1"
+      "checksum": "5984c2ce29be51a60074634800c0c419"
     },
     "learn/R/nucleo/estado.R": {
       "checksum": "2b25222e0b27668c140b93e9ff32ec4b"
     },
     "learn/R/nucleo/exportar.R": {
       "checksum": "7e37a3b956ae81c4ebb563f820a46548"
+    },
+    "learn/R/nucleo/formulas.R": {
+      "checksum": "ceee631587ba8e7b8969b86c8b8a0805"
+    },
+    "learn/R/nucleo/informe_codigos.R": {
+      "checksum": "822ea9a58457d93d2929ed53ef19b563"
+    },
+    "learn/R/nucleo/informe_exploracion.R": {
+      "checksum": "883470cb0ddfc36705662a34985664cf"
     },
     "learn/R/nucleo/informe.R": {
       "checksum": "bbfaf9b1fc5fbe3b09ce898c0678fe44"
@@ -1893,43 +1947,49 @@
       "checksum": "f9198a7a016d43f5a3f9bfda84b8d691"
     },
     "learn/R/nucleo/registro.R": {
-      "checksum": "7cf717db09e533818fb14aad996e3668"
+      "checksum": "5281ae7050452beb1ad02515c756e3d9"
     },
     "learn/R/nucleo/tema_app.R": {
       "checksum": "ec6ed587d6fcf225acf010b73399a70e"
     },
     "learn/R/nucleo/textos.R": {
-      "checksum": "8abfca7723b236c3295e2f458b495746"
+      "checksum": "0482469b8d28b2b316e0fdb4b5bb2b87"
+    },
+    "learn/R/run_headless.R": {
+      "checksum": "5326703920218eb120fb731d260c8bcc"
     },
     "learn/R/ui/f0/inicio.R": {
-      "checksum": "c99e027e37b77afc2cb944746164b227"
+      "checksum": "87aac1811d197e869b5bb72d93c15d80"
     },
     "learn/R/ui/f1/analisis/analisis.R": {
-      "checksum": "79320f6c540cc9a9332f65d71bbee3b5"
+      "checksum": "57d6fc6da5ba9444efbc6aee4ded2e9f"
     },
     "learn/R/ui/f1/analisis/bivariado.R": {
-      "checksum": "625e7e518878c624827fa25dbbf1ffab"
+      "checksum": "7d371604efe2ae08fa5cd33c4b18ebd8"
     },
     "learn/R/ui/f1/analisis/multivariado.R": {
-      "checksum": "0e21ca031bb7cc5f19112995354ab471"
+      "checksum": "5fb33193e5c505795234609c850579a9"
     },
     "learn/R/ui/f1/analisis/univariado.R": {
-      "checksum": "aebfc1867ba5b7ef26cc42fede559618"
+      "checksum": "456e19abdbb88199f8956f61a70c04be"
     },
     "learn/R/ui/f1/balanceo.R": {
-      "checksum": "f638e2d0b520e6f54c31c5ddf1c1672b"
+      "checksum": "acd47cfc20edfdc914831f9483f86cac"
     },
     "learn/R/ui/f1/calidad.R": {
-      "checksum": "d9ec86edfae335246bf7785af7a543e8"
+      "checksum": "04dfc1731073a9a1e2a58e72b0b5512f"
     },
     "learn/R/ui/f1/datos.R": {
-      "checksum": "25911ddac99106df485e1c000ef69a13"
+      "checksum": "15c7e2157b2f1efcdf449e53329a5389"
     },
     "learn/R/ui/f1/diccionario.R": {
-      "checksum": "6d69f31c97e0396443a7060da1639440"
+      "checksum": "c4570a6f7235393bf7a9cbed4592cc6f"
+    },
+    "learn/R/ui/f1/filtro.R": {
+      "checksum": "a8749154cb8ca8a34605edfe33092b53"
     },
     "learn/R/ui/f1/fuente.R": {
-      "checksum": "5ed2c868a7ad589b431fc0df23f3d690"
+      "checksum": "4daa889f687dfcd94d9d87388774d767"
     },
     "learn/R/ui/f1/particion.R": {
       "checksum": "4bfe80c4e2ed941d7d372b7056ed0868"
@@ -1937,32 +1997,74 @@
     "learn/R/ui/f1/transformacion.R": {
       "checksum": "2e493a63d6c3afab3227fa609385aca1"
     },
+    "learn/R/ui/f2/analisis.R": {
+      "checksum": "46b8f6be3a664601f55c5ea51d12b314"
+    },
     "learn/R/ui/f2/catalogo.R": {
-      "checksum": "2267352a7a839ad79df78802c5c5be07"
+      "checksum": "d2128948f0d39c149df5abecf63c1f3e"
+    },
+    "learn/R/ui/f2/especificacion.R": {
+      "checksum": "ab564bb876a711fe2fa5b0b009e23035"
+    },
+    "learn/R/ui/f2/hiperparametros.R": {
+      "checksum": "c6c70614f8903094a1924003812153c0"
     },
     "learn/R/ui/f2/modelado.R": {
-      "checksum": "184ddc6aa002c5a079facb6b1f3f2553"
+      "checksum": "e701ff383a9445aca129d8af0499b9a3"
+    },
+    "learn/R/ui/f2/supuestos.R": {
+      "checksum": "f3c98177af2d05f0be05430fac1d8102"
     },
     "learn/R/ui/f3/ajuste.R": {
-      "checksum": "091ce6c5780d80099afd7bf9dba20382"
+      "checksum": "cfdc892561ace9142e14f2fa925bc40f"
+    },
+    "learn/R/ui/f3/analisis.R": {
+      "checksum": "72af71473d6441efafeac7a524ca78c2"
+    },
+    "learn/R/ui/f3/consola.R": {
+      "checksum": "75e2614b1f98c59bfc4876f7cea54b68"
+    },
+    "learn/R/ui/f3/control.R": {
+      "checksum": "dc33dc0194eb26f5a5cef21bfd7a8cf8"
+    },
+    "learn/R/ui/f3/optimizador.R": {
+      "checksum": "5fd46d365601bf2939e219e16ec4e4cb"
+    },
+    "learn/R/ui/f4/analisis.R": {
+      "checksum": "38cb7c41147909e58345a0a48f91528a"
+    },
+    "learn/R/ui/f4/composicion.R": {
+      "checksum": "49057a875b15a8788b26ca86ed5dc490"
+    },
+    "learn/R/ui/f4/desempeno.R": {
+      "checksum": "b93cd8f8bfa5ee909bf93a4f103b5dc4"
+    },
+    "learn/R/ui/f4/diagnostico.R": {
+      "checksum": "336454fc87cb3b6420b58d67bcdd1770"
     },
     "learn/R/ui/f4/evaluacion.R": {
-      "checksum": "d4872e4bb494e42107daa6704be148f2"
+      "checksum": "722d70b8f95091424fb5efcd51278513"
+    },
+    "learn/R/ui/f4/explicabilidad.R": {
+      "checksum": "fe56a9010e866325a516d4a926d38354"
     },
     "learn/R/ui/ficha.R": {
       "checksum": "2a961323471992a84458d69370891af5"
     },
     "learn/R/ui/formulario.R": {
-      "checksum": "280a5de05732652f91d932097662ab97"
+      "checksum": "e47d96e2311d9c52b7f8b235498020c5"
     },
     "learn/R/ui/piezas/fase.R": {
-      "checksum": "bac373b9c03c5420308c2a574645c08a"
+      "checksum": "b1065583c790e2882f21a125db04d29a"
+    },
+    "learn/R/ui/piezas/formulas.R": {
+      "checksum": "17c2baa80d8e23ae09bb8ff295f96b7a"
     },
     "learn/R/ui/piezas/indicadores.R": {
       "checksum": "4fa35b4a8caa6d6a5d4555286db19691"
     },
     "learn/R/ui/piezas/panel.R": {
-      "checksum": "3b646ccbc41f492f689fc09e26423ca6"
+      "checksum": "dd6be819f6c1a4fd68d3b82c745b94b0"
     },
     "learn/R/ui/piezas/tablas.R": {
       "checksum": "6900dc8d1c8901f66148e1e49c5f0da5"
@@ -1970,89 +2072,143 @@
     "learn/R/ui/piezas/tarjetas.R": {
       "checksum": "e669f0a38418fea87d63b3fce95040fd"
     },
+    "learn/R/ui/transversal/informe.R": {
+      "checksum": "ba8d3a544cd00bc66380b50b16f4e486"
+    },
     "learn/R/ui/transversal/objetos.R": {
-      "checksum": "8fcb002109a4450f9f4c074a92848d60"
+      "checksum": "e3ade14f6b3e8a09091394921f2a607a"
     },
     "learn/R/ui/transversal/referencia.R": {
       "checksum": "b9eebf553a92564062b792a1ca004e28"
     },
     "learn/textos/f1/analisis/boxplot_grupos.md": {
-      "checksum": "985c3de50fe65e83de004930da8c12f0"
+      "checksum": "4f8f087c35e7782b3d12ac77956ff8cf"
     },
     "learn/textos/f1/analisis/boxplot.md": {
-      "checksum": "d254dfcab2090f25ae4faef8e0f9b7bb"
+      "checksum": "6f5f0294c81358d8fc6bbb9a07b88bc6"
     },
     "learn/textos/f1/analisis/coordenadas_paralelas.md": {
-      "checksum": "acbcfcfe7aec6dc214b105e4f3618858"
+      "checksum": "21e31d8f2220770e0bb9c31a6597ab12"
     },
     "learn/textos/f1/analisis/densidad_conjunta.md": {
-      "checksum": "8bbc9d95d02ec790f097a16e4054af9f"
+      "checksum": "b469a3963590f03cd0bbf669ab5d466f"
     },
     "learn/textos/f1/analisis/densidad.md": {
-      "checksum": "1ad5a6fdd4d1275fed81909f86501c49"
+      "checksum": "f99ddb0457d0b1ae256004e4771d5a0e"
     },
     "learn/textos/f1/analisis/dispersion.md": {
-      "checksum": "b46edf63a7ef4b8b6e92db13a87b7e90"
+      "checksum": "29fea61600837edf8beebcd68720005d"
     },
     "learn/textos/f1/analisis/elipsoide.md": {
-      "checksum": "a89f3e295614843cb9fc10263dddeea9"
+      "checksum": "4cf89dce06185e18a0d4355a44ff7574"
     },
     "learn/textos/f1/analisis/heatmap_correlacion.md": {
-      "checksum": "3a7910d269892f10a49756c5f0c1fbd2"
+      "checksum": "18acc3270e175a2611d95c04a679146c"
     },
     "learn/textos/f1/analisis/histograma.md": {
-      "checksum": "a81a6c50aa0d8e790290ae1fa286311f"
+      "checksum": "df2714806721518173c38e92c6ad33ad"
     },
     "learn/textos/f1/analisis/matriz_dispersion.md": {
-      "checksum": "033a23d0b4ebff4928d8a9073bbbfcab"
+      "checksum": "ed7d608ffdfbcf9a6642ca06b6fcc11c"
     },
     "learn/textos/f1/analisis/mosaico.md": {
-      "checksum": "212e57c66d992dc439e4c0751806bd6f"
+      "checksum": "9e1ec85242fd6f2b57230f6905abda9f"
     },
     "learn/textos/f1/analisis/qq_mahalanobis.md": {
-      "checksum": "6c4a4441f6a5bbf6f7c8916b891a9194"
+      "checksum": "82376f7a8f980abbcfd231291826af3f"
     },
     "learn/textos/f1/analisis/qq_normal_datos.md": {
-      "checksum": "77ae839e9a35db36ec706de883c48f51"
+      "checksum": "1cdb87e2f1da0c2fe75e8122781366d1"
     },
     "learn/textos/f1/balanceo/frecuencias.md": {
-      "checksum": "85f6de7d35d6630851a23b26f8515946"
+      "checksum": "24884e09b4565382ef7b98b73e1d1654"
     },
     "learn/textos/f1/balanceo/nube_sinteticos.md": {
-      "checksum": "ec1619ed95ba5c197b3053c03e223701"
+      "checksum": "e3987df9f24a68358beadc53e99dbd77"
     },
     "learn/textos/f1/calidad/atipicos.md": {
-      "checksum": "671bd1491b98bc0a094285a50b6539eb"
+      "checksum": "35d4f229055c26bd4630f70141e32cfe"
     },
     "learn/textos/f1/calidad/duplicados.md": {
-      "checksum": "2670b9032cac43aa780406834d71c6d0"
+      "checksum": "9c0955241d0ae66b8fd7f1706c7ae178"
     },
     "learn/textos/f1/calidad/matriz_nulidad.md": {
-      "checksum": "6cf3101cec4752f21bfcd31d81ddf4d9"
+      "checksum": "5f38779bfb68498eadf0fc5a79ddc6d9"
     },
     "learn/textos/f1/diccionario/tabla.md": {
-      "checksum": "4196db32c1021eb5853542deef9868cb"
+      "checksum": "4602426202385d33e5d0ba144733b7fd"
+    },
+    "learn/textos/f1/filtro/filas.md": {
+      "checksum": "2c9a7a5b06fbcbb131477b9698e40a35"
     },
     "learn/textos/f1/fuente/vista_previa.md": {
-      "checksum": "d464603073999cfd138d3891ff05c44e"
+      "checksum": "336bc7b8ecebcc5452a5a85026e46e43"
     },
     "learn/textos/f1/particion/balance.md": {
-      "checksum": "97894f3f8369fab39556496bbf5813dc"
+      "checksum": "ee074865cc64f8b89bf1fcd6c9550544"
     },
     "learn/textos/f1/particion/tamanos.md": {
-      "checksum": "fefbef6ffed4b1610ae07d8ee6c01774"
+      "checksum": "c3af7931fbdda54bc0353b4a0b3881ab"
     },
     "learn/textos/f1/transformacion/antes_despues.md": {
-      "checksum": "9760b5d1d554775b0767133ba2ee4e09"
+      "checksum": "d06f6f17eabbe01921c9a72254590b05"
     },
     "learn/textos/f1/transformacion/perfil_boxcox.md": {
-      "checksum": "17500c5aa869065149e39fe0a65073c8"
+      "checksum": "aa587d78dd80fa961089401245e25e52"
+    },
+    "learn/textos/f2/analisis/espacio_hipotesis.md": {
+      "checksum": "ed22d9438cb918a6426a60e3f5ca8db8"
+    },
+    "learn/textos/f2/analisis/modelo_manual.md": {
+      "checksum": "55e4684045674e20f9ba1efc88ccaab2"
+    },
+    "learn/textos/f2/analisis/presupuesto_parametros.md": {
+      "checksum": "78f4785d7c9266baf757a14e2c6e174f"
+    },
+    "learn/textos/f2/especificacion/matriz_diseno.md": {
+      "checksum": "9d06f9c97fe56f8c90c7e1367415f412"
+    },
+    "learn/textos/f2/supuestos/semaforo.md": {
+      "checksum": "c9cb4eb68c4d6030cc573ea408414cc3"
     },
     "learn/textos/f3/analisis/convergencia.md": {
-      "checksum": "2ac9b2c35b853b810b933e9b983a9502"
+      "checksum": "5b0587131c9221bd0d862f6b5cda0bda"
+    },
+    "learn/textos/f3/analisis/trayectoria.md": {
+      "checksum": "d5eef591a3d1fa1bd99553c2af96462f"
+    },
+    "learn/textos/f3/consola/estado.md": {
+      "checksum": "8bab678fc0ad428b2bb15c197d3f95e6"
+    },
+    "learn/textos/f4/desempeno/grupos.md": {
+      "checksum": "9b002900b355e253edbe96def40c9937"
+    },
+    "learn/textos/f4/diagnostico/codo.md": {
+      "checksum": "bcaae541c46018ffd94dce45b7c72d42"
+    },
+    "learn/textos/f4/diagnostico/scree.md": {
+      "checksum": "384582d51197b94f7f864032196768ff"
+    },
+    "learn/textos/f4/diagnostico/silueta.md": {
+      "checksum": "30976f087fefaeee14aa639b4097ab28"
+    },
+    "learn/textos/f4/explicabilidad/biplot.md": {
+      "checksum": "720877de497bd66b6f109faab2efecee"
+    },
+    "learn/textos/f4/explicabilidad/cargas.md": {
+      "checksum": "12e3345ccf2acf3b2787c25897023344"
+    },
+    "learn/textos/f4/explicabilidad/centroides.md": {
+      "checksum": "31d646b5ed912668397b2ab53d2a8d64"
+    },
+    "learn/textos/f4/explicabilidad/circulo_correlaciones.md": {
+      "checksum": "d1f00f8c35e6c58b017dba6c331a7978"
+    },
+    "learn/textos/f4/explicabilidad/mapa_2d.md": {
+      "checksum": "3c0ac4c88a0427b5c19fd8b8ed9bbd35"
     },
     "libs/_comun/R/datos.R": {
-      "checksum": "800acbd7156361f60786320d973aaf45"
+      "checksum": "9d26a609499604cddbe006748b9fd417"
     },
     "libs/_comun/R/metricas.R": {
       "checksum": "7c9ef2ac350521a74ca184ebebb9cd8a"
@@ -2067,7 +2223,7 @@
       "checksum": "9fc80e8efe991e86357f4342ba5f1a78"
     },
     "libs/_comun/R/temas.R": {
-      "checksum": "a134ba17bd0e455c95eb5f106debf203"
+      "checksum": "443e53b132896418707f2dfe3b60cc05"
     },
     "libs/_comun/scss/custom.scss": {
       "checksum": "30e2b15d9798a4379d03618a15afc18f"

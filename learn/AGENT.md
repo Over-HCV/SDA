@@ -72,6 +72,24 @@ source("learn/R/cargar.R")
 cargar_sda(con_ui = FALSE)   # headless: no bslib, no DT
 ```
 
+## Driving the lab from the console
+
+`learn/R/lab.R` walks phase 1 without a browser. Prefer it over ad-hoc
+`Rscript -e` snippets: it builds the same dataset object the app builds
+(source + filter stack), so what you measure is what the app shows.
+
+```bash
+Rscript learn/R/lab.R                                   # list the commands
+ORI="--fuente ori --filtro Hora=12:00"
+Rscript learn/R/lab.R resumen Temperatura $ORI
+Rscript learn/R/lab.R panel f1.analisis.histograma Temperatura $ORI
+```
+
+`panel` returns a PLOT AS A TABLE: it builds the registered ggplot for that
+artefact key and prints `ggplot_build()` layers — bin edges and heights, box
+whiskers, point coordinates — instead of drawing it. That is the read path for
+anything that cannot look at an image.
+
 ## Commands
 
 ```bash
@@ -85,6 +103,9 @@ Rscript learn/R/pruebas/test_headless.R
 
 # Phase 1 logic and plots, no GUI
 Rscript learn/R/pruebas/test_fase1.R
+
+# The exportable notebook and the console CLI, no GUI
+Rscript learn/R/pruebas/test_informe.R
 
 # One file per implemented method, no GUI
 Rscript learn/R/pruebas/test_acp.R

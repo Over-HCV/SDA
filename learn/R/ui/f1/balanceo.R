@@ -38,7 +38,8 @@ salida_balanceo <- function(ns) {
       shiny::tagList(
         shiny::plotOutput(ns("frecuencias"), height = "280px"),
         shiny::tableOutput(ns("pesos"))),
-      contexto = salida_contexto(ns, "contexto_bal")),
+      contexto = salida_contexto(ns, "contexto_bal"),
+      encabezado_extra = casilla_informe(ns, "f1.balanceo.frecuencias")),
     panel_resultado("f1.balanceo.nube_sinteticos",
       shiny::plotOutput(ns("nube"), height = "320px"),
       contexto = salida_contexto(ns, "contexto_nube"),

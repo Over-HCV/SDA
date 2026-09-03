@@ -17,18 +17,20 @@
 #' @return data.frame(clave, nombre, descripcion, filas_aprox, diferida)
 fuentes_disponibles <- function() {
   data.frame(
-    clave = c("charcoal_crudo", "charcoal_pivot", "twins",
+    clave = c("charcoal_crudo", "charcoal_pivot", "twins", "ori",
               "sintetico_anova", "sintetico_regresion"),
     nombre = c("charcoal · panel crudo", "charcoal · pais x anio",
-               "twins", "sintetico · anova", "sintetico · regresion"),
+               "twins", "ori · meteorologico IDEAM",
+               "sintetico · anova", "sintetico · regresion"),
     descripcion = c(
       "Produccion y comercio de carbon vegetal por pais, ano y flujo.",
-      "Matriz pais x ano de un solo flujo, ya agregada.",
+      "Matriz pais x anio de un solo flujo, ya agregada.",
       "Gemelos: salario, educacion y controles. 16 variables numericas.",
+      "Taller 01: clima por municipio y hora en la Orinoquia. 18 variables.",
       "k grupos normales con medias separadas por 'efecto'.",
       "Relacion cubica con ruido: la recta se queda corta a proposito."),
-    filas_aprox = c(35113L, 145L, 182L, 100L, 100L),
-    diferida = c(TRUE, TRUE, FALSE, FALSE, FALSE),
+    filas_aprox = c(35113L, 145L, 182L, 4543L, 100L, 100L),
+    diferida = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE),
     stringsAsFactors = FALSE)
 }
 
@@ -71,6 +73,7 @@ cargar_fuente <- function(clave, semilla = 42L, n = 100L, k_grupos = 4L,
             as.data.frame(matriz))
     },
     twins = cargar_twins(),
+    ori = cargar_ori(),
     sintetico_anova = gen_sintetico(n = n, k_grupos = k_grupos, efecto = efecto,
                                     semilla = semilla, tipo = "anova"),
     sintetico_regresion = gen_sintetico(n = n, semilla = semilla,

@@ -463,11 +463,89 @@ didáctico reproduciendo.
 
 ---
 
+## Hito 4b — el Taller 01 se puede hacer entero dentro del lab
+
+Al terminar: se carga `ori`, se filtra `Hora = 12:00`, se responden las doce
+preguntas del Taller 01 en la app, y lo que se marcó con la casilla «Añadir» se
+baja como un cuaderno `.Rmd` que corre solo.
+
+Lo que valida este hito no es el taller: es que la fase 1 sirva para responder
+una pregunta REAL de principio a fin. Con un taller concreto encima aparecieron
+tres huecos que ningún dataset de juguete había destapado.
+
+### E27 · La pregunta manda: filtrar filas
+
+- [x] `R/ui/f1/filtro.R` — subsección **Filtro**, entre Fuente y Diccionario.
+      Once de las doce preguntas dicen «para los registros recolectados a medio
+      día»; sin filtro de filas, ninguna se podía responder de verdad
+- [x] `aplicar_filtro()` en `logica/datos/transformacion.R` — el filtro entra en
+      la MISMA pila que las transformaciones de columna (`TIPOS_PILA`), y por
+      eso hereda gratis el deshacer, el aviso de qué se aplicó y el cuaderno
+- [x] Un filtro que dejaría el dataset vacío NO se aplica: devuelve los datos
+      intactos con un aviso de error. Un `data.frame` de cero filas rompe todo
+      lo que viene después, y en silencio
+
+### E28 · Los tres huecos de análisis que faltaban
+
+- [x] `medir_asociacion()` devuelve **covarianza** junto a Pearson y Spearman:
+      la pregunta 8 es justamente por qué una tiene unidades y la otra no
+- [x] `graficar_histograma(normal =)` y `graficar_densidad(normal =)` superponen
+      la N(media, desvío) estimada de los datos (pregunta 12)
+- [x] `graficar_dispersion_marginal()` compone la nube con el histograma de cada
+      variable en su borde (pregunta 7), con `gtable` — que ggplot2 ya arrastra.
+      `patchwork` o `ggExtra` lo harían en una línea y serían una dependencia
+      más en el bundle wasm
+
+### E29 · ⤓ Informe: llevarse el laboratorio
+
+- [x] Casilla «Añadir» en el encabezado de 17 paneles (`casilla_informe()`), con
+      la selección viviendo en un `reactiveVal` de `app.R`: ① Datos la llena y
+      la pestaña Informe la exporta, en la misma sesión Shiny
+- [x] `nucleo/informe_exploracion.R` — la selección a cuaderno `.Rmd`: los datos,
+      la pila de preparación traducida a R, y una sección por panel con su texto
+      y sus parámetros congelados AL MARCAR, no al exportar
+- [x] `nucleo/informe_codigos.R` — un artefacto a R autónomo (base + ggplot2):
+      el cuaderno se abre en cualquier R, sin nada del lab instalado
+- [x] `R/ui/transversal/informe.R` — la pestaña: `.Rmd`, CSV de los datos
+      actuales y JSON de la selección
+
+### E30 · Que los datos del taller lleguen al despliegue
+
+- [x] `data/ORI.csv` en `build.R` y en el espejo de `manifiesto.R`: sin eso el
+      archivo estaba en el repo pero no viajaba ni a GH-Pages ni a Posit
+- [x] `ORI.csv` convertido a UTF-8. `shinylive::export()` mete los `.csv` en
+      `app.json` **como texto UTF-8**: con el archivo en ISO-8859-1 el bundle
+      salía con JSON inválido. `cargar_ori()` acepta las dos codificaciones, así
+      que un estudiante puede subir su copia del curso sin convertir nada
+- [x] `learn/workshops/Taller-01-Sln.md` — el solucionario: por pregunta, la
+      ruta en la app, la respuesta con sus números y el R equivalente
+
+### E31 · El laboratorio también por consola
+
+- [x] `R/lab.R` — la fase 1 sin navegador: `datos`, `diccionario`, `resumen`,
+      `frecuencias`, `atipicos`, `asociacion`, `normalidad`, `contingencia`,
+      `panel`, `casillas`, `cuaderno`. `--fuente` y `--filtro` (repetible)
+      arman el mismo objeto dataset que la app, así que lo que se mide por
+      consola es lo que muestra la pantalla
+- [x] `panel <clave>` devuelve **el gráfico como tabla**: lee del registro (C9)
+      qué función dibuja ese artefacto, la llama y imprime las capas de
+      `ggplot_build()` en vez del dibujo. Los bordes y alturas del histograma,
+      los cinco números de la caja. Un gráfico se puede leer sin verlo
+- [x] `R/pruebas/test_informe.R` — el cuaderno y el CLI, sin Shiny. Salió de
+      partir `test_headless.R`, que había pasado el techo de 300 LOC
+
+> Completado el 2026-09-02. El hueco que más costó no fue estadístico: fue que
+> un CSV en latin1 rompe el bundle wasm sin decir por qué. Los datos de verdad
+> vienen sucios, y el despliegue es donde se nota.
+
+---
+
 ## Hitos siguientes
 
 - [ ] **Hito 5 · LASSO** — valida barrido de hiperparámetros y ruta de
       regularización; migra `projects/01-lasso/`
 - [ ] **Hito 6 · Evaluación completa** — explicabilidad, comparación de corridas,
-      exportador a `.Rmd` + `revealjs`
+      exportador a `.Rmd` + `revealjs`. El exportador a `.Rmd` ya está hecho para
+      la fase 1 (Hito 4b): falta extenderlo a las corridas y añadir `revealjs`
 - [ ] **Hito 7 · Poblar el catálogo** — el resto de `libs/topics-map.md`, un
       método por vez, con su ficha y sus textos

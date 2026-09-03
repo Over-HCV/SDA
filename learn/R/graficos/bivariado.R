@@ -47,6 +47,79 @@ graficar_dispersion <- function(datos, x, y, grupo = NULL, alfa = 0.6,
     tema_ggplot()
 }
 
+#' Dispersion con el histograma marginal de cada variable.
+#'
+#' Lo que aporta sobre la dispersion sola: la nube dice como se relacionan las
+#' dos variables, y los marginales dicen como esta distribuida cada una por su
+#' cuenta. Una correlacion debil sobre dos variables muy asimetricas se lee
+#' distinto que sobre dos simetricas, y eso solo se ve con los tres a la vez.
+#'
+#' Se compone con `gtable`, que ggplot2 ya arrastra: `patchwork` o `ggExtra`
+#' harian esto en una linea, pero serian una dependencia mas y el bundle wasm
+#' es justo donde una dependencia de mas duele.
+#'
+#' El truco de alineacion son las dos asignaciones de geometria: copiar los
+#' anchos del centro al marginal de arriba y las alturas al de la derecha hace
+#' que los tres paneles empiecen y terminen en el mismo pixel. Sin eso el
+#' histograma de arriba queda corrido respecto de la nube y el grafico miente.
+#'
+#' @return un `gtable`, que es un grob: `renderPlot()` lo dibuja igual que a un
+#'   ggplot, pero no se le pueden sumar capas despues.
+graficar_dispersion_marginal <- function(datos, x, y, grupo = NULL, alfa = 0.6,
+                                         jitter = FALSE, celdas = FALSE,
+                                         suavizado = FALSE, clases = 30L) {
+  marco <- data.frame(x = as.numeric(datos[[x]]), y = as.numeric(datos[[y]]))
+  marco <- marco[stats::complete.cases(marco), ]
+  asociacion <- medir_asociacion(marco$x, marco$y)
+
+  centro <- graficar_dispersion(datos, x, y, grupo = grupo, alfa = alfa,
+                                jitter = jitter, celdas = celdas,
+                                suavizado = suavizado) +
+    ggplot2::labs(subtitle = NULL) +
+    ggplot2::theme(legend.position = "none")
+
+  # El resumen numerico sube al marginal de arriba: en el centro quedaria
+  # encajonado entre el histograma y la nube.
+  arriba <- .histograma_marginal(marco$x, clases) +
+    ggplot2::labs(subtitle = sprintf("r = %.3f · cov = %.3g · n = %d",
+                                     asociacion$pearson, asociacion$covarianza,
+                                     asociacion$n))
+  derecha <- .histograma_marginal(marco$y, clases) + ggplot2::coord_flip()
+
+  rejilla_centro <- ggplot2::ggplotGrob(centro)
+  rejilla_arriba <- ggplot2::ggplotGrob(arriba)
+  rejilla_derecha <- ggplot2::ggplotGrob(derecha)
+  rejilla_arriba$widths <- rejilla_centro$widths
+  rejilla_derecha$heights <- rejilla_centro$heights
+
+  disposicion <- gtable::gtable(widths = grid::unit(c(4, 1), "null"),
+                                heights = grid::unit(c(1, 4), "null"))
+  disposicion <- gtable::gtable_add_grob(disposicion, rejilla_arriba, 1, 1,
+                                         name = "arriba")
+  disposicion <- gtable::gtable_add_grob(disposicion, rejilla_centro, 2, 1,
+                                         name = "centro")
+  disposicion <- gtable::gtable_add_grob(disposicion, rejilla_derecha, 2, 2,
+                                         name = "derecha")
+  disposicion
+}
+
+#' Un marginal: histograma pelado, sin ejes ni rejilla.
+#'
+#' No fija limites a proposito. Las dos capas miran la MISMA columna, asi que
+#' la escala por defecto y su expansion del 5 % dan el mismo rango en las dos:
+#' fijarlos a mano solo abriria la puerta a recortar barras del borde.
+.histograma_marginal <- function(valores, clases = 30L) {
+  ggplot2::ggplot(data.frame(valor = valores),
+                  ggplot2::aes(x = .data$valor)) +
+    ggplot2::geom_histogram(bins = clases, fill = paleta_cat(1),
+                            color = "white", linewidth = 0.2) +
+    tema_ggplot() +
+    ggplot2::theme(axis.title = ggplot2::element_blank(),
+                   axis.text = ggplot2::element_blank(),
+                   axis.ticks = ggplot2::element_blank(),
+                   panel.grid = ggplot2::element_blank())
+}
+
 #' Densidad conjunta con curvas de nivel sobre los puntos.
 #'
 #' Donde el sobreploteo esconde la estructura, las curvas la devuelven: cada

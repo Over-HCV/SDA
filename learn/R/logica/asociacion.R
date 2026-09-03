@@ -8,15 +8,21 @@
 
 #' Asociación entre dos vectores numéricos.
 #'
-#' @return list(n, pearson, spearman, p_valor, comentario)
+#' La covarianza va con la correlación a propósito: la correlación es la
+#' covarianza estandarizada, y verlas juntas explica por qué una no tiene
+#' unidades y la otra sí (°C·mph si las columnas son temperatura y viento).
+#'
+#' @return list(n, covarianza, pearson, spearman, p_valor, comentario)
 medir_asociacion <- function(x, y, metodo = "pearson") {
   completos <- !is.na(x) & !is.na(y)
   x <- x[completos]; y <- y[completos]
   n <- length(x)
   if (n < 3L)
-    return(list(n = n, pearson = NA_real_, spearman = NA_real_,
-                p_valor = NA_real_, comentario = "faltan observaciones"))
+    return(list(n = n, covarianza = NA_real_, pearson = NA_real_,
+                spearman = NA_real_, p_valor = NA_real_,
+                comentario = "faltan observaciones"))
 
+  covarianza <- stats::cov(x, y)
   pearson <- suppressWarnings(stats::cor(x, y, method = "pearson"))
   spearman <- suppressWarnings(stats::cor(x, y, method = "spearman"))
   prueba <- tryCatch(stats::cor.test(x, y, method = metodo),
@@ -27,7 +33,7 @@ medir_asociacion <- function(x, y, metodo = "pearson") {
     else if (abs(pearson) < 0.1) "sin relacion lineal apreciable"
     else "relacion aproximadamente lineal"
 
-  list(n = n, pearson = pearson, spearman = spearman,
+  list(n = n, covarianza = covarianza, pearson = pearson, spearman = spearman,
        p_valor = if (is.null(prueba)) NA_real_ else prueba$p.value,
        comentario = comentario)
 }

@@ -5,6 +5,8 @@
 #
 # Funciones expuestas:
 #   cargar_charcoal()     -> data.frame limpio (Country_Area, flujo, Year, Quantity)
+#   cargar_twins()        -> data.frame gemelos (16 vars numéricas)
+#   cargar_ori()          -> data.frame meteorológico del Taller 01 (18 vars)
 #   listar_flujos()       -> character() con los flujos disponibles
 #   listar_paises()       -> character() con los países disponibles
 #   filtrar_charcoal()    -> data.frame filtrado por país/año/flujo
@@ -129,6 +131,45 @@ twins_diccionario <- function() {
 }
 
 listar_vars_twins <- function() names(twins_diccionario())
+
+# ---------------------------------------------------------------------------
+# ORI.csv — variables meteorológicas de municipios de la Orinoquía (IDEAM),
+# base del Taller 01 del curso. Una fila por medición municipio × hora.
+#
+# Tres trampas del archivo, todas resueltas acá:
+#   1. Separador punto y coma con decimales a la inglesa (formato regional COL
+#      exportado sin normalizar): sin sep = ";" todo queda en una columna.
+#   2. Codificación: la copia que reparte el curso viene en ISO-8859-1
+#      (ACACÍAS, GUAINÍA) y leída como UTF-8 los municipios llegan rotos. La
+#      copia de `data/` está convertida a UTF-8 a propósito, porque
+#      shinylive::export() mete los .csv en app.json COMO TEXTO UTF-8: con el
+#      archivo en latin1 el bundle wasm sale con JSON inválido y la app no
+#      arranca en GH-Pages. El lector acepta las dos, así que un estudiante
+#      puede subir la suya sin convertir nada.
+#   3. El último nombre del encabezado trae un espacio final ("Pronostico "):
+#      se recortan los nombres para que los selectores no muestren basura.
+# ---------------------------------------------------------------------------
+ruta_ori <- function() file.path(proyecto_raiz(), "data", "ORI.csv")
+
+cargar_ori <- function(ruta = ruta_ori()) {
+  df <- utils::read.csv(ruta, sep = ";", dec = ".",
+                        fileEncoding = codificacion_de(ruta),
+                        stringsAsFactors = FALSE, check.names = FALSE)
+  names(df) <- trimws(names(df))
+  for (columna in names(df))
+    if (is.character(df[[columna]])) df[[columna]] <- enc2utf8(df[[columna]])
+  df
+}
+
+#' UTF-8 si el archivo lo es; latin1 si no.
+#'
+#' `validUTF8()` es la prueba directa: un archivo latin1 con tildes tiene bytes
+#' que no forman secuencias UTF-8 válidas. Adivinar por el nombre o confiar en
+#' el locale es lo que produce los municipios rotos.
+codificacion_de <- function(ruta) {
+  lineas <- readLines(ruta, n = -1L, warn = FALSE, encoding = "bytes")
+  if (all(validUTF8(lineas))) "UTF-8" else "latin1"
+}
 
 # ---------------------------------------------------------------------------
 # Selectores para UI

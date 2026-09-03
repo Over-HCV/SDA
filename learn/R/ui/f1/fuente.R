@@ -44,7 +44,8 @@ salida_fuente <- function(ns) {
     shiny::tagList(
       shiny::uiOutput(ns("avisos_fuente")),
       salida_tabla(ns, "vista_previa")),
-    contexto = salida_contexto(ns, "contexto_fuente"))
+    contexto = salida_contexto(ns, "contexto_fuente"),
+    encabezado_extra = casilla_informe(ns, "f1.fuente.vista_previa"))
 }
 
 servidor_fuente <- function(input, output, session, datos_base, dataset) {

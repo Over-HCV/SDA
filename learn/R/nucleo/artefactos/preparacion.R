@@ -14,6 +14,12 @@ poblar_artefactos_preparacion <- function() {
     logica  = "R/logica/datos/fuente.R::cargar_fuente",
     descripcion = "Las primeras filas de lo que se cargó, con su pie de conteo.")
 
+  # --- Filtro ------------------------------------------------------------
+  registrar_artefacto("f1.filtro.filas", "Filas antes y después del filtro",
+    grafico = "R/ui/f1/filtro.R::salida_filtro",
+    logica  = "R/logica/datos/transformacion.R::aplicar_filtro",
+    descripcion = "Cuántas filas quedan tras los filtros aplicados y la pila completa, en orden.")
+
   # --- Diccionario -------------------------------------------------------
   registrar_artefacto("f1.diccionario.tabla", "Diccionario de columnas",
     grafico = "R/ui/f1/diccionario.R::salida_diccionario",

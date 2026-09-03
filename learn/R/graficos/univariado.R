@@ -16,7 +16,7 @@
 #' como decisión escondida.
 graficar_histograma <- function(datos, columna, clases = 30L,
                                 densidad = FALSE, ancho = NULL,
-                                log_x = FALSE) {
+                                log_x = FALSE, normal = FALSE) {
   valores <- as.numeric(datos[[columna]])
   marco <- data.frame(valor = valores[!is.na(valores)])
   grafico <- ggplot2::ggplot(marco, ggplot2::aes(x = .data$valor)) +
@@ -33,23 +33,48 @@ graficar_histograma <- function(datos, columna, clases = 30L,
       data = curva, ggplot2::aes(x = .data$x, y = .data$densidad),
       color = paleta_cat(2)[2], linewidth = 0.9)
   }
+  if (normal)
+    grafico <- grafico + .capa_normal(marco$valor)
   if (log_x) grafico <- grafico + ggplot2::scale_x_log10()
   grafico
 }
 
 #' Densidad kernel sola, con la banda h a la vista en el subtítulo.
-graficar_densidad <- function(datos, columna, ancho = NULL, relleno = TRUE) {
+#'
+#' `normal = TRUE` añade la curva N(media, desvío) de los propios datos: es el
+#' modelo normal "estimado", contra el que se compara la estimación kernel.
+graficar_densidad <- function(datos, columna, ancho = NULL, relleno = TRUE,
+                              normal = FALSE) {
   estimada <- estimar_densidad(as.numeric(datos[[columna]]), ancho)
   grafico <- ggplot2::ggplot(estimada$curva,
                              ggplot2::aes(x = .data$x, y = .data$densidad))
   if (relleno)
     grafico <- grafico + ggplot2::geom_area(fill = paleta_cat(1), alpha = 0.25)
+  grafico <- grafico +
+    ggplot2::geom_line(color = paleta_cat(1), linewidth = 0.9)
+  if (normal)
+    grafico <- grafico + .capa_normal(estimada$curva$x)
   grafico +
-    ggplot2::geom_line(color = paleta_cat(1), linewidth = 0.9) +
     ggplot2::labs(x = columna, y = "densidad",
                   subtitle = sprintf("ancho de banda h = %.4g · n = %d",
                                      estimada$ancho, estimada$n)) +
     tema_ggplot()
+}
+
+#' La normal ajustada por momentos, como capa reutilizable.
+#'
+#' Se dibuja sobre el rango de los datos (más un colchón del 10 % a cada lado):
+#' stat_function evaluaría en toda la escala x y las colas planas mienten.
+.capa_normal <- function(valores) {
+  media <- mean(valores)
+  desviacion <- stats::sd(valores)
+  colchon <- 0.1 * diff(range(valores))
+  malla <- data.frame(x = seq(min(valores) - colchon, max(valores) + colchon,
+                              length.out = 200))
+  malla$densidad <- stats::dnorm(malla$x, media, desviacion)
+  ggplot2::geom_line(
+    data = malla, ggplot2::aes(x = .data$x, y = .data$densidad),
+    color = paleta_cat(6)[6], linewidth = 0.8, linetype = "dashed")
 }
 
 #' Caja y bigotes de una variable. Los bigotes llegan hasta 1,5 veces el rango

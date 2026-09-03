@@ -44,19 +44,26 @@ salida_multivariado <- function(ns) {
     panel_resultado("f1.analisis.matriz_dispersion",
       shiny::plotOutput(ns("pares"), height = "420px"),
       contexto = salida_contexto(ns, "contexto_pares"),
-      encabezado_extra = shiny::uiOutput(ns("badge_multi"), inline = TRUE)),
+      encabezado_extra = shiny::tagList(
+        shiny::uiOutput(ns("badge_multi"), inline = TRUE),
+        casilla_informe(ns, "f1.analisis.matriz_dispersion"))),
     panel_resultado("f1.analisis.heatmap_correlacion",
       shiny::plotOutput(ns("heatmap"), height = "360px"),
-      contexto = salida_contexto(ns, "contexto_heatmap")),
+      contexto = salida_contexto(ns, "contexto_heatmap"),
+      encabezado_extra = casilla_informe(ns, "f1.analisis.heatmap_correlacion")),
     panel_resultado("f1.analisis.coordenadas_paralelas",
       shiny::plotOutput(ns("paralelas"), height = "320px"),
-      contexto = salida_contexto(ns, "contexto_paralelas")),
+      contexto = salida_contexto(ns, "contexto_paralelas"),
+      encabezado_extra = casilla_informe(
+        ns, "f1.analisis.coordenadas_paralelas")),
     panel_resultado("f1.analisis.elipsoide",
       shiny::plotOutput(ns("elipsoide"), height = "340px"),
-      contexto = salida_contexto(ns, "contexto_elipsoide")),
+      contexto = salida_contexto(ns, "contexto_elipsoide"),
+      encabezado_extra = casilla_informe(ns, "f1.analisis.elipsoide")),
     panel_resultado("f1.analisis.qq_mahalanobis",
       shiny::plotOutput(ns("qq_mahalanobis"), height = "320px"),
-      contexto = salida_contexto(ns, "contexto_mahalanobis")))
+      contexto = salida_contexto(ns, "contexto_mahalanobis"),
+      encabezado_extra = casilla_informe(ns, "f1.analisis.qq_mahalanobis")))
 }
 
 servidor_multivariado <- function(input, output, session, dataset, muestreo) {

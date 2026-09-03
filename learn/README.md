@@ -51,6 +51,7 @@ Rscript learn/R/pruebas/verificar_idioma.R   # español ASCII (C1)
 Rscript learn/R/pruebas/verificar_mapa.R     # MAPA.md al día (C9)
 Rscript learn/R/pruebas/test_headless.R      # núcleo, sin Shiny
 Rscript learn/R/pruebas/test_fase1.R         # lógica y gráficos de la fase 1
+Rscript learn/R/pruebas/test_informe.R       # el cuaderno exportable y lab.R
 Rscript learn/R/pruebas/test_acp.R           # el método ACP, sin Shiny
 Rscript learn/R/pruebas/test_kmeans.R        # el método K-medias, sin Shiny
 Rscript learn/R/pruebas/test_contrato.R      # contrato S2 y regla de tres partes
@@ -63,6 +64,45 @@ Rscript learn/R/pruebas/verificar_bundle.R   # el bundle wasm arranca de verdad
 
 Los cinco últimos abren un navegador de verdad. No son opcionales: un render
 limpio y un HTTP 200 no prueban nada (ver `libs/sdd.md` S2b).
+
+## Hacer el laboratorio por consola
+
+`learn/R/lab.R` recorre la fase 1 sin navegador: es la app preguntada por
+escrito. Sirve para responder un taller desde la terminal, para comprobar en
+dos segundos lo que un panel dice, y para que un script o un agente puedan
+hacer lo mismo que una persona hace con las pestañas.
+
+```bash
+Rscript learn/R/lab.R                          # los comandos disponibles
+Rscript learn/R/lab.R fuentes                  # el catálogo de datos
+ORI="--fuente ori --filtro Hora=12:00"         # se repite en cada comando
+
+Rscript learn/R/lab.R datos $ORI               # dimensiones + pila + cabecera
+Rscript learn/R/lab.R diccionario $ORI         # escala y clase por columna
+Rscript learn/R/lab.R resumen Temperatura $ORI # los 14 estadísticos
+Rscript learn/R/lab.R atipicos Presion $ORI    # Tukey: corte y filas marcadas
+Rscript learn/R/lab.R asociacion Temperatura Velocidad_del_Viento $ORI
+Rscript learn/R/lab.R normalidad Presion $ORI  # asimetría, h, Shapiro-Wilk
+```
+
+**Un gráfico se devuelve como su tabla.** `panel` construye el mismo ggplot que
+pinta la app y, en vez de dibujarlo, imprime las capas ya calculadas: los
+bordes y las alturas del histograma, los cinco números de la caja, los puntos
+de la nube. Es la información que uno lee del dibujo, en un formato que se lee
+sin ojos.
+
+```bash
+Rscript learn/R/lab.R panel f1.analisis.histograma Temperatura $ORI
+Rscript learn/R/lab.R casillas                 # las 17 claves exportables
+Rscript learn/R/lab.R cuaderno f1.analisis.boxplot $ORI --salida taller.Rmd
+```
+
+`--filtro` se puede repetir y se aplica en orden, igual que la pila de la
+subsección Filtro. No hay estado entre invocaciones a propósito: cada comando
+declara el dataset sobre el que corre, y por eso es reproducible.
+
+Ver `learn/workshops/Taller-01-Sln.md` para el Taller 01 resuelto por los tres
+caminos: la app, la consola y R puro.
 
 ## Correr un método sin la app
 
