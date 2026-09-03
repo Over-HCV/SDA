@@ -31,7 +31,7 @@ library(ggplot2)
 # ORI.csv es la base del Taller 01 (IDEAM). Ponerlo al lado del cuaderno.
 # La copia que reparte el curso viene en ISO-8859-1; si la tuya ya está en
 # UTF-8 (la de data/ del repo lo está), quitá el fileEncoding.
-datos <- read.csv("ORI.csv", sep = ";", dec = ".",
+datos <- read.csv("../../data/ORI.csv", sep = ";", dec = ".",
                   fileEncoding = "latin1", stringsAsFactors = FALSE)
 names(datos) <- trimws(names(datos))
 ```
