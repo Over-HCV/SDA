@@ -1,0 +1,121 @@
+# install.packages(c("tidyverse", "ggExtra", "psych", "MVN"))
+
+library(tidyverse)
+library(ggplot2)
+library(ggExtra)
+# library(psych)
+library(dplyr)
+
+# 1. Cargar el dataset con el delimitador adecuado
+datos <- read_delim("ORI.csv", delim = ";", show_col_types = FALSE)
+# Filas y columnas totales
+n_filas <- nrow(datos)
+n_cols  <- ncol(datos)
+
+cat("Número de filas (Unidades Estadísticas / Experimentales):", n_filas, "\n")
+cat("Número de columnas (Variables):", n_cols, "\n")
+
+# Elimina espacios al inicio y final de todos los nombres de columnas
+names(datos) <- trimws(names(datos))
+
+# Filtramos de nuevo datos_noon con los nombres limpios
+datos_noon <- datos %>% 
+  filter(as.character(Hora) == "12:00:00" | str_starts(as.character(Hora), "12:00"))
+
+cat("Número de registros a medio día (12:00):", nrow(datos_noon), "\n")
+
+#2 Frecuencias de Pronóstico a medio día
+tabla_pronostico <- datos_noon %>%
+  count(Pronostico, name = "Frecuencia") %>%
+  arrange(desc(Frecuencia))
+
+print(tabla_pronostico)
+
+cat("Pronóstico más frecuente:\n")
+print(slice_head(tabla_pronostico, n = 1))
+
+cat("Pronóstico menos frecuente:\n")
+print(slice_tail(tabla_pronostico, n = 1))
+
+#4 Boxplot de Temperatura
+g_box_temp <- ggplot(datos_noon, aes(y = Temperatura)) +
+  geom_boxplot(fill = "skyblue", color = "black", outlier.color = "red") +
+  labs(title = "Distribución de la Temperatura a medio día", y = "Temperatura (°C)") +
+  theme_minimal()
+
+# Boxplot de Velocidad del viento
+g_box_viento <- ggplot(datos_noon, aes(y = Velocidad_del_Viento)) +
+  geom_boxplot(fill = "lightgreen", color = "black", outlier.color = "red") +
+  labs(title = "Distribución de la Velocidad del Viento a medio día", 
+       y = "Velocidad del viento (mph)") +
+  theme_minimal()
+
+print(g_box_viento)
+
+print(g_box_temp)
+print(g_box_viento)
+#5
+summary(datos_noon$Temperatura)
+summary(datos_noon$Velocidad_del_Viento)
+
+#6 Obtener outliers usando $out de la función boxplot base
+out_presion <- boxplot(datos_noon$Presion, plot = FALSE)$out
+out_rocio   <- boxplot(datos_noon$Punto_de_Rocio, plot = FALSE)$out
+
+cat("Número de atípicos en Presión:", length(out_presion), "\n")
+cat("Número de atípicos en Punto de Rocío:", length(out_rocio), "\n")
+# Para ver cuáles son:
+print(out_presion)
+print(out_rocio)
+
+#7
+p_disp <- ggplot(datos_noon, aes(x = Temperatura, y = Velocidad_del_Viento)) +
+  geom_point(color = "steelblue", alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, color = "red", linetype = "dashed") +
+  labs(title = "Asociación Temperatura vs. Velocidad del Viento",
+       x = "Temperatura (°C)", y = "Velocidad del Viento (mph)") +
+  theme_minimal()
+
+# Añadir histogramas marginales con ggExtra
+p_marginal <- ggMarginal(p_disp, type = "histogram", fill = "gray70", color = "black")
+p_marginal
+
+#8 Covarianza
+cov_temp_viento <- cov(datos_noon$Temperatura, datos_noon$Velocidad_del_Viento, use = "complete.obs")
+
+# Correlación de Pearson
+cor_temp_viento <- cor(datos_noon$Temperatura, datos_noon$Velocidad_del_Viento, use = "complete.obs")
+
+cat("Covarianza:", cov_temp_viento, "\n")
+cat("Correlación de Pearson:", cor_temp_viento, "\n")
+
+#10
+ggplot(datos_noon, aes(x = Temperatura)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 20, fill = "lightblue", color = "black", alpha = 0.6) +
+  geom_density(color = "darkblue", linewidth = 1) +
+  labs(title = "Densidad: Histograma y Kernel (KDE) - Temperatura",
+       x = "Temperatura (°C)", y = "Densidad") +
+  theme_minimal()
+#11
+ggplot(datos_noon, aes(x = Presion)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 20, fill = "orange", color = "black", alpha = 0.5) +
+  geom_density(color = "brown", linewidth = 1) +
+  labs(title = "Densidad: Histograma y Kernel (KDE) - Presión",
+       x = "Presión", y = "Densidad") +
+  theme_minimal()
+#12
+media_viento <- mean(datos_noon$Velocidad_del_Viento, na.rm = TRUE)
+sd_viento    <- sd(datos_noon$Velocidad_del_Viento, na.rm = TRUE)
+
+ggplot(datos_noon, aes(x = Velocidad_del_Viento)) +
+  # Estimación Kernel empírica
+  geom_density(color = "blue", linewidth = 1.2, fill = "blue", alpha = 0.2) +
+  # Curva normal teórica con media y sd observadas
+  stat_function(fun = dnorm, args = list(mean = media_viento, sd = sd_viento), 
+                color = "red", linetype = "dashed", linewidth = 1) +
+  labs(title = "KDE vs. Distribución Normal Teórica - Velocidad del Viento",
+       x = "Velocidad del viento (mph)", y = "Densidad",
+       caption = "Azul: Densidad Kernel (empírica) | Rojo punteado: Normal teórica") +
+  theme_minimal()
+
+
