@@ -112,6 +112,29 @@ avisos_diccionario <- function(diccionario) {
   avisos
 }
 
+#' El diccionario después de reaplicar la pila: los conteos se recalculan, lo
+#' declarado se conserva.
+#'
+#' Filtrar cambia cuántos faltantes hay y cuántos valores distintos quedan, y
+#' eso hay que recalcularlo. Lo que NO se deduce de los datos —escala, clase,
+#' rol, etiqueta— es la decisión de quien analiza, y volver a autodetectarla
+#' borraba en silencio cada corrección: marcar Temperatura como intervalo y
+#' filtrar después la devolvía a razón.
+#'
+#' @param previo diccionario declarado antes de la pila (puede ser NULL)
+#' @param df datos ya transformados
+rehacer_diccionario <- function(previo, df) {
+  nuevo <- diccionario_inicial(df)
+  if (is.null(previo) || !nrow(previo)) return(nuevo)
+  declarados <- c("etiqueta", "descripcion", "escala", "clase", "rol", "unidad")
+  comunes <- match(nuevo$columna, previo$columna)
+  for (campo in intersect(declarados, names(previo))) {
+    heredado <- previo[[campo]][comunes]
+    nuevo[[campo]] <- ifelse(is.na(comunes), nuevo[[campo]], heredado)
+  }
+  nuevo
+}
+
 #' Edita una celda del diccionario sin mutar el original. Recalcula la clase
 #' cuando cambia la escala, para que no queden pares imposibles.
 actualizar_diccionario <- function(diccionario, columna, campo, valor) {

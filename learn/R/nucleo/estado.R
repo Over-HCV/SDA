@@ -74,7 +74,11 @@ nuevo_dataset <- function(id, nombre, df, fuente = "desconocida",
     df = df, diccionario = diccionario %||% diccionario_inicial(df),
     transformaciones = transformaciones, particion = particion,
     balanceo = balanceo, semilla = semilla,
-    n = nrow(df), p = ncol(df), creado = .ahora()
+    n = nrow(df), p = ncol(df),
+    # El tamaño AL CARGAR, que la pila no toca. Sin esto, después de filtrar a
+    # mediodía no queda forma de responder cuántas filas tenía la tabla: la
+    # pregunta 1 del Taller 01 es exactamente esa.
+    n_crudo = nrow(df), p_crudo = ncol(df), creado = .ahora()
   )
 }
 

@@ -42,7 +42,9 @@ mod_objetos_ui <- function(id) {
         style = ESTILO_CONTROLES,
         shiny::tags$p(class = "small text-muted",
                       paste("Todo vive en memoria. Exportá antes de cerrar la",
-                            "pestaña si querés conservarlo.")),
+                            "pestaña si querés conservarlo. La sesión lleva",
+                            "además el estado de ① Datos: fuente, pila,",
+                            "diccionario y paneles marcados.")),
         shiny::downloadButton(ns("bajar_json"), "Exportar JSON",
                               class = "btn-sm btn-outline-primary w-100 mb-2"),
         shiny::downloadButton(ns("bajar_rds"), "Exportar RDS",
@@ -63,8 +65,18 @@ mod_objetos_ui <- function(id) {
   )
 }
 
-mod_objetos_server <- function(id, almacen) {
+#' @param dataset reactiveVal del dataset vivo de la fase 1 (puede ser NULL)
+#' @param seleccion reactiveVal de los paneles marcados (puede ser NULL)
+mod_objetos_server <- function(id, almacen, dataset = NULL, seleccion = NULL) {
   shiny::moduleServer(id, function(input, output, session) {
+
+    # La sesión es almacén + estado de la fase 1. Las dos mitades se piden al
+    # descargar y se devuelven al importar; si el cableado no las pasó, se
+    # exporta lo que hay y se dice cuál falta.
+    .sesion <- function() sesion_actual(
+      almacen(),
+      if (is.null(dataset)) NULL else dataset(),
+      if (is.null(seleccion)) list() else seleccion())
 
     for (tipo in TIPOS_OBJETO) {
       local({
@@ -92,11 +104,11 @@ mod_objetos_server <- function(id, almacen) {
 
     output$bajar_json <- shiny::downloadHandler(
       filename = function() nombre_descarga("sesion", "json"),
-      content = function(archivo) exportar_sesion_json(almacen(), archivo))
+      content = function(archivo) exportar_sesion_json(.sesion(), archivo))
 
     output$bajar_rds <- shiny::downloadHandler(
       filename = function() nombre_descarga("sesion", "rds"),
-      content = function(archivo) exportar_sesion_rds(almacen(), archivo))
+      content = function(archivo) exportar_sesion_rds(.sesion(), archivo))
 
     shiny::observeEvent(input$subir, {
       ruta <- input$subir$datapath
@@ -109,11 +121,43 @@ mod_objetos_server <- function(id, almacen) {
         NULL
       })
       if (!is.null(recuperado)) {
-        almacen(recuperado)
-        shiny::showNotification("Sesión importada", type = "message")
+        if (!is.null(recuperado$almacen)) almacen(recuperado$almacen)
+        shiny::showNotification(.restaurar_fase1(recuperado$fase1),
+                                type = "message", duration = 6)
       }
     })
+
+    .restaurar_fase1 <- function(fase1)
+      restaurar_fase1_en(fase1, dataset, seleccion)
   })
+}
+
+#' Devolver la fase 1 a como estaba: el dataset se RECONSTRUYE desde la fuente
+#' y la pila (nucleo/sesion.R) y los paneles marcados vuelven a la lista del
+#' cuaderno. Las casillas de ① Datos se re-marcan solas: su observador de
+#' sincronización mira esta misma selección.
+#'
+#' Vive fuera del módulo porque lo usan dos caminos: importar un archivo desde
+#' ⚙ Objetos y abrir la app con una sesión ya puesta (`?sesion=`).
+#'
+#' @param dataset,seleccion los reactiveVal de app.R
+#' @return el mensaje que se le muestra a quien importó
+restaurar_fase1_en <- function(fase1, dataset, seleccion) {
+  if (is.null(fase1)) return("Sesión importada (sin estado de ① Datos).")
+  if (is.null(dataset) || is.null(seleccion))
+    return("Sesión importada; los objetos, sí; el estado de ① Datos no.")
+  reconstruido <- dataset_de_sesion(fase1)
+  for (aviso in reconstruido$avisos) message("[sesion] ", aviso$mensaje)
+  if (is.null(reconstruido$dataset))
+    return(paste("Sesión importada, pero el dataset no se pudo recrear:",
+                 reconstruido$avisos[[1]]$mensaje))
+  dataset(reconstruido$dataset)
+  marcados <- seleccion_con_tablas(seleccion_de_sesion(fase1),
+                                   reconstruido$dataset)
+  seleccion(marcados)
+  sprintf("Sesión restaurada · %s · %d x %d · %d paneles marcados",
+          reconstruido$dataset$nombre, reconstruido$dataset$n,
+          reconstruido$dataset$p, length(marcados))
 }
 
 avisar_sin_seleccion <- function() {

@@ -53,7 +53,7 @@ servidor_transformacion <- function(input, output, session, datos_base, dataset)
     resultado <- aplicar_transformaciones(datos_base(), pila)
     ds$df <- resultado$datos
     ds$transformaciones <- pila
-    ds$diccionario <- diccionario_inicial(resultado$datos)
+    ds$diccionario <- rehacer_diccionario(ds$diccionario, resultado$datos)
     ds$n <- nrow(resultado$datos)
     ds$p <- ncol(resultado$datos)
     output$avisos_tr <- shiny::renderUI(lista_avisos(resultado$avisos))

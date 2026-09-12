@@ -624,6 +624,19 @@ Todo objeto es exportable e importable. Una sesión entera cabe en un JSON, lo
 que permite: compartir un estado con un compañero por un enlace, reproducir una
 corrida desde `rscript`, y que el agente verifique la app sin GUI.
 
+La sesión no es solo el almacén: lleva también **el estado de trabajo de la
+fase 1** —qué fuente está cargada, con qué pila de filtros, qué declaró el
+diccionario y qué paneles quedaron marcados con su lectura escrita—, que es lo
+que uno arma cada vez y perdía al cerrar la pestaña (`nucleo/sesion.R`). Al
+importarla el dataset se RECONSTRUYE desde la fuente y la pila, así que el
+archivo pesa kilobytes y no arrastra datos. Tres formas de abrirla:
+
+```sh
+Rscript learn/R/lab.R cuaderno --sesion sesion.json --salida taller.Rmd
+SDA_SESION=sesion.json Rscript -e 'shiny::runApp("learn/R/app.R")'
+# y en el navegador (el camino que sobrevive en wasm):  ?sesion=sesion.json
+```
+
 ---
 
 ### ⓘ Referencia
@@ -789,6 +802,8 @@ learn/
 │  │   ├─ informe.R             armado del cuaderno .Rmd (corridas, f2-f4)
 │  │   ├─ informe_exploracion.R cuaderno de la fase 1 + CASILLAS_INFORME
 │  │   ├─ informe_codigos.R     un artefacto -> R autónomo para el cuaderno
+│  │   ├─ sesion.R             fase 1 guardada: fuente + pila + diccionario
+│  │   │                       declarado + paneles marcados, y su vuelta
 │  │   ├─ modo.R                wasm vs servidor
 │  │   └─ tema_app.R            tema_seguro(): sin font_google() en wasm
 │  ├─ logica/               cálculo puro

@@ -100,7 +100,7 @@ servidor_calidad <- function(input, output, session, dataset, muestreo) {
       return(invisible(NULL))
     }
     ds$df <- resultado$datos
-    ds$diccionario <- diccionario_inicial(resultado$datos)
+    ds$diccionario <- rehacer_diccionario(ds$diccionario, resultado$datos)
     ds$transformaciones <- c(ds$transformaciones, list(list(
       tipo = "imputar", columnas = input$columna_cal,
       params = list(metodo = resultado$metodo, imputados = resultado$imputados))))

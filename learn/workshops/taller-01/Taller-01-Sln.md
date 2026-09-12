@@ -132,8 +132,8 @@ ejercicio.
 ### Pregunta 4 · Descripción gráfica: cajas de temperatura y viento
 
 **En el lab.** ① Datos → **▣ Análisis → Univariado** → *Variable* `Temperatura`,
-panel «Diagrama de caja» (trae debajo la tabla de estadísticos). Repetir con
-`Velocidad_del_Viento`. *Casilla:* Diagrama de caja.
+panel «Diagrama de caja». Repetir con `Velocidad_del_Viento`.
+*Casilla:* Diagrama de caja.
 
 **Respuesta.**
 
@@ -171,9 +171,9 @@ boxplot(medio_dia$Velocidad_del_Viento, horizontal = TRUE, main = "Viento")
 
 ### Pregunta 5 · Descripción numérica con `summary()`
 
-**En el lab.** El mismo panel «Diagrama de caja» trae debajo la tabla
-«Estadísticos sobre el total de filas», que es `summary()` más desviación,
-RIC y asimetría.
+**En el lab.** El panel «Resumen numérico», justo debajo de la caja: es
+`summary()` más desviación, RIC y asimetría, con los estadísticos que la escala
+declarada permite. *Casilla:* Resumen numérico.
 
 **Respuesta.** Sí, concuerda, y es la comprobación que la pregunta busca: los
 cinco números del `summary()` son exactamente los que dibuja la caja. La mediana
@@ -199,6 +199,11 @@ summary(medio_dia$Velocidad_del_Viento)
 |---|---|---|
 | Presión (hPa) | [1009,65 ; 1015,65] | **1** (el valor 1015,7) |
 | Punto de Rocío (°C) | [13,45 ; 30,45] | **0** |
+
+> Los límites de arriba salen de los cuartiles tipo 7, que es con lo que el
+> panel dibuja la caja. `boxplot(x, plot = FALSE)` corta por **bisagras** y da
+> [13,35 ; 30,55] en el Punto de Rocío: décimas de diferencia, mismo conteo. El
+> cuaderno exportado usa la vía del enunciado (`$out`) y lo avisa en el chunk.
 
 **La Presión presenta más atipicidades** — una, y por un margen mínimo: 1015,7
 contra un límite de 1015,65, apenas 0,05 hPa fuera. El Punto de Rocío no tiene
@@ -394,4 +399,38 @@ Rscript learn/R/lab.R cuaderno f1.analisis.boxplot,f1.analisis.dispersion \
   $ORI --salida taller-01.Rmd
 ```
 
-`Rscript learn/R/lab.R casillas` lista las 17 claves que se pueden pedir.
+`Rscript learn/R/lab.R casillas` lista las 18 claves que se pueden pedir.
+
+## Guardar la sesión en vez de repetir los clics
+
+Lo que se arma para responder el taller —la fuente `ori`, el filtro de
+mediodía, `Temperatura` declarada de **intervalo** en el Diccionario y los
+catorce paneles marcados— es una **sesión**, y se guarda en un archivo:
+
+```sh
+Rscript learn/R/lab.R sesion \
+  f1.fuente.vista_previa,f1.balanceo.frecuencias:Pronostico,... \
+  --fuente ori --filtro Hora=12:00 --escala Temperatura=intervalo \
+  --salida learn/sesiones/taller-01.json
+```
+
+Ese archivo (8 KB, sin datos adentro: la fuente se recarga) es el del repo, y
+sirve de tres formas:
+
+```sh
+# el cuaderno, sin volver a listar los paneles
+Rscript learn/R/lab.R cuaderno --sesion learn/sesiones/taller-01.json \
+  --salida learn/workshops/taller-01/taller-01.Rmd
+
+# la app abierta con todo puesto
+SDA_SESION=learn/sesiones/taller-01.json \
+  Rscript -e 'shiny::runApp("learn/R/app.R")'
+```
+
+y en el navegador, `?sesion=sesiones/taller-01.json`. Desde
+la app, ⚙ Objetos → **Exportar JSON** guarda la sesión e **Importar** la
+devuelve: vuelven el filtro, el diccionario declarado y las casillas marcadas.
+
+Las lecturas de cada panel se escriben en la pestaña ⤓ Informe (una caja de
+texto por panel) o directamente en el campo `nota` del JSON: el cuaderno las
+pone en el lugar del recordatorio.

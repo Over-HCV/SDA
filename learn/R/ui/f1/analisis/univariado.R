@@ -45,12 +45,18 @@ salida_univariado <- function(ns) {
       contexto = salida_contexto(ns, "contexto_densidad"),
       encabezado_extra = casilla_informe(ns, "f1.analisis.densidad")),
     panel_resultado("f1.analisis.boxplot",
-      shiny::tagList(
-        shiny::plotOutput(ns("boxplot"), height = "200px"),
-        shiny::tags$h6(class = "mt-3", "Estadisticos sobre el total de filas"),
-        shiny::tableOutput(ns("resumen_uni"))),
+      shiny::plotOutput(ns("boxplot"), height = "200px"),
       contexto = salida_contexto(ns, "contexto_boxplot"),
       encabezado_extra = casilla_informe(ns, "f1.analisis.boxplot")),
+    # La tabla de estadisticos es su propio panel y no un apendice del
+    # boxplot: asi se puede citar sola en el cuaderno (la caja responde la
+    # pregunta grafica, el resumen la numerica) y tiene su casilla.
+    panel_resultado("f1.analisis.resumen",
+      shiny::tagList(
+        shiny::tags$h6("Estadisticos sobre el total de filas"),
+        shiny::tableOutput(ns("resumen_uni"))),
+      contexto = salida_contexto(ns, "contexto_resumen"),
+      encabezado_extra = casilla_informe(ns, "f1.analisis.resumen")),
     panel_resultado("f1.analisis.boxplot_grupos",
       shiny::plotOutput(ns("boxplot_grupos"), height = "300px"),
       contexto = salida_contexto(ns, "contexto_grupos"),
@@ -155,6 +161,7 @@ servidor_univariado <- function(input, output, session, dataset, muestreo) {
   for (par in list(c("f1.analisis.histograma", "contexto_histograma"),
                    c("f1.analisis.densidad", "contexto_densidad"),
                    c("f1.analisis.boxplot", "contexto_boxplot"),
+                   c("f1.analisis.resumen", "contexto_resumen"),
                    c("f1.analisis.boxplot_grupos", "contexto_grupos"),
                    c("f1.analisis.qq_normal_datos", "contexto_qq")))
     dibujar_contexto(output, par[1], params = parametros, sufijo = par[2])

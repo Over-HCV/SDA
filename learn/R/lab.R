@@ -27,6 +27,18 @@
 #     f1.analisis.boxplot:Temperatura,\
 #     f1.analisis.dispersion:Temperatura+Velocidad_del_Viento+marginales=TRUE \
 #     --fuente ori --filtro Hora=12:00 --salida taller.Rmd
+#   Rscript learn/R/lab.R sesion f1.analisis.boxplot:Temperatura \
+#     --fuente ori --filtro Hora=12:00 --salida sesion.json
+#   Rscript learn/R/lab.R cuaderno --sesion sesion.json --salida taller.Rmd
+#
+# Una SESIÓN (nucleo/sesion.R) es fuente + pila + diccionario + paneles
+# marcados. `--sesion archivo.json` arma el dataset desde ella, así que la
+# misma configuración sirve por consola y abriendo la app con
+# `?sesion=...`: se guarda una vez y se reusa.
+#
+# `--texto completo|breve|ninguno` gradúa cuánto texto explicativo entra al
+# cuaderno. El taller puntúa la concisión, así que es una decisión de quien
+# entrega y no una constante.
 #
 # En `cuaderno`, lo que va tras los dos puntos son los parámetros del panel:
 # columnas separadas por `+`, y opciones con nombre como `normal=TRUE`. Son los
@@ -47,9 +59,9 @@ local({
 
 #' Parte los argumentos en posicionales y opciones `--clave valor`.
 #'
-#' `--filtro` se acumula en un vector porque filtrar dos veces es normal; las
-#' demás opciones se quedan con la última, que es lo que uno espera al repetir
-#' una por error.
+#' `--filtro` y `--escala` se acumulan en un vector porque repetirlas es lo
+#' normal (dos filtros encadenados, tres columnas declaradas); las demás se
+#' quedan con la última, que es lo que uno espera al repetir una por error.
 partir_argumentos <- function(argumentos) {
   posicionales <- character(0)
   opciones <- list()
@@ -59,7 +71,7 @@ partir_argumentos <- function(argumentos) {
     if (startsWith(actual, "--")) {
       clave <- sub("^--", "", actual)
       valor <- if (i < length(argumentos)) argumentos[i + 1L] else ""
-      opciones[[clave]] <- if (identical(clave, "filtro"))
+      opciones[[clave]] <- if (clave %in% c("filtro", "escala"))
         c(opciones[[clave]], valor) else valor
       i <- i + 2L
     } else {
@@ -75,6 +87,21 @@ partir_argumentos <- function(argumentos) {
 #' Devuelve el mismo objeto que la app (`nuevo_dataset()`), así que todo lo que
 #' sabe hacer la fase 1 con un dataset sirve acá sin traducción.
 armar_dataset <- function(opciones) {
+  # Una sesión ya trae fuente, pila y diccionario declarado: si la pasaron,
+  # manda ella. Los --filtro de la línea se apilan encima, que es lo que uno
+  # espera al pedir una vuelta de tuerca sobre algo guardado.
+  if (!is.null(opciones$sesion)) {
+    fase1 <- leer_sesion_cli(opciones$sesion)$fase1
+    reconstruido <- dataset_de_sesion(fase1)
+    for (aviso in reconstruido$avisos) message("[aviso] ", aviso$mensaje)
+    if (is.null(reconstruido$dataset))
+      stop("la sesión no trae una fuente que se pueda recargar",
+           call. = FALSE)
+    ds <- reconstruido$dataset
+    for (filtro in opciones$filtro %||% character(0))
+      ds <- aplicar_filtro_cli(ds, filtro)
+    return(declarar_escalas_cli(ds, opciones$escala))
+  }
   # Sin default a propósito. Un default acá no ahorra tecleo: produce en
   # silencio un análisis sobre el dataset equivocado, y el cuaderno exportado
   # sale citando un CSV que no es el de la pregunta. Mejor negarse.
@@ -89,7 +116,39 @@ armar_dataset <- function(opciones) {
   ds <- nuevo_dataset(NULL, clave, resultado$datos, fuente = clave)
   for (filtro in opciones$filtro %||% character(0))
     ds <- aplicar_filtro_cli(ds, filtro)
+  declarar_escalas_cli(ds, opciones$escala)
+}
+
+#' `--escala Columna=intervalo`, repetible: lo que en la app se corrige a mano
+#' en el Diccionario.
+#'
+#' No es un detalle de tecleo. La autodetección ve números y propone razón; que
+#' Temperatura sea de INTERVALO —el 0 °C es convencional, así que 30 °C no es
+#' el doble de calor que 15 °C— es información del dominio, y sin esta opción
+#' la consola no tenía forma de declararla.
+declarar_escalas_cli <- function(ds, expresiones) {
+  for (expresion in expresiones %||% character(0)) {
+    if (!grepl("=", expresion, fixed = TRUE))
+      stop("una escala se escribe Columna=escala, no: ", expresion,
+           call. = FALSE)
+    columna <- sub("=.*$", "", expresion)
+    valor <- sub("^[^=]*=", "", expresion)
+    if (!valor %in% ESCALAS)
+      stop("escala desconocida: ", valor, " · válidas: ",
+           paste(ESCALAS, collapse = ", "), call. = FALSE)
+    if (!columna %in% ds$diccionario$columna)
+      stop("no existe la columna: ", columna, call. = FALSE)
+    ds$diccionario <- actualizar_diccionario(ds$diccionario, columna,
+                                             "escala", valor)
+  }
   ds
+}
+
+#' Una sesión de disco, en cualquiera de los dos formatos.
+leer_sesion_cli <- function(ruta) {
+  if (!file.exists(ruta)) stop("no existe la sesión: ", ruta, call. = FALSE)
+  if (grepl("[.]rds$", ruta, ignore.case = TRUE)) importar_sesion_rds(ruta)
+  else importar_sesion_json(ruta)
 }
 
 #' Un `--filtro Columna=valor[,valor]` aplicado sobre el dataset.
@@ -105,7 +164,7 @@ aplicar_filtro_cli <- function(ds, expresion) {
     message("[", aviso$severidad, "] ", aviso$mensaje)
   ds$df <- resultado$datos
   ds$transformaciones <- pila
-  ds$diccionario <- diccionario_inicial(resultado$datos)
+  ds$diccionario <- rehacer_diccionario(ds$diccionario, resultado$datos)
   ds$n <- nrow(resultado$datos)
   ds$p <- ncol(resultado$datos)
   ds
@@ -193,13 +252,40 @@ COMANDOS <- list(
   panel = function(ds, args) tabla_de_panel(ds, .exigir(
     args[1], "panel <clave> [columnas...]"), args[-1]),
 
-  cuaderno = function(ds, args) {
-    pedidos <- strsplit(.exigir(args[1], "cuaderno <clave>[:col+col][,...]"),
-                        ",", fixed = TRUE)[[1]]
-    seleccion <- lapply(pedidos, function(pedido) entrada_de_pedido(pedido, ds))
-    armar_informe_exploracion(seleccion, ds)
+  cuaderno = function(ds, args, opciones = list()) {
+    seleccion <- seleccion_de_args(ds, args, opciones)
+    armar_informe_exploracion(seleccion, ds,
+                              texto = opciones$texto %||% .texto_de_sesion(opciones))
+  },
+
+  #' La sesión guardada: lo mismo que descarga ⚙ Objetos, desde la consola.
+  #' Sirve para dejar preparada la configuración de un taller y abrirla
+  #' después con `--sesion` o con `?sesion=` en la app.
+  sesion = function(ds, args, opciones = list()) {
+    seleccion <- seleccion_de_args(ds, args, opciones)
+    sesion_actual(NULL, ds, seleccion, opciones$texto %||% "completo")
   }
 )
+
+#' Los paneles pedidos: los de la línea de comandos o, si no hay, los que
+#' venían marcados en la sesión.
+seleccion_de_args <- function(ds, args, opciones) {
+  pedidos <- if (!is.na(args[1]) && nzchar(args[1] %||% ""))
+    strsplit(args[1], ",", fixed = TRUE)[[1]] else character(0)
+  if (length(pedidos))
+    return(lapply(seq_along(pedidos), function(i)
+      entrada_de_pedido(pedidos[i], ds, sprintf("p%d", i))))
+  if (is.null(opciones$sesion))
+    stop("faltan argumentos · uso: cuaderno <clave>[:col+col][,...] ",
+         "(o --sesion archivo.json)", call. = FALSE)
+  guardada <- seleccion_de_sesion(leer_sesion_cli(opciones$sesion)$fase1)
+  seleccion_con_tablas(guardada, ds)
+}
+
+.texto_de_sesion <- function(opciones) {
+  if (is.null(opciones$sesion)) return("completo")
+  leer_sesion_cli(opciones$sesion)$fase1$texto %||% "completo"
+}
 
 #' Un `clave:token+token` a la entrada de selección que espera el cuaderno.
 #'
@@ -207,7 +293,7 @@ COMANDOS <- list(
 #' de esa clave declara (`PARAMS_REQUERIDOS`); los que traen `=` son opciones
 #' con nombre, como `marginales=TRUE`. En la app esos parámetros salen de los
 #' controles; acá salen de la línea de comandos, y son los mismos.
-entrada_de_pedido <- function(pedido, ds) {
+entrada_de_pedido <- function(pedido, ds, id = "p1") {
   partes <- strsplit(pedido, ":", fixed = TRUE)[[1]]
   clave <- partes[1]
   if (!existe_artefacto(clave))
@@ -215,14 +301,23 @@ entrada_de_pedido <- function(pedido, ds) {
          call. = FALSE)
   tokens <- if (length(partes) > 1L)
     strsplit(partes[2], "+", fixed = TRUE)[[1]] else character(0)
-  params <- params_de_pedido(clave, tokens)
+  params <- .completar_params(clave, params_de_pedido(clave, tokens), ds)
   if (!params_completos(clave, params))
     message("[aviso] ", clave, " necesita ",
             paste(PARAMS_REQUERIDOS[[clave]], collapse = " + "),
             ": escribilo como ", clave, ":columna")
-  list(clave = clave, titulo = titulo_de(clave),
+  list(id = id, clave = clave, titulo = titulo_de(clave),
        cuando = format(Sys.time(), "%H:%M:%S"), params = params,
-       tabla = tabla_de_pedido(clave, params, ds))
+       tabla = tabla_de_seleccion(clave, params, ds))
+}
+
+#' Lo que la app saca de sus controles y la consola tiene que sacar del
+#' diccionario: la escala decide qué resumen se emite.
+.completar_params <- function(clave, params, ds) {
+  if (identical(clave, "f1.analisis.resumen") && !is.null(params$variable) &&
+      is.null(params$escala))
+    params$escala <- .escala_cli(ds, params$variable)
+  params
 }
 
 params_de_pedido <- function(clave, tokens) {
@@ -240,18 +335,6 @@ params_de_pedido <- function(clave, tokens) {
   if (identical(campos, "variables")) return(list(variables = columnas))
   stats::setNames(as.list(columnas[seq_along(campos)]),
                   campos[seq_along(columnas)])
-}
-
-#' Las claves que congelan una tabla en vez de un gráfico (C9: el diccionario
-#' es estado declarado, no se recalcula desde el código).
-tabla_de_pedido <- function(clave, params, ds) {
-  switch(clave,
-         "f1.fuente.vista_previa" = utils::head(ds$df, 10),
-         "f1.diccionario.tabla" =
-           ds$diccionario[, c("columna", "escala", "clase", "rol")],
-         "f1.balanceo.frecuencias" = if (!is.null(params$clase))
-           resumir_balance(ds$df, params$clase) else NULL,
-         NULL)
 }
 
 .convertir <- function(x) {
@@ -315,14 +398,27 @@ correr_lab <- function(argumentos = commandArgs(trailingOnly = TRUE)) {
   comando <- partido$posicionales[1]
   if (is.na(comando) || !comando %in% names(COMANDOS)) {
     cat("comandos:", paste(names(COMANDOS), collapse = " · "), "\n")
-    cat("opciones: --fuente <clave> · --filtro Columna=valor (repetible)\n")
+    cat("opciones: --fuente <clave> · --filtro Columna=valor (repetible)",
+        "· --sesion archivo.json · --texto completo|breve|ninguno",
+        "· --salida archivo\n")
     return(invisible(FALSE))
   }
-  ds <- if (identical(comando, "fuentes")) NULL else armar_dataset(partido$opciones)
-  resultado <- COMANDOS[[comando]](ds, partido$posicionales[-1])
-  if (identical(comando, "cuaderno") && !is.null(partido$opciones$salida)) {
-    writeLines(resultado, partido$opciones$salida, useBytes = TRUE)
-    cat("cuaderno escrito en", partido$opciones$salida, "\n")
+  # `fuentes` y `casillas` son catálogos: preguntan qué hay, no miran datos.
+  # Exigirles --fuente era pedir el dataset para poder preguntar cuál elegir.
+  ds <- if (comando %in% c("fuentes", "casillas")) NULL
+        else armar_dataset(partido$opciones)
+  resultado <- if (comando %in% c("cuaderno", "sesion"))
+    COMANDOS[[comando]](ds, partido$posicionales[-1], partido$opciones)
+  else COMANDOS[[comando]](ds, partido$posicionales[-1])
+  salida <- partido$opciones$salida
+  if (identical(comando, "cuaderno") && !is.null(salida)) {
+    writeLines(resultado, salida, useBytes = TRUE)
+    cat("cuaderno escrito en", salida, "\n")
+    return(invisible(TRUE))
+  }
+  if (identical(comando, "sesion") && !is.null(salida)) {
+    exportar_sesion_json(resultado, salida)
+    cat("sesión escrita en", salida, "\n")
     return(invisible(TRUE))
   }
   print(resultado)

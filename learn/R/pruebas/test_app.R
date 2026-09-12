@@ -341,6 +341,27 @@ probar("el conteo de paneles refleja la selección",
        grepl("1 panel", html_informe, fixed = TRUE))
 probar("el cuaderno sabe sobre qué dataset se armó",
        grepl("ori · 118 x 18", html_informe, fixed = TRUE))
+
+# La pregunta 4 del taller pide la caja de DOS variables. La casilla es por
+# panel, así que sin identidad la segunda reemplazaba a la primera y el
+# cuaderno salía con la mitad de la respuesta.
+invisible(ir_a(app, "① Datos", "Añadir"))
+marcar_caja <- function(variable) {
+  app$set_inputs(`datos-variable_uni` = variable, wait_ = FALSE)
+  app$wait_for_idle(duration = 800, timeout = 20000)
+  marcada <- isTRUE(app$get_value(input = "datos-inf_f1.analisis.boxplot"))
+  app$set_inputs(`datos-inf_f1.analisis.boxplot` = TRUE, wait_ = FALSE)
+  app$wait_for_idle(duration = 800, timeout = 20000)
+  marcada
+}
+probar("al cambiar de variable la casilla se destilda sola",
+       !marcar_caja("Temperatura"))
+probar("y con otra variable vuelve a destildarse, lista para sumar la segunda",
+       !marcar_caja("Velocidad_del_Viento"))
+html_dos <- ir_a(app, "Informe", "3 paneles")
+probar("el mismo panel entra dos veces con columnas distintas (Pregunta 4)",
+       grepl("variable = Temperatura", html_dos, fixed = TRUE) &&
+         grepl("variable = Velocidad_del_Viento", html_dos, fixed = TRUE))
 probar("hay botón para bajarse el cuaderno .Rmd",
        grepl("Cuaderno .Rmd", html_informe, fixed = TRUE))
 app$click("informe-vaciar")
@@ -358,6 +379,37 @@ app$click("tema_darkly")
 Sys.sleep(2)
 probar("el cambio de tema no rompe la app",
        grepl("SDA Lab", app$get_html("body"), fixed = TRUE))
+
+# ---------------------------------------------------------------------------
+cat("\n[sesión guardada · arrancar con todo puesto]\n")
+# La app abierta con SDA_SESION: el caso de uso es entrar al lab y encontrar el
+# filtro aplicado, el diccionario declarado y los paneles del taller marcados,
+# en vez de rehacer los clics cada vez.
+app2 <- local({
+  Sys.setenv(SDA_SESION = "sesiones/taller-01.json")
+  on.exit(Sys.unsetenv("SDA_SESION"), add = TRUE)
+  AppDriver$new(app_dir = "learn/R", name = "sda-lab-sesion",
+                load_timeout = 60000, timeout = 20000, seed = 42,
+                options = list(shiny.autoreload = FALSE))
+})
+on.exit(app2$stop(), add = TRUE)
+
+probar("al abrir con una sesión, el dataset ya está cargado y filtrado",
+       grepl("ori · 118 x 18", esperar_html(app2, "ori · 118 x 18"),
+             fixed = TRUE))
+# Se espera por el texto de la caja de lectura y no por el conteo: el
+# encabezado se pinta un ciclo antes que la lista de paneles.
+html_sesion <- ir_a(app2, "Informe", "va al cuaderno")
+probar("y los paneles del taller ya están en el cuaderno, sin duplicarse", {
+  # Restaurar re-marca las casillas de ① Datos, y cada marca dispara el
+  # observador que añade: sin la guarda de identidad, los 14 se volvían 24.
+  grepl("14 paneles", html_sesion, fixed = TRUE) &&
+    grepl("Resumen numérico", html_sesion, fixed = TRUE)
+})
+probar("la lectura de cada panel tiene dónde escribirse",
+       grepl("va al cuaderno", html_sesion, fixed = TRUE))
+probar("cero errores de consola al restaurar",
+       length(errores_de_consola(app2)) == 0)
 
 cat("\n[consola del navegador]\n")
 errores <- errores_de_consola(app)

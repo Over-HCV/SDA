@@ -93,8 +93,14 @@ sin ojos.
 
 ```bash
 Rscript learn/R/lab.R panel f1.analisis.histograma Temperatura $ORI
-Rscript learn/R/lab.R casillas                 # las 17 claves exportables
-Rscript learn/R/lab.R cuaderno f1.analisis.boxplot $ORI --salida taller.Rmd
+Rscript learn/R/lab.R casillas                 # las 18 claves exportables
+Rscript learn/R/lab.R cuaderno f1.analisis.boxplot:Temperatura $ORI --salida taller.Rmd
+
+# Una sesión = fuente + pila + diccionario declarado + paneles marcados.
+Rscript learn/R/lab.R sesion f1.analisis.boxplot:Temperatura $ORI \
+  --escala Temperatura=intervalo --salida sesion.json
+Rscript learn/R/lab.R cuaderno --sesion sesion.json --salida taller.Rmd
+SDA_SESION=sesion.json Rscript -e 'shiny::runApp("learn/R/app.R")'   # o ?sesion=
 ```
 
 `--filtro` se puede repetir y se aplica en orden, igual que la pila de la

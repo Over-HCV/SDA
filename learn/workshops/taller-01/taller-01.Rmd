@@ -1,14 +1,13 @@
 ---
 title: "Exploración de datos · SDA Lab"
 subtitle: "ori"
-date: "2026-09-02 20:50"
+date: "2026-09-12 07:50"
 output:
   html_document:
     toc: true
     toc_float: true
+    number_sections: true
 ---
-
-<!-- Compilado con: `Rscript -e 'rmarkdown::render("learn/workshops/taller-01.Rmd")'` -->
 
 Cuaderno generado desde SDA Lab. Cada sección corresponde a un panel marcado
 con la casilla **Añadir**: trae su texto explicativo, los parámetros con que
@@ -16,7 +15,9 @@ se produjo y el código R que lo redibuja sobre `datos`.
 
 ```{r configuracion, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+# install.packages(c("ggplot2", "ggExtra"))
 library(ggplot2)
+library(ggExtra)
 ```
 
 # Los datos
@@ -25,27 +26,40 @@ library(ggplot2)
 |---|---|
 | Nombre | ori |
 | Fuente | ori |
-| Filas | 118 |
-| Columnas | 18 |
+| Filas al cargar | 4543 |
+| Columnas al cargar | 18 |
+| Filas ahora | 118 |
+| Columnas ahora | 18 |
 
 
 ```{r cargar-datos}
-# ORI.csv es la base del Taller 01 (IDEAM). Ponerlo al lado del cuaderno.
-# La copia que reparte el curso viene en ISO-8859-1; si la tuya ya está en
-# UTF-8 (la de data/ del repo lo está), quitá el fileEncoding.
-datos <- read.csv("../../../data/ORI.csv", sep = ";", dec = ".",
-                  fileEncoding = "latin1", stringsAsFactors = FALSE)
-names(datos) <- trimws(names(datos))
+# ORI.csv es la base del Taller 01 (IDEAM). Dejalo al lado del cuaderno o
+# ajustá `ruta`: se prueban los lugares habituales, en orden.
+ruta <- Filter(file.exists, c("ORI.csv", "data/ORI.csv",
+                              "../../../data/ORI.csv"))[1]
+# La copia que reparte el curso viene en ISO-8859-1 y la de data/ del repo
+# en UTF-8. Se detecta en vez de suponer: suponer es lo que rompe las
+# tildes de los municipios (ACACÍAS -> ACACÃAS).
+codificacion <- if (all(validUTF8(readLines(ruta, warn = FALSE,
+                                            encoding = "bytes"))))
+  "UTF-8" else "latin1"
+datos <- read.csv(ruta, sep = ";", dec = ".", fileEncoding = codificacion,
+                  stringsAsFactors = FALSE)
+names(datos) <- trimws(names(datos))   # el encabezado trae "Pronostico "
+cat("Al cargar:", nrow(datos), "filas x", ncol(datos), "columnas\n")
 ```
 
 # Preparación
 
 ```{r preparacion}
 datos <- datos[datos$Hora %in% c("12:00"), ]
+cat("Después de la preparación:", nrow(datos), "filas\n")
 ```
 
+# Análisis
+
 ## Vista previa del dataset
-Panel `f1.fuente.vista_previa` · marcado a las 20:50:09
+Panel `f1.fuente.vista_previa` · marcado a las 07:25:51
 
 ### Para qué sirve
 
@@ -103,7 +117,8 @@ Estado al marcarlo:
 
 ```{r}
 # f1.fuente.vista_previa
-cat("Dimensiones:", nrow(datos), "filas x", ncol(datos), "columnas\n")
+cat("Unidades estadísticas (filas):", nrow(datos), "\n")
+cat("Variables (columnas):     ", ncol(datos), "\n")
 utils::head(datos, 10)
 ```
 
@@ -111,7 +126,7 @@ utils::head(datos, 10)
 > figura sin lectura no es un resultado: es un adorno.
 
 ## Frecuencias por clase · Pronostico
-Panel `f1.balanceo.frecuencias` · marcado a las 20:50:09
+Panel `f1.balanceo.frecuencias` · marcado a las 07:25:51
 
 ### Para qué sirve
 
@@ -184,6 +199,10 @@ Parámetros:
 # f1.balanceo.frecuencias
 tabla <- sort(table(datos$Pronostico), decreasing = TRUE)
 print(cbind(n = tabla, prop = round(prop.table(tabla), 3)))
+cat("Más frecuente:  ", names(tabla)[1], " (n = ", tabla[1], ")\n",
+    sep = "")
+cat("Menos frecuente: ", names(tabla)[length(tabla)],
+    " (n = ", tabla[length(tabla)], ")\n", sep = "")
 barplot(tabla, horiz = TRUE, las = 1, cex.names = 0.7,
         main = "Frecuencias de Pronostico")
 ```
@@ -192,7 +211,7 @@ barplot(tabla, horiz = TRUE, las = 1, cex.names = 0.7,
 > figura sin lectura no es un resultado: es un adorno.
 
 ## Diccionario de columnas
-Panel `f1.diccionario.tabla` · marcado a las 20:50:09
+Panel `f1.diccionario.tabla` · marcado a las 07:25:51
 
 ### Para qué sirve
 
@@ -246,27 +265,32 @@ porque metiste el identificador como predictor.
 **Los avisos de conflicto son heurísticos.** Que una columna se llame `year` no
 prueba que sea un año. El aviso pregunta; la decisión es tuya.
 
-Estado al marcarlo:
-
-| columna | escala | clase | rol |
-|---|---|---|---|
-| Cod_Div | razon | continua | predictor |
-| Latitud | razon | continua | predictor |
-| Longitud | razon | continua | predictor |
-| Region | nominal | cualitativa | predictor |
-| Departamento | nominal | cualitativa | predictor |
-| Municipio | nominal | cualitativa | predictor |
-| Fecha | nominal | cualitativa | predictor |
-| Hora | nominal | cualitativa | predictor |
-| Temperatura | razon | continua | predictor |
-| Velocidad_del_Viento | razon | continua | predictor |
-| Direccion_del_Viento | razon | continua | predictor |
-| Presion | razon | continua | predictor |
-
-
 ```{r}
 # f1.diccionario.tabla
-str(datos)
+# Escala, clase y rol los declara quien analiza: R no los puede
+# deducir del tipo de dato (un código postal es numérico y nominal;
+# los grados centígrados son de intervalo, no de razón).
+diccionario <- data.frame(
+  columna = c("Cod_Div", "Latitud", "Longitud", "Region", "Departamento",
+              "Municipio", "Fecha", "Hora", "Temperatura",
+              "Velocidad_del_Viento", "Direccion_del_Viento", "Presion",
+              "Punto_de_Rocio", "Cobertura_total_nubosa",
+              "Precipitacion_mm_h", "Probabilidad_de_Tormenta", "Humedad",
+              "Pronostico"),
+  escala = c("razon", "razon", "razon", "nominal", "nominal", "nominal",
+             "nominal", "nominal", "intervalo", "razon", "razon", "razon",
+             "razon", "razon", "razon", "razon", "razon", "nominal"),
+  clase = c("continua", "continua", "continua", "cualitativa", "cualitativa",
+            "cualitativa", "cualitativa", "cualitativa", "continua",
+            "continua", "continua", "continua", "continua", "continua",
+            "continua", "discreta", "continua", "cualitativa"),
+  rol = c("predictor", "predictor", "predictor", "predictor", "predictor",
+          "predictor", "predictor", "predictor", "predictor", "predictor",
+          "predictor", "predictor", "predictor", "predictor", "predictor",
+          "predictor", "predictor", "predictor")
+)
+print(diccionario)
+# Lo que R infiere solo, para comparar:
 data.frame(columna = names(datos),
            clase_en_R = vapply(datos, function(v) class(v)[1], ""),
            distintos = vapply(datos, function(v) length(unique(v)), 0L),
@@ -277,7 +301,7 @@ data.frame(columna = names(datos),
 > figura sin lectura no es un resultado: es un adorno.
 
 ## Diagrama de caja · Temperatura
-Panel `f1.analisis.boxplot` · marcado a las 20:50:09
+Panel `f1.analisis.boxplot` · marcado a las 07:25:51
 
 ### Para qué sirve
 
@@ -345,55 +369,9 @@ ggplot(datos, aes(x = "", y = Temperatura)) +
 > figura sin lectura no es un resultado: es un adorno.
 
 ## Diagrama de caja · Velocidad_del_Viento
-Panel `f1.analisis.boxplot` · marcado a las 20:50:09
+Panel `f1.analisis.boxplot` · marcado a las 07:25:51
 
-### Para qué sirve
-
-Comparar posición y dispersión de un vistazo, y decidir qué variable merece
-una mirada más detallada. Es el resumen que escala: veinte boxplots en fila se
-leen sin esfuerzo; veinte histogramas, no.
-
-### Qué muestra
-
-El resumen de cinco números: mínimo dentro de la cerca, primer cuartil,
-mediana, tercer cuartil y máximo dentro de la cerca. La caja va de Q1 a Q3, así
-que encierra el 50 % central de los datos, y la línea de adentro es la mediana.
-
-Los bigotes llegan hasta la observación más lejana que todavía cae dentro de
-1,5 veces el rango intercuartílico:
-
-$$
-\text{cerca inferior} = Q_1 - 1{,}5 \cdot \text{RIC}
-\qquad
-\text{cerca superior} = Q_3 + 1{,}5 \cdot \text{RIC}
-$$
-
-Lo que queda afuera se dibuja punto por punto. Son los **atípicos de Tukey**, y
-son una convención, no un diagnóstico.
-
-### Qué buscar
-
-- **Posición de la mediana dentro de la caja**: si está pegada a un borde, la
-  distribución es asimétrica.
-- **Largo relativo de los bigotes**: el más largo apunta hacia la cola.
-- **Cuántos puntos quedan afuera** y qué tan lejos. Uno muy separado del resto
-  vale más atención que quince apenas pasada la cerca.
-- **Ancho de la caja**: es el RIC, la medida de dispersión que no se deja
-  arrastrar por los extremos.
-
-### Cuándo engaña
-
-**Esconde las modas.** Una distribución con dos picos y otra con uno solo
-pueden dar cajas idénticas. El boxplot resume posiciones, no forma. Por eso
-está al lado del histograma y no en su lugar.
-
-**"Atípico" acá significa "pasó de 1,5·RIC", nada más.** En una variable con
-cola derecha larga —ingresos, tiempos de espera— es normal que haya decenas de
-puntos afuera y ninguno es un error. Marcarlos no es motivo para borrarlos.
-
-**Con n chico los cuartiles son inestables.** Por debajo de unas 20
-observaciones, agregá los puntos encima de la caja: es más honesto mostrar el
-dato que su resumen.
+El texto de este panel está en la primera sección «Diagrama de caja».
 
 Parámetros:
 
@@ -412,8 +390,157 @@ ggplot(datos, aes(x = "", y = Velocidad_del_Viento)) +
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
+## Resumen numérico · Temperatura
+Panel `f1.analisis.resumen` · marcado a las 07:25:51
+
+### Para qué sirve
+
+Poner en números lo que la caja muestra en forma, y comprobar que las dos
+cuentan la misma historia. Es la tabla que se cita cuando hay que escribir el
+centro y la dispersión de una variable sin adjetivos.
+
+### Qué muestra
+
+Los cinco números de `summary()` —mínimo, Q1, mediana, media, Q3, máximo— más
+la desviación estándar, el rango intercuartílico y la asimetría, con el conteo
+de faltantes al lado.
+
+Qué estadísticos aparecen **lo decide la escala declarada en el Diccionario**,
+no el tipo de dato en memoria:
+
+```
+nominal  -> moda y tabla de frecuencias
+ordinal  -> moda, mediana y cuantiles
+intervalo -> todo menos los cocientes
+razon    -> todo
+```
+
+La media de una nominal no sale porque no se calcula, no porque esté escondida.
+
+### Qué buscar
+
+- **Media contra mediana**: si la media es menor, hay cola a la izquierda; si
+  es mayor, cola a la derecha. Es la regla de bolsillo de la asimetría, y se
+  confirma con el coeficiente.
+- **Desviación contra RIC**: cuando la desviación es mucho mayor de lo que el
+  RIC sugiere, unos pocos valores extremos la están inflando.
+- **Dispersión relativa**: un RIC de 2,5 °C sobre una mediana de 30 es el 8 %;
+  el mismo 2,5 sobre una mediana de 1,7 sería otra variable completamente.
+  Comparar dispersiones en unidades distintas no significa nada.
+- **Faltantes**: cuántos son y si `summary()` los está descontando.
+
+### Cuándo engaña
+
+**Un resumen no distingue formas.** Dos variables con los mismos seis números
+pueden tener una moda o dos. Por eso esta tabla va al lado del histograma y de
+la densidad, no en su lugar.
+
+**La media de una escala de intervalo se puede calcular; el cociente no.**
+30 °C no es el doble de calor que 15 °C. El resumen no lo avisa: lo avisa la
+escala que se declaró en el Diccionario.
+
+**Con n chico los cuartiles se mueven mucho.** Por debajo de unas 20
+observaciones, agregar o quitar un dato cambia Q1 y Q3 de forma visible, y la
+tabla se lee con la misma desconfianza que la caja.
+
+Estado al marcarlo:
+
+| estadistico | mostrado |
+|---|---|
+| n | 118 |
+| faltantes | 0 |
+| moda | 31 |
+| mediana | 30.4 |
+| q1 | 28.83 |
+| q3 | 31.3 |
+| rango_inter | 2.475 |
+| minimo | 22.4 |
+| maximo | 32.7 |
+| media | 29.75 |
+| desviacion | 2.276 |
+| asimetria | -1.391 |
+| curtosis | 1.576 |
+
+
+Parámetros:
+
+| Campo | Valor |
+|---|---|
+| variable | Temperatura |
+| escala | intervalo |
+
+
+```{r}
+# f1.analisis.resumen
+x <- datos$Temperatura
+print(summary(x))
+v <- x[!is.na(x)]
+centrado <- v - mean(v)
+raiz <- sqrt(mean(centrado^2))
+asimetria <- mean(centrado^3) / raiz^3   # g1: hacia dónde va la cola
+curtosis <- mean(centrado^4) / raiz^4 - 3  # g2: exceso sobre la normal
+cat("Desviación:", round(sd(v), 4), "· RIC:", round(IQR(v), 4), "\n")
+cat("Asimetría:", round(asimetria, 3),
+    "· Curtosis:", round(curtosis, 3), "\n")
+cat("n:", length(v), "· faltantes:", sum(is.na(x)), "\n")
+```
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Resumen numérico · Velocidad_del_Viento
+Panel `f1.analisis.resumen` · marcado a las 07:25:51
+
+El texto de este panel está en la primera sección «Resumen numérico».
+
+Estado al marcarlo:
+
+| estadistico | mostrado |
+|---|---|
+| n | 118 |
+| faltantes | 0 |
+| moda | 0.9 |
+| mediana | 1.7 |
+| q1 | 1 |
+| q3 | 2.175 |
+| rango_inter | 1.175 |
+| minimo | 0.4 |
+| maximo | 3.7 |
+| media | 1.719 |
+| desviacion | 0.7892 |
+| asimetria | 0.4854 |
+| curtosis | -0.3234 |
+| coef_variacion | 0.4592 |
+
+
+Parámetros:
+
+| Campo | Valor |
+|---|---|
+| variable | Velocidad_del_Viento |
+| escala | razon |
+
+
+```{r}
+# f1.analisis.resumen
+x <- datos$Velocidad_del_Viento
+print(summary(x))
+v <- x[!is.na(x)]
+centrado <- v - mean(v)
+raiz <- sqrt(mean(centrado^2))
+asimetria <- mean(centrado^3) / raiz^3   # g1: hacia dónde va la cola
+curtosis <- mean(centrado^4) / raiz^4 - 3  # g2: exceso sobre la normal
+cat("Desviación:", round(sd(v), 4), "· RIC:", round(IQR(v), 4), "\n")
+cat("Asimetría:", round(asimetria, 3),
+    "· Curtosis:", round(curtosis, 3), "\n")
+cat("n:", length(v), "· faltantes:", sum(is.na(x)), "\n")
+```
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
 ## Atípicos detectados · Presion
-Panel `f1.calidad.atipicos` · marcado a las 20:50:09
+Panel `f1.calidad.atipicos` · marcado a las 07:25:51
 
 ### Para qué sirve
 
@@ -474,70 +601,27 @@ Parámetros:
 ```{r}
 # f1.calidad.atipicos
 x <- datos$Presion
-cuartiles <- quantile(x, c(0.25, 0.75), na.rm = TRUE)
-limites <- c(cuartiles[1] - 1.5 * IQR(x, na.rm = TRUE),
-             cuartiles[2] + 1.5 * IQR(x, na.rm = TRUE))
-atipicos <- x[x < limites[1] | x > limites[2]]
-cat("Atípicos por IQR (Tukey):", length(atipicos),
+# Ojo: boxplot() corta por bisagras y el panel del lab por cuartiles
+# (tipo 7, que es con lo que ggplot2 dibuja la caja). Las cercas pueden
+# diferir en décimas; el conteo de atípicos casi nunca cambia.
+caja <- boxplot(x, plot = FALSE)
+atipicos <- caja$out
+ric <- diff(caja$stats[c(2, 4)])
+cercas <- c(caja$stats[2] - 1.5 * ric, caja$stats[4] + 1.5 * ric)
+cat("Atípicos por el criterio de Tukey:", length(atipicos),
     "de", length(x), "\n")
-print(round(limites, 2))
-boxplot(x, horizontal = TRUE, main = "Caja y bigotes de Tukey")
+cat("Cercas:", round(cercas, 2), "\n")
+print(atipicos)
+boxplot(x, horizontal = TRUE, main = "Presion")
 ```
 
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
 ## Atípicos detectados · Punto_de_Rocio
-Panel `f1.calidad.atipicos` · marcado a las 20:50:09
+Panel `f1.calidad.atipicos` · marcado a las 07:25:51
 
-### Para qué sirve
-
-Decidir qué hacer con los valores extremos: corregirlos, dejarlos, o cambiar a
-un método robusto que no dependa de ellos. Lo que no se decide acá se decide
-solo más adelante, y casi siempre mal.
-
-### Qué muestra
-
-Cada observación contra su posición en el archivo, con los atípicos marcados
-según el criterio elegido. Los tres criterios responden preguntas distintas:
-
-$$
-\begin{aligned}
-\text{IQR} &: && x \notin \left[\, Q_1 - 1.5 \cdot \text{RIC} \;,\; Q_3 + 1.5 \cdot \text{RIC} \,\right] && \text{robusto, univariado} \\[4pt]
-z &: && \frac{\lvert x - \bar{x} \rvert}{s} > 3 && \text{no robusto, univariado} \\[4pt]
-\text{Mahalanobis} &: && d^2 > \chi^2_p(\alpha) && \text{multivariado}
-\end{aligned}
-$$
-
-Los dos primeros miran una columna; el tercero mira todas a la vez y encuentra
-filas que ninguna columna por separado delata.
-
-### Qué buscar
-
-- **Puntos aislados muy lejos del resto**: candidatos a error de captura.
-- **Grupos de atípicos juntos en el eje horizontal**: no son ruido, es un tramo
-  del archivo distinto —otro año, otro instrumento, otro criterio de medición.
-- **Muchos atípicos de un solo lado**: no hay error, hay asimetría. La
-  transformación log suele hacerlos desaparecer sin borrar nada.
-- **La diferencia entre criterios**: si z no marca nada y el RIC marca veinte,
-  es porque la media y la desviación ya fueron arrastradas por los extremos.
-
-### Cuándo engaña
-
-**Atípico no es sinónimo de error.** El criterio es geométrico y no sabe nada
-del fenómeno. Borrar por costumbre es la peor decisión posible: en muchos
-estudios el atípico es el caso que motivó la investigación.
-
-**z se enmascara a sí mismo.** La media y la desviación estándar se calculan
-con los atípicos adentro, así que un valor extremo infla `s` y termina pareciendo
-razonable. Con un solo extremo muy grande, ningún punto supera 3 desvíos.
-
-**El 1,5 de Tukey es una convención, no un umbral óptimo.** Nada se rompe si lo
-movés; solo cambia cuántos puntos se pintan.
-
-**Mahalanobis exige covarianza invertible y datos completos.** Con colinealidad
-exacta o con filas incompletas devuelve vacío, y eso no significa que no haya
-atípicos.
+El texto de este panel está en la primera sección «Atípicos detectados».
 
 Parámetros:
 
@@ -549,21 +633,25 @@ Parámetros:
 ```{r}
 # f1.calidad.atipicos
 x <- datos$Punto_de_Rocio
-cuartiles <- quantile(x, c(0.25, 0.75), na.rm = TRUE)
-limites <- c(cuartiles[1] - 1.5 * IQR(x, na.rm = TRUE),
-             cuartiles[2] + 1.5 * IQR(x, na.rm = TRUE))
-atipicos <- x[x < limites[1] | x > limites[2]]
-cat("Atípicos por IQR (Tukey):", length(atipicos),
+# Ojo: boxplot() corta por bisagras y el panel del lab por cuartiles
+# (tipo 7, que es con lo que ggplot2 dibuja la caja). Las cercas pueden
+# diferir en décimas; el conteo de atípicos casi nunca cambia.
+caja <- boxplot(x, plot = FALSE)
+atipicos <- caja$out
+ric <- diff(caja$stats[c(2, 4)])
+cercas <- c(caja$stats[2] - 1.5 * ric, caja$stats[4] + 1.5 * ric)
+cat("Atípicos por el criterio de Tukey:", length(atipicos),
     "de", length(x), "\n")
-print(round(limites, 2))
-boxplot(x, horizontal = TRUE, main = "Caja y bigotes de Tukey")
+cat("Cercas:", round(cercas, 2), "\n")
+print(atipicos)
+boxplot(x, horizontal = TRUE, main = "Punto_de_Rocio")
 ```
 
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
 ## Diagrama de dispersión · Temperatura vs. Velocidad_del_Viento
-Panel `f1.analisis.dispersion` · marcado a las 20:50:09
+Panel `f1.analisis.dispersion` · marcado a las 07:25:51
 
 ### Para qué sirve
 
@@ -626,28 +714,23 @@ Parámetros:
 
 ```{r}
 # f1.analisis.dispersion
-completos <- complete.cases(datos[, c("Temperatura", "Velocidad_del_Viento")])
-x <- datos$Temperatura[completos]; y <- datos$Velocidad_del_Viento[completos]
-hx <- hist(x, plot = FALSE); hy <- hist(y, plot = FALSE)
-layout(matrix(c(2, 0, 1, 3), 2, 2, byrow = TRUE),
-       widths = c(4, 1), heights = c(1, 4))
-par(mar = c(4, 4, 1, 1))
-plot(x, y, pch = 19, col = "#00000099", xlab = "Temperatura", ylab = "Velocidad_del_Viento",
-     xlim = range(hx$breaks), ylim = range(hy$breaks))
-par(mar = c(0, 4, 1, 1))
-barplot(hx$counts, axes = FALSE, space = 0)
-par(mar = c(4, 0, 1, 1))
-barplot(hy$counts, axes = FALSE, space = 0, horiz = TRUE)
-layout(1)
-cat("Pearson:   ", cor(datos$Temperatura, datos$Velocidad_del_Viento, use = "complete.obs"), "\n")
+grafico <- ggplot(datos, aes(x = Temperatura, y = Velocidad_del_Viento)) +
+  geom_point(alpha = 0.6) +
+  labs(x = "Temperatura", y = "Velocidad_del_Viento")
+ggExtra::ggMarginal(grafico, type = "histogram", fill = "grey70",
+                    color = "white")
 cat("Covarianza:", cov(datos$Temperatura, datos$Velocidad_del_Viento, use = "complete.obs"), "\n")
+cat("Pearson:   ", cor(datos$Temperatura, datos$Velocidad_del_Viento, use = "complete.obs"), "\n")
+cat("Spearman:  ", cor(datos$Temperatura, datos$Velocidad_del_Viento, use = "complete.obs",
+    method = "spearman"), "\n")
+print(cor.test(datos$Temperatura, datos$Velocidad_del_Viento))
 ```
 
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
 ## Histograma · Temperatura
-Panel `f1.analisis.histograma` · marcado a las 20:50:09
+Panel `f1.analisis.histograma` · marcado a las 07:25:51
 
 ### Para qué sirve
 
@@ -703,7 +786,7 @@ Parámetros:
 | Campo | Valor |
 |---|---|
 | variable | Temperatura |
-| normal | TRUE |
+| densidad | TRUE |
 
 
 ```{r}
@@ -711,83 +794,15 @@ Parámetros:
 ggplot(datos, aes(x = Temperatura)) +
   geom_histogram(aes(y = after_stat(density)),
                  bins = 30, fill = "steelblue") +
-  stat_function(fun = dnorm, args = list(mean = mean(datos$Temperatura, na.rm = TRUE), sd = sd(datos$Temperatura, na.rm = TRUE)), color = "firebrick", linetype = "dashed") +
+  geom_density(alpha = 0.4) +
   labs(x = "Temperatura", y = "densidad")
 ```
 
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Densidad kernel · Temperatura
-Panel `f1.analisis.densidad` · marcado a las 20:50:09
-
-### Para qué sirve
-
-Ver la forma de una variable sin la arbitrariedad del número de clases. Es la
-que conviene para juzgar si una transformación hizo falta y si funcionó,
-porque el cambio de forma se lee sin depender de dónde cayeron los bordes.
-
-### Qué muestra
-
-Una curva suave que estima la densidad de probabilidad de la variable. En vez
-de contar por intervalos, pone una campanita —el **núcleo**— sobre cada
-observación y las suma todas.
-
-El parámetro que manda es el ancho de banda `h`, no el número de clases:
-
-$$
-\hat{f}(x) = \frac{1}{n h} \sum_{i=1}^{n} K\!\left( \frac{x - x_i}{h} \right)
-$$
-
-El área bajo la curva vale 1, así que la altura no es una cuenta de casos: es
-densidad. Comparar dos densidades de muestras de tamaño distinto es legítimo;
-comparar dos histogramas de conteos, no.
-
-### Qué buscar
-
-- **Modas**: los picos son la razón de ser de este gráfico. Dos modas separadas
-  y estables al mover `h` son dos poblaciones mezcladas.
-- **Asimetría**: la cola más larga dice hacia dónde se estira la variable.
-- **Colas**: qué tan rápido cae la curva en los extremos, comparado con la
-  campana que uno esperaría si fuera normal.
-- **El valor de h**: aparece en el subtítulo. Por defecto sale de la regla de
-  Silverman, `h = 0.9 · min(s, RIC/1.34) · n^(−1/5)`, que es un punto de
-  partida razonable y nada más.
-
-### Cuándo engaña
-
-**h chico inventa modas; h grande las borra.** Es el mismo dilema del número de
-clases del histograma, con otro nombre: sesgo contra varianza. Movelo y fijate
-cuáles picos sobreviven. Los que aparecen y desaparecen no son estructura, son
-ruido suavizado con distinta fuerza.
-
-**Suaviza más allá del recorrido real.** El núcleo gaussiano tiene colas
-infinitas, así que la curva pone densidad en valores imposibles: edades
-negativas, porcentajes por encima de 100. Si la variable está acotada, la parte
-que se derrama por el borde es un artefacto del método.
-
-**Con pocos datos es casi solo el núcleo.** Con n = 10 estás mirando la forma
-de la campanita que elegiste, no la de la variable.
-
-Parámetros:
-
-| Campo | Valor |
-|---|---|
-| variable | Temperatura |
-
-
-```{r}
-# f1.analisis.densidad
-ggplot(datos, aes(x = Temperatura)) +
-  geom_density() +
-  labs(x = "Valor", y = "densidad")
-```
-
-> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
-> figura sin lectura no es un resultado: es un adorno.
-
 ## Q-Q normal de la variable · Temperatura
-Panel `f1.analisis.qq_normal_datos` · marcado a las 20:50:09
+Panel `f1.analisis.qq_normal_datos` · marcado a las 07:25:51
 
 ### Para qué sirve
 
@@ -843,7 +858,7 @@ Parámetros:
 ```{r}
 # f1.analisis.qq_normal_datos
 x <- datos$Temperatura
-qqnorm(x, main = "Q-Q normal")
+qqnorm(x, main = "Q-Q normal · Temperatura")
 qqline(x, col = "firebrick")
 cat("Shapiro-Wilk:\n"); print(shapiro.test(x))
 ```
@@ -852,62 +867,16 @@ cat("Shapiro-Wilk:\n"); print(shapiro.test(x))
 > figura sin lectura no es un resultado: es un adorno.
 
 ## Histograma · Presion
-Panel `f1.analisis.histograma` · marcado a las 20:50:09
+Panel `f1.analisis.histograma` · marcado a las 07:25:51
 
-### Para qué sirve
-
-Formarse la primera idea de una variable antes de decidir cualquier otra cosa
-sobre ella: si transformarla, si partirla por grupos, si desconfiar de cómo se
-midió. Es la card que se abre primero y la que más veces termina cambiando el
-plan.
-
-### Qué muestra
-
-Cuántas observaciones caen en cada intervalo de la variable. La altura de cada
-barra es una frecuencia; el ancho, un tramo del recorrido.
-
-Es el primer retrato de una variable continua y el antecedente directo de la
-idea de **densidad**: si en vez de contar dividís por el total y por el ancho
-del intervalo, el área total pasa a valer 1 y ya estás mirando una densidad
-empírica.
-
-### Qué buscar
-
-- **Centro**: ¿dónde está el grueso de los datos? ¿Coincide con la media?
-- **Dispersión**: ¿ancho o angosto respecto al recorrido posible?
-- **Forma**: ¿simétrico o con cola a un lado? Una cola derecha larga es la
-  firma de variables que no pueden ser negativas (ingresos, tiempos, conteos),
-  y suele pedir una transformación logarítmica.
-- **Modas**: ¿un pico o varios? Dos picos casi siempre significan que hay dos
-  poblaciones mezcladas, y ese es un hallazgo, no un defecto.
-- **Huecos y paredes**: un vacío en medio, o un corte abrupto en un valor
-  redondo, suelen delatar cómo se recogió el dato, no cómo se comporta.
-
-### Cuándo engaña
-
-**El número de clases cambia la historia.** Es la trampa central de este
-gráfico y por eso el control está a la vista. Con pocas barras todo parece una
-campana suave; con muchas, todo parece ruido dentado. Ninguna de las dos
-versiones es "la verdadera": son la misma tabla de datos leída con distinta
-resolución.
-
-Movelo. Si una moda secundaria aparece y desaparece según el número de clases,
-no confíes en ella todavía — comparala con la densidad kernel, que suaviza sin
-depender de dónde caen los bordes.
-
-**El origen de los intervalos también importa.** Dos histogramas con el mismo
-ancho de clase pero desplazados medio intervalo pueden verse distintos. La
-densidad kernel no tiene ese problema, porque no tiene bordes.
-
-**Con pocos datos no dice casi nada.** Por debajo de unas 30 observaciones, la
-forma es principalmente azar. Ahí conviene un diagrama de puntos o el de tallo
-y hojas, que no esconden ninguna observación.
+El texto de este panel está en la primera sección «Histograma».
 
 Parámetros:
 
 | Campo | Valor |
 |---|---|
 | variable | Presion |
+| densidad | TRUE |
 
 
 ```{r}
@@ -915,82 +884,15 @@ Parámetros:
 ggplot(datos, aes(x = Presion)) +
   geom_histogram(aes(y = after_stat(density)),
                  bins = 30, fill = "steelblue") +
+  geom_density(alpha = 0.4) +
   labs(x = "Presion", y = "densidad")
 ```
 
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Densidad kernel · Presion
-Panel `f1.analisis.densidad` · marcado a las 20:50:09
-
-### Para qué sirve
-
-Ver la forma de una variable sin la arbitrariedad del número de clases. Es la
-que conviene para juzgar si una transformación hizo falta y si funcionó,
-porque el cambio de forma se lee sin depender de dónde cayeron los bordes.
-
-### Qué muestra
-
-Una curva suave que estima la densidad de probabilidad de la variable. En vez
-de contar por intervalos, pone una campanita —el **núcleo**— sobre cada
-observación y las suma todas.
-
-El parámetro que manda es el ancho de banda `h`, no el número de clases:
-
-$$
-\hat{f}(x) = \frac{1}{n h} \sum_{i=1}^{n} K\!\left( \frac{x - x_i}{h} \right)
-$$
-
-El área bajo la curva vale 1, así que la altura no es una cuenta de casos: es
-densidad. Comparar dos densidades de muestras de tamaño distinto es legítimo;
-comparar dos histogramas de conteos, no.
-
-### Qué buscar
-
-- **Modas**: los picos son la razón de ser de este gráfico. Dos modas separadas
-  y estables al mover `h` son dos poblaciones mezcladas.
-- **Asimetría**: la cola más larga dice hacia dónde se estira la variable.
-- **Colas**: qué tan rápido cae la curva en los extremos, comparado con la
-  campana que uno esperaría si fuera normal.
-- **El valor de h**: aparece en el subtítulo. Por defecto sale de la regla de
-  Silverman, `h = 0.9 · min(s, RIC/1.34) · n^(−1/5)`, que es un punto de
-  partida razonable y nada más.
-
-### Cuándo engaña
-
-**h chico inventa modas; h grande las borra.** Es el mismo dilema del número de
-clases del histograma, con otro nombre: sesgo contra varianza. Movelo y fijate
-cuáles picos sobreviven. Los que aparecen y desaparecen no son estructura, son
-ruido suavizado con distinta fuerza.
-
-**Suaviza más allá del recorrido real.** El núcleo gaussiano tiene colas
-infinitas, así que la curva pone densidad en valores imposibles: edades
-negativas, porcentajes por encima de 100. Si la variable está acotada, la parte
-que se derrama por el borde es un artefacto del método.
-
-**Con pocos datos es casi solo el núcleo.** Con n = 10 estás mirando la forma
-de la campanita que elegiste, no la de la variable.
-
-Parámetros:
-
-| Campo | Valor |
-|---|---|
-| variable | Presion |
-
-
-```{r}
-# f1.analisis.densidad
-ggplot(datos, aes(x = Presion)) +
-  geom_density() +
-  labs(x = "Valor", y = "densidad")
-```
-
-> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
-> figura sin lectura no es un resultado: es un adorno.
-
 ## Densidad kernel · Velocidad_del_Viento
-Panel `f1.analisis.densidad` · marcado a las 20:50:09
+Panel `f1.analisis.densidad` · marcado a las 07:25:51
 
 ### Para qué sirve
 

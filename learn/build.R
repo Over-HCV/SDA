@@ -15,7 +15,7 @@
 #   ├── sda-raiz            marcador para sda_raiz()
 #   ├── app.R               wrapper con $value y las librerías declaradas
 #   ├── R/                  todo el árbol, sin pruebas/ ni mapa.R
-#   ├── textos/ fichas/ metodos/
+#   ├── textos/ fichas/ metodos/ sesiones/
 #   ├── libs/_comun/R/
 #   └── data/
 
@@ -70,7 +70,7 @@ preparar_staging <- function(stage) {
 
   # `www` trae KaTeX vendorizado (ver learn/www/katex/LEEME.md). Sin él las
   # fórmulas llegan al navegador como TeX crudo y nada avisa.
-  for (carpeta in c("textos", "fichas", "metodos", "www"))
+  for (carpeta in c("textos", "fichas", "metodos", "www", "sesiones"))
     .copiar_arbol(ruta_app(carpeta), stage, carpeta)
 
   dir.create(file.path(stage, "libs", "_comun", "R"), recursive = TRUE,

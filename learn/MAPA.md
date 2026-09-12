@@ -12,8 +12,8 @@ Todas las rutas son relativas a `learn/`.
 ## Resumen
 
 - **Métodos**: 54 registrados — 2 activos, 46 pendientes, 6 bloqueados
-- **Artefactos**: 85 registrados
-- **Textos escritos**: 42 de 85
+- **Artefactos**: 86 registrados
+- **Textos escritos**: 43 de 86
 - **Fichas escritas**: 3 de 54
 
 ## Artefactos
@@ -36,6 +36,7 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f1.analisis.mosaico` | Gráfico de mosaico | `R/graficos/bivariado.R::graficar_mosaico` | `R/logica/contingencia.R::tabla_contingencia` | `textos/f1/analisis/mosaico.md` |
 | `f1.analisis.qq_mahalanobis` | Q-Q de distancias de Mahalanobis | `R/graficos/multivariado.R::graficar_qq_mahalanobis` | `R/logica/distancias.R::mahalanobis_cuadrado` | `textos/f1/analisis/qq_mahalanobis.md` |
 | `f1.analisis.qq_normal_datos` | Q-Q normal de la variable | `R/graficos/univariado.R::graficar_qq` | `R/logica/normalidad.R::evaluar_normalidad` | `textos/f1/analisis/qq_normal_datos.md` |
+| `f1.analisis.resumen` | Resumen numérico | `—` | `R/logica/resumen_univariado.R::resumir_variable` | `textos/f1/analisis/resumen.md` |
 | `f1.balanceo.frecuencias` | Frecuencias por clase | `R/graficos/calidad.R::graficar_balance` | `R/logica/datos/balanceo.R::resumir_balance` | `textos/f1/balanceo/frecuencias.md` |
 | `f1.balanceo.nube_sinteticos` | Nube con filas remuestreadas | `R/graficos/preparacion.R::graficar_nube_sinteticos` | `R/logica/datos/balanceo.R::balancear` | `textos/f1/balanceo/nube_sinteticos.md` |
 | `f1.calidad.atipicos` | Atípicos detectados | `R/graficos/calidad.R::graficar_atipicos` | `R/logica/datos/calidad.R::detectar_atipicos` | `textos/f1/calidad/atipicos.md` |

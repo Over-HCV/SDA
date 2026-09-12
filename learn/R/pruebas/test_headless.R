@@ -251,14 +251,31 @@ probar("exportar_csv y releer da las mismas dimensiones", {
   identical(dim(utils::read.csv(ruta)), dim(datos_prueba))
 })
 probar("exportar_rds hace ida y vuelta sin pérdida", {
-  ruta <- exportar_rds(almacen, file.path(directorio, "sesion.rds"))
-  identical(almacen_contar(importar_sesion_rds(ruta), "modelo"),
+  ruta <- exportar_rds(sesion_actual(almacen), file.path(directorio, "sesion.rds"))
+  identical(almacen_contar(importar_sesion_rds(ruta)$almacen, "modelo"),
             almacen_contar(almacen, "modelo"))
 })
 probar("la sesión en JSON no arrastra objetos de ajuste", {
-  ruta <- exportar_sesion_json(almacen, file.path(directorio, "sesion.json"))
+  ruta <- exportar_sesion_json(sesion_actual(almacen),
+                               file.path(directorio, "sesion.json"))
   leido <- importar_sesion_json(ruta)
-  is.null(leido$corridas[[1]]$ajuste)
+  is.null(leido$almacen$corridas[[1]]$ajuste)
+})
+probar("la sesión también lleva el estado de la fase 1, y vuelve", {
+  # Los objetos guardados eran la mitad de lo que uno pierde al cerrar la
+  # pestaña; la otra mitad es la fuente, la pila y los paneles marcados.
+  ds <- nuevo_dataset("dx", "prueba", datos_prueba, fuente = "memoria")
+  marcados <- list(list(id = "p1", clave = "f1.analisis.boxplot",
+                        titulo = "Diagrama de caja", cuando = "10:00:00",
+                        params = list(variable = names(datos_prueba)[1]),
+                        nota = "cola a la derecha"))
+  ruta <- exportar_sesion_json(sesion_actual(almacen, ds, marcados),
+                               file.path(directorio, "sesion-fase1.json"))
+  leida <- importar_sesion_json(ruta)
+  identical(leida$fase1$fuente, "memoria") &&
+    length(seleccion_de_sesion(leida$fase1)) == 1L &&
+    identical(leida$fase1$seleccion[[1]]$nota, "cola a la derecha") &&
+    !is.null(leida$almacen$modelos)
 })
 probar("exportar_rmd produce un cuaderno con encabezado YAML", {
   ruta <- exportar_rmd(corrida, file.path(directorio, "informe.Rmd"),

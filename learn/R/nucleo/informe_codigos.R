@@ -23,6 +23,7 @@ PARAMS_REQUERIDOS <- list(
   "f1.analisis.histograma" = "variable",
   "f1.analisis.densidad" = "variable",
   "f1.analisis.boxplot" = "variable",
+  "f1.analisis.resumen" = "variable",
   "f1.analisis.boxplot_grupos" = c("variable", "grupo"),
   "f1.analisis.qq_normal_datos" = "variable",
   "f1.analisis.dispersion" = c("x", "y"),
@@ -50,8 +51,10 @@ params_completos <- function(clave, params) {
 #' El código de un artefacto, elegido por su clave.
 #'
 #' @param params lista con los parámetros vigentes al marcar la casilla
+#' @param tabla la tabla congelada del panel, cuando la clave guarda una
+#'   (diccionario, frecuencias): hay código que la necesita para ser autónomo.
 #' @return character() de líneas R; nunca character(0): el fallback documenta.
-codigo_artefacto <- function(clave, params) {
+codigo_artefacto <- function(clave, params, tabla = NULL) {
   if (!params_completos(clave, params))
     return(c(sprintf("# %s", clave),
              .codigo_incompleto(clave, params)))
@@ -60,6 +63,7 @@ codigo_artefacto <- function(clave, params) {
     "f1.analisis.histograma" = .codigo_histograma(params),
     "f1.analisis.densidad" = .codigo_densidad(params),
     "f1.analisis.boxplot" = .codigo_boxplot(params),
+    "f1.analisis.resumen" = .codigo_resumen(params),
     "f1.analisis.boxplot_grupos" = .codigo_boxplot_grupos(params),
     "f1.analisis.qq_normal_datos" = .codigo_qq(params),
     "f1.analisis.dispersion" = .codigo_dispersion(params),
@@ -73,7 +77,7 @@ codigo_artefacto <- function(clave, params) {
     "f1.calidad.atipicos" = .codigo_atipicos(params),
     "f1.balanceo.frecuencias" = .codigo_frecuencias(params),
     "f1.fuente.vista_previa" = .codigo_vista_previa(params),
-    "f1.diccionario.tabla" = .codigo_diccionario(params),
+    "f1.diccionario.tabla" = .codigo_diccionario(params, tabla),
     .codigo_generico(clave, params))
   # La clave viaja como comentario: es el puente entre el cuaderno y el lab.
   c(sprintf("# %s", clave), lineas)
@@ -93,7 +97,7 @@ codigo_artefacto <- function(clave, params) {
     "  geom_histogram(aes(y = after_stat(density)),",
     sprintf("                 bins = %s, fill = \"steelblue\") +",
             p$clases %||% 30L),
-    if (isTRUE(p$densidad)) '  geom_density(alpha = 0.4) +' else NULL,
+    if (isTRUE(p$densidad %||% TRUE)) '  geom_density(alpha = 0.4) +' else NULL,
     if (isTRUE(p$normal)) .capa_normal_r(p$variable) else NULL,
     sprintf('  labs(x = "%s", y = "densidad")', p$variable))
 }
@@ -109,6 +113,40 @@ codigo_artefacto <- function(clave, params) {
     '  labs(x = "Valor", y = "densidad")')
 }
 
+#' El resumen numérico, con la escala de medición mandando.
+#'
+#' `summary()` de una nominal devuelve "character" y nada más; por eso una
+#' cualitativa se resume con su tabla de frecuencias y su moda. Es la misma
+#' regla que apaga la media en el panel del lab, escrita en R.
+.codigo_resumen <- function(p) {
+  if (.es_cualitativa(p)) return(c(
+    sprintf("x <- datos$%s", p$variable),
+    "tabla <- sort(table(x), decreasing = TRUE)",
+    "print(tabla)",
+    'cat("Moda:", names(tabla)[1], "· categorías:", length(tabla),',
+    '    "· faltantes:", sum(is.na(x)), "\\n")'))
+  # g1 y g2 en R base, con la misma fórmula que usa el panel del lab
+  # (logica/resumen_univariado.R). psych::describe() daría lo mismo; no se
+  # emite para que el cuaderno no muera al knitear en una máquina donde el
+  # paquete no está instalado.
+  c(sprintf("x <- datos$%s", p$variable),
+    "print(summary(x))",
+    "v <- x[!is.na(x)]",
+    "centrado <- v - mean(v)",
+    "raiz <- sqrt(mean(centrado^2))",
+    "asimetria <- mean(centrado^3) / raiz^3   # g1: hacia dónde va la cola",
+    "curtosis <- mean(centrado^4) / raiz^4 - 3  # g2: exceso sobre la normal",
+    'cat("Desviación:", round(sd(v), 4), "· RIC:", round(IQR(v), 4), "\\n")',
+    'cat("Asimetría:", round(asimetria, 3),',
+    '    "· Curtosis:", round(curtosis, 3), "\\n")',
+    'cat("n:", length(v), "· faltantes:", sum(is.na(x)), "\\n")')
+}
+
+#' ¿La escala declarada en el diccionario hace de esta variable una cualitativa?
+.es_cualitativa <- function(p)
+  isTRUE((p$escala %||% "") %in% c("nominal", "ordinal")) ||
+    isTRUE((p$clase %||% "") == "cualitativa")
+
 .codigo_boxplot <- function(p)
   c(sprintf("ggplot(datos, aes(x = \"\", y = %s)) +", p$variable),
     '  geom_boxplot(fill = "steelblue", alpha = 0.5) +',
@@ -122,37 +160,42 @@ codigo_artefacto <- function(clave, params) {
 
 .codigo_qq <- function(p)
   c(sprintf("x <- datos$%s", p$variable),
-    "qqnorm(x, main = \"Q-Q normal\")",
+    sprintf('qqnorm(x, main = "Q-Q normal · %s")', p$variable),
     "qqline(x, col = \"firebrick\")",
     'cat("Shapiro-Wilk:\\n"); print(shapiro.test(x))')
 
 .codigo_dispersion <- function(p) {
+  # Los tres números juntos: la covarianza lleva las unidades de las dos
+  # variables, Pearson es adimensional y Spearman dice si hay relación
+  # monótona donde la lineal no aparece. cor.test() agrega el p-valor.
   numeros <- c(
+    sprintf('cat("Covarianza:", cov(datos$%s, datos$%s, use = "complete.obs"), "\\n")', p$x, p$y),
     sprintf('cat("Pearson:   ", cor(datos$%s, datos$%s, use = "complete.obs"), "\\n")', p$x, p$y),
-    sprintf('cat("Covarianza:", cov(datos$%s, datos$%s, use = "complete.obs"), "\\n")', p$x, p$y))
-  # Con marginales el chunk va en R base: layout() reparte la ventana en tres
-  # y no hace falta ggplot2 ni ningun paquete de composicion.
-  if (isTRUE(p$marginales)) return(c(
-    sprintf("completos <- complete.cases(datos[, c(\"%s\", \"%s\")])", p$x, p$y),
-    sprintf("x <- datos$%s[completos]; y <- datos$%s[completos]", p$x, p$y),
-    "hx <- hist(x, plot = FALSE); hy <- hist(y, plot = FALSE)",
-    "layout(matrix(c(2, 0, 1, 3), 2, 2, byrow = TRUE),",
-    "       widths = c(4, 1), heights = c(1, 4))",
-    "par(mar = c(4, 4, 1, 1))",
-    sprintf('plot(x, y, pch = 19, col = "#00000099", xlab = "%s", ylab = "%s",',
-            p$x, p$y),
-    "     xlim = range(hx$breaks), ylim = range(hy$breaks))",
-    "par(mar = c(0, 4, 1, 1))",
-    "barplot(hx$counts, axes = FALSE, space = 0)",
-    "par(mar = c(4, 0, 1, 1))",
-    "barplot(hy$counts, axes = FALSE, space = 0, horiz = TRUE)",
-    "layout(1)",
-    numeros))
+    sprintf('cat("Spearman:  ", cor(datos$%s, datos$%s, use = "complete.obs",', p$x, p$y),
+    '    method = "spearman"), "\\n")',
+    sprintf('print(cor.test(datos$%s, datos$%s))', p$x, p$y))
   color <- if (!is.null(p$grupo) && nzchar(p$grupo))
     sprintf(", color = %s", p$grupo) else ""
-  c(sprintf("ggplot(datos, aes(x = %s, y = %s%s)) +", p$x, p$y, color),
-    '  geom_point(alpha = 0.6)',
-    numeros)
+  capa_puntos <- if (isTRUE(p$celdas)) "  geom_bin2d(bins = 40) +"
+    else if (isTRUE(p$jitter))
+      sprintf("  geom_jitter(width = 0.02, height = 0.02, alpha = %s) +",
+              p$alfa %||% 0.6)
+    else sprintf("  geom_point(alpha = %s) +", p$alfa %||% 0.6)
+  grafico <- c(
+    sprintf("grafico <- ggplot(datos, aes(x = %s, y = %s%s)) +", p$x, p$y, color),
+    capa_puntos,
+    if (isTRUE(p$suavizado))
+      '  geom_smooth(method = "loess", formula = y ~ x, se = TRUE) +' else NULL,
+    sprintf('  labs(x = "%s", y = "%s")', p$x, p$y))
+  # Con marginales el dibujo lo compone ggExtra, que es la vía que sugiere el
+  # enunciado del taller. El lab lo arma a mano con gtable para no sumar una
+  # dependencia al bundle wasm; el cuaderno no tiene esa restricción.
+  if (isTRUE(p$marginales)) return(c(
+    grafico,
+    'ggExtra::ggMarginal(grafico, type = "histogram", fill = "grey70",',
+    '                    color = "white")',
+    numeros))
+  c(grafico, "grafico", numeros)
 }
 
 .codigo_densidad_conjunta <- function(p)
@@ -204,37 +247,88 @@ codigo_artefacto <- function(clave, params) {
     sprintf("x <- datos$%s", columna),
     "z <- abs(x - mean(x, na.rm = TRUE)) / sd(x, na.rm = TRUE)",
     sprintf("atipicos <- x[z > %s]", p$umbral %||% 3),
-    'cat("Atípicos:", length(atipicos), "de", length(x), "\\n")',
+    'cat("At\u00edpicos:", length(atipicos), "de", length(x), "\\n")',
     'print(atipicos)'))
+  # `boxplot(x, plot = FALSE)$out` y no quantile(): son las BISAGRAS de Tukey,
+  # que con n par no coinciden con los cuartiles tipo 7 de quantile(). Es el
+  # criterio que dibuja la caja, y el que pide el enunciado del taller.
   c(sprintf("x <- datos$%s", columna),
-    "cuartiles <- quantile(x, c(0.25, 0.75), na.rm = TRUE)",
-    "limites <- c(cuartiles[1] - 1.5 * IQR(x, na.rm = TRUE),",
-    "             cuartiles[2] + 1.5 * IQR(x, na.rm = TRUE))",
-    "atipicos <- x[x < limites[1] | x > limites[2]]",
-    'cat("Atípicos por IQR (Tukey):", length(atipicos),',
+    "# Ojo: boxplot() corta por bisagras y el panel del lab por cuartiles",
+    "# (tipo 7, que es con lo que ggplot2 dibuja la caja). Las cercas pueden",
+    "# diferir en décimas; el conteo de atípicos casi nunca cambia.",
+    "caja <- boxplot(x, plot = FALSE)",
+    "atipicos <- caja$out",
+    "ric <- diff(caja$stats[c(2, 4)])",
+    "cercas <- c(caja$stats[2] - 1.5 * ric, caja$stats[4] + 1.5 * ric)",
+    'cat("At\u00edpicos por el criterio de Tukey:", length(atipicos),',
     '    "de", length(x), "\\n")',
-    'print(round(limites, 2))',
-    'boxplot(x, horizontal = TRUE, main = "Caja y bigotes de Tukey")')
+    'cat("Cercas:", round(cercas, 2), "\\n")',
+    "print(atipicos)",
+    sprintf('boxplot(x, horizontal = TRUE, main = "%s")', columna))
 }
 
 .codigo_frecuencias <- function(p)
   c(sprintf("tabla <- sort(table(datos$%s), decreasing = TRUE)", p$clase),
     'print(cbind(n = tabla, prop = round(prop.table(tabla), 3)))',
+    'cat("M\u00e1s frecuente:  ", names(tabla)[1], " (n = ", tabla[1], ")\\n",',
+    '    sep = "")',
+    'cat("Menos frecuente: ", names(tabla)[length(tabla)],',
+    '    " (n = ", tabla[length(tabla)], ")\\n", sep = "")',
     'barplot(tabla, horiz = TRUE, las = 1, cex.names = 0.7,',
     sprintf('        main = "Frecuencias de %s")', p$clase))
 
-#' El diccionario que el usuario declaró viaja como TABLA en la sección (es
-#' estado, no cálculo). El chunk muestra lo que R infiere por su cuenta, que es
-#' con lo que hay que compararlo: donde difieran, la diferencia es la decisión.
-.codigo_diccionario <- function(p)
-  c("str(datos)",
+#' El diccionario que el usuario declaró viaja DENTRO del chunk, como un
+#' data.frame literal: es estado, no cálculo, y así el cuaderno se sostiene
+#' solo. Al lado se imprime lo que R infiere por su cuenta, que es con lo que
+#' hay que compararlo: donde difieran, la diferencia es la decisión.
+.codigo_diccionario <- function(p, tabla = NULL) {
+  declarado <- if (is.null(tabla) || !nrow(tabla)) c(
+    "# (El diccionario se exportó vacío: volvé al lab y marcá la casilla.)")
+    else c("# Escala, clase y rol los declara quien analiza: R no los puede",
+           "# deducir del tipo de dato (un código postal es numérico y nominal;",
+           "# los grados centígrados son de intervalo, no de razón).",
+           "diccionario <- data.frame(",
+           .lineas_data_frame(tabla),
+           ")",
+           "print(diccionario)")
+  c(declarado,
+    "# Lo que R infiere solo, para comparar:",
     'data.frame(columna = names(datos),',
     '           clase_en_R = vapply(datos, function(v) class(v)[1], ""),',
     '           distintos = vapply(datos, function(v) length(unique(v)), 0L),',
     "           row.names = NULL)")
+}
+
+#' Cada columna de una tabla como `nombre = c("a", "b"),`, plegada a 78
+#' columnas: es lo que hace que el data.frame inlineado se pueda leer y
+#' corregir a mano. Con 18 variables, sin plegar son renglones de 250
+#' caracteres que nadie revisa.
+.lineas_data_frame <- function(tabla) {
+  ultimas <- c(rep(",", ncol(tabla) - 1L), "")
+  unlist(lapply(seq_along(tabla), function(i)
+    .plegar_vector(names(tabla)[i], tabla[[i]], ultimas[i])), use.names = FALSE)
+}
+
+.plegar_vector <- function(nombre, valores, final) {
+  piezas <- paste0(strsplit(.valores_r(valores), ", ", fixed = TRUE)[[1]], ",")
+  piezas[length(piezas)] <- sub(",$", "", piezas[length(piezas)])
+  lineas <- character(0)
+  actual <- sprintf("  %s = c(", nombre)
+  sangria <- strrep(" ", nchar(actual))
+  for (pieza in piezas) {
+    candidata <- if (identical(actual, sprintf("  %s = c(", nombre)))
+      paste0(actual, pieza) else paste(actual, pieza)
+    if (nchar(candidata) > 78L) {
+      lineas <- c(lineas, actual)
+      actual <- paste0(sangria, pieza)
+    } else actual <- candidata
+  }
+  c(lineas, paste0(actual, ")", final))
+}
 
 .codigo_vista_previa <- function(p)
-  c('cat("Dimensiones:", nrow(datos), "filas x", ncol(datos), "columnas\\n")',
+  c('cat("Unidades estad\u00edsticas (filas):", nrow(datos), "\\n")',
+    'cat("Variables (columnas):     ", ncol(datos), "\\n")',
     'utils::head(datos, 10)')
 
 #' Cuando faltan los parámetros, el cuaderno dice QUÉ falta en vez de emitir

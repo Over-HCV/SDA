@@ -94,33 +94,44 @@ exportar_rmd <- function(corrida, ruta, dataset = NULL, modelo = NULL,
 # ---------------------------------------------------------------------------
 # Sesión completa
 #
+# Qué es una sesión y cómo se arma está en nucleo/sesion.R: acá solo se
+# escribe y se lee el archivo.
+#
 # Dos formatos por una razón concreta: JSON viaja entre máquinas y lo puede
 # leer un agente, pero pierde fidelidad (factores, atributos, objetos de
 # ajuste). RDS conserva todo pero solo lo abre R. Se ofrecen los dos y se
 # explica la diferencia en la UI.
 # ---------------------------------------------------------------------------
 
-exportar_sesion_rds <- function(almacen, ruta) exportar_rds(almacen, ruta)
+#' @param sesion lo que devuelve sesion_actual()
+exportar_sesion_rds <- function(sesion, ruta) exportar_rds(sesion, ruta)
 
 importar_sesion_rds <- function(ruta) {
   if (!file.exists(ruta)) stop("no existe el archivo: ", ruta)
-  readRDS(ruta)
+  sesion_normalizada(readRDS(ruta))
 }
 
 #' Sesión a JSON. Los objetos de ajuste (`ajuste`) no se serializan: son
 #' punteros a estructuras de R que no sobreviven el viaje. Se guarda todo lo
 #' necesario para RE-correr la corrida, que es lo que importa.
-exportar_sesion_json <- function(almacen, ruta) {
-  liviano <- almacen
-  liviano$corridas <- lapply(almacen$corridas, function(cor) {
-    cor$ajuste <- NULL
-    cor
-  })
-  liviano$datasets <- lapply(almacen$datasets, function(ds) {
-    ds$df <- utils::head(ds$df, 200)     # muestra, no el dataset entero
-    ds$truncado <- TRUE
-    ds
-  })
+#'
+#' El estado de la fase 1 viaja entero y sin datos: fuente, pila, diccionario y
+#' paneles marcados son kilobytes, y el data.frame se reconstruye al abrirla.
+exportar_sesion_json <- function(sesion, ruta) {
+  liviano <- sesion
+  almacen <- sesion$almacen
+  if (!is.null(almacen)) {
+    almacen$corridas <- lapply(almacen$corridas %||% list(), function(cor) {
+      cor$ajuste <- NULL
+      cor
+    })
+    almacen$datasets <- lapply(almacen$datasets %||% list(), function(ds) {
+      ds$df <- utils::head(ds$df, 200)     # muestra, no el dataset entero
+      ds$truncado <- TRUE
+      ds
+    })
+    liviano$almacen <- almacen
+  }
   liviano$exportado <- format(Sys.time(), "%Y-%m-%d %H:%M:%S")
   liviano$modo <- modo_ejecucion()
   jsonlite::write_json(liviano, .asegurar_dir(ruta), auto_unbox = TRUE,
@@ -130,7 +141,7 @@ exportar_sesion_json <- function(almacen, ruta) {
 
 importar_sesion_json <- function(ruta) {
   if (!file.exists(ruta)) stop("no existe el archivo: ", ruta)
-  jsonlite::fromJSON(ruta, simplifyVector = FALSE)
+  sesion_normalizada(jsonlite::fromJSON(ruta, simplifyVector = FALSE))
 }
 
 #' Nombre de archivo sugerido, con marca de tiempo para no pisar descargas.

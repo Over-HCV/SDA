@@ -1,0 +1,355 @@
+{
+  "proyecto": "sda-lab",
+  "tipo": "sesion",
+  "version": 1,
+  "exportado": "2026-09-12 07:25:51",
+  "modo": "servidor",
+  "fase1": {
+    "fuente": "ori",
+    "nombre": "ori",
+    "semilla": 42,
+    "n_crudo": 4543,
+    "transformaciones": [
+      {
+        "tipo": "filtro",
+        "columnas": "Hora",
+        "params": {
+          "valores": "12:00"
+        }
+      }
+    ],
+    "diccionario": [
+      {
+        "columna": "Cod_Div",
+        "etiqueta": "Cod_Div",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 59
+      },
+      {
+        "columna": "Latitud",
+        "etiqueta": "Latitud",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 59
+      },
+      {
+        "columna": "Longitud",
+        "etiqueta": "Longitud",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 59
+      },
+      {
+        "columna": "Region",
+        "etiqueta": "Region",
+        "descripcion": "",
+        "escala": "nominal",
+        "clase": "cualitativa",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 1
+      },
+      {
+        "columna": "Departamento",
+        "etiqueta": "Departamento",
+        "descripcion": "",
+        "escala": "nominal",
+        "clase": "cualitativa",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 8
+      },
+      {
+        "columna": "Municipio",
+        "etiqueta": "Municipio",
+        "descripcion": "",
+        "escala": "nominal",
+        "clase": "cualitativa",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 59
+      },
+      {
+        "columna": "Fecha",
+        "etiqueta": "Fecha",
+        "descripcion": "",
+        "escala": "nominal",
+        "clase": "cualitativa",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 2
+      },
+      {
+        "columna": "Hora",
+        "etiqueta": "Hora",
+        "descripcion": "",
+        "escala": "nominal",
+        "clase": "cualitativa",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 1
+      },
+      {
+        "columna": "Temperatura",
+        "etiqueta": "Temperatura",
+        "descripcion": "",
+        "escala": "intervalo",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 54
+      },
+      {
+        "columna": "Velocidad_del_Viento",
+        "etiqueta": "Velocidad_del_Viento",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 31
+      },
+      {
+        "columna": "Direccion_del_Viento",
+        "etiqueta": "Direccion_del_Viento",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 91
+      },
+      {
+        "columna": "Presion",
+        "etiqueta": "Presion",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 38
+      },
+      {
+        "columna": "Punto_de_Rocio",
+        "etiqueta": "Punto_de_Rocio",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 79
+      },
+      {
+        "columna": "Cobertura_total_nubosa",
+        "etiqueta": "Cobertura_total_nubosa",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 29
+      },
+      {
+        "columna": "Precipitacion_mm_h",
+        "etiqueta": "Precipitacion_mm_h",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 13
+      },
+      {
+        "columna": "Probabilidad_de_Tormenta",
+        "etiqueta": "Probabilidad_de_Tormenta",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "discreta",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 3
+      },
+      {
+        "columna": "Humedad",
+        "etiqueta": "Humedad",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 100
+      },
+      {
+        "columna": "Pronostico",
+        "etiqueta": "Pronostico",
+        "descripcion": "",
+        "escala": "nominal",
+        "clase": "cualitativa",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 8
+      }
+    ],
+    "seleccion": [
+      {
+        "id": "p1",
+        "clave": "f1.fuente.vista_previa",
+        "titulo": "Vista previa del dataset",
+        "cuando": "07:25:51",
+        "params": []
+      },
+      {
+        "id": "p2",
+        "clave": "f1.balanceo.frecuencias",
+        "titulo": "Frecuencias por clase",
+        "cuando": "07:25:51",
+        "params": {
+          "clase": "Pronostico"
+        }
+      },
+      {
+        "id": "p3",
+        "clave": "f1.diccionario.tabla",
+        "titulo": "Diccionario de columnas",
+        "cuando": "07:25:51",
+        "params": []
+      },
+      {
+        "id": "p4",
+        "clave": "f1.analisis.boxplot",
+        "titulo": "Diagrama de caja",
+        "cuando": "07:25:51",
+        "params": {
+          "variable": "Temperatura"
+        }
+      },
+      {
+        "id": "p5",
+        "clave": "f1.analisis.boxplot",
+        "titulo": "Diagrama de caja",
+        "cuando": "07:25:51",
+        "params": {
+          "variable": "Velocidad_del_Viento"
+        }
+      },
+      {
+        "id": "p6",
+        "clave": "f1.analisis.resumen",
+        "titulo": "Resumen numérico",
+        "cuando": "07:25:51",
+        "params": {
+          "variable": "Temperatura",
+          "escala": "intervalo"
+        }
+      },
+      {
+        "id": "p7",
+        "clave": "f1.analisis.resumen",
+        "titulo": "Resumen numérico",
+        "cuando": "07:25:51",
+        "params": {
+          "variable": "Velocidad_del_Viento",
+          "escala": "razon"
+        }
+      },
+      {
+        "id": "p8",
+        "clave": "f1.calidad.atipicos",
+        "titulo": "Atípicos detectados",
+        "cuando": "07:25:51",
+        "params": {
+          "columna": "Presion"
+        }
+      },
+      {
+        "id": "p9",
+        "clave": "f1.calidad.atipicos",
+        "titulo": "Atípicos detectados",
+        "cuando": "07:25:51",
+        "params": {
+          "columna": "Punto_de_Rocio"
+        }
+      },
+      {
+        "id": "p10",
+        "clave": "f1.analisis.dispersion",
+        "titulo": "Diagrama de dispersión",
+        "cuando": "07:25:51",
+        "params": {
+          "x": "Temperatura",
+          "y": "Velocidad_del_Viento",
+          "marginales": true
+        }
+      },
+      {
+        "id": "p11",
+        "clave": "f1.analisis.histograma",
+        "titulo": "Histograma",
+        "cuando": "07:25:51",
+        "params": {
+          "variable": "Temperatura",
+          "densidad": true
+        }
+      },
+      {
+        "id": "p12",
+        "clave": "f1.analisis.qq_normal_datos",
+        "titulo": "Q-Q normal de la variable",
+        "cuando": "07:25:51",
+        "params": {
+          "variable": "Temperatura"
+        }
+      },
+      {
+        "id": "p13",
+        "clave": "f1.analisis.histograma",
+        "titulo": "Histograma",
+        "cuando": "07:25:51",
+        "params": {
+          "variable": "Presion",
+          "densidad": true
+        }
+      },
+      {
+        "id": "p14",
+        "clave": "f1.analisis.densidad",
+        "titulo": "Densidad kernel",
+        "cuando": "07:25:51",
+        "params": {
+          "variable": "Velocidad_del_Viento",
+          "normal": true
+        }
+      }
+    ],
+    "texto": "completo"
+  },
+  "almacen": {}
+}

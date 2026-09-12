@@ -96,7 +96,7 @@ servidor_filtro <- function(input, output, session, datos_base, dataset) {
     }
     ds$df <- resultado$datos
     ds$transformaciones <- pila
-    ds$diccionario <- diccionario_inicial(resultado$datos)
+    ds$diccionario <- rehacer_diccionario(ds$diccionario, resultado$datos)
     ds$n <- nrow(resultado$datos)
     ds$p <- ncol(resultado$datos)
     ds$particion <- NULL      # las filas cambiaron: la partición ya no vale

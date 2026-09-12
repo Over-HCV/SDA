@@ -24,6 +24,10 @@ poblar_artefactos_exploracion <- function() {
     logica  = "R/logica/resumen_univariado.R::resumir_variable",
     descripcion = "Resumen de cinco números más las cercas y los atípicos.")
 
+  registrar_artefacto("f1.analisis.resumen", "Resumen numérico",
+    logica  = "R/logica/resumen_univariado.R::resumir_variable",
+    descripcion = "summary() y compañía, con los estadísticos que la escala permite.")
+
   registrar_artefacto("f1.analisis.boxplot_grupos", "Cajas comparadas por grupo",
     grafico = "R/graficos/univariado.R::graficar_boxplot_grupos",
     logica  = "R/logica/resumen_univariado.R::resumir_por_grupo",

@@ -9,6 +9,11 @@
 #   SDA_TEMA=retro   preset inicial
 #   SDA_MODO=wasm    fuerza el camino del navegador sin exportar el bundle
 #   SDA_THEMER=1     monta el widget bs_themer() de bslib
+#   SDA_SESION=ruta  abre la app con una sesión ya restaurada
+#
+# En el navegador la sesión se pide por URL: `?sesion=sesiones/taller-01.json`
+# (una ruta dentro del bundle). Es el camino que sobrevive en wasm, donde no
+# hay variables de entorno ni disco del usuario.
 
 # El directorio de trabajo depende de quién arranca la app: shiny::runApp lo
 # pone en learn/R/, el wrapper de shinylive en la raíz del bundle. Se prueban
@@ -87,9 +92,31 @@ server <- function(input, output, session) {
   mod_modelado_server("modelado", almacen)
   mod_ajuste_server("ajuste", almacen)
   mod_evaluacion_server("evaluacion", almacen)
-  mod_objetos_server("objetos", almacen)
+  mod_objetos_server("objetos", almacen, estado_datos$dataset, seleccion)
   mod_referencia_server("referencia")
   mod_informe_server("informe", seleccion, estado_datos$dataset)
+
+  # Arrancar con una sesión puesta: el caso de uso es entrar al lab y que el
+  # dataset, el filtro, el diccionario y los paneles del taller ya estén,
+  # en vez de rehacer catorce clics cada vez.
+  shiny::observeEvent(session$clientData$url_search, {
+    ruta <- .sesion_inicial(session$clientData$url_search)
+    if (is.null(ruta)) return(invisible(NULL))
+    bruto <- tryCatch(
+      if (grepl("[.]rds$", ruta, ignore.case = TRUE)) importar_sesion_rds(ruta)
+      else importar_sesion_json(ruta),
+      error = function(e) {
+        shiny::showNotification(paste("No se pudo abrir la sesión:",
+                                      conditionMessage(e)),
+                                type = "error", duration = 8)
+        NULL
+      })
+    if (is.null(bruto)) return(invisible(NULL))
+    if (!is.null(bruto$almacen)) almacen(bruto$almacen)
+    shiny::showNotification(
+      restaurar_fase1_en(bruto$fase1, estado_datos$dataset, seleccion),
+      type = "message", duration = 6)
+  }, once = TRUE, ignoreNULL = FALSE)
 
   # cambiar_tema() reconstruye el preset COMPLETO en vez de usar
   # bs_theme_update(), para que las reglas Sass y las fuentes del tema anterior
@@ -100,6 +127,25 @@ server <- function(input, output, session) {
     shiny::observeEvent(input[[id]], cambiar_tema_seguro(session, nombre),
                         ignoreInit = TRUE)
   })
+}
+
+#' La sesión con que arrancar, si la hay: primero `?sesion=` de la URL (el
+#' camino que funciona en wasm), después SDA_SESION. La ruta se busca tal cual
+#' y, si no está, dentro de learn/: así el mismo `?sesion=sesiones/x.json`
+#' sirve en el bundle y en modo servidor.
+.sesion_inicial <- function(busqueda = "") {
+  pedida <- if (nzchar(busqueda %||% "")) {
+    partes <- shiny::parseQueryString(busqueda)
+    partes$sesion
+  } else NULL
+  pedida <- pedida %||% (if (nzchar(Sys.getenv("SDA_SESION")))
+    Sys.getenv("SDA_SESION") else NULL)
+  if (is.null(pedida) || !nzchar(pedida)) return(NULL)
+  candidatas <- c(pedida, ruta_app(pedida))
+  encontrada <- Find(file.exists, candidatas)
+  if (is.null(encontrada))
+    message("[sesion] no existe el archivo pedido: ", pedida)
+  encontrada
 }
 
 shiny::shinyApp(ui, server)
