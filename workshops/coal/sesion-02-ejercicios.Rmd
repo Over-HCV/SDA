@@ -1,0 +1,534 @@
+---
+title: "Ejercicios de la sesión 02 — resueltos y explicados"
+subtitle: "Análisis Estadístico de Datos · datos de carbón vegetal (charcoal), 2019"
+author: "Over Castrillón"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+    code_folding: show
+    theme: flatly
+---
+
+```{r configuracion, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.width = 8, fig.height = 5, fig.align = "center")
+options(scipen = 999)   # sin notación científica: los números se leen mejor
+```
+
+# De qué se trata este cuaderno
+
+En la sesión 2 el profesor dejó **ocho ejercicios sin resolver**. Unos son de cálculo
+directo, dos son demostraciones algebraicas y el último lo presentó explícitamente como
+un *reto*. Este documento los resuelve todos.
+
+La estructura de cada sección es siempre la misma:
+
+1. **La cita** textual de lo que pidió en clase.
+2. **La intuición** — qué está preguntando realmente.
+3. **La matemática** — la fórmula y de dónde sale.
+4. **El código** y su resultado.
+5. **La interpretación** — qué significa *ese número concreto* para *estos* datos.
+
+El cuarto paso es el que normalmente falta. Un cuaderno que imprime `429.075` no enseña
+nada; lo que enseña es entender por qué ese 429 está a veinte veces de la mediana.
+
+| # | Ejercicio | Sección |
+|---|---|---|
+| 1 | Media y mediana de producción, e interpretar | \@ref(media-mediana) |
+| 2 | Por qué la varianza amplifica los extremos, con la ecuación | \@ref(varianza) |
+| 3 | Interpretar asimetría positiva, con la ecuación | \@ref(asimetria) |
+| 4 | Interpretar curtosis alta, con la ecuación | \@ref(curtosis) |
+| 5 | Interpretar covarianza negativa + demostrar que $r$ es adimensional | \@ref(covarianza) |
+| 6 | Verificar que el área del histograma de densidad es 1 | \@ref(area-hist) |
+| 7 | $P(0 < X < 500)$ bajo el histograma ("la respuesta es casi 80%") | \@ref(prob-hist) |
+| 8 | **Reto:** área bajo la curva del KDE ("la mía es casi uno") | \@ref(reto-kde) |
+
+Y como el profesor pidió además *"hagan lo mismo para la variable de producción"* y
+*"comparen esos métodos"*, se incluyen también el KDE para ambas variables
+(\@ref(kde)), la comparación de anchos de banda (\@ref(ancho-banda)) y el problema de
+la densidad negativa con dos formas de arreglarlo (\@ref(densidad-negativa)).
+
+# Preparación {#preparacion}
+
+```{r librerias}
+library(tidyverse)
+```
+
+## Los datos
+
+`charcoal.csv` está en formato **largo**: una fila por combinación de
+país-área × *commodity* × año. Por eso hay ~35 000 filas para unos 150 países.
+
+```{r cargar}
+# Se prueban las rutas habituales, en orden, para que el cuaderno compile
+# tanto desde workshops/coal/ como desde la raíz del repo.
+ruta <- Filter(file.exists, c("charcoal.csv",
+                              "data/charcoal.csv",
+                              "../../data/charcoal.csv"))[1]
+stopifnot(!is.na(ruta))
+
+data_charcoal <- read_csv(ruta, show_col_types = FALSE)
+dim(data_charcoal)
+```
+
+Filtramos igual que en los cuadernos del curso: año 2019, y las dos variables de
+interés separadas en dos tablas.
+
+```{r filtrar}
+charcoal_prd19 <- data_charcoal %>%
+  filter(Year == 2019, Commodity == "Charcoal - Production") %>%
+  select(-Commodity)
+
+charcoal_chh19 <- data_charcoal %>%
+  filter(Year == 2019, Commodity == "Charcoal - Consumption by households") %>%
+  select(-Commodity)
+
+c(produccion = nrow(charcoal_prd19), consumo = nrow(charcoal_chh19))
+```
+
+```{r vistazo}
+head(charcoal_prd19)
+```
+
+## Qué estamos midiendo
+
+- **Unidad estadística (UE):** un país-área. No una persona, no un año: un país.
+- **Variable de interés:** `Quantity`, la producción de carbón vegetal en **miles de
+  toneladas métricas**.
+- **Escala de medición:** de **razón**. El cero significa ausencia real de producción
+  (un país que no produce carbón produce 0), y por eso tiene sentido decir "Brasil
+  produce el doble que Nigeria". Esto importa: es lo que autoriza a calcular medias,
+  varianzas, coeficientes de variación y razones. Con una variable ordinal (el estrato
+  socioeconómico del ejemplo de clase) ninguna de esas cuentas estaría permitida.
+
+```{r vector}
+x <- charcoal_prd19$Quantity   # producción — la usaremos en todo el cuaderno
+y <- charcoal_chh19$Quantity   # consumo por hogares
+```
+
+# Ejercicio 1 — Media y mediana de la producción {#media-mediana}
+
+> *"Calcular la media y la mediana, nuevamente, pero en este caso para la variable no la
+> cantidad, sino la de producción. E interpretar, que ya en este punto todos sabemos qué
+> pasa cuando son diferentes."*
+
+## La intuición
+
+Media y mediana son dos respuestas distintas a la misma pregunta —"¿dónde está el centro?"—
+y **cuando no coinciden, la diferencia misma es el dato interesante**. No es un problema
+de cálculo: es un diagnóstico de forma.
+
+## La matemática
+
+$$\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i
+\qquad\qquad
+\tilde{x} = Q_2 = \text{el valor que parte la muestra ordenada en dos mitades}$$
+
+La diferencia estructural: la media **usa el valor** de cada dato, la mediana solo usa su
+**posición**. Si el país más productor del mundo triplicara su producción mañana, la media
+se movería y la mediana no se movería ni un milímetro. Por eso se dice que la mediana es
+*robusta*.
+
+## El código
+
+```{r ej1-calculo}
+media   <- mean(x)
+mediana <- median(x)
+
+tibble(
+  Estadística = c("Media", "Mediana", "Razón media/mediana"),
+  Valor       = c(media, mediana, media / mediana)
+)
+```
+
+```{r ej1-resumen}
+resumen <- tibble(
+  n        = length(x),
+  minimo   = min(x),
+  Q1       = quantile(x, 0.25),
+  mediana  = median(x),
+  media    = mean(x),
+  Q3       = quantile(x, 0.75),
+  maximo   = max(x),
+  sd       = sd(x),
+  IQR      = IQR(x),
+  CV       = sd(x) / mean(x)
+)
+glimpse(resumen)
+```
+
+## La interpretación
+
+La media es **`r round(media, 2)`** y la mediana es **`r round(mediana, 2)`** miles de
+toneladas. La media es **más de veinte veces** la mediana.
+
+Leamos qué significa eso, frase por frase:
+
+- **El país típico produce ~21 mil toneladas.** Esa es la mediana: la mitad de los países
+  produce menos de eso.
+- **La media de 429 no describe a casi nadie.** No hay un "país promedio" que produzca 429.
+  De hecho, `r sum(x > media)` países de `r length(x)` (el
+  `r round(100*mean(x > media), 1)`%) están por encima de la media. Una media que deja
+  al `r round(100*mean(x <= media), 1)`% de los datos por debajo no es un centro: es un
+  punto arrastrado por la cola.
+- **La dirección de la diferencia importa.** Media **>** mediana ⟹ la cola larga está a
+  la **derecha** ⟹ **asimetría positiva**. Hay muchos países con producción diminuta y
+  unos pocos con producción enorme que jalonan el promedio hacia arriba. Es exactamente
+  la estructura del ejemplo de los salarios de clase.
+
+Y el coeficiente de variación:
+
+$$CV = \frac{s}{\bar{x}} = \frac{`r round(sd(x),2)`}{`r round(media,2)`} = `r round(sd(x)/media, 3)`$$
+
+El CV vale **`r round(100*sd(x)/media, 1)`%**. La regla empírica de clase dice que un CV
+por encima del **10%** ya indica dispersión alta respecto a la media. Aquí estamos en
+`r round(100*sd(x)/media)`%: la desviación estándar es **más del doble** de la media.
+Dispersión extrema.
+
+> **Por qué el CV existe.** La desviación estándar está en miles de toneladas; decir
+> "962" no dice si es mucho o poco sin saber contra qué. Al dividir por la media, las
+> unidades se cancelan y queda un número puro, comparable entre variables medidas en
+> escalas distintas. Volveremos a esta misma idea —quitar las unidades dividiendo— en
+> \@ref(covarianza), que es literalmente cómo se construye la correlación.
+
+# Ejercicio 2 — Por qué la varianza amplifica los valores extremos {#varianza}
+
+> *"Explicar por qué la varianza amplifica los valores extremos, y dar la ecuación y ver
+> exactamente en qué punto se genera esa amplificación."*
+
+## La ecuación y el punto exacto
+
+$$s^2 = \frac{1}{n-1}\sum_{i=1}^{n} \underbrace{(x_i - \bar{x})^2}_{\text{contribución del dato } i}$$
+
+**El punto exacto de la amplificación es el exponente 2.** Ahí, y en ningún otro lado.
+
+Definamos $d_i = x_i - \bar{x}$, la desviación del dato $i$. La contribución del dato $i$
+a la suma es $d_i^2$. Entonces:
+
+- Un dato que se desvía $d$ aporta $d^2$.
+- Un dato que se desvía $2d$ —el doble de lejos— aporta $4d^2$: **cuatro veces** más.
+- Un dato que se desvía $10d$ aporta $100d^2$: **cien veces** más.
+
+En general, alejarse $k$ veces más multiplica el aporte por $k^2$. La contribución crece
+**cuadráticamente** con la distancia, mientras que la distancia crece linealmente. Esa
+desproporción *es* la amplificación.
+
+## Verlo en los datos
+
+```{r ej2-contribuciones}
+contrib <- charcoal_prd19 %>%
+  mutate(
+    desvio     = Quantity - mean(Quantity),
+    aporte     = desvio^2,
+    pct_aporte = 100 * aporte / sum(aporte)
+  ) %>%
+  arrange(desc(aporte)) %>%
+  select(Country_Area, Quantity, desvio, aporte, pct_aporte)
+
+head(contrib, 10)
+```
+
+```{r ej2-concentracion}
+n <- nrow(contrib)
+tibble(
+  grupo = c("Top 1 país", "Top 5 países", "Top 10 países",
+            paste0("Los otros ", n - 10, " países")),
+  pct_de_la_varianza = c(
+    sum(contrib$pct_aporte[1]),
+    sum(contrib$pct_aporte[1:5]),
+    sum(contrib$pct_aporte[1:10]),
+    sum(contrib$pct_aporte[11:n])
+  ),
+  pct_de_los_datos = 100 * c(1, 5, 10, n - 10) / n
+)
+```
+
+Ese es el resultado que hay que mirar despacio: **`r round(sum(contrib$pct_aporte[1:5]), 1)`%
+de toda la varianza lo producen 5 países**, o sea el `r round(100*5/n, 1)`% de las
+observaciones. Los otros `r n - 10` países —la abrumadora mayoría— aportan apenas el
+`r round(sum(contrib$pct_aporte[11:n]), 1)`%.
+
+La varianza no está describiendo "la dispersión de los datos". Está describiendo,
+casi por completo, **a un puñado de países grandes**.
+
+## El contraste: ¿y si no elevamos al cuadrado?
+
+Si el cuadrado es el culpable, quitémoslo y veamos qué pasa. La **desviación absoluta
+media** usa $|d_i|$ en vez de $d_i^2$ — misma idea, castigo lineal:
+
+$$DAM = \frac{1}{n}\sum_{i=1}^{n} |x_i - \bar{x}|$$
+
+```{r ej2-dam}
+dam <- mean(abs(x - mean(x)))
+
+contrib_dam <- sort(abs(x - mean(x)), decreasing = TRUE)
+pct_dam     <- 100 * contrib_dam / sum(contrib_dam)
+
+tibble(
+  medida = c("Varianza (cuadrática)", "Desviación absoluta media (lineal)"),
+  `% que aportan los 5 datos más extremos` = c(
+    sum(contrib$pct_aporte[1:5]),
+    sum(pct_dam[1:5])
+  )
+)
+```
+
+Con el mismo conjunto de datos y los mismos cinco países: bajo la varianza pesan
+`r round(sum(contrib$pct_aporte[1:5]), 1)`%, bajo una medida lineal pesan
+`r round(sum(pct_dam[1:5]), 1)`%. **Los datos no cambiaron; cambió el exponente.**
+Eso prueba que la amplificación viene de la fórmula, no del fenómeno.
+
+> **¿Entonces la varianza está mal?** No. El cuadrado tiene razones matemáticas de peso
+> (es diferenciable, genera la geometría euclidiana de la estadística, hace que las
+> varianzas de variables independientes se sumen, y el estimador de mínimos cuadrados
+> tiene propiedades óptimas). Lo que hay que saber es el **precio**: en distribuciones
+> muy sesgadas como esta, la varianza es hipersensible a la cola, y por eso aquí el IQR
+> —que solo mira posiciones, no valores— es la medida de dispersión honesta.
+
+## De vuelta al ejemplo de clase: hijos vs. salario
+
+El profesor puso este ejemplo para mostrar que la varianza, sola, puede engañar.
+Reconstruyámoslo:
+
+```{r ej2-hijos-salario}
+hijos   <- c(1, 2, 3, 4, 5)
+salario <- c(1000000 - 2, 1000000 - 1, 1000000, 1000000 + 1, 1000000 + 2)
+
+tibble(
+  variable = c("Número de hijos", "Salario (COP)"),
+  media    = c(mean(hijos), mean(salario)),
+  varianza = c(var(hijos), var(salario)),
+  sd       = c(sd(hijos), sd(salario)),
+  CV       = c(sd(hijos)/mean(hijos), sd(salario)/mean(salario))
+)
+```
+
+Las dos variables tienen **exactamente la misma varianza** (`r var(hijos)`) y la misma
+desviación estándar. Y sin embargo:
+
+- Pasar de 1 hijo a 5 hijos es un cambio de vida.
+- Pasar de \$999.998 a \$1.000.002 no es nada.
+
+La varianza no puede distinguirlas porque solo mira los desvíos, que son idénticos
+($-2,-1,0,1,2$ en ambos casos). Lo que las distingue es la **escala de la media**: 3 hijos
+contra un millón de pesos. Por eso el CV —que divide por la media— sí las separa:
+`r round(100*sd(hijos)/mean(hijos), 1)`% contra
+`r format(100*sd(salario)/mean(salario), scientific = TRUE, digits = 2)`%.
+
+# Ejercicio 3 — Interpretar una asimetría positiva {#asimetria}
+
+> *"Interpretar una asimetría positiva, que lo acabamos de hablar con una variable salario,
+> pero en este caso también la tenemos presente."*
+
+## La ecuación
+
+$$g_1 = \frac{\dfrac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^3}{s_n^3}
+\qquad\text{con}\qquad
+s_n = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^2}$$
+
+Dos decisiones de diseño, y cada una hace una cosa distinta:
+
+1. **El cubo (potencia impar) conserva el signo.** $(-3)^3 = -27$, pero $3^3 = +27$. Los
+   datos por debajo de la media aportan negativo, los de arriba aportan positivo. Si se
+   cancelan, la distribución es simétrica. Si sobra positivo, la cola derecha pesa más.
+   Compárese con la varianza, donde el cuadrado borra el signo y por eso la varianza
+   **no puede** decir hacia dónde está la cola.
+2. **Dividir por $s_n^3$ hace la medida adimensional.** El numerador está en
+   (miles de toneladas)³; el denominador también. Se cancelan. Por eso $g_1$ es un número
+   puro y se puede comparar entre variables distintas — la misma jugada del CV.
+
+## El código
+
+```{r ej3-funcion}
+# Asimetría muestral g1 (definición clásica, la que usan `moments::skewness` y las
+# diapositivas). Se programa a mano: es exactamente la ecuación de arriba.
+asimetria <- function(v) {
+  n  <- length(v)
+  m  <- mean(v)
+  sn <- sqrt(sum((v - m)^2) / n)     # ojo: /n, no /(n-1)
+  (sum((v - m)^3) / n) / sn^3
+}
+
+g1_prd <- asimetria(x)
+g1_chh <- asimetria(y)
+
+tibble(
+  variable  = c("Producción", "Consumo por hogares"),
+  asimetria = c(g1_prd, g1_chh)
+)
+```
+
+Como referencia, veamos qué da esta misma función sobre distribuciones cuya forma
+conocemos:
+
+```{r ej3-referencia}
+set.seed(2026)
+tibble(
+  caso = c("Normal simulada (simétrica)",
+           "Uniforme simulada (simétrica)",
+           "Exponencial simulada (sesgo derecho)",
+           "Producción de carbón (nuestros datos)"),
+  g1 = c(asimetria(rnorm(10000)),
+         asimetria(runif(10000)),
+         asimetria(rexp(10000)),
+         g1_prd)
+)
+```
+
+## La interpretación
+
+$g_1 = `r round(g1_prd, 3)`$, **claramente positivo**. Traducido:
+
+- **La cola larga está a la derecha.** La masa de la distribución se acumula en los
+  valores bajos, y unos pocos países se van lejísimos hacia arriba.
+- **Es más asimétrica que una exponencial** (que tiene $g_1 = 2$ teórico), que ya es una
+  distribución con fama de sesgada. Esto no es un sesgo leve.
+- **Coincide con lo que ya sabíamos** desde el Ejercicio 1 sin calcular nada: media
+  (`r round(media,1)`) $>$ mediana (`r round(mediana,1)`). El signo de $g_1$ y el signo
+  de $\bar{x} - \tilde{x}$ dicen lo mismo; $g_1$ solo lo cuantifica.
+
+**Qué significa en el problema real:** el mercado mundial del carbón vegetal está
+concentrado. La mayoría de países produce cantidades marginales y un puñado —los que
+veremos listados en \@ref(atipicos)— concentra la producción. Es la misma forma que
+tiene la distribución del ingreso: muchos ganan poco, poquísimos ganan muchísimo.
+
+```{r ej3-grafico}
+hist(x, breaks = 25, prob = FALSE,
+     main = "Producción de carbón por país-área, 2019\nAsimetría positiva",
+     xlab = "Producción (miles de toneladas métricas)",
+     ylab = "Frecuencia absoluta",
+     col  = "grey85", border = "white")
+abline(v = mediana, col = "darkgreen", lwd = 3)
+abline(v = media,   col = "blue",      lwd = 3, lty = 2)
+legend("topright",
+       legend = c(paste0("Mediana = ", round(mediana, 1)),
+                  paste0("Media = ",   round(media, 1))),
+       col = c("darkgreen", "blue"), lwd = 3, lty = c(1, 2), bty = "n")
+```
+
+En el gráfico se ve la firma de la asimetría positiva: **la media queda a la derecha de
+la mediana**, arrastrada por la cola. En una distribución simétrica las dos líneas
+estarían encima una de la otra.
+
+# Ejercicio 4 — Interpretar una curtosis alta {#curtosis}
+
+> *"Tiempo de curtosis alta: la medida de curtosis con la ecuación, entender qué
+> significaría esto."*
+
+## La ecuación
+
+$$g_2 = \frac{\dfrac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^4}{s_n^4}
+\qquad\qquad
+\text{exceso de curtosis} = g_2 - 3$$
+
+Misma receta, ahora con la **cuarta** potencia. El 3 que se resta es el valor de $g_2$
+para la distribución normal, que se toma como punto de referencia:
+
+| Exceso | Nombre | Significado |
+|---|---|---|
+| $< 0$ | **platicúrtica** | colas más ligeras que la normal, forma achatada |
+| $= 0$ | **mesocúrtica** | como la normal |
+| $> 0$ | **leptocúrtica** | colas más pesadas que la normal, pico más agudo |
+
+## Qué mide realmente la curtosis
+
+Aquí hay que corregir una idea que circula mucho. Se suele decir que la curtosis mide
+"lo apuntada" que es la distribución. **Eso es impreciso.** La cuarta potencia castiga
+las distancias grandes todavía más brutalmente que el cuadrado: un dato a $10s$ de la
+media aporta $10^4 = 10\,000$, mientras que uno a $1s$ aporta $1$. Los datos cerca del
+centro —donde está el "pico"— aportan casi nada porque $d_i^4 \approx 0$ cuando $d_i$ es
+pequeño.
+
+Conclusión: **la curtosis mide el peso de las colas**, es decir, cuán probables son los
+valores extremos. El pico agudo es una *consecuencia* (si la masa se va a las colas y el
+área total sigue siendo 1, el centro tiene que compensar), no lo que se está midiendo.
+
+## El código
+
+```{r ej4-funcion}
+curtosis <- function(v) {
+  n  <- length(v)
+  m  <- mean(v)
+  sn <- sqrt(sum((v - m)^2) / n)
+  (sum((v - m)^4) / n) / sn^4
+}
+
+g2_prd     <- curtosis(x)
+exceso_prd <- g2_prd - 3
+
+tibble(
+  variable = c("Producción", "Consumo por hogares"),
+  g2       = c(curtosis(x), curtosis(y)),
+  exceso   = c(curtosis(x) - 3, curtosis(y) - 3)
+)
+```
+
+```{r ej4-referencia}
+set.seed(2026)
+tibble(
+  caso = c("Uniforme (platicúrtica)",
+           "Normal (mesocúrtica, referencia)",
+           "Exponencial (leptocúrtica)",
+           "t de Student gl=5 (colas pesadas)",
+           "Producción de carbón"),
+  exceso_curtosis = c(curtosis(runif(10000)) - 3,
+                      curtosis(rnorm(10000)) - 3,
+                      curtosis(rexp(10000))  - 3,
+                      curtosis(rt(10000, df = 5)) - 3,
+                      exceso_prd)
+)
+```
+
+## La interpretación
+
+Exceso de curtosis = **`r round(exceso_prd, 2)`**. Fuertemente **leptocúrtica**.
+
+Para dimensionarlo: la exponencial, que ya tiene colas notoriamente pesadas, tiene un
+exceso teórico de 6. Nuestros datos están en `r round(exceso_prd, 1)`, **más del doble**.
+
+Qué implica esto en términos prácticos:
+
+- **Los eventos extremos no son raros aquí, son esperables.** Bajo una normal, un dato a
+  más de 3 desviaciones estándar ocurre ~3 veces en 1000. En esta distribución, los
+  extremos ocurren con frecuencia muchísimo mayor.
+- **Cualquier método que asuma normalidad va a subestimar el riesgo de cola.** Si se
+  modelara la producción mundial con una normal, se concluiría que un país produciendo
+  6000 mil toneladas es prácticamente imposible — y sin embargo ahí está.
+- **La media y la varianza son estadísticas frágiles en este régimen.** Con colas así de
+  pesadas, agregar una sola observación nueva puede mover la media apreciablemente.
+
+Veámoslo comparando contra una normal con la **misma media y la misma desviación
+estándar** — es decir, la normal que un análisis descuidado ajustaría a estos datos:
+
+```{r ej4-comparacion}
+set.seed(2026)
+normal_equivalente <- rnorm(length(x), mean = mean(x), sd = sd(x))
+
+par(mfrow = c(1, 2))
+hist(x, breaks = 25, prob = TRUE, col = "grey85", border = "white",
+     main = "Datos reales", xlab = "Producción", ylab = "Densidad")
+hist(normal_equivalente, breaks = 25, prob = TRUE, col = "lightcoral", border = "white",
+     main = "Normal con misma media y sd", xlab = "Producción simulada", ylab = "Densidad")
+par(mfrow = c(1, 1))
+```
+
+```{r ej4-negativos}
+tibble(
+  comprobacion = c("Mínimo de los datos reales",
+                   "Mínimo de la normal equivalente",
+                   "% de valores negativos en la normal equivalente"),
+  valor = c(min(x), min(normal_equivalente),
+            100 * mean(normal_equivalente < 0))
+)
+```
+
+La normal equivalente genera un `r round(100*mean(normal_equivalente < 0), 1)`% de países
+con **producción negativa**. Es el absurdo que delata el problema: **ajustar una normal a
+esta variable es un error de modelado**, porque la normal es simétrica y con soporte en
+todos los reales, y esta variable ni es simétrica ni puede ser negativa. Guardemos esta
+observación: la vamos a reencontrar, con otra cara, en \@ref(densidad-negativa).
+
