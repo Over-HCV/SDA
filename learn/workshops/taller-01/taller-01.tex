@@ -1,0 +1,1904 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Exploración de datos · SDA Lab},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Exploración de datos · SDA Lab}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{ori}
+\author{}
+\date{\vspace{-2.5em}2026-09-12 07:50}
+
+\begin{document}
+\maketitle
+
+Cuaderno generado desde SDA Lab. Cada sección corresponde a un panel
+marcado con la casilla \textbf{Añadir}: trae su texto explicativo, los
+parámetros con que se produjo y el código R que lo redibuja sobre
+\texttt{datos}.
+
+\section{Los datos}\label{los-datos}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Campo & Valor \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Nombre & ori \\
+Fuente & ori \\
+Filas al cargar & 4543 \\
+Columnas al cargar & 18 \\
+Filas ahora & 118 \\
+Columnas ahora & 18 \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# ORI.csv es la base del Taller 01 (IDEAM). Dejalo al lado del cuaderno o}
+\CommentTok{\# ajustá \textasciigrave{}ruta\textasciigrave{}: se prueban los lugares habituales, en orden.}
+\NormalTok{ruta }\OtherTok{\textless{}{-}} \FunctionTok{Filter}\NormalTok{(file.exists, }\FunctionTok{c}\NormalTok{(}\StringTok{"ORI.csv"}\NormalTok{, }\StringTok{"data/ORI.csv"}\NormalTok{,}
+                              \StringTok{"../../../data/ORI.csv"}\NormalTok{))[}\DecValTok{1}\NormalTok{]}
+\CommentTok{\# La copia que reparte el curso viene en ISO{-}8859{-}1 y la de data/ del repo}
+\CommentTok{\# en UTF{-}8. Se detecta en vez de suponer: suponer es lo que rompe las}
+\CommentTok{\# tildes de los municipios (ACACÍAS {-}\textgreater{} ACACÃAS).}
+\NormalTok{codificacion }\OtherTok{\textless{}{-}} \ControlFlowTok{if}\NormalTok{ (}\FunctionTok{all}\NormalTok{(}\FunctionTok{validUTF8}\NormalTok{(}\FunctionTok{readLines}\NormalTok{(ruta, }\AttributeTok{warn =} \ConstantTok{FALSE}\NormalTok{,}
+                                            \AttributeTok{encoding =} \StringTok{"bytes"}\NormalTok{))))}
+  \StringTok{"UTF{-}8"} \ControlFlowTok{else} \StringTok{"latin1"}
+\NormalTok{datos }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(ruta, }\AttributeTok{sep =} \StringTok{";"}\NormalTok{, }\AttributeTok{dec =} \StringTok{"."}\NormalTok{, }\AttributeTok{fileEncoding =}\NormalTok{ codificacion,}
+                  \AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}\NormalTok{)}
+\FunctionTok{names}\NormalTok{(datos) }\OtherTok{\textless{}{-}} \FunctionTok{trimws}\NormalTok{(}\FunctionTok{names}\NormalTok{(datos))   }\CommentTok{\# el encabezado trae "Pronostico "}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Al cargar:"}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(datos), }\StringTok{"filas x"}\NormalTok{, }\FunctionTok{ncol}\NormalTok{(datos), }\StringTok{"columnas}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Al cargar: 4543 filas x 18 columnas
+\end{verbatim}
+
+\section{Preparación}\label{preparaciuxf3n}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{datos }\OtherTok{\textless{}{-}}\NormalTok{ datos[datos}\SpecialCharTok{$}\NormalTok{Hora }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"12:00"}\NormalTok{), ]}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Después de la preparación:"}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(datos), }\StringTok{"filas}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Después de la preparación: 118 filas
+\end{verbatim}
+
+\section{Análisis}\label{anuxe1lisis}
+
+\subsection{Vista previa del dataset}\label{vista-previa-del-dataset}
+
+Panel \texttt{f1.fuente.vista\_previa} · marcado a las 07:25:51
+
+\subsubsection{Para qué sirve}\label{para-quuxe9-sirve}
+
+Atrapar el desastre antes de gastar una hora en él. Es la única card que
+se mira sin haber decidido nada todavía, y la que dice si el archivo se
+cargó como creías o hay que volver a leerlo con otras opciones.
+
+\subsubsection{Qué muestra}\label{quuxe9-muestra}
+
+Las primeras filas de lo que se acaba de cargar, con el pie que dice
+cuántas se muestran y cuántas hay. Es la comprobación más barata que
+existe y la que más errores atrapa: si la tabla se ve mal acá, todo lo
+que venga después está mal.
+
+\subsubsection{Qué buscar}\label{quuxe9-buscar}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Columnas de más o de menos}: casi siempre es el separador
+  equivocado en un CSV. Si todo el archivo entró en una sola columna,
+  probá \texttt{;} o tabulador.
+\item
+  \textbf{Números leídos como texto}: el separador decimal. Con coma
+  decimal y punto como separador de miles, \texttt{1.234,5} se convierte
+  en texto y ninguna operación numérica va a funcionar.
+\item
+  \textbf{Tildes rotas}: es la codificación. UTF-8 y Latin-1 se
+  confunden fácil.
+\item
+  \textbf{Faltantes disfrazados}: \texttt{.}, \texttt{-99},
+  \texttt{N/A}, celdas vacías. Si no se declaran como faltantes, entran
+  al análisis como valores reales.
+\item
+  \textbf{La primera fila}: ¿es un encabezado o ya es un dato?
+\end{itemize}
+
+\subsubsection{Cuándo engaña}\label{cuuxe1ndo-engauxf1a}
+
+\textbf{Ver diez filas correctas no dice nada de las 35.000 restantes.}
+El problema típico ---una columna que cambia de formato a mitad del
+archivo--- no aparece arriba. La subsección de Calidad es la que mira el
+archivo entero.
+
+\textbf{Un dataset del curso ya cargado también puede estar
+transformado.} Si en el pivot país×año ves ceros, muchos no son ceros
+observados: son pares sin dato rellenados en la agregación. El panel lo
+avisa al cargar y conviene creerle.
+
+\textbf{El orden de las filas puede no ser inocente.} Si el archivo
+viene ordenado por alguna variable, cualquier partición sin barajar
+hereda ese orden. Por eso la subsección de Partición baraja siempre y
+con semilla.
+
+Estado al marcarlo:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 34\tabcolsep) * \real{0.0556}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Cod\_Div
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Latitud
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Longitud
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Region
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Departamento
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Municipio
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Fecha
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Hora
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Temperatura
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Velocidad\_del\_Viento
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Direccion\_del\_Viento
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Presion
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Punto\_de\_Rocio
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Cobertura\_total\_nubosa
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Precipitacion\_mm\_h
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Probabilidad\_de\_Tormenta
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Humedad
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Pronostico
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+50006000 & 3.99012 & -73.76594 & ORI & META & ACACÍAS & 26/08/2022 &
+12:00 & 26.5 & 1.2 & 179.8 & 1014.2 & 18.3 & 70 & 0 & 0 & 60.7 &
+Parcialmente Nublado \\
+50006000 & 3.99012 & -73.76594 & ORI & META & ACACÍAS & 27/08/2022 &
+12:00 & 27.3 & 1.7 & 113.7 & 1013.9 & 21 & 80 & 0 & 0 & 68.7 &
+Nublado \\
+85010000 & 5.17269 & -72.5463 & ORI & CASANARE & AGUAZUL & 26/08/2022 &
+12:00 & 30.2 & 2.1 & 176.7 & 1013 & 21.8 & 49.8 & 0 & 0 & 60.9 &
+Parcialmente Nublado \\
+85010000 & 5.17269 & -72.5463 & ORI & CASANARE & AGUAZUL & 27/08/2022 &
+12:00 & 30.4 & 1.7 & 200 & 1013.2 & 24.4 & 63.2 & 0 & 0 & 70.4 &
+Parcialmente Nublado \\
+81001000 & 7.073902 & -70.74801 & ORI & ARAUCA & ARAUCA & 26/08/2022 &
+12:00 & 30.4 & 2 & 150 & 1012 & 22.5 & 40 & 0 & 0 & 62.7 & Parcialmente
+Nublado \\
+81001000 & 7.073902 & -70.74801 & ORI & ARAUCA & ARAUCA & 27/08/2022 &
+12:00 & 29 & 0.7 & 187.1 & 1011.6 & 22.3 & 80 & 0 & 0 & 67.5 &
+Nublado \\
+81065000 & 7.026981 & -71.42675 & ORI & ARAUCA & ARAUQUITA & 26/08/2022
+& 12:00 & 29.7 & 2.1 & 200.7 & 1011.6 & 18.3 & 50 & 0 & 0 & 50.3 &
+Parcialmente Nublado \\
+81065000 & 7.026981 & -71.42675 & ORI & ARAUCA & ARAUQUITA & 27/08/2022
+& 12:00 & 28.8 & 0.5 & 356.5 & 1011.9 & 24.5 & 80 & 0.8 & 0 & 77.6 &
+Nublado - Lluvia \\
+50110000 & 4.567202 & -72.96328 & ORI & META & BARRANCA DE UPÍA &
+26/08/2022 & 12:00 & 31 & 2 & 200 & 1012.2 & 21.4 & 50 & 0 & 0 & 56.7 &
+Parcialmente Nublado \\
+50110000 & 4.567202 & -72.96328 & ORI & META & BARRANCA DE UPÍA &
+27/08/2022 & 12:00 & 31.5 & 0.7 & 210.5 & 1012.8 & 28.7 & 80 & 0 & 0 &
+85 & Nublado \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.fuente.vista\_previa}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Unidades estadísticas (filas):"}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(datos), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Unidades estadísticas (filas): 118
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Variables (columnas):     "}\NormalTok{, }\FunctionTok{ncol}\NormalTok{(datos), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Variables (columnas):      18
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{utils}\SpecialCharTok{::}\FunctionTok{head}\NormalTok{(datos, }\DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      Cod_Div  Latitud  Longitud Region Departamento        Municipio      Fecha
+## 21  50006000 3.990120 -73.76594    ORI         META          ACACÍAS 26/08/2022
+## 45  50006000 3.990120 -73.76594    ORI         META          ACACÍAS 27/08/2022
+## 98  85010000 5.172690 -72.54630    ORI     CASANARE          AGUAZUL 26/08/2022
+## 122 85010000 5.172690 -72.54630    ORI     CASANARE          AGUAZUL 27/08/2022
+## 175 81001000 7.073902 -70.74801    ORI       ARAUCA           ARAUCA 26/08/2022
+## 199 81001000 7.073902 -70.74801    ORI       ARAUCA           ARAUCA 27/08/2022
+## 252 81065000 7.026981 -71.42675    ORI       ARAUCA        ARAUQUITA 26/08/2022
+## 276 81065000 7.026981 -71.42675    ORI       ARAUCA        ARAUQUITA 27/08/2022
+## 329 50110000 4.567202 -72.96328    ORI         META BARRANCA DE UPÍA 26/08/2022
+## 353 50110000 4.567202 -72.96328    ORI         META BARRANCA DE UPÍA 27/08/2022
+##      Hora Temperatura Velocidad_del_Viento Direccion_del_Viento Presion
+## 21  12:00        26.5                  1.2                179.8  1014.2
+## 45  12:00        27.3                  1.7                113.7  1013.9
+## 98  12:00        30.2                  2.1                176.7  1013.0
+## 122 12:00        30.4                  1.7                200.0  1013.2
+## 175 12:00        30.4                  2.0                150.0  1012.0
+## 199 12:00        29.0                  0.7                187.1  1011.6
+## 252 12:00        29.7                  2.1                200.7  1011.6
+## 276 12:00        28.8                  0.5                356.5  1011.9
+## 329 12:00        31.0                  2.0                200.0  1012.2
+## 353 12:00        31.5                  0.7                210.5  1012.8
+##     Punto_de_Rocio Cobertura_total_nubosa Precipitacion_mm_h
+## 21            18.3                   70.0                0.0
+## 45            21.0                   80.0                0.0
+## 98            21.8                   49.8                0.0
+## 122           24.4                   63.2                0.0
+## 175           22.5                   40.0                0.0
+## 199           22.3                   80.0                0.0
+## 252           18.3                   50.0                0.0
+## 276           24.5                   80.0                0.8
+## 329           21.4                   50.0                0.0
+## 353           28.7                   80.0                0.0
+##     Probabilidad_de_Tormenta Humedad           Pronostico
+## 21                         0    60.7 Parcialmente Nublado
+## 45                         0    68.7              Nublado
+## 98                         0    60.9 Parcialmente Nublado
+## 122                        0    70.4 Parcialmente Nublado
+## 175                        0    62.7 Parcialmente Nublado
+## 199                        0    67.5              Nublado
+## 252                        0    50.3 Parcialmente Nublado
+## 276                        0    77.6     Nublado - Lluvia
+## 329                        0    56.7 Parcialmente Nublado
+## 353                        0    85.0              Nublado
+\end{verbatim}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\subsection{Frecuencias por clase ·
+Pronostico}\label{frecuencias-por-clase-pronostico}
+
+Panel \texttt{f1.balanceo.frecuencias} · marcado a las 07:25:51
+
+\subsubsection{Para qué sirve}\label{para-quuxe9-sirve-1}
+
+Ver de cuánto es el desbalance y decidir si hace falta hacer algo. La
+respuesta muchas veces es que no: un 60/40 no necesita tratamiento, y
+rebalancear por costumbre estropea la calibración de las probabilidades
+que salen del modelo.
+
+\subsubsection{Qué muestra}\label{quuxe9-muestra-1}
+
+Cuántas observaciones hay por clase, antes y después de rebalancear. El
+subtítulo trae la razón de desbalance: cuántas veces la clase
+mayoritaria supera a la minoritaria.
+
+Las tres técnicas disponibles no traen dependencias nuevas y no inventan
+datos:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{sub-muestreo} --- recorta las clases grandes. Se pierde
+  información real.
+\item
+  \textbf{sobre-muestreo} --- repite filas de las chicas. No agrega
+  información.
+\item
+  \textbf{bootstrap} --- remuestrea todas con reemplazo hasta un tamaño
+  común.
+\end{itemize}
+
+SMOTE, que interpola entre vecinos y sí fabrica filas nuevas, está en el
+catálogo como pendiente: pedirlo suma un paquete al bundle.
+
+\subsubsection{Qué buscar}\label{quuxe9-buscar-1}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{La razón de desbalance}: por debajo de 3 a 1 casi nunca hace
+  falta tocar nada. Por encima de 20 a 1 el problema es real.
+\item
+  \textbf{Cuánto se pierde con sub-muestreo}: si la minoritaria tiene 40
+  casos, la mayoritaria queda en 40 y tiraste miles de filas.
+\item
+  \textbf{Cuánto se repite con sobre-muestreo}: si una fila aparece 30
+  veces, el modelo la va a memorizar.
+\item
+  \textbf{Clases con menos de 10 casos}: ninguna técnica las salva.
+\end{itemize}
+
+\subsubsection{Cuándo engaña}\label{cuuxe1ndo-engauxf1a-1}
+
+\textbf{Balancear cambia las probabilidades a priori.} Después de
+rebalancear, las probabilidades que estime el modelo no son las de la
+población: están calibradas para el mundo artificial 50/50 que
+construiste.
+
+\textbf{El desbalance a veces no es el problema.} Con clases separables,
+un modelo aprende bien con 1 \% de positivos. Lo que suele estar mal es
+la métrica: exactitud con 99 \% de negativos se gana prediciendo siempre
+``no''. Antes de remuestrear, probá cambiar de métrica o usar pesos de
+clase.
+
+\textbf{Nunca se rebalancea la partición de prueba.} Solo el
+entrenamiento. Si tocás la prueba, estás midiendo el desempeño en una
+población que no existe.
+
+Estado al marcarlo:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lll@{}}
+\toprule\noalign{}
+clase & n & proporcion \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Parcialmente Nublado & 63 & 0.5338983 \\
+Nublado & 31 & 0.2627119 \\
+Parcialmente Nublado - Lluvia Fuerte & 6 & 0.05084746 \\
+Parcialmente Nublado - Llovizna & 5 & 0.04237288 \\
+Nublado - Llovizna & 4 & 0.03389831 \\
+Nublado - Lluvia & 4 & 0.03389831 \\
+Despejado & 3 & 0.02542373 \\
+Parcialmente Nublado - Tormenta Ligera & 2 & 0.01694915 \\
+\end{longtable}
+}
+
+Parámetros:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Campo & Valor \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+clase & Pronostico \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.balanceo.frecuencias}
+\NormalTok{tabla }\OtherTok{\textless{}{-}} \FunctionTok{sort}\NormalTok{(}\FunctionTok{table}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Pronostico), }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{)}
+\FunctionTok{print}\NormalTok{(}\FunctionTok{cbind}\NormalTok{(}\AttributeTok{n =}\NormalTok{ tabla, }\AttributeTok{prop =} \FunctionTok{round}\NormalTok{(}\FunctionTok{prop.table}\NormalTok{(tabla), }\DecValTok{3}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                                         n  prop
+## Parcialmente Nublado                   63 0.534
+## Nublado                                31 0.263
+## Parcialmente Nublado - Lluvia Fuerte    6 0.051
+## Parcialmente Nublado - Llovizna         5 0.042
+## Nublado - Llovizna                      4 0.034
+## Nublado - Lluvia                        4 0.034
+## Despejado                               3 0.025
+## Parcialmente Nublado - Tormenta Ligera  2 0.017
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Más frecuente:  "}\NormalTok{, }\FunctionTok{names}\NormalTok{(tabla)[}\DecValTok{1}\NormalTok{], }\StringTok{" (n = "}\NormalTok{, tabla[}\DecValTok{1}\NormalTok{], }\StringTok{")}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{,}
+    \AttributeTok{sep =} \StringTok{""}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Más frecuente:  Parcialmente Nublado (n = 63)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Menos frecuente: "}\NormalTok{, }\FunctionTok{names}\NormalTok{(tabla)[}\FunctionTok{length}\NormalTok{(tabla)],}
+    \StringTok{" (n = "}\NormalTok{, tabla[}\FunctionTok{length}\NormalTok{(tabla)], }\StringTok{")}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{, }\AttributeTok{sep =} \StringTok{""}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Menos frecuente: Parcialmente Nublado - Tormenta Ligera (n = 2)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{barplot}\NormalTok{(tabla, }\AttributeTok{horiz =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{las =} \DecValTok{1}\NormalTok{, }\AttributeTok{cex.names =} \FloatTok{0.7}\NormalTok{,}
+        \AttributeTok{main =} \StringTok{"Frecuencias de Pronostico"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{taller-01_files/taller-01_files/figure-latex/unnamed-chunk-2-1.pdf}}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\subsection{Diccionario de columnas}\label{diccionario-de-columnas}
+
+Panel \texttt{f1.diccionario.tabla} · marcado a las 07:25:51
+
+\subsubsection{Para qué sirve}\label{para-quuxe9-sirve-2}
+
+Declarar qué es cada columna, que es lo que después habilita o bloquea
+cada operación en el resto de la app. Es la card con más consecuencias
+del proyecto: marcar una variable como nominal apaga su media y su
+histograma a propósito, y con la razón escrita al lado.
+
+\subsubsection{Qué muestra}\label{quuxe9-muestra-2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{{-}{-}{-}}
+\NormalTok{config:}
+\NormalTok{  layout: elk}
+\NormalTok{  theme: default}
+\NormalTok{{-}{-}{-}}
+\NormalTok{flowchart TD}
+\NormalTok{    V["CLASIFICACIÓN DE VARIABLES\textless{}br/\textgreater{}(NB1: escala × clase, ejes independientes)"]}
+
+\NormalTok{    V {-}{-}\textgreater{} ESC["EJE 1 · ESCALA\textless{}br/\textgreater{}¿qué operaciones tienen sentido?"]}
+\NormalTok{    V {-}{-}\textgreater{} CLA["EJE 2 · CLASE\textless{}br/\textgreater{}¿cuál es el recorrido?"]}
+
+\NormalTok{    \%\% ================= EJE 1: ESCALA =================}
+\NormalTok{    ESC {-}{-}\textgreater{} CUAL["CUALITATIVA\textless{}br/\textgreater{}mide atributos → categorías"]}
+\NormalTok{    ESC {-}{-}\textgreater{} CUAN["CUANTITATIVA\textless{}br/\textgreater{}mide cantidades → números"]}
+
+\NormalTok{    CUAL {-}{-}\textgreater{} NOM["NOMINAL\textless{}br/\textgreater{}solo = / ≠"]}
+\NormalTok{    CUAL {-}{-}\textgreater{} ORD["ORDINAL\textless{}br/\textgreater{}= / ≠ + orden\textless{}br/\textgreater{}(distancias sin significado)"]}
+\NormalTok{    CUAN {-}{-}\textgreater{} INT["INTERVALO\textless{}br/\textgreater{}+ intervalos equidistantes\textless{}br/\textgreater{}CERO RELATIVO"]}
+\NormalTok{    CUAN {-}{-}\textgreater{} RAZ["RAZÓN\textless{}br/\textgreater{}+ razones válidas\textless{}br/\textgreater{}CERO ABSOLUTO"]}
+
+\NormalTok{    NOM {-}{-}\textgreater{} NOME["Municipio, Pronóstico, Region\textless{}br/\textgreater{}(código postal: numérico pero nominal)"]}
+\NormalTok{    ORD {-}{-}\textgreater{} ORDE["Estrato \{bajo, medio, alto\}\textless{}br/\textgreater{}consumo eléctrico \{alto, medio, bajo\}"]}
+\NormalTok{    INT {-}{-}\textgreater{} INTE["Temperatura en °C\textless{}br/\textgreater{}0 °C no es ausencia de temperatura"]}
+\NormalTok{    RAZ {-}{-}\textgreater{} RAZE["Velocidad del viento (mph)\textless{}br/\textgreater{}Presion, Latitud — 0 = ausencia"]}
+
+\NormalTok{    \%\% ================= EJE 2: CLASE =================}
+\NormalTok{    CLA {-}{-}\textgreater{} CUAL2["si es CUALITATIVA"]}
+\NormalTok{    CLA {-}{-}\textgreater{} CUAN2["si es CUANTITATIVA"]}
+
+\NormalTok{    CUAL2 {-}{-}\textgreater{} BIN["BINARIA / DICOTÓMICA\textless{}br/\textgreater{}2 categorías"]}
+\NormalTok{    CUAL2 {-}{-}\textgreater{} POL["POLITÓMICA\textless{}br/\textgreater{}más de 2 categorías"]}
+\NormalTok{    CUAN2 {-}{-}\textgreater{} DIS["DISCRETA\textless{}br/\textgreater{}valores contables"]}
+\NormalTok{    CUAN2 {-}{-}\textgreater{} CON["CONTINUA\textless{}br/\textgreater{}cualquier valor de un intervalo real"]}
+
+\NormalTok{    BIN {-}{-}\textgreater{} BINE["Sí / No · Presence \{Sí, No\}"]}
+\NormalTok{    POL {-}{-}\textgreater{} POLE["Pronóstico (11 categorías)\textless{}br/\textgreater{}Municipio, Departamento"]}
+\NormalTok{    DIS {-}{-}\textgreater{} DISE["n.° de turbinas\textless{}br/\textgreater{}n.° de hijos"]}
+\NormalTok{    CON {-}{-}\textgreater{} CONE["Temperatura, Presion\textless{}br/\textgreater{}Velocidad del viento"]}
+
+\NormalTok{    \%\% ================= ESTILOS =================}
+\NormalTok{    classDef raiz fill:\#65e94f,stroke:\#222,stroke{-}width:2px,color:\#000,font{-}weight:bold;}
+\NormalTok{    classDef eje fill:\#91cbe8,stroke:\#555,stroke{-}width:1px,color:\#000,font{-}weight:bold;}
+\NormalTok{    classDef grupo fill:\#ffffb0,stroke:\#777,stroke{-}width:1px,color:\#000,font{-}weight:bold;}
+\NormalTok{    classDef tipo fill:\#e58be8,stroke:\#777,stroke{-}width:1px,color:\#000,font{-}weight:bold;}
+\NormalTok{    classDef ejemplo fill:\#8de8d8,stroke:\#777,stroke{-}width:1px,color:\#000;}
+
+\NormalTok{    class V raiz;}
+\NormalTok{    class ESC,CLA eje;}
+\NormalTok{    class CUAL,CUAN,CUAL2,CUAN2 grupo;}
+\NormalTok{    class NOM,ORD,INT,RAZ,BIN,POL,DIS,CON tipo;}
+\NormalTok{    class NOME,ORDE,INTE,RAZE,BINE,POLE,DISE,CONE ejemplo;}
+\end{Highlighting}
+\end{Shaded}
+
+Una fila por columna del dataset, con lo que la app necesita saber de
+ella: etiqueta, escala de medición, clase y rol.
+
+\begin{verbatim}
+escala ∈ {nominal, ordinal, intervalo, razon}
+clase  ∈ {cualitativa, discreta, continua}
+rol    ∈ {respuesta, predictor, id, grupo, peso, ignorar}
+\end{verbatim}
+
+La escala no se puede deducir del tipo de dato, y ahí está todo el
+punto: un código postal es numérico y es nominal; un año es entero y es
+de intervalo, porque su cero es convencional. La autodetección propone;
+vos corregís.
+
+\textbf{Esta tabla gobierna el resto de la app.} Si marcás una columna
+como nominal, el selector de media se deshabilita y aparece la moda, con
+la razón escrita al lado. Los métodos de la fase 2 se filtran por lo
+mismo.
+
+\subsubsection{Qué buscar}\label{quuxe9-buscar-2}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Identificadores marcados como predictores}: un \texttt{id}
+  correlaciona con cualquier cosa por accidente y arruina un modelo en
+  silencio.
+\item
+  \textbf{Códigos numéricos que son categorías}: 1 = norte, 2 = sur.
+  Numéricos en memoria, nominales de verdad.
+\item
+  \textbf{Años y fechas marcados como razón}: son de intervalo. Duplicar
+  un año no significa nada.
+\item
+  \textbf{Columnas con muchos faltantes}: el porcentaje está en la
+  tabla. Por encima de 40 \%, imputar es inventar estructura.
+\item
+  \textbf{Columnas constantes}: no aportan información y sobreviven
+  hasta la fase 4 si nadie las marca como ignorar.
+\end{itemize}
+
+\subsubsection{Cuándo engaña}\label{cuuxe1ndo-engauxf1a-2}
+
+\textbf{La detección automática acierta el tipo, no el significado.} Ve
+números y propone razón; ve texto y propone nominal. Ordinal e intervalo
+no los propone nunca, porque no se pueden inferir: los tenés que poner
+vos.
+
+\textbf{Un rol mal puesto no rompe nada hoy.} La app te deja seguir y el
+error aparece dos fases después, cuando un modelo da un R²
+sospechosamente perfecto porque metiste el identificador como predictor.
+
+\textbf{Los avisos de conflicto son heurísticos.} Que una columna se
+llame \texttt{year} no prueba que sea un año. El aviso pregunta; la
+decisión es tuya.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.diccionario.tabla}
+\CommentTok{\# Escala, clase y rol los declara quien analiza: R no los puede}
+\CommentTok{\# deducir del tipo de dato (un código postal es numérico y nominal;}
+\CommentTok{\# los grados centígrados son de intervalo, no de razón).}
+\NormalTok{diccionario }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{columna =} \FunctionTok{c}\NormalTok{(}\StringTok{"Cod\_Div"}\NormalTok{, }\StringTok{"Latitud"}\NormalTok{, }\StringTok{"Longitud"}\NormalTok{, }\StringTok{"Region"}\NormalTok{, }\StringTok{"Departamento"}\NormalTok{,}
+              \StringTok{"Municipio"}\NormalTok{, }\StringTok{"Fecha"}\NormalTok{, }\StringTok{"Hora"}\NormalTok{, }\StringTok{"Temperatura"}\NormalTok{,}
+              \StringTok{"Velocidad\_del\_Viento"}\NormalTok{, }\StringTok{"Direccion\_del\_Viento"}\NormalTok{, }\StringTok{"Presion"}\NormalTok{,}
+              \StringTok{"Punto\_de\_Rocio"}\NormalTok{, }\StringTok{"Cobertura\_total\_nubosa"}\NormalTok{,}
+              \StringTok{"Precipitacion\_mm\_h"}\NormalTok{, }\StringTok{"Probabilidad\_de\_Tormenta"}\NormalTok{, }\StringTok{"Humedad"}\NormalTok{,}
+              \StringTok{"Pronostico"}\NormalTok{),}
+  \AttributeTok{escala =} \FunctionTok{c}\NormalTok{(}\StringTok{"razon"}\NormalTok{, }\StringTok{"razon"}\NormalTok{, }\StringTok{"razon"}\NormalTok{, }\StringTok{"nominal"}\NormalTok{, }\StringTok{"nominal"}\NormalTok{, }\StringTok{"nominal"}\NormalTok{,}
+             \StringTok{"nominal"}\NormalTok{, }\StringTok{"nominal"}\NormalTok{, }\StringTok{"intervalo"}\NormalTok{, }\StringTok{"razon"}\NormalTok{, }\StringTok{"razon"}\NormalTok{, }\StringTok{"razon"}\NormalTok{,}
+             \StringTok{"razon"}\NormalTok{, }\StringTok{"razon"}\NormalTok{, }\StringTok{"razon"}\NormalTok{, }\StringTok{"razon"}\NormalTok{, }\StringTok{"razon"}\NormalTok{, }\StringTok{"nominal"}\NormalTok{),}
+  \AttributeTok{clase =} \FunctionTok{c}\NormalTok{(}\StringTok{"continua"}\NormalTok{, }\StringTok{"continua"}\NormalTok{, }\StringTok{"continua"}\NormalTok{, }\StringTok{"cualitativa"}\NormalTok{, }\StringTok{"cualitativa"}\NormalTok{,}
+            \StringTok{"cualitativa"}\NormalTok{, }\StringTok{"cualitativa"}\NormalTok{, }\StringTok{"cualitativa"}\NormalTok{, }\StringTok{"continua"}\NormalTok{,}
+            \StringTok{"continua"}\NormalTok{, }\StringTok{"continua"}\NormalTok{, }\StringTok{"continua"}\NormalTok{, }\StringTok{"continua"}\NormalTok{, }\StringTok{"continua"}\NormalTok{,}
+            \StringTok{"continua"}\NormalTok{, }\StringTok{"discreta"}\NormalTok{, }\StringTok{"continua"}\NormalTok{, }\StringTok{"cualitativa"}\NormalTok{),}
+  \AttributeTok{rol =} \FunctionTok{c}\NormalTok{(}\StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{,}
+          \StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{,}
+          \StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{,}
+          \StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{, }\StringTok{"predictor"}\NormalTok{)}
+\NormalTok{)}
+\FunctionTok{print}\NormalTok{(diccionario)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                     columna    escala       clase       rol
+## 1                   Cod_Div     razon    continua predictor
+## 2                   Latitud     razon    continua predictor
+## 3                  Longitud     razon    continua predictor
+## 4                    Region   nominal cualitativa predictor
+## 5              Departamento   nominal cualitativa predictor
+## 6                 Municipio   nominal cualitativa predictor
+## 7                     Fecha   nominal cualitativa predictor
+## 8                      Hora   nominal cualitativa predictor
+## 9               Temperatura intervalo    continua predictor
+## 10     Velocidad_del_Viento     razon    continua predictor
+## 11     Direccion_del_Viento     razon    continua predictor
+## 12                  Presion     razon    continua predictor
+## 13           Punto_de_Rocio     razon    continua predictor
+## 14   Cobertura_total_nubosa     razon    continua predictor
+## 15       Precipitacion_mm_h     razon    continua predictor
+## 16 Probabilidad_de_Tormenta     razon    discreta predictor
+## 17                  Humedad     razon    continua predictor
+## 18               Pronostico   nominal cualitativa predictor
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Lo que R infiere solo, para comparar:}
+\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{columna =} \FunctionTok{names}\NormalTok{(datos),}
+           \AttributeTok{clase\_en\_R =} \FunctionTok{vapply}\NormalTok{(datos, }\ControlFlowTok{function}\NormalTok{(v) }\FunctionTok{class}\NormalTok{(v)[}\DecValTok{1}\NormalTok{], }\StringTok{""}\NormalTok{),}
+           \AttributeTok{distintos =} \FunctionTok{vapply}\NormalTok{(datos, }\ControlFlowTok{function}\NormalTok{(v) }\FunctionTok{length}\NormalTok{(}\FunctionTok{unique}\NormalTok{(v)), }\DecValTok{0}\DataTypeTok{L}\NormalTok{),}
+           \AttributeTok{row.names =} \ConstantTok{NULL}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                     columna clase_en_R distintos
+## 1                   Cod_Div    integer        59
+## 2                   Latitud    numeric        59
+## 3                  Longitud    numeric        59
+## 4                    Region  character         1
+## 5              Departamento  character         8
+## 6                 Municipio  character        59
+## 7                     Fecha  character         2
+## 8                      Hora  character         1
+## 9               Temperatura    numeric        54
+## 10     Velocidad_del_Viento    numeric        31
+## 11     Direccion_del_Viento    numeric        91
+## 12                  Presion    numeric        38
+## 13           Punto_de_Rocio    numeric        79
+## 14   Cobertura_total_nubosa    numeric        29
+## 15       Precipitacion_mm_h    numeric        13
+## 16 Probabilidad_de_Tormenta    integer         3
+## 17                  Humedad    numeric       100
+## 18               Pronostico  character         8
+\end{verbatim}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\subsection{Diagrama de caja ·
+Temperatura}\label{diagrama-de-caja-temperatura}
+
+Panel \texttt{f1.analisis.boxplot} · marcado a las 07:25:51
+
+\subsubsection{Para qué sirve}\label{para-quuxe9-sirve-3}
+
+Comparar posición y dispersión de un vistazo, y decidir qué variable
+merece una mirada más detallada. Es el resumen que escala: veinte
+boxplots en fila se leen sin esfuerzo; veinte histogramas, no.
+
+\subsubsection{Qué muestra}\label{quuxe9-muestra-3}
+
+El resumen de cinco números: mínimo dentro de la cerca, primer cuartil,
+mediana, tercer cuartil y máximo dentro de la cerca. La caja va de Q1 a
+Q3, así que encierra el 50 \% central de los datos, y la línea de
+adentro es la mediana.
+
+Los bigotes llegan hasta la observación más lejana que todavía cae
+dentro de 1,5 veces el rango intercuartílico:
+
+\[
+\text{cerca inferior} = Q_1 - 1{,}5 \cdot \text{RIC}
+\qquad
+\text{cerca superior} = Q_3 + 1{,}5 \cdot \text{RIC}
+\]
+
+Lo que queda afuera se dibuja punto por punto. Son los \textbf{atípicos
+de Tukey}, y son una convención, no un diagnóstico.
+
+\subsubsection{Qué buscar}\label{quuxe9-buscar-3}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Posición de la mediana dentro de la caja}: si está pegada a un
+  borde, la distribución es asimétrica.
+\item
+  \textbf{Largo relativo de los bigotes}: el más largo apunta hacia la
+  cola.
+\item
+  \textbf{Cuántos puntos quedan afuera} y qué tan lejos. Uno muy
+  separado del resto vale más atención que quince apenas pasada la
+  cerca.
+\item
+  \textbf{Ancho de la caja}: es el RIC, la medida de dispersión que no
+  se deja arrastrar por los extremos.
+\end{itemize}
+
+\subsubsection{Cuándo engaña}\label{cuuxe1ndo-engauxf1a-3}
+
+\textbf{Esconde las modas.} Una distribución con dos picos y otra con
+uno solo pueden dar cajas idénticas. El boxplot resume posiciones, no
+forma. Por eso está al lado del histograma y no en su lugar.
+
+\textbf{``Atípico'' acá significa ``pasó de 1,5·RIC'', nada más.} En una
+variable con cola derecha larga ---ingresos, tiempos de espera--- es
+normal que haya decenas de puntos afuera y ninguno es un error.
+Marcarlos no es motivo para borrarlos.
+
+\textbf{Con n chico los cuartiles son inestables.} Por debajo de unas 20
+observaciones, agregá los puntos encima de la caja: es más honesto
+mostrar el dato que su resumen.
+
+Parámetros:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Campo & Valor \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+variable & Temperatura \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.analisis.boxplot}
+\FunctionTok{ggplot}\NormalTok{(datos, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \StringTok{""}\NormalTok{, }\AttributeTok{y =}\NormalTok{ Temperatura)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{(}\AttributeTok{fill =} \StringTok{"steelblue"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_flip}\NormalTok{() }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \ConstantTok{NULL}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{taller-01_files/taller-01_files/figure-latex/unnamed-chunk-4-1.pdf}}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\subsection{Diagrama de caja ·
+Velocidad\_del\_Viento}\label{diagrama-de-caja-velocidad_del_viento}
+
+Panel \texttt{f1.analisis.boxplot} · marcado a las 07:25:51
+
+El texto de este panel está en la primera sección «Diagrama de caja».
+
+Parámetros:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Campo & Valor \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+variable & Velocidad\_del\_Viento \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.analisis.boxplot}
+\FunctionTok{ggplot}\NormalTok{(datos, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \StringTok{""}\NormalTok{, }\AttributeTok{y =}\NormalTok{ Velocidad\_del\_Viento)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{(}\AttributeTok{fill =} \StringTok{"steelblue"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_flip}\NormalTok{() }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \ConstantTok{NULL}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{taller-01_files/taller-01_files/figure-latex/unnamed-chunk-5-1.pdf}}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\subsection{Resumen numérico ·
+Temperatura}\label{resumen-numuxe9rico-temperatura}
+
+Panel \texttt{f1.analisis.resumen} · marcado a las 07:25:51
+
+\subsubsection{Para qué sirve}\label{para-quuxe9-sirve-4}
+
+Poner en números lo que la caja muestra en forma, y comprobar que las
+dos cuentan la misma historia. Es la tabla que se cita cuando hay que
+escribir el centro y la dispersión de una variable sin adjetivos.
+
+\subsubsection{Qué muestra}\label{quuxe9-muestra-4}
+
+Los cinco números de \texttt{summary()} ---mínimo, Q1, mediana, media,
+Q3, máximo--- más la desviación estándar, el rango intercuartílico y la
+asimetría, con el conteo de faltantes al lado.
+
+Qué estadísticos aparecen \textbf{lo decide la escala declarada en el
+Diccionario}, no el tipo de dato en memoria:
+
+\begin{verbatim}
+nominal  -> moda y tabla de frecuencias
+ordinal  -> moda, mediana y cuantiles
+intervalo -> todo menos los cocientes
+razon    -> todo
+\end{verbatim}
+
+La media de una nominal no sale porque no se calcula, no porque esté
+escondida.
+
+\subsubsection{Qué buscar}\label{quuxe9-buscar-4}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Media contra mediana}: si la media es menor, hay cola a la
+  izquierda; si es mayor, cola a la derecha. Es la regla de bolsillo de
+  la asimetría, y se confirma con el coeficiente.
+\item
+  \textbf{Desviación contra RIC}: cuando la desviación es mucho mayor de
+  lo que el RIC sugiere, unos pocos valores extremos la están inflando.
+\item
+  \textbf{Dispersión relativa}: un RIC de 2,5 °C sobre una mediana de 30
+  es el 8 \%; el mismo 2,5 sobre una mediana de 1,7 sería otra variable
+  completamente. Comparar dispersiones en unidades distintas no
+  significa nada.
+\item
+  \textbf{Faltantes}: cuántos son y si \texttt{summary()} los está
+  descontando.
+\end{itemize}
+
+\subsubsection{Cuándo engaña}\label{cuuxe1ndo-engauxf1a-4}
+
+\textbf{Un resumen no distingue formas.} Dos variables con los mismos
+seis números pueden tener una moda o dos. Por eso esta tabla va al lado
+del histograma y de la densidad, no en su lugar.
+
+\textbf{La media de una escala de intervalo se puede calcular; el
+cociente no.} 30 °C no es el doble de calor que 15 °C. El resumen no lo
+avisa: lo avisa la escala que se declaró en el Diccionario.
+
+\textbf{Con n chico los cuartiles se mueven mucho.} Por debajo de unas
+20 observaciones, agregar o quitar un dato cambia Q1 y Q3 de forma
+visible, y la tabla se lee con la misma desconfianza que la caja.
+
+Estado al marcarlo:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+estadistico & mostrado \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+n & 118 \\
+faltantes & 0 \\
+moda & 31 \\
+mediana & 30.4 \\
+q1 & 28.83 \\
+q3 & 31.3 \\
+rango\_inter & 2.475 \\
+minimo & 22.4 \\
+maximo & 32.7 \\
+media & 29.75 \\
+desviacion & 2.276 \\
+asimetria & -1.391 \\
+curtosis & 1.576 \\
+\end{longtable}
+}
+
+Parámetros:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Campo & Valor \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+variable & Temperatura \\
+escala & intervalo \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.analisis.resumen}
+\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Temperatura}
+\FunctionTok{print}\NormalTok{(}\FunctionTok{summary}\NormalTok{(x))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   22.40   28.82   30.40   29.75   31.30   32.70
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{v }\OtherTok{\textless{}{-}}\NormalTok{ x[}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(x)]}
+\NormalTok{centrado }\OtherTok{\textless{}{-}}\NormalTok{ v }\SpecialCharTok{{-}} \FunctionTok{mean}\NormalTok{(v)}
+\NormalTok{raiz }\OtherTok{\textless{}{-}} \FunctionTok{sqrt}\NormalTok{(}\FunctionTok{mean}\NormalTok{(centrado}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{))}
+\NormalTok{asimetria }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(centrado}\SpecialCharTok{\^{}}\DecValTok{3}\NormalTok{) }\SpecialCharTok{/}\NormalTok{ raiz}\SpecialCharTok{\^{}}\DecValTok{3}   \CommentTok{\# g1: hacia dónde va la cola}
+\NormalTok{curtosis }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(centrado}\SpecialCharTok{\^{}}\DecValTok{4}\NormalTok{) }\SpecialCharTok{/}\NormalTok{ raiz}\SpecialCharTok{\^{}}\DecValTok{4} \SpecialCharTok{{-}} \DecValTok{3}  \CommentTok{\# g2: exceso sobre la normal}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Desviación:"}\NormalTok{, }\FunctionTok{round}\NormalTok{(}\FunctionTok{sd}\NormalTok{(v), }\DecValTok{4}\NormalTok{), }\StringTok{"· RIC:"}\NormalTok{, }\FunctionTok{round}\NormalTok{(}\FunctionTok{IQR}\NormalTok{(v), }\DecValTok{4}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Desviación: 2.2756 · RIC: 2.475
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Asimetría:"}\NormalTok{, }\FunctionTok{round}\NormalTok{(asimetria, }\DecValTok{3}\NormalTok{),}
+    \StringTok{"· Curtosis:"}\NormalTok{, }\FunctionTok{round}\NormalTok{(curtosis, }\DecValTok{3}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Asimetría: -1.391 · Curtosis: 1.576
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"n:"}\NormalTok{, }\FunctionTok{length}\NormalTok{(v), }\StringTok{"· faltantes:"}\NormalTok{, }\FunctionTok{sum}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(x)), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## n: 118 · faltantes: 0
+\end{verbatim}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\subsection{Resumen numérico ·
+Velocidad\_del\_Viento}\label{resumen-numuxe9rico-velocidad_del_viento}
+
+Panel \texttt{f1.analisis.resumen} · marcado a las 07:25:51
+
+El texto de este panel está en la primera sección «Resumen numérico».
+
+Estado al marcarlo:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+estadistico & mostrado \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+n & 118 \\
+faltantes & 0 \\
+moda & 0.9 \\
+mediana & 1.7 \\
+q1 & 1 \\
+q3 & 2.175 \\
+rango\_inter & 1.175 \\
+minimo & 0.4 \\
+maximo & 3.7 \\
+media & 1.719 \\
+desviacion & 0.7892 \\
+asimetria & 0.4854 \\
+curtosis & -0.3234 \\
+coef\_variacion & 0.4592 \\
+\end{longtable}
+}
+
+Parámetros:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Campo & Valor \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+variable & Velocidad\_del\_Viento \\
+escala & razon \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.analisis.resumen}
+\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento}
+\FunctionTok{print}\NormalTok{(}\FunctionTok{summary}\NormalTok{(x))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   0.400   1.000   1.700   1.719   2.175   3.700
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{v }\OtherTok{\textless{}{-}}\NormalTok{ x[}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(x)]}
+\NormalTok{centrado }\OtherTok{\textless{}{-}}\NormalTok{ v }\SpecialCharTok{{-}} \FunctionTok{mean}\NormalTok{(v)}
+\NormalTok{raiz }\OtherTok{\textless{}{-}} \FunctionTok{sqrt}\NormalTok{(}\FunctionTok{mean}\NormalTok{(centrado}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{))}
+\NormalTok{asimetria }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(centrado}\SpecialCharTok{\^{}}\DecValTok{3}\NormalTok{) }\SpecialCharTok{/}\NormalTok{ raiz}\SpecialCharTok{\^{}}\DecValTok{3}   \CommentTok{\# g1: hacia dónde va la cola}
+\NormalTok{curtosis }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(centrado}\SpecialCharTok{\^{}}\DecValTok{4}\NormalTok{) }\SpecialCharTok{/}\NormalTok{ raiz}\SpecialCharTok{\^{}}\DecValTok{4} \SpecialCharTok{{-}} \DecValTok{3}  \CommentTok{\# g2: exceso sobre la normal}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Desviación:"}\NormalTok{, }\FunctionTok{round}\NormalTok{(}\FunctionTok{sd}\NormalTok{(v), }\DecValTok{4}\NormalTok{), }\StringTok{"· RIC:"}\NormalTok{, }\FunctionTok{round}\NormalTok{(}\FunctionTok{IQR}\NormalTok{(v), }\DecValTok{4}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Desviación: 0.7892 · RIC: 1.175
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Asimetría:"}\NormalTok{, }\FunctionTok{round}\NormalTok{(asimetria, }\DecValTok{3}\NormalTok{),}
+    \StringTok{"· Curtosis:"}\NormalTok{, }\FunctionTok{round}\NormalTok{(curtosis, }\DecValTok{3}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Asimetría: 0.485 · Curtosis: -0.323
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"n:"}\NormalTok{, }\FunctionTok{length}\NormalTok{(v), }\StringTok{"· faltantes:"}\NormalTok{, }\FunctionTok{sum}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(x)), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## n: 118 · faltantes: 0
+\end{verbatim}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\subsection{Atípicos detectados ·
+Presion}\label{atuxedpicos-detectados-presion}
+
+Panel \texttt{f1.calidad.atipicos} · marcado a las 07:25:51
+
+\subsubsection{Para qué sirve}\label{para-quuxe9-sirve-5}
+
+Decidir qué hacer con los valores extremos: corregirlos, dejarlos, o
+cambiar a un método robusto que no dependa de ellos. Lo que no se decide
+acá se decide solo más adelante, y casi siempre mal.
+
+\subsubsection{Qué muestra}\label{quuxe9-muestra-5}
+
+Cada observación contra su posición en el archivo, con los atípicos
+marcados según el criterio elegido. Los tres criterios responden
+preguntas distintas:
+
+\[
+\begin{aligned}
+\text{IQR} &: && x \notin \left[\, Q_1 - 1.5 \cdot \text{RIC} \;,\; Q_3 + 1.5 \cdot \text{RIC} \,\right] && \text{robusto, univariado} \\[4pt]
+z &: && \frac{\lvert x - \bar{x} \rvert}{s} > 3 && \text{no robusto, univariado} \\[4pt]
+\text{Mahalanobis} &: && d^2 > \chi^2_p(\alpha) && \text{multivariado}
+\end{aligned}
+\]
+
+Los dos primeros miran una columna; el tercero mira todas a la vez y
+encuentra filas que ninguna columna por separado delata.
+
+\subsubsection{Qué buscar}\label{quuxe9-buscar-5}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Puntos aislados muy lejos del resto}: candidatos a error de
+  captura.
+\item
+  \textbf{Grupos de atípicos juntos en el eje horizontal}: no son ruido,
+  es un tramo del archivo distinto ---otro año, otro instrumento, otro
+  criterio de medición.
+\item
+  \textbf{Muchos atípicos de un solo lado}: no hay error, hay asimetría.
+  La transformación log suele hacerlos desaparecer sin borrar nada.
+\item
+  \textbf{La diferencia entre criterios}: si z no marca nada y el RIC
+  marca veinte, es porque la media y la desviación ya fueron arrastradas
+  por los extremos.
+\end{itemize}
+
+\subsubsection{Cuándo engaña}\label{cuuxe1ndo-engauxf1a-5}
+
+\textbf{Atípico no es sinónimo de error.} El criterio es geométrico y no
+sabe nada del fenómeno. Borrar por costumbre es la peor decisión
+posible: en muchos estudios el atípico es el caso que motivó la
+investigación.
+
+\textbf{z se enmascara a sí mismo.} La media y la desviación estándar se
+calculan con los atípicos adentro, así que un valor extremo infla
+\texttt{s} y termina pareciendo razonable. Con un solo extremo muy
+grande, ningún punto supera 3 desvíos.
+
+\textbf{El 1,5 de Tukey es una convención, no un umbral óptimo.} Nada se
+rompe si lo movés; solo cambia cuántos puntos se pintan.
+
+\textbf{Mahalanobis exige covarianza invertible y datos completos.} Con
+colinealidad exacta o con filas incompletas devuelve vacío, y eso no
+significa que no haya atípicos.
+
+Parámetros:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Campo & Valor \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+columna & Presion \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.calidad.atipicos}
+\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Presion}
+\CommentTok{\# Ojo: boxplot() corta por bisagras y el panel del lab por cuartiles}
+\CommentTok{\# (tipo 7, que es con lo que ggplot2 dibuja la caja). Las cercas pueden}
+\CommentTok{\# diferir en décimas; el conteo de atípicos casi nunca cambia.}
+\NormalTok{caja }\OtherTok{\textless{}{-}} \FunctionTok{boxplot}\NormalTok{(x, }\AttributeTok{plot =} \ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{atipicos }\OtherTok{\textless{}{-}}\NormalTok{ caja}\SpecialCharTok{$}\NormalTok{out}
+\NormalTok{ric }\OtherTok{\textless{}{-}} \FunctionTok{diff}\NormalTok{(caja}\SpecialCharTok{$}\NormalTok{stats[}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{)])}
+\NormalTok{cercas }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(caja}\SpecialCharTok{$}\NormalTok{stats[}\DecValTok{2}\NormalTok{] }\SpecialCharTok{{-}} \FloatTok{1.5} \SpecialCharTok{*}\NormalTok{ ric, caja}\SpecialCharTok{$}\NormalTok{stats[}\DecValTok{4}\NormalTok{] }\SpecialCharTok{+} \FloatTok{1.5} \SpecialCharTok{*}\NormalTok{ ric)}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Atípicos por el criterio de Tukey:"}\NormalTok{, }\FunctionTok{length}\NormalTok{(atipicos),}
+    \StringTok{"de"}\NormalTok{, }\FunctionTok{length}\NormalTok{(x), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Atípicos por el criterio de Tukey: 1 de 118
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Cercas:"}\NormalTok{, }\FunctionTok{round}\NormalTok{(cercas, }\DecValTok{2}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Cercas: 1009.65 1015.65
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(atipicos)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1015.7
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{boxplot}\NormalTok{(x, }\AttributeTok{horizontal =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{main =} \StringTok{"Presion"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{taller-01_files/taller-01_files/figure-latex/unnamed-chunk-8-1.pdf}}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\subsection{Atípicos detectados ·
+Punto\_de\_Rocio}\label{atuxedpicos-detectados-punto_de_rocio}
+
+Panel \texttt{f1.calidad.atipicos} · marcado a las 07:25:51
+
+El texto de este panel está en la primera sección «Atípicos detectados».
+
+Parámetros:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Campo & Valor \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+columna & Punto\_de\_Rocio \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.calidad.atipicos}
+\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Punto\_de\_Rocio}
+\CommentTok{\# Ojo: boxplot() corta por bisagras y el panel del lab por cuartiles}
+\CommentTok{\# (tipo 7, que es con lo que ggplot2 dibuja la caja). Las cercas pueden}
+\CommentTok{\# diferir en décimas; el conteo de atípicos casi nunca cambia.}
+\NormalTok{caja }\OtherTok{\textless{}{-}} \FunctionTok{boxplot}\NormalTok{(x, }\AttributeTok{plot =} \ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{atipicos }\OtherTok{\textless{}{-}}\NormalTok{ caja}\SpecialCharTok{$}\NormalTok{out}
+\NormalTok{ric }\OtherTok{\textless{}{-}} \FunctionTok{diff}\NormalTok{(caja}\SpecialCharTok{$}\NormalTok{stats[}\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{4}\NormalTok{)])}
+\NormalTok{cercas }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(caja}\SpecialCharTok{$}\NormalTok{stats[}\DecValTok{2}\NormalTok{] }\SpecialCharTok{{-}} \FloatTok{1.5} \SpecialCharTok{*}\NormalTok{ ric, caja}\SpecialCharTok{$}\NormalTok{stats[}\DecValTok{4}\NormalTok{] }\SpecialCharTok{+} \FloatTok{1.5} \SpecialCharTok{*}\NormalTok{ ric)}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Atípicos por el criterio de Tukey:"}\NormalTok{, }\FunctionTok{length}\NormalTok{(atipicos),}
+    \StringTok{"de"}\NormalTok{, }\FunctionTok{length}\NormalTok{(x), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Atípicos por el criterio de Tukey: 0 de 118
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Cercas:"}\NormalTok{, }\FunctionTok{round}\NormalTok{(cercas, }\DecValTok{2}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Cercas: 13.35 30.55
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(atipicos)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## numeric(0)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{boxplot}\NormalTok{(x, }\AttributeTok{horizontal =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{main =} \StringTok{"Punto\_de\_Rocio"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{taller-01_files/taller-01_files/figure-latex/unnamed-chunk-9-1.pdf}}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\subsection{Diagrama de dispersión · Temperatura
+vs.~Velocidad\_del\_Viento}\label{diagrama-de-dispersiuxf3n-temperatura-vs.-velocidad_del_viento}
+
+Panel \texttt{f1.analisis.dispersion} · marcado a las 07:25:51
+
+\subsubsection{Para qué sirve}\label{para-quuxe9-sirve-6}
+
+Decidir si dos variables tienen relación, y de qué tipo, antes de
+resumirla en un coeficiente. Todo lo que venga después ---correlación,
+regresión--- da por hecha una forma; acá se comprueba que esa forma
+existe.
+
+\subsubsection{Qué muestra}\label{quuxe9-muestra-6}
+
+Cada observación como un punto en el plano de dos variables. Es el
+gráfico más directo que existe y el que sostiene toda la idea de
+regresión: si hay relación, se ve acá antes de ajustar nada.
+
+El subtítulo trae dos números que conviene leer juntos:
+
+\begin{verbatim}
+r   = correlación de Pearson  → mide relación LINEAL
+rho = correlación de Spearman → mide relación MONÓTONA
+\end{verbatim}
+
+Cuando \texttt{\textbar{}rho\textbar{}} es bastante mayor que
+\texttt{\textbar{}r\textbar{}}, hay relación y no es una recta.
+
+\subsubsection{Qué buscar}\label{quuxe9-buscar-6}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Forma}: recta, curva, abanico, nube sin estructura.
+\item
+  \textbf{Dirección y fuerza}: cuánto se aprieta la nube alrededor de su
+  tendencia.
+\item
+  \textbf{Heterocedasticidad}: si la dispersión vertical crece con x, el
+  abanico está avisando que la varianza no es constante.
+\item
+  \textbf{Grupos}: dos nubes separadas piden colorear por una tercera
+  variable.
+\item
+  \textbf{Puntos con influencia}: los que están lejos en x mueven una
+  recta ajustada mucho más que los que están lejos en y.
+\end{itemize}
+
+\subsubsection{Cuándo engaña}\label{cuuxe1ndo-engauxf1a-6}
+
+\textbf{El sobreploteo miente por saturación.} Con muchos puntos, la
+mancha negra oculta dónde está la masa: cualquier zona llena se ve igual
+de negra que una diez veces más densa. Las tres curas están en el panel:
+bajar la transparencia, agregar jitter cuando los valores están
+redondeados, o pasar a conteo por celda, que ya no dibuja puntos sino
+cuánta gente hay en cada casilla.
+
+\textbf{r = 0 no significa ``sin relación''.} Significa ``sin relación
+lineal''. Una parábola perfecta da r cercano a cero. Mirá la nube, no el
+número.
+
+\textbf{Correlación no es causa, y encima puede ser de un tercero.} Dos
+variables pueden moverse juntas porque una tercera las mueve a las dos.
+Colorear por esa tercera suele deshacer el espejismo en un segundo.
+
+\textbf{El muestreo cambia el dibujo, no la cuenta.} Si el badge de
+muestreo está activo, los puntos son una muestra con semilla; \texttt{r}
+y \texttt{rho} se calcularon sobre el total.
+
+Parámetros:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Campo & Valor \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+x & Temperatura \\
+y & Velocidad\_del\_Viento \\
+marginales & TRUE \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.analisis.dispersion}
+\NormalTok{grafico }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(datos, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Temperatura, }\AttributeTok{y =}\NormalTok{ Velocidad\_del\_Viento)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.6}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Temperatura"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Velocidad\_del\_Viento"}\NormalTok{)}
+\NormalTok{ggExtra}\SpecialCharTok{::}\FunctionTok{ggMarginal}\NormalTok{(grafico, }\AttributeTok{type =} \StringTok{"histogram"}\NormalTok{, }\AttributeTok{fill =} \StringTok{"grey70"}\NormalTok{,}
+                    \AttributeTok{color =} \StringTok{"white"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{taller-01_files/taller-01_files/figure-latex/unnamed-chunk-10-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Covarianza:"}\NormalTok{, }\FunctionTok{cov}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura, datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento, }\AttributeTok{use =} \StringTok{"complete.obs"}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Covarianza: 0.04718528
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Pearson:   "}\NormalTok{, }\FunctionTok{cor}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura, datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento, }\AttributeTok{use =} \StringTok{"complete.obs"}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Pearson:    0.02627245
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Spearman:  "}\NormalTok{, }\FunctionTok{cor}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura, datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento, }\AttributeTok{use =} \StringTok{"complete.obs"}\NormalTok{,}
+    \AttributeTok{method =} \StringTok{"spearman"}\NormalTok{), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Spearman:   -0.01089905
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(}\FunctionTok{cor.test}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura, datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Pearson's product-moment correlation
+## 
+## data:  datos$Temperatura and datos$Velocidad_del_Viento
+## t = 0.28306, df = 116, p-value = 0.7776
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  -0.1552241  0.2060533
+## sample estimates:
+##        cor 
+## 0.02627245
+\end{verbatim}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\subsection{Histograma · Temperatura}\label{histograma-temperatura}
+
+Panel \texttt{f1.analisis.histograma} · marcado a las 07:25:51
+
+\subsubsection{Para qué sirve}\label{para-quuxe9-sirve-7}
+
+Formarse la primera idea de una variable antes de decidir cualquier otra
+cosa sobre ella: si transformarla, si partirla por grupos, si desconfiar
+de cómo se midió. Es la card que se abre primero y la que más veces
+termina cambiando el plan.
+
+\subsubsection{Qué muestra}\label{quuxe9-muestra-7}
+
+Cuántas observaciones caen en cada intervalo de la variable. La altura
+de cada barra es una frecuencia; el ancho, un tramo del recorrido.
+
+Es el primer retrato de una variable continua y el antecedente directo
+de la idea de \textbf{densidad}: si en vez de contar dividís por el
+total y por el ancho del intervalo, el área total pasa a valer 1 y ya
+estás mirando una densidad empírica.
+
+\subsubsection{Qué buscar}\label{quuxe9-buscar-7}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Centro}: ¿dónde está el grueso de los datos? ¿Coincide con la
+  media?
+\item
+  \textbf{Dispersión}: ¿ancho o angosto respecto al recorrido posible?
+\item
+  \textbf{Forma}: ¿simétrico o con cola a un lado? Una cola derecha
+  larga es la firma de variables que no pueden ser negativas (ingresos,
+  tiempos, conteos), y suele pedir una transformación logarítmica.
+\item
+  \textbf{Modas}: ¿un pico o varios? Dos picos casi siempre significan
+  que hay dos poblaciones mezcladas, y ese es un hallazgo, no un
+  defecto.
+\item
+  \textbf{Huecos y paredes}: un vacío en medio, o un corte abrupto en un
+  valor redondo, suelen delatar cómo se recogió el dato, no cómo se
+  comporta.
+\end{itemize}
+
+\subsubsection{Cuándo engaña}\label{cuuxe1ndo-engauxf1a-7}
+
+\textbf{El número de clases cambia la historia.} Es la trampa central de
+este gráfico y por eso el control está a la vista. Con pocas barras todo
+parece una campana suave; con muchas, todo parece ruido dentado. Ninguna
+de las dos versiones es ``la verdadera'': son la misma tabla de datos
+leída con distinta resolución.
+
+Movelo. Si una moda secundaria aparece y desaparece según el número de
+clases, no confíes en ella todavía --- comparala con la densidad kernel,
+que suaviza sin depender de dónde caen los bordes.
+
+\textbf{El origen de los intervalos también importa.} Dos histogramas
+con el mismo ancho de clase pero desplazados medio intervalo pueden
+verse distintos. La densidad kernel no tiene ese problema, porque no
+tiene bordes.
+
+\textbf{Con pocos datos no dice casi nada.} Por debajo de unas 30
+observaciones, la forma es principalmente azar. Ahí conviene un diagrama
+de puntos o el de tallo y hojas, que no esconden ninguna observación.
+
+Parámetros:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Campo & Valor \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+variable & Temperatura \\
+densidad & TRUE \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.analisis.histograma}
+\FunctionTok{ggplot}\NormalTok{(datos, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Temperatura)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_histogram}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{y =} \FunctionTok{after\_stat}\NormalTok{(density)),}
+                 \AttributeTok{bins =} \DecValTok{30}\NormalTok{, }\AttributeTok{fill =} \StringTok{"steelblue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.4}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Temperatura"}\NormalTok{, }\AttributeTok{y =} \StringTok{"densidad"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{taller-01_files/taller-01_files/figure-latex/unnamed-chunk-11-1.pdf}}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\subsection{Q-Q normal de la variable ·
+Temperatura}\label{q-q-normal-de-la-variable-temperatura}
+
+Panel \texttt{f1.analisis.qq\_normal\_datos} · marcado a las 07:25:51
+
+\subsubsection{Para qué sirve}\label{para-quuxe9-sirve-8}
+
+Comprobar la normalidad de una variable con más resolución que un
+histograma, sobre todo en las colas. Es donde se distingue si el
+problema son unos pocos valores extremos o la forma completa, y esa
+diferencia decide si alcanza con recortar o hay que cambiar de método.
+
+\subsubsection{Qué muestra}\label{quuxe9-muestra-8}
+
+Los cuantiles observados de la variable contra los que tendría si fuera
+normal. Cada punto es una observación: en el eje horizontal, el valor
+que le tocaría bajo una normal; en el vertical, el que de verdad tiene.
+
+Si la variable es normal, los puntos caen sobre la recta de referencia,
+que pasa por el primer y el tercer cuartil. Los desvíos se leen por su
+forma, no por su tamaño.
+
+\subsubsection{Qué buscar}\label{quuxe9-buscar-8}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{S acostada}: asimetría. Si los puntos se despegan hacia arriba
+  en la derecha, hay cola derecha larga.
+\item
+  \textbf{Extremos que se van hacia afuera en los dos lados}: colas
+  pesadas, más masa lejos del centro de la que una normal admite.
+\item
+  \textbf{Extremos que se aplanan}: colas livianas, distribución más
+  corta que la normal.
+\item
+  \textbf{Escalones horizontales}: la variable está discretizada o
+  redondeada.
+\item
+  \textbf{Uno o dos puntos muy lejos de la recta al final}: atípicos, no
+  forma.
+\end{itemize}
+
+\subsubsection{Cuándo engaña}\label{cuuxe1ndo-engauxf1a-8}
+
+\textbf{La prueba y el gráfico se contradicen a propósito, y el gráfico
+tiene razón más veces.} Con n grande, Shapiro-Wilk rechaza la normalidad
+por desvíos minúsculos que no afectan a ningún método; con n chico, no
+rechaza nada porque no tiene potencia. El subtítulo trae la prueba y el
+p, pero la decisión se toma mirando la nube.
+
+\textbf{Casi ningún método pide que los DATOS sean normales.} La
+regresión pide normalidad de los \emph{residuos}, no de las variables.
+Este Q-Q sirve para conocer la forma de la variable y decidir una
+transformación, no para aprobar o reprobar un modelo que todavía no
+existe.
+
+\textbf{Con n \textless{} 20 la nube es tan errática que casi nada se
+puede concluir.} Se espera ver zigzag; no lo leas como estructura.
+
+Parámetros:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Campo & Valor \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+variable & Temperatura \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.analisis.qq\_normal\_datos}
+\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Temperatura}
+\FunctionTok{qqnorm}\NormalTok{(x, }\AttributeTok{main =} \StringTok{"Q{-}Q normal · Temperatura"}\NormalTok{)}
+\FunctionTok{qqline}\NormalTok{(x, }\AttributeTok{col =} \StringTok{"firebrick"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{taller-01_files/taller-01_files/figure-latex/unnamed-chunk-12-1.pdf}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Shapiro{-}Wilk:}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{); }\FunctionTok{print}\NormalTok{(}\FunctionTok{shapiro.test}\NormalTok{(x))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Shapiro-Wilk:
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  x
+## W = 0.85961, p-value = 3.403e-09
+\end{verbatim}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\subsection{Histograma · Presion}\label{histograma-presion}
+
+Panel \texttt{f1.analisis.histograma} · marcado a las 07:25:51
+
+El texto de este panel está en la primera sección «Histograma».
+
+Parámetros:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Campo & Valor \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+variable & Presion \\
+densidad & TRUE \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.analisis.histograma}
+\FunctionTok{ggplot}\NormalTok{(datos, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Presion)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_histogram}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{y =} \FunctionTok{after\_stat}\NormalTok{(density)),}
+                 \AttributeTok{bins =} \DecValTok{30}\NormalTok{, }\AttributeTok{fill =} \StringTok{"steelblue"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.4}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Presion"}\NormalTok{, }\AttributeTok{y =} \StringTok{"densidad"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{taller-01_files/taller-01_files/figure-latex/unnamed-chunk-13-1.pdf}}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\subsection{Densidad kernel ·
+Velocidad\_del\_Viento}\label{densidad-kernel-velocidad_del_viento}
+
+Panel \texttt{f1.analisis.densidad} · marcado a las 07:25:51
+
+\subsubsection{Para qué sirve}\label{para-quuxe9-sirve-9}
+
+Ver la forma de una variable sin la arbitrariedad del número de clases.
+Es la que conviene para juzgar si una transformación hizo falta y si
+funcionó, porque el cambio de forma se lee sin depender de dónde cayeron
+los bordes.
+
+\subsubsection{Qué muestra}\label{quuxe9-muestra-9}
+
+Una curva suave que estima la densidad de probabilidad de la variable.
+En vez de contar por intervalos, pone una campanita ---el
+\textbf{núcleo}--- sobre cada observación y las suma todas.
+
+El parámetro que manda es el ancho de banda \texttt{h}, no el número de
+clases:
+
+\[
+\hat{f}(x) = \frac{1}{n h} \sum_{i=1}^{n} K\!\left( \frac{x - x_i}{h} \right)
+\]
+
+El área bajo la curva vale 1, así que la altura no es una cuenta de
+casos: es densidad. Comparar dos densidades de muestras de tamaño
+distinto es legítimo; comparar dos histogramas de conteos, no.
+
+\subsubsection{Qué buscar}\label{quuxe9-buscar-9}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Modas}: los picos son la razón de ser de este gráfico. Dos
+  modas separadas y estables al mover \texttt{h} son dos poblaciones
+  mezcladas.
+\item
+  \textbf{Asimetría}: la cola más larga dice hacia dónde se estira la
+  variable.
+\item
+  \textbf{Colas}: qué tan rápido cae la curva en los extremos, comparado
+  con la campana que uno esperaría si fuera normal.
+\item
+  \textbf{El valor de h}: aparece en el subtítulo. Por defecto sale de
+  la regla de Silverman,
+  \texttt{h\ =\ 0.9\ ·\ min(s,\ RIC/1.34)\ ·\ n\^{}(−1/5)}, que es un
+  punto de partida razonable y nada más.
+\end{itemize}
+
+\subsubsection{Cuándo engaña}\label{cuuxe1ndo-engauxf1a-9}
+
+\textbf{h chico inventa modas; h grande las borra.} Es el mismo dilema
+del número de clases del histograma, con otro nombre: sesgo contra
+varianza. Movelo y fijate cuáles picos sobreviven. Los que aparecen y
+desaparecen no son estructura, son ruido suavizado con distinta fuerza.
+
+\textbf{Suaviza más allá del recorrido real.} El núcleo gaussiano tiene
+colas infinitas, así que la curva pone densidad en valores imposibles:
+edades negativas, porcentajes por encima de 100. Si la variable está
+acotada, la parte que se derrama por el borde es un artefacto del
+método.
+
+\textbf{Con pocos datos es casi solo el núcleo.} Con n = 10 estás
+mirando la forma de la campanita que elegiste, no la de la variable.
+
+Parámetros:
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}ll@{}}
+\toprule\noalign{}
+Campo & Valor \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+variable & Velocidad\_del\_Viento \\
+normal & TRUE \\
+\end{longtable}
+}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# f1.analisis.densidad}
+\FunctionTok{ggplot}\NormalTok{(datos, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Velocidad\_del\_Viento)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{stat\_function}\NormalTok{(}\AttributeTok{fun =}\NormalTok{ dnorm, }\AttributeTok{args =} \FunctionTok{list}\NormalTok{(}\AttributeTok{mean =} \FunctionTok{mean}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\AttributeTok{sd =} \FunctionTok{sd}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)), }\AttributeTok{color =} \StringTok{"firebrick"}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Valor"}\NormalTok{, }\AttributeTok{y =} \StringTok{"densidad"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\pandocbounded{\includegraphics[keepaspectratio]{taller-01_files/taller-01_files/figure-latex/unnamed-chunk-14-1.pdf}}
+
+\begin{quote}
+Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una figura
+sin lectura no es un resultado: es un adorno.
+\end{quote}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+14 paneles · dataset ori · generado en modo servidor.
+
+\end{document}

@@ -35,7 +35,8 @@ library(ggExtra)
 ```{r cargar-datos}
 # ORI.csv es la base del Taller 01 (IDEAM). Dejalo al lado del cuaderno o
 # ajustá `ruta`: se prueban los lugares habituales, en orden.
-ruta <- Filter(file.exists, c("ORI.csv", "data/ORI.csv",
+# ruta <- Filter(file.exists, c("ORI.csv", "data/ORI.csv",
+# https://www.kaggle.com/api/v1/datasets/download/overhcv/ori-dataset
                               "../../../data/ORI.csv"))[1]
 # La copia que reparte el curso viene en ISO-8859-1 y la de data/ del repo
 # en UTF-8. Se detecta en vez de suponer: suponer es lo que rompe las
@@ -222,7 +223,7 @@ propósito, y con la razón escrita al lado.
 
 ### Qué muestra
 
-```mermaid
+```{mermaid}
 ---
 config:
   layout: elk

@@ -118,6 +118,12 @@ De acuerdo con los propósitos de formación establecidos en el programa, se esp
 | 6, 7, 8 | Taller 3                | 25 %       | Sesión 7 |
 | Todos   | Proyecto aplicado       | 25 %       | Sesión 8 |
 
+> Integrantes:
+> - ANYELO LEONARDY	ALVAREZ BAQUERO
+> - DANIEL	ARIAS MUTIS
+> - TANIA FERNANDA	MORA CUBILLOS
+> - OVER HAIDER	CASTRILLÓN VALENCIA
+
 ---
 
 ## 9. Programación de actividades

@@ -109,5 +109,8 @@ graficar_balance <- function(antes, despues = NULL) {
     ggplot2::labs(x = NULL, y = "frecuencia", fill = NULL,
                   subtitle = sprintf("razon de desbalance %.2f a 1",
                                      attr(antes, "razon") %||% NA_real_)) +
-    tema_ggplot()
+    tema_ggplot() +
+    # Después del tema, que si no lo pisa. Con nombres de clase largos las
+    # etiquetas horizontales se montaban unas sobre otras.
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 20, hjust = 1))
 }

@@ -1,0 +1,1284 @@
+Exploración de datos · SDA Lab
+================
+2026-09-12 07:50
+
+Cuaderno generado desde SDA Lab. Cada sección corresponde a un panel
+marcado con la casilla **Añadir**: trae su texto explicativo, los
+parámetros con que se produjo y el código R que lo redibuja sobre
+`datos`.
+
+# Los datos
+
+| Campo              | Valor |
+|--------------------|-------|
+| Nombre             | ori   |
+| Fuente             | ori   |
+| Filas al cargar    | 4543  |
+| Columnas al cargar | 18    |
+| Filas ahora        | 118   |
+| Columnas ahora     | 18    |
+
+``` r
+# ORI.csv es la base del Taller 01 (IDEAM). Dejalo al lado del cuaderno o
+# ajustá `ruta`: se prueban los lugares habituales, en orden.
+ruta <- Filter(file.exists, c("ORI.csv", "data/ORI.csv",
+                              "../../../data/ORI.csv"))[1]
+# La copia que reparte el curso viene en ISO-8859-1 y la de data/ del repo
+# en UTF-8. Se detecta en vez de suponer: suponer es lo que rompe las
+# tildes de los municipios (ACACÍAS -> ACACÃAS).
+codificacion <- if (all(validUTF8(readLines(ruta, warn = FALSE,
+                                            encoding = "bytes"))))
+  "UTF-8" else "latin1"
+datos <- read.csv(ruta, sep = ";", dec = ".", fileEncoding = codificacion,
+                  stringsAsFactors = FALSE)
+names(datos) <- trimws(names(datos))   # el encabezado trae "Pronostico "
+cat("Al cargar:", nrow(datos), "filas x", ncol(datos), "columnas\n")
+```
+
+    ## Al cargar: 4543 filas x 18 columnas
+
+# Preparación
+
+``` r
+datos <- datos[datos$Hora %in% c("12:00"), ]
+cat("Después de la preparación:", nrow(datos), "filas\n")
+```
+
+    ## Después de la preparación: 118 filas
+
+# Análisis
+
+## Vista previa del dataset
+
+Panel `f1.fuente.vista_previa` · marcado a las 07:25:51
+
+### Para qué sirve
+
+Atrapar el desastre antes de gastar una hora en él. Es la única card que
+se mira sin haber decidido nada todavía, y la que dice si el archivo se
+cargó como creías o hay que volver a leerlo con otras opciones.
+
+### Qué muestra
+
+Las primeras filas de lo que se acaba de cargar, con el pie que dice
+cuántas se muestran y cuántas hay. Es la comprobación más barata que
+existe y la que más errores atrapa: si la tabla se ve mal acá, todo lo
+que venga después está mal.
+
+### Qué buscar
+
+- **Columnas de más o de menos**: casi siempre es el separador
+  equivocado en un CSV. Si todo el archivo entró en una sola columna,
+  probá `;` o tabulador.
+- **Números leídos como texto**: el separador decimal. Con coma decimal
+  y punto como separador de miles, `1.234,5` se convierte en texto y
+  ninguna operación numérica va a funcionar.
+- **Tildes rotas**: es la codificación. UTF-8 y Latin-1 se confunden
+  fácil.
+- **Faltantes disfrazados**: `.`, `-99`, `N/A`, celdas vacías. Si no se
+  declaran como faltantes, entran al análisis como valores reales.
+- **La primera fila**: ¿es un encabezado o ya es un dato?
+
+### Cuándo engaña
+
+**Ver diez filas correctas no dice nada de las 35.000 restantes.** El
+problema típico —una columna que cambia de formato a mitad del archivo—
+no aparece arriba. La subsección de Calidad es la que mira el archivo
+entero.
+
+**Un dataset del curso ya cargado también puede estar transformado.** Si
+en el pivot país×año ves ceros, muchos no son ceros observados: son
+pares sin dato rellenados en la agregación. El panel lo avisa al cargar
+y conviene creerle.
+
+**El orden de las filas puede no ser inocente.** Si el archivo viene
+ordenado por alguna variable, cualquier partición sin barajar hereda ese
+orden. Por eso la subsección de Partición baraja siempre y con semilla.
+
+Estado al marcarlo:
+
+| Cod_Div | Latitud | Longitud | Region | Departamento | Municipio | Fecha | Hora | Temperatura | Velocidad_del_Viento | Direccion_del_Viento | Presion | Punto_de_Rocio | Cobertura_total_nubosa | Precipitacion_mm_h | Probabilidad_de_Tormenta | Humedad | Pronostico |
+|----|----|----|----|----|----|----|----|----|----|----|----|----|----|----|----|----|----|
+| 50006000 | 3.99012 | -73.76594 | ORI | META | ACACÍAS | 26/08/2022 | 12:00 | 26.5 | 1.2 | 179.8 | 1014.2 | 18.3 | 70 | 0 | 0 | 60.7 | Parcialmente Nublado |
+| 50006000 | 3.99012 | -73.76594 | ORI | META | ACACÍAS | 27/08/2022 | 12:00 | 27.3 | 1.7 | 113.7 | 1013.9 | 21 | 80 | 0 | 0 | 68.7 | Nublado |
+| 85010000 | 5.17269 | -72.5463 | ORI | CASANARE | AGUAZUL | 26/08/2022 | 12:00 | 30.2 | 2.1 | 176.7 | 1013 | 21.8 | 49.8 | 0 | 0 | 60.9 | Parcialmente Nublado |
+| 85010000 | 5.17269 | -72.5463 | ORI | CASANARE | AGUAZUL | 27/08/2022 | 12:00 | 30.4 | 1.7 | 200 | 1013.2 | 24.4 | 63.2 | 0 | 0 | 70.4 | Parcialmente Nublado |
+| 81001000 | 7.073902 | -70.74801 | ORI | ARAUCA | ARAUCA | 26/08/2022 | 12:00 | 30.4 | 2 | 150 | 1012 | 22.5 | 40 | 0 | 0 | 62.7 | Parcialmente Nublado |
+| 81001000 | 7.073902 | -70.74801 | ORI | ARAUCA | ARAUCA | 27/08/2022 | 12:00 | 29 | 0.7 | 187.1 | 1011.6 | 22.3 | 80 | 0 | 0 | 67.5 | Nublado |
+| 81065000 | 7.026981 | -71.42675 | ORI | ARAUCA | ARAUQUITA | 26/08/2022 | 12:00 | 29.7 | 2.1 | 200.7 | 1011.6 | 18.3 | 50 | 0 | 0 | 50.3 | Parcialmente Nublado |
+| 81065000 | 7.026981 | -71.42675 | ORI | ARAUCA | ARAUQUITA | 27/08/2022 | 12:00 | 28.8 | 0.5 | 356.5 | 1011.9 | 24.5 | 80 | 0.8 | 0 | 77.6 | Nublado - Lluvia |
+| 50110000 | 4.567202 | -72.96328 | ORI | META | BARRANCA DE UPÍA | 26/08/2022 | 12:00 | 31 | 2 | 200 | 1012.2 | 21.4 | 50 | 0 | 0 | 56.7 | Parcialmente Nublado |
+| 50110000 | 4.567202 | -72.96328 | ORI | META | BARRANCA DE UPÍA | 27/08/2022 | 12:00 | 31.5 | 0.7 | 210.5 | 1012.8 | 28.7 | 80 | 0 | 0 | 85 | Nublado |
+
+``` r
+# f1.fuente.vista_previa
+cat("Unidades estadísticas (filas):", nrow(datos), "\n")
+```
+
+    ## Unidades estadísticas (filas): 118
+
+``` r
+cat("Variables (columnas):     ", ncol(datos), "\n")
+```
+
+    ## Variables (columnas):      18
+
+``` r
+utils::head(datos, 10)
+```
+
+    ##      Cod_Div  Latitud  Longitud Region Departamento        Municipio      Fecha
+    ## 21  50006000 3.990120 -73.76594    ORI         META          ACACÍAS 26/08/2022
+    ## 45  50006000 3.990120 -73.76594    ORI         META          ACACÍAS 27/08/2022
+    ## 98  85010000 5.172690 -72.54630    ORI     CASANARE          AGUAZUL 26/08/2022
+    ## 122 85010000 5.172690 -72.54630    ORI     CASANARE          AGUAZUL 27/08/2022
+    ## 175 81001000 7.073902 -70.74801    ORI       ARAUCA           ARAUCA 26/08/2022
+    ## 199 81001000 7.073902 -70.74801    ORI       ARAUCA           ARAUCA 27/08/2022
+    ## 252 81065000 7.026981 -71.42675    ORI       ARAUCA        ARAUQUITA 26/08/2022
+    ## 276 81065000 7.026981 -71.42675    ORI       ARAUCA        ARAUQUITA 27/08/2022
+    ## 329 50110000 4.567202 -72.96328    ORI         META BARRANCA DE UPÍA 26/08/2022
+    ## 353 50110000 4.567202 -72.96328    ORI         META BARRANCA DE UPÍA 27/08/2022
+    ##      Hora Temperatura Velocidad_del_Viento Direccion_del_Viento Presion
+    ## 21  12:00        26.5                  1.2                179.8  1014.2
+    ## 45  12:00        27.3                  1.7                113.7  1013.9
+    ## 98  12:00        30.2                  2.1                176.7  1013.0
+    ## 122 12:00        30.4                  1.7                200.0  1013.2
+    ## 175 12:00        30.4                  2.0                150.0  1012.0
+    ## 199 12:00        29.0                  0.7                187.1  1011.6
+    ## 252 12:00        29.7                  2.1                200.7  1011.6
+    ## 276 12:00        28.8                  0.5                356.5  1011.9
+    ## 329 12:00        31.0                  2.0                200.0  1012.2
+    ## 353 12:00        31.5                  0.7                210.5  1012.8
+    ##     Punto_de_Rocio Cobertura_total_nubosa Precipitacion_mm_h
+    ## 21            18.3                   70.0                0.0
+    ## 45            21.0                   80.0                0.0
+    ## 98            21.8                   49.8                0.0
+    ## 122           24.4                   63.2                0.0
+    ## 175           22.5                   40.0                0.0
+    ## 199           22.3                   80.0                0.0
+    ## 252           18.3                   50.0                0.0
+    ## 276           24.5                   80.0                0.8
+    ## 329           21.4                   50.0                0.0
+    ## 353           28.7                   80.0                0.0
+    ##     Probabilidad_de_Tormenta Humedad           Pronostico
+    ## 21                         0    60.7 Parcialmente Nublado
+    ## 45                         0    68.7              Nublado
+    ## 98                         0    60.9 Parcialmente Nublado
+    ## 122                        0    70.4 Parcialmente Nublado
+    ## 175                        0    62.7 Parcialmente Nublado
+    ## 199                        0    67.5              Nublado
+    ## 252                        0    50.3 Parcialmente Nublado
+    ## 276                        0    77.6     Nublado - Lluvia
+    ## 329                        0    56.7 Parcialmente Nublado
+    ## 353                        0    85.0              Nublado
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Frecuencias por clase · Pronostico
+
+Panel `f1.balanceo.frecuencias` · marcado a las 07:25:51
+
+### Para qué sirve
+
+Ver de cuánto es el desbalance y decidir si hace falta hacer algo. La
+respuesta muchas veces es que no: un 60/40 no necesita tratamiento, y
+rebalancear por costumbre estropea la calibración de las probabilidades
+que salen del modelo.
+
+### Qué muestra
+
+Cuántas observaciones hay por clase, antes y después de rebalancear. El
+subtítulo trae la razón de desbalance: cuántas veces la clase
+mayoritaria supera a la minoritaria.
+
+Las tres técnicas disponibles no traen dependencias nuevas y no inventan
+datos:
+
+- **sub-muestreo** — recorta las clases grandes. Se pierde información
+  real.
+- **sobre-muestreo** — repite filas de las chicas. No agrega
+  información.
+- **bootstrap** — remuestrea todas con reemplazo hasta un tamaño común.
+
+SMOTE, que interpola entre vecinos y sí fabrica filas nuevas, está en el
+catálogo como pendiente: pedirlo suma un paquete al bundle.
+
+### Qué buscar
+
+- **La razón de desbalance**: por debajo de 3 a 1 casi nunca hace falta
+  tocar nada. Por encima de 20 a 1 el problema es real.
+- **Cuánto se pierde con sub-muestreo**: si la minoritaria tiene 40
+  casos, la mayoritaria queda en 40 y tiraste miles de filas.
+- **Cuánto se repite con sobre-muestreo**: si una fila aparece 30 veces,
+  el modelo la va a memorizar.
+- **Clases con menos de 10 casos**: ninguna técnica las salva.
+
+### Cuándo engaña
+
+**Balancear cambia las probabilidades a priori.** Después de
+rebalancear, las probabilidades que estime el modelo no son las de la
+población: están calibradas para el mundo artificial 50/50 que
+construiste.
+
+**El desbalance a veces no es el problema.** Con clases separables, un
+modelo aprende bien con 1 % de positivos. Lo que suele estar mal es la
+métrica: exactitud con 99 % de negativos se gana prediciendo siempre
+“no”. Antes de remuestrear, probá cambiar de métrica o usar pesos de
+clase.
+
+**Nunca se rebalancea la partición de prueba.** Solo el entrenamiento.
+Si tocás la prueba, estás midiendo el desempeño en una población que no
+existe.
+
+Estado al marcarlo:
+
+| clase                                  | n   | proporcion |
+|----------------------------------------|-----|------------|
+| Parcialmente Nublado                   | 63  | 0.5338983  |
+| Nublado                                | 31  | 0.2627119  |
+| Parcialmente Nublado - Lluvia Fuerte   | 6   | 0.05084746 |
+| Parcialmente Nublado - Llovizna        | 5   | 0.04237288 |
+| Nublado - Llovizna                     | 4   | 0.03389831 |
+| Nublado - Lluvia                       | 4   | 0.03389831 |
+| Despejado                              | 3   | 0.02542373 |
+| Parcialmente Nublado - Tormenta Ligera | 2   | 0.01694915 |
+
+Parámetros:
+
+| Campo | Valor      |
+|-------|------------|
+| clase | Pronostico |
+
+``` r
+# f1.balanceo.frecuencias
+tabla <- sort(table(datos$Pronostico), decreasing = TRUE)
+print(cbind(n = tabla, prop = round(prop.table(tabla), 3)))
+```
+
+    ##                                         n  prop
+    ## Parcialmente Nublado                   63 0.534
+    ## Nublado                                31 0.263
+    ## Parcialmente Nublado - Lluvia Fuerte    6 0.051
+    ## Parcialmente Nublado - Llovizna         5 0.042
+    ## Nublado - Llovizna                      4 0.034
+    ## Nublado - Lluvia                        4 0.034
+    ## Despejado                               3 0.025
+    ## Parcialmente Nublado - Tormenta Ligera  2 0.017
+
+``` r
+cat("Más frecuente:  ", names(tabla)[1], " (n = ", tabla[1], ")\n",
+    sep = "")
+```
+
+    ## Más frecuente:  Parcialmente Nublado (n = 63)
+
+``` r
+cat("Menos frecuente: ", names(tabla)[length(tabla)],
+    " (n = ", tabla[length(tabla)], ")\n", sep = "")
+```
+
+    ## Menos frecuente: Parcialmente Nublado - Tormenta Ligera (n = 2)
+
+``` r
+barplot(tabla, horiz = TRUE, las = 1, cex.names = 0.7,
+        main = "Frecuencias de Pronostico")
+```
+
+![](taller-01_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Diccionario de columnas
+
+Panel `f1.diccionario.tabla` · marcado a las 07:25:51
+
+### Para qué sirve
+
+Declarar qué es cada columna, que es lo que después habilita o bloquea
+cada operación en el resto de la app. Es la card con más consecuencias
+del proyecto: marcar una variable como nominal apaga su media y su
+histograma a propósito, y con la razón escrita al lado.
+
+### Qué muestra
+
+``` mermaid
+---
+config:
+  layout: elk
+  theme: default
+---
+flowchart TD
+    V["CLASIFICACIÓN DE VARIABLES<br/>(NB1: escala × clase, ejes independientes)"]
+
+    V --> ESC["EJE 1 · ESCALA<br/>¿qué operaciones tienen sentido?"]
+    V --> CLA["EJE 2 · CLASE<br/>¿cuál es el recorrido?"]
+
+    %% ================= EJE 1: ESCALA =================
+    ESC --> CUAL["CUALITATIVA<br/>mide atributos → categorías"]
+    ESC --> CUAN["CUANTITATIVA<br/>mide cantidades → números"]
+
+    CUAL --> NOM["NOMINAL<br/>solo = / ≠"]
+    CUAL --> ORD["ORDINAL<br/>= / ≠ + orden<br/>(distancias sin significado)"]
+    CUAN --> INT["INTERVALO<br/>+ intervalos equidistantes<br/>CERO RELATIVO"]
+    CUAN --> RAZ["RAZÓN<br/>+ razones válidas<br/>CERO ABSOLUTO"]
+
+    NOM --> NOME["Municipio, Pronóstico, Region<br/>(código postal: numérico pero nominal)"]
+    ORD --> ORDE["Estrato {bajo, medio, alto}<br/>consumo eléctrico {alto, medio, bajo}"]
+    INT --> INTE["Temperatura en °C<br/>0 °C no es ausencia de temperatura"]
+    RAZ --> RAZE["Velocidad del viento (mph)<br/>Presion, Latitud — 0 = ausencia"]
+
+    %% ================= EJE 2: CLASE =================
+    CLA --> CUAL2["si es CUALITATIVA"]
+    CLA --> CUAN2["si es CUANTITATIVA"]
+
+    CUAL2 --> BIN["BINARIA / DICOTÓMICA<br/>2 categorías"]
+    CUAL2 --> POL["POLITÓMICA<br/>más de 2 categorías"]
+    CUAN2 --> DIS["DISCRETA<br/>valores contables"]
+    CUAN2 --> CON["CONTINUA<br/>cualquier valor de un intervalo real"]
+
+    BIN --> BINE["Sí / No · Presence {Sí, No}"]
+    POL --> POLE["Pronóstico (11 categorías)<br/>Municipio, Departamento"]
+    DIS --> DISE["n.° de turbinas<br/>n.° de hijos"]
+    CON --> CONE["Temperatura, Presion<br/>Velocidad del viento"]
+
+    %% ================= ESTILOS =================
+    classDef raiz fill:#65e94f,stroke:#222,stroke-width:2px,color:#000,font-weight:bold;
+    classDef eje fill:#91cbe8,stroke:#555,stroke-width:1px,color:#000,font-weight:bold;
+    classDef grupo fill:#ffffb0,stroke:#777,stroke-width:1px,color:#000,font-weight:bold;
+    classDef tipo fill:#e58be8,stroke:#777,stroke-width:1px,color:#000,font-weight:bold;
+    classDef ejemplo fill:#8de8d8,stroke:#777,stroke-width:1px,color:#000;
+
+    class V raiz;
+    class ESC,CLA eje;
+    class CUAL,CUAN,CUAL2,CUAN2 grupo;
+    class NOM,ORD,INT,RAZ,BIN,POL,DIS,CON tipo;
+    class NOME,ORDE,INTE,RAZE,BINE,POLE,DISE,CONE ejemplo;
+```
+
+Una fila por columna del dataset, con lo que la app necesita saber de
+ella: etiqueta, escala de medición, clase y rol.
+
+    escala ∈ {nominal, ordinal, intervalo, razon}
+    clase  ∈ {cualitativa, discreta, continua}
+    rol    ∈ {respuesta, predictor, id, grupo, peso, ignorar}
+
+La escala no se puede deducir del tipo de dato, y ahí está todo el
+punto: un código postal es numérico y es nominal; un año es entero y es
+de intervalo, porque su cero es convencional. La autodetección propone;
+vos corregís.
+
+**Esta tabla gobierna el resto de la app.** Si marcás una columna como
+nominal, el selector de media se deshabilita y aparece la moda, con la
+razón escrita al lado. Los métodos de la fase 2 se filtran por lo mismo.
+
+### Qué buscar
+
+- **Identificadores marcados como predictores**: un `id` correlaciona
+  con cualquier cosa por accidente y arruina un modelo en silencio.
+- **Códigos numéricos que son categorías**: 1 = norte, 2 = sur.
+  Numéricos en memoria, nominales de verdad.
+- **Años y fechas marcados como razón**: son de intervalo. Duplicar un
+  año no significa nada.
+- **Columnas con muchos faltantes**: el porcentaje está en la tabla. Por
+  encima de 40 %, imputar es inventar estructura.
+- **Columnas constantes**: no aportan información y sobreviven hasta la
+  fase 4 si nadie las marca como ignorar.
+
+### Cuándo engaña
+
+**La detección automática acierta el tipo, no el significado.** Ve
+números y propone razón; ve texto y propone nominal. Ordinal e intervalo
+no los propone nunca, porque no se pueden inferir: los tenés que poner
+vos.
+
+**Un rol mal puesto no rompe nada hoy.** La app te deja seguir y el
+error aparece dos fases después, cuando un modelo da un R²
+sospechosamente perfecto porque metiste el identificador como predictor.
+
+**Los avisos de conflicto son heurísticos.** Que una columna se llame
+`year` no prueba que sea un año. El aviso pregunta; la decisión es tuya.
+
+``` r
+# f1.diccionario.tabla
+# Escala, clase y rol los declara quien analiza: R no los puede
+# deducir del tipo de dato (un código postal es numérico y nominal;
+# los grados centígrados son de intervalo, no de razón).
+diccionario <- data.frame(
+  columna = c("Cod_Div", "Latitud", "Longitud", "Region", "Departamento",
+              "Municipio", "Fecha", "Hora", "Temperatura",
+              "Velocidad_del_Viento", "Direccion_del_Viento", "Presion",
+              "Punto_de_Rocio", "Cobertura_total_nubosa",
+              "Precipitacion_mm_h", "Probabilidad_de_Tormenta", "Humedad",
+              "Pronostico"),
+  escala = c("razon", "razon", "razon", "nominal", "nominal", "nominal",
+             "nominal", "nominal", "intervalo", "razon", "razon", "razon",
+             "razon", "razon", "razon", "razon", "razon", "nominal"),
+  clase = c("continua", "continua", "continua", "cualitativa", "cualitativa",
+            "cualitativa", "cualitativa", "cualitativa", "continua",
+            "continua", "continua", "continua", "continua", "continua",
+            "continua", "discreta", "continua", "cualitativa"),
+  rol = c("predictor", "predictor", "predictor", "predictor", "predictor",
+          "predictor", "predictor", "predictor", "predictor", "predictor",
+          "predictor", "predictor", "predictor", "predictor", "predictor",
+          "predictor", "predictor", "predictor")
+)
+print(diccionario)
+```
+
+    ##                     columna    escala       clase       rol
+    ## 1                   Cod_Div     razon    continua predictor
+    ## 2                   Latitud     razon    continua predictor
+    ## 3                  Longitud     razon    continua predictor
+    ## 4                    Region   nominal cualitativa predictor
+    ## 5              Departamento   nominal cualitativa predictor
+    ## 6                 Municipio   nominal cualitativa predictor
+    ## 7                     Fecha   nominal cualitativa predictor
+    ## 8                      Hora   nominal cualitativa predictor
+    ## 9               Temperatura intervalo    continua predictor
+    ## 10     Velocidad_del_Viento     razon    continua predictor
+    ## 11     Direccion_del_Viento     razon    continua predictor
+    ## 12                  Presion     razon    continua predictor
+    ## 13           Punto_de_Rocio     razon    continua predictor
+    ## 14   Cobertura_total_nubosa     razon    continua predictor
+    ## 15       Precipitacion_mm_h     razon    continua predictor
+    ## 16 Probabilidad_de_Tormenta     razon    discreta predictor
+    ## 17                  Humedad     razon    continua predictor
+    ## 18               Pronostico   nominal cualitativa predictor
+
+``` r
+# Lo que R infiere solo, para comparar:
+data.frame(columna = names(datos),
+           clase_en_R = vapply(datos, function(v) class(v)[1], ""),
+           distintos = vapply(datos, function(v) length(unique(v)), 0L),
+           row.names = NULL)
+```
+
+    ##                     columna clase_en_R distintos
+    ## 1                   Cod_Div    integer        59
+    ## 2                   Latitud    numeric        59
+    ## 3                  Longitud    numeric        59
+    ## 4                    Region  character         1
+    ## 5              Departamento  character         8
+    ## 6                 Municipio  character        59
+    ## 7                     Fecha  character         2
+    ## 8                      Hora  character         1
+    ## 9               Temperatura    numeric        54
+    ## 10     Velocidad_del_Viento    numeric        31
+    ## 11     Direccion_del_Viento    numeric        91
+    ## 12                  Presion    numeric        38
+    ## 13           Punto_de_Rocio    numeric        79
+    ## 14   Cobertura_total_nubosa    numeric        29
+    ## 15       Precipitacion_mm_h    numeric        13
+    ## 16 Probabilidad_de_Tormenta    integer         3
+    ## 17                  Humedad    numeric       100
+    ## 18               Pronostico  character         8
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Diagrama de caja · Temperatura
+
+Panel `f1.analisis.boxplot` · marcado a las 07:25:51
+
+### Para qué sirve
+
+Comparar posición y dispersión de un vistazo, y decidir qué variable
+merece una mirada más detallada. Es el resumen que escala: veinte
+boxplots en fila se leen sin esfuerzo; veinte histogramas, no.
+
+### Qué muestra
+
+El resumen de cinco números: mínimo dentro de la cerca, primer cuartil,
+mediana, tercer cuartil y máximo dentro de la cerca. La caja va de Q1 a
+Q3, así que encierra el 50 % central de los datos, y la línea de adentro
+es la mediana.
+
+Los bigotes llegan hasta la observación más lejana que todavía cae
+dentro de 1,5 veces el rango intercuartílico:
+
+$$
+\text{cerca inferior} = Q_1 - 1{,}5 \cdot \text{RIC}
+\qquad
+\text{cerca superior} = Q_3 + 1{,}5 \cdot \text{RIC}
+$$
+
+Lo que queda afuera se dibuja punto por punto. Son los **atípicos de
+Tukey**, y son una convención, no un diagnóstico.
+
+### Qué buscar
+
+- **Posición de la mediana dentro de la caja**: si está pegada a un
+  borde, la distribución es asimétrica.
+- **Largo relativo de los bigotes**: el más largo apunta hacia la cola.
+- **Cuántos puntos quedan afuera** y qué tan lejos. Uno muy separado del
+  resto vale más atención que quince apenas pasada la cerca.
+- **Ancho de la caja**: es el RIC, la medida de dispersión que no se
+  deja arrastrar por los extremos.
+
+### Cuándo engaña
+
+**Esconde las modas.** Una distribución con dos picos y otra con uno
+solo pueden dar cajas idénticas. El boxplot resume posiciones, no forma.
+Por eso está al lado del histograma y no en su lugar.
+
+**“Atípico” acá significa “pasó de 1,5·RIC”, nada más.** En una variable
+con cola derecha larga —ingresos, tiempos de espera— es normal que haya
+decenas de puntos afuera y ninguno es un error. Marcarlos no es motivo
+para borrarlos.
+
+**Con n chico los cuartiles son inestables.** Por debajo de unas 20
+observaciones, agregá los puntos encima de la caja: es más honesto
+mostrar el dato que su resumen.
+
+Parámetros:
+
+| Campo    | Valor       |
+|----------|-------------|
+| variable | Temperatura |
+
+``` r
+# f1.analisis.boxplot
+ggplot(datos, aes(x = "", y = Temperatura)) +
+  geom_boxplot(fill = "steelblue", alpha = 0.5) +
+  coord_flip() + labs(x = NULL)
+```
+
+![](taller-01_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Diagrama de caja · Velocidad_del_Viento
+
+Panel `f1.analisis.boxplot` · marcado a las 07:25:51
+
+El texto de este panel está en la primera sección «Diagrama de caja».
+
+Parámetros:
+
+| Campo    | Valor                |
+|----------|----------------------|
+| variable | Velocidad_del_Viento |
+
+``` r
+# f1.analisis.boxplot
+ggplot(datos, aes(x = "", y = Velocidad_del_Viento)) +
+  geom_boxplot(fill = "steelblue", alpha = 0.5) +
+  coord_flip() + labs(x = NULL)
+```
+
+![](taller-01_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Resumen numérico · Temperatura
+
+Panel `f1.analisis.resumen` · marcado a las 07:25:51
+
+### Para qué sirve
+
+Poner en números lo que la caja muestra en forma, y comprobar que las
+dos cuentan la misma historia. Es la tabla que se cita cuando hay que
+escribir el centro y la dispersión de una variable sin adjetivos.
+
+### Qué muestra
+
+Los cinco números de `summary()` —mínimo, Q1, mediana, media, Q3,
+máximo— más la desviación estándar, el rango intercuartílico y la
+asimetría, con el conteo de faltantes al lado.
+
+Qué estadísticos aparecen **lo decide la escala declarada en el
+Diccionario**, no el tipo de dato en memoria:
+
+    nominal  -> moda y tabla de frecuencias
+    ordinal  -> moda, mediana y cuantiles
+    intervalo -> todo menos los cocientes
+    razon    -> todo
+
+La media de una nominal no sale porque no se calcula, no porque esté
+escondida.
+
+### Qué buscar
+
+- **Media contra mediana**: si la media es menor, hay cola a la
+  izquierda; si es mayor, cola a la derecha. Es la regla de bolsillo de
+  la asimetría, y se confirma con el coeficiente.
+- **Desviación contra RIC**: cuando la desviación es mucho mayor de lo
+  que el RIC sugiere, unos pocos valores extremos la están inflando.
+- **Dispersión relativa**: un RIC de 2,5 °C sobre una mediana de 30 es
+  el 8 %; el mismo 2,5 sobre una mediana de 1,7 sería otra variable
+  completamente. Comparar dispersiones en unidades distintas no
+  significa nada.
+- **Faltantes**: cuántos son y si `summary()` los está descontando.
+
+### Cuándo engaña
+
+**Un resumen no distingue formas.** Dos variables con los mismos seis
+números pueden tener una moda o dos. Por eso esta tabla va al lado del
+histograma y de la densidad, no en su lugar.
+
+**La media de una escala de intervalo se puede calcular; el cociente
+no.** 30 °C no es el doble de calor que 15 °C. El resumen no lo avisa:
+lo avisa la escala que se declaró en el Diccionario.
+
+**Con n chico los cuartiles se mueven mucho.** Por debajo de unas 20
+observaciones, agregar o quitar un dato cambia Q1 y Q3 de forma visible,
+y la tabla se lee con la misma desconfianza que la caja.
+
+Estado al marcarlo:
+
+| estadistico | mostrado |
+|-------------|----------|
+| n           | 118      |
+| faltantes   | 0        |
+| moda        | 31       |
+| mediana     | 30.4     |
+| q1          | 28.83    |
+| q3          | 31.3     |
+| rango_inter | 2.475    |
+| minimo      | 22.4     |
+| maximo      | 32.7     |
+| media       | 29.75    |
+| desviacion  | 2.276    |
+| asimetria   | -1.391   |
+| curtosis    | 1.576    |
+
+Parámetros:
+
+| Campo    | Valor       |
+|----------|-------------|
+| variable | Temperatura |
+| escala   | intervalo   |
+
+``` r
+# f1.analisis.resumen
+x <- datos$Temperatura
+print(summary(x))
+```
+
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##   22.40   28.82   30.40   29.75   31.30   32.70
+
+``` r
+v <- x[!is.na(x)]
+centrado <- v - mean(v)
+raiz <- sqrt(mean(centrado^2))
+asimetria <- mean(centrado^3) / raiz^3   # g1: hacia dónde va la cola
+curtosis <- mean(centrado^4) / raiz^4 - 3  # g2: exceso sobre la normal
+cat("Desviación:", round(sd(v), 4), "· RIC:", round(IQR(v), 4), "\n")
+```
+
+    ## Desviación: 2.2756 · RIC: 2.475
+
+``` r
+cat("Asimetría:", round(asimetria, 3),
+    "· Curtosis:", round(curtosis, 3), "\n")
+```
+
+    ## Asimetría: -1.391 · Curtosis: 1.576
+
+``` r
+cat("n:", length(v), "· faltantes:", sum(is.na(x)), "\n")
+```
+
+    ## n: 118 · faltantes: 0
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Resumen numérico · Velocidad_del_Viento
+
+Panel `f1.analisis.resumen` · marcado a las 07:25:51
+
+El texto de este panel está en la primera sección «Resumen numérico».
+
+Estado al marcarlo:
+
+| estadistico    | mostrado |
+|----------------|----------|
+| n              | 118      |
+| faltantes      | 0        |
+| moda           | 0.9      |
+| mediana        | 1.7      |
+| q1             | 1        |
+| q3             | 2.175    |
+| rango_inter    | 1.175    |
+| minimo         | 0.4      |
+| maximo         | 3.7      |
+| media          | 1.719    |
+| desviacion     | 0.7892   |
+| asimetria      | 0.4854   |
+| curtosis       | -0.3234  |
+| coef_variacion | 0.4592   |
+
+Parámetros:
+
+| Campo    | Valor                |
+|----------|----------------------|
+| variable | Velocidad_del_Viento |
+| escala   | razon                |
+
+``` r
+# f1.analisis.resumen
+x <- datos$Velocidad_del_Viento
+print(summary(x))
+```
+
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##   0.400   1.000   1.700   1.719   2.175   3.700
+
+``` r
+v <- x[!is.na(x)]
+centrado <- v - mean(v)
+raiz <- sqrt(mean(centrado^2))
+asimetria <- mean(centrado^3) / raiz^3   # g1: hacia dónde va la cola
+curtosis <- mean(centrado^4) / raiz^4 - 3  # g2: exceso sobre la normal
+cat("Desviación:", round(sd(v), 4), "· RIC:", round(IQR(v), 4), "\n")
+```
+
+    ## Desviación: 0.7892 · RIC: 1.175
+
+``` r
+cat("Asimetría:", round(asimetria, 3),
+    "· Curtosis:", round(curtosis, 3), "\n")
+```
+
+    ## Asimetría: 0.485 · Curtosis: -0.323
+
+``` r
+cat("n:", length(v), "· faltantes:", sum(is.na(x)), "\n")
+```
+
+    ## n: 118 · faltantes: 0
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Atípicos detectados · Presion
+
+Panel `f1.calidad.atipicos` · marcado a las 07:25:51
+
+### Para qué sirve
+
+Decidir qué hacer con los valores extremos: corregirlos, dejarlos, o
+cambiar a un método robusto que no dependa de ellos. Lo que no se decide
+acá se decide solo más adelante, y casi siempre mal.
+
+### Qué muestra
+
+Cada observación contra su posición en el archivo, con los atípicos
+marcados según el criterio elegido. Los tres criterios responden
+preguntas distintas:
+
+$$
+\begin{aligned}
+\text{IQR} &: && x \notin \left[\, Q_1 - 1.5 \cdot \text{RIC} \;,\; Q_3 + 1.5 \cdot \text{RIC} \,\right] && \text{robusto, univariado} \\[4pt]
+z &: && \frac{\lvert x - \bar{x} \rvert}{s} > 3 && \text{no robusto, univariado} \\[4pt]
+\text{Mahalanobis} &: && d^2 > \chi^2_p(\alpha) && \text{multivariado}
+\end{aligned}
+$$
+
+Los dos primeros miran una columna; el tercero mira todas a la vez y
+encuentra filas que ninguna columna por separado delata.
+
+### Qué buscar
+
+- **Puntos aislados muy lejos del resto**: candidatos a error de
+  captura.
+- **Grupos de atípicos juntos en el eje horizontal**: no son ruido, es
+  un tramo del archivo distinto —otro año, otro instrumento, otro
+  criterio de medición.
+- **Muchos atípicos de un solo lado**: no hay error, hay asimetría. La
+  transformación log suele hacerlos desaparecer sin borrar nada.
+- **La diferencia entre criterios**: si z no marca nada y el RIC marca
+  veinte, es porque la media y la desviación ya fueron arrastradas por
+  los extremos.
+
+### Cuándo engaña
+
+**Atípico no es sinónimo de error.** El criterio es geométrico y no sabe
+nada del fenómeno. Borrar por costumbre es la peor decisión posible: en
+muchos estudios el atípico es el caso que motivó la investigación.
+
+**z se enmascara a sí mismo.** La media y la desviación estándar se
+calculan con los atípicos adentro, así que un valor extremo infla `s` y
+termina pareciendo razonable. Con un solo extremo muy grande, ningún
+punto supera 3 desvíos.
+
+**El 1,5 de Tukey es una convención, no un umbral óptimo.** Nada se
+rompe si lo movés; solo cambia cuántos puntos se pintan.
+
+**Mahalanobis exige covarianza invertible y datos completos.** Con
+colinealidad exacta o con filas incompletas devuelve vacío, y eso no
+significa que no haya atípicos.
+
+Parámetros:
+
+| Campo   | Valor   |
+|---------|---------|
+| columna | Presion |
+
+``` r
+# f1.calidad.atipicos
+x <- datos$Presion
+# Ojo: boxplot() corta por bisagras y el panel del lab por cuartiles
+# (tipo 7, que es con lo que ggplot2 dibuja la caja). Las cercas pueden
+# diferir en décimas; el conteo de atípicos casi nunca cambia.
+caja <- boxplot(x, plot = FALSE)
+atipicos <- caja$out
+ric <- diff(caja$stats[c(2, 4)])
+cercas <- c(caja$stats[2] - 1.5 * ric, caja$stats[4] + 1.5 * ric)
+cat("Atípicos por el criterio de Tukey:", length(atipicos),
+    "de", length(x), "\n")
+```
+
+    ## Atípicos por el criterio de Tukey: 1 de 118
+
+``` r
+cat("Cercas:", round(cercas, 2), "\n")
+```
+
+    ## Cercas: 1009.65 1015.65
+
+``` r
+print(atipicos)
+```
+
+    ## [1] 1015.7
+
+``` r
+boxplot(x, horizontal = TRUE, main = "Presion")
+```
+
+![](taller-01_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Atípicos detectados · Punto_de_Rocio
+
+Panel `f1.calidad.atipicos` · marcado a las 07:25:51
+
+El texto de este panel está en la primera sección «Atípicos detectados».
+
+Parámetros:
+
+| Campo   | Valor          |
+|---------|----------------|
+| columna | Punto_de_Rocio |
+
+``` r
+# f1.calidad.atipicos
+x <- datos$Punto_de_Rocio
+# Ojo: boxplot() corta por bisagras y el panel del lab por cuartiles
+# (tipo 7, que es con lo que ggplot2 dibuja la caja). Las cercas pueden
+# diferir en décimas; el conteo de atípicos casi nunca cambia.
+caja <- boxplot(x, plot = FALSE)
+atipicos <- caja$out
+ric <- diff(caja$stats[c(2, 4)])
+cercas <- c(caja$stats[2] - 1.5 * ric, caja$stats[4] + 1.5 * ric)
+cat("Atípicos por el criterio de Tukey:", length(atipicos),
+    "de", length(x), "\n")
+```
+
+    ## Atípicos por el criterio de Tukey: 0 de 118
+
+``` r
+cat("Cercas:", round(cercas, 2), "\n")
+```
+
+    ## Cercas: 13.35 30.55
+
+``` r
+print(atipicos)
+```
+
+    ## numeric(0)
+
+``` r
+boxplot(x, horizontal = TRUE, main = "Punto_de_Rocio")
+```
+
+![](taller-01_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Diagrama de dispersión · Temperatura vs. Velocidad_del_Viento
+
+Panel `f1.analisis.dispersion` · marcado a las 07:25:51
+
+### Para qué sirve
+
+Decidir si dos variables tienen relación, y de qué tipo, antes de
+resumirla en un coeficiente. Todo lo que venga después —correlación,
+regresión— da por hecha una forma; acá se comprueba que esa forma
+existe.
+
+### Qué muestra
+
+Cada observación como un punto en el plano de dos variables. Es el
+gráfico más directo que existe y el que sostiene toda la idea de
+regresión: si hay relación, se ve acá antes de ajustar nada.
+
+El subtítulo trae dos números que conviene leer juntos:
+
+    r   = correlación de Pearson  → mide relación LINEAL
+    rho = correlación de Spearman → mide relación MONÓTONA
+
+Cuando `|rho|` es bastante mayor que `|r|`, hay relación y no es una
+recta.
+
+### Qué buscar
+
+- **Forma**: recta, curva, abanico, nube sin estructura.
+- **Dirección y fuerza**: cuánto se aprieta la nube alrededor de su
+  tendencia.
+- **Heterocedasticidad**: si la dispersión vertical crece con x, el
+  abanico está avisando que la varianza no es constante.
+- **Grupos**: dos nubes separadas piden colorear por una tercera
+  variable.
+- **Puntos con influencia**: los que están lejos en x mueven una recta
+  ajustada mucho más que los que están lejos en y.
+
+### Cuándo engaña
+
+**El sobreploteo miente por saturación.** Con muchos puntos, la mancha
+negra oculta dónde está la masa: cualquier zona llena se ve igual de
+negra que una diez veces más densa. Las tres curas están en el panel:
+bajar la transparencia, agregar jitter cuando los valores están
+redondeados, o pasar a conteo por celda, que ya no dibuja puntos sino
+cuánta gente hay en cada casilla.
+
+**r = 0 no significa “sin relación”.** Significa “sin relación lineal”.
+Una parábola perfecta da r cercano a cero. Mirá la nube, no el número.
+
+**Correlación no es causa, y encima puede ser de un tercero.** Dos
+variables pueden moverse juntas porque una tercera las mueve a las dos.
+Colorear por esa tercera suele deshacer el espejismo en un segundo.
+
+**El muestreo cambia el dibujo, no la cuenta.** Si el badge de muestreo
+está activo, los puntos son una muestra con semilla; `r` y `rho` se
+calcularon sobre el total.
+
+Parámetros:
+
+| Campo      | Valor                |
+|------------|----------------------|
+| x          | Temperatura          |
+| y          | Velocidad_del_Viento |
+| marginales | TRUE                 |
+
+``` r
+# f1.analisis.dispersion
+grafico <- ggplot(datos, aes(x = Temperatura, y = Velocidad_del_Viento)) +
+  geom_point(alpha = 0.6) +
+  labs(x = "Temperatura", y = "Velocidad_del_Viento")
+ggExtra::ggMarginal(grafico, type = "histogram", fill = "grey70",
+                    color = "white")
+```
+
+![](taller-01_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+``` r
+cat("Covarianza:", cov(datos$Temperatura, datos$Velocidad_del_Viento, use = "complete.obs"), "\n")
+```
+
+    ## Covarianza: 0.04718528
+
+``` r
+cat("Pearson:   ", cor(datos$Temperatura, datos$Velocidad_del_Viento, use = "complete.obs"), "\n")
+```
+
+    ## Pearson:    0.02627245
+
+``` r
+cat("Spearman:  ", cor(datos$Temperatura, datos$Velocidad_del_Viento, use = "complete.obs",
+    method = "spearman"), "\n")
+```
+
+    ## Spearman:   -0.01089905
+
+``` r
+print(cor.test(datos$Temperatura, datos$Velocidad_del_Viento))
+```
+
+    ## 
+    ##  Pearson's product-moment correlation
+    ## 
+    ## data:  datos$Temperatura and datos$Velocidad_del_Viento
+    ## t = 0.28306, df = 116, p-value = 0.7776
+    ## alternative hypothesis: true correlation is not equal to 0
+    ## 95 percent confidence interval:
+    ##  -0.1552241  0.2060533
+    ## sample estimates:
+    ##        cor 
+    ## 0.02627245
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Histograma · Temperatura
+
+Panel `f1.analisis.histograma` · marcado a las 07:25:51
+
+### Para qué sirve
+
+Formarse la primera idea de una variable antes de decidir cualquier otra
+cosa sobre ella: si transformarla, si partirla por grupos, si desconfiar
+de cómo se midió. Es la card que se abre primero y la que más veces
+termina cambiando el plan.
+
+### Qué muestra
+
+Cuántas observaciones caen en cada intervalo de la variable. La altura
+de cada barra es una frecuencia; el ancho, un tramo del recorrido.
+
+Es el primer retrato de una variable continua y el antecedente directo
+de la idea de **densidad**: si en vez de contar dividís por el total y
+por el ancho del intervalo, el área total pasa a valer 1 y ya estás
+mirando una densidad empírica.
+
+### Qué buscar
+
+- **Centro**: ¿dónde está el grueso de los datos? ¿Coincide con la
+  media?
+- **Dispersión**: ¿ancho o angosto respecto al recorrido posible?
+- **Forma**: ¿simétrico o con cola a un lado? Una cola derecha larga es
+  la firma de variables que no pueden ser negativas (ingresos, tiempos,
+  conteos), y suele pedir una transformación logarítmica.
+- **Modas**: ¿un pico o varios? Dos picos casi siempre significan que
+  hay dos poblaciones mezcladas, y ese es un hallazgo, no un defecto.
+- **Huecos y paredes**: un vacío en medio, o un corte abrupto en un
+  valor redondo, suelen delatar cómo se recogió el dato, no cómo se
+  comporta.
+
+### Cuándo engaña
+
+**El número de clases cambia la historia.** Es la trampa central de este
+gráfico y por eso el control está a la vista. Con pocas barras todo
+parece una campana suave; con muchas, todo parece ruido dentado. Ninguna
+de las dos versiones es “la verdadera”: son la misma tabla de datos
+leída con distinta resolución.
+
+Movelo. Si una moda secundaria aparece y desaparece según el número de
+clases, no confíes en ella todavía — comparala con la densidad kernel,
+que suaviza sin depender de dónde caen los bordes.
+
+**El origen de los intervalos también importa.** Dos histogramas con el
+mismo ancho de clase pero desplazados medio intervalo pueden verse
+distintos. La densidad kernel no tiene ese problema, porque no tiene
+bordes.
+
+**Con pocos datos no dice casi nada.** Por debajo de unas 30
+observaciones, la forma es principalmente azar. Ahí conviene un diagrama
+de puntos o el de tallo y hojas, que no esconden ninguna observación.
+
+Parámetros:
+
+| Campo    | Valor       |
+|----------|-------------|
+| variable | Temperatura |
+| densidad | TRUE        |
+
+``` r
+# f1.analisis.histograma
+ggplot(datos, aes(x = Temperatura)) +
+  geom_histogram(aes(y = after_stat(density)),
+                 bins = 30, fill = "steelblue") +
+  geom_density(alpha = 0.4) +
+  labs(x = "Temperatura", y = "densidad")
+```
+
+![](taller-01_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Q-Q normal de la variable · Temperatura
+
+Panel `f1.analisis.qq_normal_datos` · marcado a las 07:25:51
+
+### Para qué sirve
+
+Comprobar la normalidad de una variable con más resolución que un
+histograma, sobre todo en las colas. Es donde se distingue si el
+problema son unos pocos valores extremos o la forma completa, y esa
+diferencia decide si alcanza con recortar o hay que cambiar de método.
+
+### Qué muestra
+
+Los cuantiles observados de la variable contra los que tendría si fuera
+normal. Cada punto es una observación: en el eje horizontal, el valor
+que le tocaría bajo una normal; en el vertical, el que de verdad tiene.
+
+Si la variable es normal, los puntos caen sobre la recta de referencia,
+que pasa por el primer y el tercer cuartil. Los desvíos se leen por su
+forma, no por su tamaño.
+
+### Qué buscar
+
+- **S acostada**: asimetría. Si los puntos se despegan hacia arriba en
+  la derecha, hay cola derecha larga.
+- **Extremos que se van hacia afuera en los dos lados**: colas pesadas,
+  más masa lejos del centro de la que una normal admite.
+- **Extremos que se aplanan**: colas livianas, distribución más corta
+  que la normal.
+- **Escalones horizontales**: la variable está discretizada o
+  redondeada.
+- **Uno o dos puntos muy lejos de la recta al final**: atípicos, no
+  forma.
+
+### Cuándo engaña
+
+**La prueba y el gráfico se contradicen a propósito, y el gráfico tiene
+razón más veces.** Con n grande, Shapiro-Wilk rechaza la normalidad por
+desvíos minúsculos que no afectan a ningún método; con n chico, no
+rechaza nada porque no tiene potencia. El subtítulo trae la prueba y el
+p, pero la decisión se toma mirando la nube.
+
+**Casi ningún método pide que los DATOS sean normales.** La regresión
+pide normalidad de los *residuos*, no de las variables. Este Q-Q sirve
+para conocer la forma de la variable y decidir una transformación, no
+para aprobar o reprobar un modelo que todavía no existe.
+
+**Con n \< 20 la nube es tan errática que casi nada se puede concluir.**
+Se espera ver zigzag; no lo leas como estructura.
+
+Parámetros:
+
+| Campo    | Valor       |
+|----------|-------------|
+| variable | Temperatura |
+
+``` r
+# f1.analisis.qq_normal_datos
+x <- datos$Temperatura
+qqnorm(x, main = "Q-Q normal · Temperatura")
+qqline(x, col = "firebrick")
+```
+
+![](taller-01_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+``` r
+cat("Shapiro-Wilk:\n"); print(shapiro.test(x))
+```
+
+    ## Shapiro-Wilk:
+
+    ## 
+    ##  Shapiro-Wilk normality test
+    ## 
+    ## data:  x
+    ## W = 0.85961, p-value = 3.403e-09
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Histograma · Presion
+
+Panel `f1.analisis.histograma` · marcado a las 07:25:51
+
+El texto de este panel está en la primera sección «Histograma».
+
+Parámetros:
+
+| Campo    | Valor   |
+|----------|---------|
+| variable | Presion |
+| densidad | TRUE    |
+
+``` r
+# f1.analisis.histograma
+ggplot(datos, aes(x = Presion)) +
+  geom_histogram(aes(y = after_stat(density)),
+                 bins = 30, fill = "steelblue") +
+  geom_density(alpha = 0.4) +
+  labs(x = "Presion", y = "densidad")
+```
+
+![](taller-01_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+## Densidad kernel · Velocidad_del_Viento
+
+Panel `f1.analisis.densidad` · marcado a las 07:25:51
+
+### Para qué sirve
+
+Ver la forma de una variable sin la arbitrariedad del número de clases.
+Es la que conviene para juzgar si una transformación hizo falta y si
+funcionó, porque el cambio de forma se lee sin depender de dónde cayeron
+los bordes.
+
+### Qué muestra
+
+Una curva suave que estima la densidad de probabilidad de la variable.
+En vez de contar por intervalos, pone una campanita —el **núcleo**—
+sobre cada observación y las suma todas.
+
+El parámetro que manda es el ancho de banda `h`, no el número de clases:
+
+$$
+\hat{f}(x) = \frac{1}{n h} \sum_{i=1}^{n} K\!\left( \frac{x - x_i}{h} \right)
+$$
+
+El área bajo la curva vale 1, así que la altura no es una cuenta de
+casos: es densidad. Comparar dos densidades de muestras de tamaño
+distinto es legítimo; comparar dos histogramas de conteos, no.
+
+### Qué buscar
+
+- **Modas**: los picos son la razón de ser de este gráfico. Dos modas
+  separadas y estables al mover `h` son dos poblaciones mezcladas.
+- **Asimetría**: la cola más larga dice hacia dónde se estira la
+  variable.
+- **Colas**: qué tan rápido cae la curva en los extremos, comparado con
+  la campana que uno esperaría si fuera normal.
+- **El valor de h**: aparece en el subtítulo. Por defecto sale de la
+  regla de Silverman, `h = 0.9 · min(s, RIC/1.34) · n^(−1/5)`, que es un
+  punto de partida razonable y nada más.
+
+### Cuándo engaña
+
+**h chico inventa modas; h grande las borra.** Es el mismo dilema del
+número de clases del histograma, con otro nombre: sesgo contra varianza.
+Movelo y fijate cuáles picos sobreviven. Los que aparecen y desaparecen
+no son estructura, son ruido suavizado con distinta fuerza.
+
+**Suaviza más allá del recorrido real.** El núcleo gaussiano tiene colas
+infinitas, así que la curva pone densidad en valores imposibles: edades
+negativas, porcentajes por encima de 100. Si la variable está acotada,
+la parte que se derrama por el borde es un artefacto del método.
+
+**Con pocos datos es casi solo el núcleo.** Con n = 10 estás mirando la
+forma de la campanita que elegiste, no la de la variable.
+
+Parámetros:
+
+| Campo    | Valor                |
+|----------|----------------------|
+| variable | Velocidad_del_Viento |
+| normal   | TRUE                 |
+
+``` r
+# f1.analisis.densidad
+ggplot(datos, aes(x = Velocidad_del_Viento)) +
+  geom_density() +
+  stat_function(fun = dnorm, args = list(mean = mean(datos$Velocidad_del_Viento, na.rm = TRUE), sd = sd(datos$Velocidad_del_Viento, na.rm = TRUE)), color = "firebrick", linetype = "dashed") +
+  labs(x = "Valor", y = "densidad")
+```
+
+![](taller-01_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+> Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
+> figura sin lectura no es un resultado: es un adorno.
+
+------------------------------------------------------------------------
+
+14 paneles · dataset ori · generado en modo servidor.

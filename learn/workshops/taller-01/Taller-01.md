@@ -71,8 +71,62 @@ Clasifique las variables (1) Pronóstico, (2) Municipio, (3) Temperatura y (4) V
 
 - **Pronóstico:** Pronóstico del clima.
 - **Municipio:** Municipio de medición.
-- **Temperatura:** Temperatura medida en grados centígrados.
+- **Temperatura:** Temperatura medida en grados célsius.
 - **Velocidad del viento:** Velocidad del viento medida en mph.
+
+```{mermaid}
+---
+config:
+  layout: elk
+  theme: default
+---
+flowchart TD
+    V["CLASIFICACIÓN DE VARIABLES<br/>(NB1: escala × clase, ejes independientes)"]
+
+    V --> ESC["EJE 1 · ESCALA<br/>¿qué operaciones tienen sentido?"]
+    V --> CLA["EJE 2 · CLASE<br/>¿cuál es el recorrido?"]
+
+    %% ================= EJE 1: ESCALA =================
+    ESC --> CUAL["CUALITATIVA<br/>mide atributos → categorías"]
+    ESC --> CUAN["CUANTITATIVA<br/>mide cantidades → números"]
+
+    CUAL --> NOM["NOMINAL<br/>solo = / ≠"]
+    CUAL --> ORD["ORDINAL<br/>= / ≠ + orden<br/>(distancias sin significado)"]
+    CUAN --> INT["INTERVALO<br/>+ intervalos equidistantes<br/>CERO RELATIVO"]
+    CUAN --> RAZ["RAZÓN<br/>+ razones válidas<br/>CERO ABSOLUTO"]
+
+    NOM --> NOME["Municipio, Pronóstico, Region<br/>(código postal: numérico pero nominal)"]
+    ORD --> ORDE["Estrato {bajo, medio, alto}<br/>consumo eléctrico {alto, medio, bajo}"]
+    INT --> INTE["Temperatura en °C<br/>0 °C no es ausencia de temperatura"]
+    RAZ --> RAZE["Velocidad del viento (mph)<br/>Presion, Latitud — 0 = ausencia"]
+
+    %% ================= EJE 2: CLASE =================
+    CLA --> CUAL2["si es CUALITATIVA"]
+    CLA --> CUAN2["si es CUANTITATIVA"]
+
+    CUAL2 --> BIN["BINARIA / DICOTÓMICA<br/>2 categorías"]
+    CUAL2 --> POL["POLITÓMICA<br/>más de 2 categorías"]
+    CUAN2 --> DIS["DISCRETA<br/>valores contables"]
+    CUAN2 --> CON["CONTINUA<br/>cualquier valor de un intervalo real"]
+
+    BIN --> BINE["Sí / No · Presence {Sí, No}"]
+    POL --> POLE["Pronóstico (11 categorías)<br/>Municipio, Departamento"]
+    DIS --> DISE["n.° de turbinas<br/>n.° de hijos"]
+    CON --> CONE["Temperatura, Presion<br/>Velocidad del viento"]
+
+    %% ================= ESTILOS =================
+    classDef raiz fill:#65e94f,stroke:#222,stroke-width:2px,color:#000,font-weight:bold;
+    classDef eje fill:#91cbe8,stroke:#555,stroke-width:1px,color:#000,font-weight:bold;
+    classDef grupo fill:#ffffb0,stroke:#777,stroke-width:1px,color:#000,font-weight:bold;
+    classDef tipo fill:#e58be8,stroke:#777,stroke-width:1px,color:#000,font-weight:bold;
+    classDef ejemplo fill:#8de8d8,stroke:#777,stroke-width:1px,color:#000;
+
+    class V raiz;
+    class ESC,CLA eje;
+    class CUAL,CUAN,CUAL2,CUAN2 grupo;
+    class NOM,ORD,INT,RAZ,BIN,POL,DIS,CON tipo;
+    class NOME,ORDE,INTE,RAZE,BINE,POLE,DISE,CONE ejemplo;
+```
 
 ### Pregunta 4. $w_4 = 7$
 

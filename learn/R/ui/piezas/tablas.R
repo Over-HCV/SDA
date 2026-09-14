@@ -71,9 +71,14 @@ pie_tabla <- function(n_mostradas, n_totales) {
 }
 
 #' Tabla + su pie, que es como debería usarse siempre.
+#'
+#' `fill = FALSE` porque el cuerpo de `panel_resultado()` es fillable: como
+#' fill item la DT recibía un alto repartido menor que sus filas más la
+#' paginación, y el pie y lo que viniera después se pintaban encima. En
+#' pantalla completa sobraba alto y no se notaba.
 salida_tabla <- function(ns, id, altura = NULL) {
   shiny::tagList(
-    DT::dataTableOutput(ns(id), height = altura),
+    DT::dataTableOutput(ns(id), height = altura, fill = FALSE),
     shiny::uiOutput(ns(paste0(id, "_pie")))
   )
 }

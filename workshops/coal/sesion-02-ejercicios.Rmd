@@ -1,7 +1,7 @@
 ---
-title: "Ejercicios de la sesión 02 — resueltos y explicados"
+title: "Ejercicios de la sesión 02 — Solución / Explicación"
 subtitle: "Análisis Estadístico de Datos · datos de carbón vegetal (charcoal), 2019"
-author: "Over Castrillón"
+author: "Over V."
 date: "`r format(Sys.Date(), '%Y-%m-%d')`"
 output:
   html_document:
@@ -532,3 +532,1260 @@ esta variable es un error de modelado**, porque la normal es simétrica y con so
 todos los reales, y esta variable ni es simétrica ni puede ser negativa. Guardemos esta
 observación: la vamos a reencontrar, con otra cara, en \@ref(densidad-negativa).
 
+# Ejercicio 5 — Covarianza, covarianza negativa y correlación {#covarianza}
+
+> *"Interpretar una covarianza negativa: no la tuvimos en este conjunto de datos, la
+> covarianza acá es positiva."*
+>
+> *"La correlación no es más que la covarianza dividida por la desviación estándar de cada
+> variable […] esto queda adimensional, y esto lo podríamos demostrar si quisiéramos, les
+> queda de tarea."*
+
+Son dos ejercicios y los resolvemos juntos porque el segundo explica el primero.
+
+## Preparar los datos bivariados
+
+Hasta ahora cada país aparecía en dos tablas separadas. Para hablar de covarianza hay que
+unirlas: necesitamos **el par $(x_i, y_i)$ del mismo país**.
+
+```{r ej5-join}
+charcoal_bivar <- charcoal_prd19 %>%
+  select(Country_Area, Produccion = Quantity) %>%
+  inner_join(charcoal_chh19 %>% select(Country_Area, Consumo = Quantity),
+             by = "Country_Area")
+
+nrow(charcoal_bivar)
+```
+
+Quedan `r nrow(charcoal_bivar)` países (menos que los 148 y 141 originales: el
+`inner_join` conserva solo los que están en **ambas** tablas).
+
+## De dónde sale el signo de la covarianza
+
+$$s_{xy} = \frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})$$
+
+La explicación geométrica de clase: pongamos el origen en $(\bar{x}, \bar{y})$ y miremos
+los cuatro cuadrantes que eso define.
+
+| Cuadrante | $x_i - \bar{x}$ | $y_i - \bar{y}$ | Producto |
+|---|---|---|---|
+| I (arriba-derecha) | $+$ | $+$ | **$+$** |
+| II (arriba-izquierda) | $-$ | $+$ | $-$ |
+| III (abajo-izquierda) | $-$ | $-$ | **$+$** |
+| IV (abajo-derecha) | $+$ | $-$ | $-$ |
+
+- Si la mayoría de puntos cae en **I y III** → predominan los productos positivos →
+  $s_{xy} > 0$ → asociación **positiva**.
+- Si la mayoría cae en **II y IV** → predominan los negativos → $s_{xy} < 0$ → asociación
+  **negativa**.
+- Si están repartidos por todos lados → positivos y negativos se cancelan → $s_{xy} \approx 0$.
+
+Dibujémoslo literalmente, coloreando cada país según el signo de su aporte:
+
+```{r ej5-cuadrantes}
+bivar_cuad <- charcoal_bivar %>%
+  mutate(
+    dx     = Produccion - mean(Produccion),
+    dy     = Consumo    - mean(Consumo),
+    aporte = dx * dy,
+    signo  = if_else(aporte > 0, "Aporte positivo (cuad. I y III)",
+                                 "Aporte negativo (cuad. II y IV)")
+  )
+
+ggplot(bivar_cuad, aes(Produccion, Consumo, colour = signo)) +
+  geom_vline(xintercept = mean(charcoal_bivar$Produccion),
+             linetype = "dashed", colour = "grey40") +
+  geom_hline(yintercept = mean(charcoal_bivar$Consumo),
+             linetype = "dashed", colour = "grey40") +
+  geom_point(alpha = 0.8, size = 2) +
+  scale_colour_manual(values = c("Aporte positivo (cuad. I y III)" = "#2c7fb8",
+                                 "Aporte negativo (cuad. II y IV)" = "#d95f0e")) +
+  labs(
+    title    = "Producción vs. consumo de carbón por hogares, 2019",
+    subtitle = "Las líneas punteadas son las medias; definen los cuatro cuadrantes",
+    x = "Producción (miles de toneladas métricas)",
+    y = "Consumo por hogares (miles de toneladas métricas)",
+    colour = NULL
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+```{r ej5-conteo-cuadrantes}
+bivar_cuad %>%
+  count(signo) %>%
+  mutate(pct = 100 * n / sum(n))
+```
+
+## Los números
+
+```{r ej5-cov-cor}
+cov_pc <- cov(charcoal_bivar$Produccion, charcoal_bivar$Consumo)
+cor_pc <- cor(charcoal_bivar$Produccion, charcoal_bivar$Consumo)
+
+tibble(
+  medida = c("Covarianza", "Correlación de Pearson"),
+  valor  = c(cov_pc, cor_pc),
+  unidad = c("(miles de toneladas)²", "adimensional")
+)
+```
+
+**Covarianza = `r format(round(cov_pc), big.mark = " ")`.** Un número enorme y
+prácticamente ilegible. ¿Es mucho? ¿Poco? No se puede saber mirándolo, porque está en
+**(miles de toneladas)²**, una unidad sin sentido físico. De la covarianza, de forma
+descriptiva, lo único que se lee es **el signo**: aquí positivo, luego los países que
+producen más también consumen más. Lo cual tiene todo el sentido del mundo: el carbón
+vegetal se consume mayoritariamente donde se produce.
+
+> **Paréntesis útil:** ¿qué es $\text{Cov}(X,X)$? Sustituyendo $y_i$ por $x_i$ en la
+> fórmula queda $\frac{1}{n-1}\sum(x_i-\bar x)^2$, que es **la varianza**. La varianza es
+> un caso particular de la covarianza. Comprobémoslo:
+
+```{r ej5-cov-consigo}
+c(cov_xx = cov(x, x), var_x = var(x), iguales = isTRUE(all.equal(cov(x, x), var(x))))
+```
+
+## Interpretar una covarianza negativa
+
+En estos datos no aparece —la asociación es positiva— así que hay que construirla para
+poder interpretarla. Un ejemplo con sentido: **producción neta exportable**, definida como
+producción menos consumo. Contra el consumo, debería dar asociación negativa: a mayor
+consumo interno, menos queda para exportar.
+
+```{r ej5-cov-negativa}
+bivar_neg <- charcoal_bivar %>%
+  mutate(Excedente = Produccion - Consumo)
+
+cov_neg <- cov(bivar_neg$Consumo, bivar_neg$Excedente)
+cor_neg <- cor(bivar_neg$Consumo, bivar_neg$Excedente)
+
+tibble(
+  par        = "Consumo vs. Excedente exportable",
+  covarianza = cov_neg,
+  correlacion = cor_neg
+)
+```
+
+```{r ej5-grafico-negativo}
+ggplot(bivar_neg, aes(Consumo, Excedente)) +
+  geom_vline(xintercept = mean(bivar_neg$Consumo),   linetype = "dashed", colour = "grey40") +
+  geom_hline(yintercept = mean(bivar_neg$Excedente), linetype = "dashed", colour = "grey40") +
+  geom_point(alpha = 0.7, colour = "#d95f0e") +
+  labs(title = "Un caso de covarianza negativa",
+       subtitle = paste0("Cov = ", format(round(cov_neg), big.mark = " "),
+                         " · r = ", round(cor_neg, 3)),
+       x = "Consumo por hogares", y = "Excedente (producción − consumo)") +
+  theme_minimal(base_size = 11)
+```
+
+**Cómo se lee una covarianza negativa:** los países que están **por encima** del promedio
+en una variable tienden a estar **por debajo** del promedio en la otra. Se mueven en
+direcciones opuestas. La mayoría de los puntos cae en los cuadrantes II y IV.
+
+Ejemplos cotidianos de la misma estructura: horas de ejercicio vs. porcentaje de grasa
+corporal; precio de un producto vs. cantidad demandada; altitud de una ciudad vs.
+temperatura media.
+
+**Advertencia obligatoria:** covarianza negativa significa *asociación lineal inversa*,
+no *causa*. Y una covarianza cercana a cero **no significa independencia**: solo significa
+ausencia de asociación *lineal*. Una relación perfectamente determinista pero parabólica
+($y = x^2$ centrada) da covarianza cero:
+
+```{r ej5-no-lineal}
+xs <- seq(-10, 10, length.out = 201)
+ys <- xs^2
+c(covarianza = cov(xs, ys), correlacion = cor(xs, ys))
+```
+
+Cero, y sin embargo $y$ está **completamente determinada** por $x$. La covarianza es ciega
+a todo lo que no sea una línea recta.
+
+## La demostración: por qué la correlación es adimensional {#demo-correlacion}
+
+$$r_{xy} = \frac{s_{xy}}{s_x \, s_y}
+= \frac{\dfrac{1}{n-1}\sum (x_i - \bar{x})(y_i - \bar{y})}
+       {\sqrt{\dfrac{1}{n-1}\sum (x_i - \bar{x})^2}\;\sqrt{\dfrac{1}{n-1}\sum (y_i - \bar{y})^2}}$$
+
+### Parte 1 — Es adimensional
+
+Sea $[X]$ la unidad de $X$ y $[Y]$ la de $Y$. Entonces:
+
+- Numerador: $s_{xy}$ tiene unidades $[X]\cdot[Y]$ (es un promedio de productos de
+  desvíos, y cada desvío conserva la unidad de su variable).
+- Denominador: $s_x$ tiene unidades $[X]$, $s_y$ tiene $[Y]$; el producto tiene
+  $[X]\cdot[Y]$.
+
+$$[r_{xy}] = \frac{[X]\cdot[Y]}{[X]\cdot[Y]} = 1 \quad \blacksquare$$
+
+Las unidades se cancelan exactamente. Es la misma jugada que en el CV
+(\@ref(media-mediana)): dividir por algo con las mismas unidades para obtener un número
+puro. En nuestro caso, (miles de ton)² sobre (miles de ton)² = sin unidades.
+
+### Parte 2 — Es invariante ante cambios de escala y origen
+
+Formalmente: si $u_i = a x_i + b$ y $v_i = c y_i + d$ con $a, c > 0$, entonces
+$r_{uv} = r_{xy}$.
+
+*Demostración.* Primero, $\bar{u} = a\bar{x} + b$, luego
+$u_i - \bar{u} = a(x_i - \bar{x})$ — **la constante $b$ desaparece**: sumar una constante
+traslada todo, no cambia los desvíos. Análogamente $v_i - \bar{v} = c(y_i - \bar{y})$.
+Sustituyendo:
+
+$$s_{uv} = \frac{1}{n-1}\sum a(x_i-\bar x)\,c(y_i-\bar y) = ac\,s_{xy},
+\qquad s_u = a\,s_x, \qquad s_v = c\,s_y$$
+
+$$r_{uv} = \frac{ac\,s_{xy}}{(a s_x)(c s_y)} = \frac{ac}{ac}\cdot\frac{s_{xy}}{s_x s_y} = r_{xy} \quad \blacksquare$$
+
+Esto es exactamente el punto de la clase sobre escalas de medición: pasar de grados
+Celsius a Fahrenheit es una transformación $aX + b$, y la correlación no se entera. La
+covarianza sí: se multiplica por $ac$.
+
+```{r ej5-invarianza}
+p <- charcoal_bivar$Produccion
+q <- charcoal_bivar$Consumo
+
+tibble(
+  transformacion = c("Original", "3·X + 100 (afín en X)", "X en toneladas (×1000)"),
+  covarianza  = c(cov(p, q), cov(3*p + 100, q), cov(1000*p, q)),
+  correlacion = c(cor(p, q), cor(3*p + 100, q), cor(1000*p, q))
+)
+```
+
+La covarianza cambia salvajemente. **La correlación no se mueve ni un dígito.**
+
+### Parte 3 — Por qué $-1 \le r \le 1$ (Cauchy–Schwarz)
+
+Sean $d_i = x_i - \bar{x}$ y $e_i = y_i - \bar{y}$. La desigualdad de Cauchy–Schwarz dice:
+
+$$\left(\sum_i d_i e_i\right)^2 \;\le\; \left(\sum_i d_i^2\right)\left(\sum_i e_i^2\right)$$
+
+Dividiendo ambos lados por el término de la derecha (positivo salvo caso degenerado) y
+tomando raíz:
+
+$$\frac{\left|\sum d_i e_i\right|}{\sqrt{\sum d_i^2}\sqrt{\sum e_i^2}} \le 1
+\;\Longleftrightarrow\; |r_{xy}| \le 1 \quad \blacksquare$$
+
+La igualdad $|r| = 1$ se alcanza **si y solo si** los vectores $d$ y $e$ son
+proporcionales, es decir, si y solo si los puntos caen exactamente sobre una recta.
+Por eso $r = \pm 1$ significa relación lineal perfecta.
+
+```{r ej5-limites}
+set.seed(2026)
+z <- rnorm(100)
+tibble(
+  caso = c("y = 2x + 5 (recta creciente)", "y = -2x + 5 (recta decreciente)", "y independiente de x"),
+  r    = c(cor(z, 2*z + 5), cor(z, -2*z + 5), cor(z, rnorm(100)))
+)
+```
+
+### Conclusión del ejercicio
+
+**Correlación = `r round(cor_pc, 3)`** entre producción y consumo. Ahora sí es un número
+que se puede interpretar sin saber nada del contexto: cercano a 1, asociación lineal
+positiva fuerte. Esa es toda la ventaja de la correlación sobre la covarianza, y es la
+razón por la que en la práctica se reporta casi siempre la correlación.
+
+Lo que la covarianza conserva y la correlación pierde es la **magnitud**, que sí importa
+en el desarrollo teórico (la matriz $\Sigma$ de varianzas y covarianzas, que aparecerá en
+la distribución normal multivariada, se construye con covarianzas, no con correlaciones).
+
+# Atípicos por el criterio del rango intercuartílico {#atipicos}
+
+> *"Yo sumo para la variable cantidad cuántos de ellos están por debajo del umbral inferior
+> o están por encima del umbral superior. Esa suma da 22."*
+
+No lo dejó como ejercicio formal, pero mencionó el número de viva voz sin mostrar el
+cálculo. Vale la pena reproducirlo: es el control de que estamos usando exactamente sus
+datos y su criterio.
+
+## Las vallas
+
+$$IQR = Q_3 - Q_1$$
+$$\text{Vallas internas: } [\,Q_1 - 1.5\,IQR,\;\; Q_3 + 1.5\,IQR\,] \;\rightarrow\; \textit{outliers}$$
+$$\text{Vallas externas: } [\,Q_1 - 3.0\,IQR,\;\; Q_3 + 3.0\,IQR\,] \;\rightarrow\; \textit{far outliers}$$
+
+**Por qué en función del IQR.** Un niño de 1.60 m es atípico entre los de sexto y normal
+entre los de octavo. "Atípico" no es una propiedad del dato: es una propiedad del dato
+*relativa a la variabilidad de su grupo*. El IQR es esa vara de medir, y tiene la ventaja
+de ser robusto — se construye con posiciones ($Q_1$, $Q_3$), no con valores, así que los
+propios extremos no lo inflan. Si se usara la desviación estándar, los outliers agrandarían
+la vara con la que se los mide y se volverían invisibles.
+
+**De dónde sale el 1.5.** Es una heurística, no un teorema. Viene de la distribución
+normal: bajo normalidad, las vallas internas cubren aproximadamente el 99.3% de la masa,
+de modo que dar "atípico" a algo fuera de ellas es señalar un evento de menos del 1%.
+El valor sobrevivió porque funciona razonablemente bien en muchas distribuciones.
+
+## El cálculo
+
+```{r atip-funcion}
+detectar_atipicos <- function(v, k = 1.5) {
+  Q1  <- quantile(v, 0.25)
+  Q3  <- quantile(v, 0.75)
+  iqr <- Q3 - Q1
+  list(
+    Q1 = Q1, Q3 = Q3, IQR = iqr,
+    valla_inf = Q1 - k * iqr,
+    valla_sup = Q3 + k * iqr,
+    indices   = which(v < Q1 - k * iqr | v > Q3 + k * iqr)
+  )
+}
+
+at_prd <- detectar_atipicos(x)          # vallas internas, k = 1.5
+far_prd <- detectar_atipicos(x, k = 3)  # vallas externas, k = 3
+
+tibble(
+  concepto = c("Q1", "Q3", "IQR", "Valla inferior", "Valla superior",
+               "N.° de atípicos (1.5·IQR)", "N.° de far outliers (3·IQR)"),
+  valor = c(at_prd$Q1, at_prd$Q3, at_prd$IQR,
+            at_prd$valla_inf, at_prd$valla_sup,
+            length(at_prd$indices), length(far_prd$indices))
+)
+```
+
+**`r length(at_prd$indices)` atípicos.** Coincide exactamente con el número de la clase.
+
+## Quiénes son
+
+```{r atip-quienes}
+charcoal_prd19 %>%
+  slice(at_prd$indices) %>%
+  arrange(desc(Quantity)) %>%
+  mutate(far_outlier = Quantity > far_prd$valla_sup) %>%
+  select(Country_Area, Quantity, far_outlier)
+```
+
+## La interpretación
+
+Tres cosas que leer en esta tabla:
+
+1. **`r length(at_prd$indices)` de `r length(x)` países son atípicos: el
+   `r round(100*length(at_prd$indices)/length(x), 1)`%.** Eso es *muchísimo*. Bajo
+   normalidad se esperaría menos del 1%. Cuando el criterio de atipicidad marca a uno de
+   cada siete datos, el mensaje no es "hay muchos casos raros": es **"esta distribución no
+   se parece en nada a aquella para la que se diseñó el criterio"**. El sesgo es tan
+   severo que el criterio se desborda.
+2. **Todos los atípicos están en el lado alto.** La valla inferior vale
+   `r round(at_prd$valla_inf, 2)` —negativa, e inalcanzable para una variable que no puede
+   ser negativa— así que por construcción **no puede haber atípicos bajos**. Otra firma
+   de la asimetría positiva.
+3. **El contenido sustantivo:** son los grandes productores mundiales de carbón vegetal.
+   Su producción es "atípica" en sentido estadístico, no en sentido de error. No hay nada
+   que corregir ni que eliminar: la concentración *es* el fenómeno.
+
+## El mismo cálculo para consumo
+
+```{r atip-consumo}
+at_chh <- detectar_atipicos(y)
+tibble(
+  variable = c("Producción", "Consumo por hogares"),
+  n        = c(length(x), length(y)),
+  atipicos = c(length(at_prd$indices), length(at_chh$indices)),
+  pct      = c(100*length(at_prd$indices)/length(x), 100*length(at_chh$indices)/length(y))
+)
+```
+
+## Histograma y boxplot en la misma escala
+
+```{r atip-grafico, fig.height=6}
+par(mfrow = c(2, 1), mar = c(4, 4, 3, 2))
+
+hist(x, breaks = 25, xlim = c(0, 6500),
+     main = "Producción de carbón, 2019",
+     xlab = "", ylab = "Frecuencia absoluta",
+     col = "grey85", border = "white")
+abline(v = mean(x),   col = "blue",   lwd = 2)
+abline(v = median(x), col = "darkgreen", lwd = 2)
+
+boxplot(x, horizontal = TRUE, ylim = c(0, 6500),
+        main = "El mismo dato, visto como boxplot",
+        xlab = "Producción (miles de toneladas métricas)",
+        col = "grey90")
+abline(v = at_prd$valla_sup, col = "red", lty = 2, lwd = 2)
+
+par(mfrow = c(1, 1))
+```
+
+Esto es lo que el profesor llamó *"una aberración de boxplot"*: la caja entera está
+colapsada contra el origen. Se lee así:
+
+- $Q_1$, $Q_2$ y $Q_3$ caben todos dentro del primer intervalo del histograma. Es decir,
+  **el 75% de los países está en el primer bin** — el histograma con este número de
+  intervalos está ocultando toda la estructura donde de hecho vive la mayoría de los datos.
+- El bigote superior es corto y luego aparece una nube larga de puntos: la cola derecha.
+- El bigote inferior es prácticamente inexistente: no hay para dónde ir hacia abajo.
+
+## ¿Y la regla empírica 68–95–99.7?
+
+La otra forma de detectar atípicos que se vio en clase: bajo normalidad, el 68% de los
+datos cae a $\pm 1s$ de la media, el 95% a $\pm 2s$ y el 99.7% a $\pm 3s$. Probémosla
+aquí:
+
+```{r atip-regla-empirica}
+m <- mean(x); s <- sd(x)
+tibble(
+  intervalo = c("μ ± 1σ", "μ ± 2σ", "μ ± 3σ"),
+  teorico_bajo_normal = c(68.3, 95.4, 99.7),
+  observado_en_datos  = c(100*mean(abs(x - m) <= 1*s),
+                          100*mean(abs(x - m) <= 2*s),
+                          100*mean(abs(x - m) <= 3*s)),
+  limite_inferior     = c(m - 1*s, m - 2*s, m - 3*s)
+)
+```
+
+Los porcentajes observados no se parecen a los teóricos, y los límites inferiores son
+todos **negativos** — imposibles para esta variable.
+
+**La conclusión metodológica es la parte importante del ejercicio:** la regla empírica
+**asume normalidad**; el criterio del IQR **no asume ninguna distribución**. Cuando los
+datos no son normales —como aquí, con $g_1 = `r round(g1_prd,2)`$ y exceso de curtosis
+`r round(exceso_prd,1)`— hay que usar el IQR. Usar la regla empírica sería aplicar una
+consecuencia de la normal a datos que no son normales.
+
+# Ejercicio 6 — ¿El área del histograma de densidad es 1? {#area-hist}
+
+> *"Sería bueno determinar si en efecto el área es 1. Me parece un ejercicio interesante.
+> Recuerden que yo puedo definir los gráficos también como objetos."*
+
+## De dónde sale la altura de cada barra
+
+Con `prob = TRUE`, el eje $y$ deja de ser un conteo y pasa a ser una **estimación de la
+densidad**. La altura de la barra que contiene al punto $x$ es:
+
+$$\hat{f}_{\text{hist}}(x) = \frac{\#\{x_i \in \text{bin}(x)\}}{n \cdot w}$$
+
+donde $n$ es el total de observaciones y $w$ es el ancho del intervalo.
+
+**Por qué el área tiene que dar 1** —y esta es la respuesta analítica, antes de calcular
+nada. Sea $c_j$ el conteo del bin $j$ y $w$ el ancho común. El área total es:
+
+$$\sum_j w \cdot \hat{f}_j = \sum_j w \cdot \frac{c_j}{n\,w} = \frac{1}{n}\sum_j c_j = \frac{n}{n} = 1$$
+
+El $w$ se cancela y los conteos suman $n$ porque cada observación cae en exactamente un
+bin. **Es una identidad algebraica, no una coincidencia numérica**: da 1 para cualquier
+número de intervalos, cualquier ancho, cualquier conjunto de datos. La división por
+$n \cdot w$ está puesta precisamente para forzarlo.
+
+## El cálculo
+
+```{r ej6-objeto}
+# Definir el histograma como OBJETO: guarda breaks, counts, density, mids
+h_dens <- hist(x, prob = TRUE,
+               main = "Histograma de densidad — producción de carbón, 2019",
+               xlab = "Producción (miles de toneladas métricas)",
+               ylab = "Densidad",
+               col = "grey85", border = "white")
+```
+
+```{r ej6-estructura}
+str(h_dens)
+```
+
+```{r ej6-area}
+l_base   <- diff(h_dens$breaks)   # ancho de cada rectángulo
+l_altura <- h_dens$density        # altura de cada rectángulo
+
+area_hist <- sum(l_base * l_altura)
+area_hist
+```
+
+**Área = `r area_hist`.** Exactamente 1.
+
+Desglosado rectángulo por rectángulo, para ver de dónde sale:
+
+```{r ej6-tabla}
+tibble(
+  intervalo = paste0("[", head(h_dens$breaks, -1), ", ", tail(h_dens$breaks, -1), ")"),
+  marca_clase = h_dens$mids,
+  conteo    = h_dens$counts,
+  base      = l_base,
+  altura    = l_altura,
+  area      = l_base * l_altura
+) %>%
+  mutate(area_acumulada = cumsum(area))
+```
+
+La columna `area` es la **probabilidad** de cada intervalo bajo esta estimación, y
+`area_acumulada` llega a 1 en la última fila.
+
+## Comprobar que vale para cualquier $k$
+
+```{r ej6-cualquier-k}
+map_dfr(c(5, 10, 25, 50, 75, 100), function(k) {
+  hk <- hist(x, breaks = k, plot = FALSE)
+  tibble(k_solicitado = k,
+         bins_reales  = length(hk$counts),
+         area         = sum(diff(hk$breaks) * hk$density))
+})
+```
+
+Siempre 1. Tal como predice el álgebra.
+
+## La interpretación
+
+Esta propiedad es lo que convierte un gráfico descriptivo en un **modelo de
+probabilidad**. Una función $\hat{f}$ que cumple:
+
+1. $\hat{f}(x) \ge 0$ para todo $x$, y
+2. $\int \hat{f}(x)\,dx = 1$
+
+es una función de densidad válida, y por lo tanto **podemos calcular probabilidades con
+ella**: el área bajo la curva entre dos valores es la probabilidad de ese intervalo.
+Acabamos de pasar de "describir datos" a "modelar el fenómeno aleatorio que los generó".
+
+Eso es justo lo que hacemos en el ejercicio siguiente.
+
+# Ejercicio 7 — Probabilidades bajo el histograma {#prob-hist}
+
+> *"Aquí les queda un ejercicio que es de cuaderno: calcular la probabilidad del evento
+> producción de carbón entre cero y 500 miles de toneladas. Yo aquí les dejo el resultado,
+> pero quiero que me lo hagan ustedes; en mi código la respuesta es casi 80%."*
+
+## El método
+
+Del ejercicio anterior sabemos que el histograma de densidad es una fdp válida. Entonces,
+para un intervalo que coincide con un bin:
+
+$$P(a < X < b) = \int_a^b \hat{f}(x)\,dx = \underbrace{(b-a)}_{\text{base}} \times \underbrace{\hat{f}\!\left(\tfrac{a+b}{2}\right)}_{\text{altura}}$$
+
+Como dentro de un bin la densidad estimada es **constante**, la integral es simplemente el
+área de un rectángulo: base × altura. La altura se lee en la **marca de clase**
+(`h_dens$mids`), el punto medio del intervalo.
+
+## El ejemplo del profesor: $P(1000 < X < 1500)$
+
+```{r ej7-ejemplo}
+base_1000_1500 <- 500
+altu_1000_1500 <- h_dens$density[h_dens$mids == 1250]
+prob_A_hist    <- base_1000_1500 * altu_1000_1500
+
+paste0("P(1000 < X < 1500) = ", round(100 * prob_A_hist, 2), "%")
+```
+
+## El ejercicio: $P(0 < X < 500)$
+
+```{r ej7-solucion}
+base_0000_0500 <- 500
+altu_0000_0500 <- h_dens$density[h_dens$mids == 250]
+prob_B_hist    <- base_0000_0500 * altu_0000_0500
+
+paste0("P(0 < X < 500) = ", round(100 * prob_B_hist, 2), "%")
+```
+
+**`r round(100*prob_B_hist, 2)`%.** El "casi 80%" de la clase, confirmado.
+
+Verifiquémoslo por dos caminos independientes, que deben coincidir:
+
+```{r ej7-verificacion}
+tibble(
+  metodo = c("Base × altura (marca de clase)",
+             "Conteo del bin / n",
+             "Frecuencia empírica: mean(0 <= x & x < 500)"),
+  valor_pct = c(100 * prob_B_hist,
+                100 * h_dens$counts[1] / length(x),
+                100 * mean(x >= 0 & x < 500))
+)
+```
+
+Los tres dan lo mismo, porque los tres *son* lo mismo: el histograma de densidad no
+inventa nada, solo reexpresa el conteo del bin como una densidad.
+
+## La interpretación — y la trampa
+
+El `r round(100*prob_B_hist, 1)`% es aritméticamente correcto. Como **descripción**, es
+impecable. Como **modelo del fenómeno**, es engañoso, y entender por qué es el punto
+completo del ejercicio.
+
+El problema está en el supuesto oculto: **dentro del bin, la densidad es constante**. Eso
+significa que el histograma afirma que un país que produce 1 mil toneladas y uno que
+produce 499 mil son igual de verosímiles. Y eso es falso — ya lo sabemos por el boxplot:
+dentro de ese primer intervalo, $Q_1 = `r round(at_prd$Q1, 2)`$ y la mediana vale
+`r round(mediana, 2)`. **La mitad de los países está en el primerísimo pedacito del
+intervalo**, no repartida uniformemente por él.
+
+Miremos la estructura interna que el histograma aplanó:
+
+```{r ej7-dentro-del-bin}
+dentro <- x[x >= 0 & x < 500]
+tibble(
+  subintervalo = c("[0, 25)", "[25, 100)", "[100, 250)", "[250, 500)"),
+  paises = c(sum(dentro < 25), sum(dentro >= 25 & dentro < 100),
+             sum(dentro >= 100 & dentro < 250), sum(dentro >= 250 & dentro < 500)),
+  pct_del_bin = 100 * c(sum(dentro < 25), sum(dentro >= 25 & dentro < 100),
+                        sum(dentro >= 100 & dentro < 250),
+                        sum(dentro >= 250 & dentro < 500)) / length(dentro)
+)
+```
+
+Si la densidad fuera realmente constante, el subintervalo $[0,25)$ —que es el 5% del ancho
+del bin— debería contener el 5% de los países del bin. Contiene el
+`r round(100*sum(dentro < 25)/length(dentro), 1)`%. El histograma está **suavizando a la
+brava** una asimetría severa.
+
+## Comparar contra el KDE
+
+Adelantemos el estimador de la sección siguiente para ver la magnitud del problema:
+
+```{r ej7-vs-kde}
+kde_prd <- density(x)
+
+# Integrar el KDE entre 0 y 500 por suma de Riemann sobre su rejilla
+integrar_kde <- function(kde, a, b) {
+  sel <- kde$x >= a & kde$x <= b
+  sum(diff(kde$x[sel]) * head(kde$y[sel], -1))
+}
+
+tibble(
+  estimador = c("Histograma (base × altura)",
+                "KDE (integral numérica)",
+                "Frecuencia empírica"),
+  `P(0 < X < 500) en %` = c(100 * prob_B_hist,
+                            100 * integrar_kde(kde_prd, 0, 500),
+                            100 * mean(x >= 0 & x < 500))
+)
+```
+
+El KDE da un valor **menor**. Exactamente lo que anticipó el profesor: *"la probabilidad
+del evento A estaba sobreestimada con el histograma, no era tan grande como nos la estaba
+mostrando"*. El KDE reparte la masa de forma continua y concentra más densidad donde
+realmente están los países (pegados al cero), sin obligarse a extender una meseta
+uniforme hasta 500.
+
+# Estimación kernel de la densidad (KDE) {#kde}
+
+> *"Eso lo hicimos para la variable de consumo, ahora para la variable de producción. Los
+> invito a que hagan lo mismo."*
+
+## El problema que resuelve
+
+El histograma estima la densidad así:
+
+$$\hat{f}_{\text{hist}}(x) = \frac{\#\{x_i \in \text{bin}(x)\}}{n \cdot w}$$
+
+Es decir: **cuenta cuántos caen dentro del intervalo y ya**. El peso que le da a cada
+observación es binario — 1 si está dentro del bin, 0 si está fuera. Tres consecuencias
+malas:
+
+1. **Saltos bruscos.** En el borde de un bin, la densidad estimada cambia de golpe. Pasar
+   de producir 499 a producir 501 mil toneladas no debería cambiar la verosimilitud de
+   forma discontinua, pero el histograma dice que sí.
+2. **Los vecinos no cuentan.** Un punto justo al otro lado de la frontera —a distancia
+   casi cero— aporta 0, mientras que uno en el extremo opuesto del mismo bin aporta 1.
+   La distancia real entre puntos se ignora por completo.
+3. **Discretiza una variable continua.** Estamos estimando la densidad de una variable
+   continua con una función escalonada.
+
+## La solución
+
+$$\hat{f}_h(x) = \frac{1}{nh}\sum_{i=1}^{n} K\!\left(\frac{x - x_i}{h}\right)$$
+
+En palabras: para estimar la densidad en un punto $x$, **considere absolutamente todas las
+observaciones**, y pondere cada una según su distancia a $x$ — mucho peso a las cercanas,
+poco a las lejanas, decayendo suavemente.
+
+Los ingredientes:
+
+- $K$ es el **kernel**, una función de peso simétrica que integra 1. La opción por defecto
+  es la campana de Gauss.
+- $h$ es el **ancho de banda**, que controla cuán rápido decae la importancia con la
+  distancia. Juega el papel que jugaba el ancho del bin $w$ en el histograma.
+- $(x - x_i)/h$ es la distancia reescalada: si $x_i$ está cerca de $x$, el argumento es
+  cercano a 0, y como el kernel tiene su máximo en 0, esa observación aporta mucho.
+
+La imagen que usó el profesor es exacta: **cada observación trae su propia campanita**, y
+la estimación final es el promedio de todas las campanitas. Un punto rodeado de vecinos
+recibe aportes de muchas campanas y queda alto; un punto aislado solo recibe el suyo y
+queda bajo.
+
+## Ver las campanitas
+
+Esto merece un gráfico explícito, porque es donde la fórmula deja de ser simbólica.
+Tomemos 8 observaciones reales y dibujemos la campana de cada una junto con su promedio:
+
+```{r kde-campanitas, fig.height=5.5}
+set.seed(7)
+muestra <- sort(sample(x[x < 800], 8))
+
+grid <- seq(-300, 1100, length.out = 600)
+h_ej  <- 90
+
+# Cada campanita: (1/n) * (1/h) * K((grid - xi)/h), para que la suma sea el promedio
+campanas <- sapply(muestra, function(xi) dnorm((grid - xi)/h_ej) / (h_ej * length(muestra)))
+estimacion <- rowSums(campanas)
+
+plot(grid, estimacion, type = "n", ylim = c(0, max(estimacion) * 1.15),
+     main = paste0("Cada observación aporta su propia campana (n = 8, h = ", h_ej, ")"),
+     xlab = "Producción (miles de toneladas métricas)", ylab = "Densidad")
+
+for (j in seq_along(muestra)) {
+  lines(grid, campanas[, j], col = "grey60", lty = 2)
+}
+lines(grid, estimacion, col = "red", lwd = 3)
+rug(muestra, col = "black", lwd = 2, ticksize = 0.05)
+
+legend("topright",
+       legend = c("Campana de cada observación", "Suma = estimación KDE", "Observaciones"),
+       col = c("grey60", "red", "black"), lwd = c(1, 3, 2), lty = c(2, 1, 1), bty = "n")
+```
+
+Donde las marcas negras se agolpan, las campanas se apilan y la curva roja sube. Donde hay
+una marca solitaria, solo aporta su propia campana y queda un montículo bajo. **Eso es
+todo lo que hace la fórmula.**
+
+## KDE sobre los datos reales
+
+```{r kde-ambas, fig.height=6}
+par(mfrow = c(2, 1), mar = c(4, 4, 3, 2))
+
+hist(x, prob = TRUE, ylim = c(0, 0.0030), xlim = c(-4, 6500), breaks = 25,
+     main = "Producción de carbón, 2019 — histograma y KDE",
+     xlab = "Producción (miles de toneladas métricas)", ylab = "Densidad",
+     col = "grey88", border = "white")
+lines(density(x), lwd = 2, col = "red")
+
+hist(y, prob = TRUE, ylim = c(0, 0.0030), xlim = c(-4, 6500), breaks = 25,
+     main = "Consumo por hogares, 2019 — histograma y KDE",
+     xlab = "Consumo (miles de toneladas métricas)", ylab = "Densidad",
+     col = "grey88", border = "white")
+lines(density(y), lwd = 2, col = "blue")
+
+par(mfrow = c(1, 1))
+```
+
+**¿Son similares las dos distribuciones?** Sí, notablemente:
+
+```{r kde-comparar}
+tibble(
+  variable = c("Producción", "Consumo por hogares"),
+  n = c(length(x), length(y)),
+  media = c(mean(x), mean(y)),
+  mediana = c(median(x), median(y)),
+  asimetria = c(asimetria(x), asimetria(y)),
+  exceso_curtosis = c(curtosis(x) - 3, curtosis(y) - 3)
+)
+```
+
+Misma forma, mismo orden de magnitud en todos los momentos. Tiene sentido: ya vimos en
+\@ref(covarianza) que la correlación entre ambas es `r round(cor_pc, 2)`. El carbón
+vegetal se consume donde se produce, así que las dos variables son casi la misma historia
+contada dos veces.
+
+## Otros kernels
+
+El kernel gaussiano no es obligatorio. Cualquier función simétrica que integre 1 sirve:
+
+```{r kde-kernels}
+plot(density(x, kernel = "gaussian"), lwd = 2, col = "red",
+     main = "La elección del kernel importa poco",
+     xlab = "Producción (miles de toneladas métricas)", ylab = "Densidad")
+lines(density(x, kernel = "epanechnikov"), lwd = 2, col = "blue",    lty = 2)
+lines(density(x, kernel = "rectangular"),  lwd = 2, col = "darkgreen", lty = 3)
+lines(density(x, kernel = "triangular"),   lwd = 2, col = "purple",  lty = 4)
+legend("topright", legend = c("Gaussiano", "Epanechnikov", "Rectangular", "Triangular"),
+       col = c("red", "blue", "darkgreen", "purple"), lwd = 2, lty = 1:4, bty = "n")
+```
+
+Las cuatro curvas son casi indistinguibles. Es un resultado conocido en estadística no
+paramétrica: **la forma del kernel casi no afecta el resultado; el ancho de banda sí, y
+muchísimo.** Es lo que veremos ahora.
+
+# Ejercicio 8 (el reto) — Área bajo la curva del KDE {#reto-kde}
+
+> *"Finalmente es un reto bien interesante, porque no es tan fácil, se los dejo ahí para
+> los que son muy curiosos […] nosotros lo hicimos para la estimación del histograma, base
+> por altura, y se sumó. Háganlo para la estimación kernel de la densidad: calculen el área
+> bajo la curva. No es tan sencillo. Pero la mía es casi uno, yo la calculé, es muy cercana
+> a uno."*
+
+## Por qué "no es tan fácil"
+
+Con el histograma teníamos rectángulos explícitos: `hist()` nos daba `breaks` y `density`,
+y el área era base × altura sumado. Con el KDE **no hay rectángulos**: es una curva
+continua. Hay que **integrarla numéricamente**.
+
+La clave está en la ayuda que dio el profesor: definir el gráfico como objeto y extraer sus
+componentes. `density()` devuelve la curva evaluada en una rejilla fina:
+
+```{r reto-objeto}
+kde <- density(x)
+str(kde[c("x", "y", "bw", "n")])
+```
+
+- `kde$x`: `r length(kde$x)` puntos del dominio, igualmente espaciados.
+- `kde$y`: la densidad estimada en cada uno de esos puntos.
+- `kde$bw`: el ancho de banda que usó.
+
+Con eso podemos aproximar $\int \hat f(x)\,dx$ como una **suma de Riemann**: la curva se
+trocea en `r length(kde$x) - 1` rectangulitos finos y se suman sus áreas.
+
+$$\int_{-\infty}^{\infty}\hat f(x)\,dx \;\approx\; \sum_{j} \underbrace{(x_{j+1} - x_j)}_{\text{base}} \cdot \underbrace{\hat f(x_{j+1})}_{\text{altura}}$$
+
+## La solución
+
+```{r reto-solucion}
+base_kde <- diff(kde$x)                          # 511 bases (todas iguales)
+alt_kde  <- tail(kde$y, length(base_kde))        # 511 alturas
+
+area_kde_prd <- sum(base_kde * alt_kde)
+area_kde_prd
+```
+
+**Área = `r round(area_kde_prd, 6)`.** El *"casi uno"* del profesor.
+
+Lo mismo para consumo:
+
+```{r reto-consumo}
+kde_chh <- density(y)
+area_kde_chh <- sum(diff(kde_chh$x) * tail(kde_chh$y, length(kde_chh$x) - 1))
+
+tibble(
+  variable = c("Producción", "Consumo por hogares"),
+  area     = c(area_kde_prd, area_kde_chh),
+  faltante = c(1 - area_kde_prd, 1 - area_kde_chh)
+)
+```
+
+## ¿Por qué *casi* uno y no uno exacto?
+
+Esta es la parte interesante del reto, y tiene **dos causas independientes**.
+
+### Causa 1 — El dominio está recortado
+
+Matemáticamente, la suma de campanas gaussianas se extiende hasta $\pm\infty$. Pero
+`density()` evalúa en un intervalo finito: por defecto, desde `min(x) - cut*bw` hasta
+`max(x) + cut*bw`, con `cut = 3`. Lo que queda fuera de ese rango —las colas de las
+campanas más extremas— simplemente **no se suma**.
+
+```{r reto-dominio}
+tibble(
+  concepto = c("Mínimo de los datos", "Inicio de la rejilla del KDE",
+               "Máximo de los datos", "Fin de la rejilla del KDE",
+               "Ancho de banda (bw)", "cut × bw"),
+  valor = c(min(x), min(kde$x), max(x), max(kde$x), kde$bw, 3 * kde$bw)
+)
+```
+
+### Causa 2 — La regla del rectángulo tiene error
+
+Aproximar el área bajo una curva con rectángulos introduce error de discretización. Aquí
+usamos el extremo derecho de cada subintervalo como altura; una regla más fina (trapecio)
+reduce el error:
+
+```{r reto-metodos}
+trapecio <- function(xs, ys) sum(diff(xs) * (head(ys, -1) + tail(ys, -1)) / 2)
+
+tibble(
+  metodo = c("Rectángulo derecho (el del enunciado)",
+             "Rectángulo izquierdo",
+             "Regla del trapecio"),
+  area = c(sum(diff(kde$x) * tail(kde$y, -1)),
+           sum(diff(kde$x) * head(kde$y, -1)),
+           trapecio(kde$x, kde$y))
+)
+```
+
+### Comprobar que el faltante se recupera
+
+Si el diagnóstico es correcto, ampliar el dominio (`cut`) y afinar la rejilla (`n`) debe
+acercar el área a 1. Probémoslo:
+
+```{r reto-convergencia}
+map_dfr(list(c(n = 512, cut = 3), c(n = 512, cut = 10), c(n = 8192, cut = 3),
+             c(n = 8192, cut = 10), c(n = 32768, cut = 20)),
+        function(p) {
+          k <- density(x, n = p["n"], cut = p["cut"])
+          tibble(n = p["n"], cut = p["cut"],
+                 area = trapecio(k$x, k$y),
+                 faltante = 1 - trapecio(k$x, k$y))
+        })
+```
+
+Confirmado: el faltante se va a cero. El KDE **sí** es una densidad legítima que integra
+exactamente 1; lo que no integra a 1 es nuestra aproximación numérica sobre una rejilla
+finita y recortada.
+
+> **La lección de fondo.** El `r round(area_kde_prd, 5)` no es un error del método: es un
+> error *nuestro*, de medición del método. Distinguir "el estimador está mal" de "mi forma
+> de evaluarlo está mal" es exactamente el tipo de diagnóstico que hay que saber hacer.
+
+# Ancho de banda: la decisión que realmente importa {#ancho-banda}
+
+> *"Ahora, ¿cómo define el ancho de banda? Antes era cómo define el número de intervalos,
+> ahora es cómo define el ancho de banda."*
+
+El histograma tenía el problema de elegir $k$ (número de intervalos). El KDE no lo
+eliminó: lo **trasladó** a la elección de $h$. Es el mismo dilema con otro nombre.
+
+## El dilema visto
+
+```{r bw-grilla, fig.height=6}
+par(mfrow = c(2, 3), mar = c(4, 4, 3, 1))
+for (h in c(5, 20, 50, 100, 300, 800)) {
+  plot(density(x, bw = h), main = paste0("h = ", h),
+       xlab = "Producción", ylab = "Densidad", lwd = 2, col = "red")
+  rug(x, col = rgb(0, 0, 0, 0.25))
+}
+par(mfrow = c(1, 1))
+```
+
+- **$h$ muy pequeño** (5, 20): rugosidad extrema. Cada observación genera su propio pico.
+  La estimación se pegó tanto a *estos* datos que dejó de describir el fenómeno — es
+  **sobreajuste**, más ruido que señal.
+- **$h$ muy grande** (300, 800): todo se aplanó. Se perdió la concentración cerca del cero,
+  que es la característica dominante de estos datos — **sobresuavizado**.
+- **En medio** está el *sweet spot*.
+
+Es el mismo compromiso sesgo–varianza del histograma: $h$ pequeño ⟹ poco sesgo, mucha
+varianza; $h$ grande ⟹ poco varianza, mucho sesgo.
+
+## Las reglas automáticas
+
+R trae varias reglas para elegir $h$ sin poner el dedo:
+
+```{r bw-reglas}
+tibble(
+  regla = c("bw.nrd0 (Silverman, por defecto)",
+            "bw.nrd (Scott)",
+            "bw.SJ (Sheather-Jones)",
+            "bw.ucv (validación cruzada insesgada)",
+            "bw.bcv (validación cruzada sesgada)"),
+  h = c(bw.nrd0(x), bw.nrd(x), bw.SJ(x),
+        suppressWarnings(bw.ucv(x)), suppressWarnings(bw.bcv(x)))
+)
+```
+
+```{r bw-comparar-reglas}
+plot(density(x, bw = bw.nrd0(x)), lwd = 2, col = "red", ylim = c(0, 0.006),
+     main = "La misma variable bajo distintas reglas de ancho de banda",
+     xlab = "Producción (miles de toneladas métricas)", ylab = "Densidad")
+lines(density(x, bw = bw.nrd(x)), lwd = 2, col = "blue",      lty = 2)
+lines(density(x, bw = bw.SJ(x)),  lwd = 2, col = "darkgreen", lty = 3)
+lines(density(x, bw = suppressWarnings(bw.ucv(x))), lwd = 2, col = "purple", lty = 4)
+rug(x, col = rgb(0, 0, 0, 0.3))
+legend("topright",
+       legend = c(paste0("nrd0 (Silverman) h = ", round(bw.nrd0(x), 1)),
+                  paste0("nrd (Scott) h = ",      round(bw.nrd(x), 1)),
+                  paste0("SJ h = ",               round(bw.SJ(x), 1)),
+                  paste0("ucv h = ",              round(suppressWarnings(bw.ucv(x)), 1))),
+       col = c("red", "blue", "darkgreen", "purple"), lwd = 2, lty = 1:4, bty = "n")
+```
+
+**Sheather–Jones da un $h$ de `r round(bw.SJ(x), 1)`, casi ocho veces menor que el
+`r round(bw.nrd0(x), 1)` de Silverman**, y la curva resultante es visiblemente más
+rugosa. ¿Cuál es "la correcta"? Depende de para qué:
+
+- **`bw.nrd0` (Silverman)** es la regla por defecto y usa
+  $h = 0.9 \min(s, IQR/1.34)\, n^{-1/5}$. Está **derivada asumiendo que los datos son
+  aproximadamente normales**. Nuestros datos no lo son ni remotamente, así que sobresuaviza.
+- **`bw.SJ`** estima el ancho óptimo a partir de los propios datos, sin asumir normalidad.
+  Por eso detecta la concentración cerca del cero y baja $h$ drásticamente. Suele ser la
+  recomendación moderna.
+
+La regla general: si la variable es muy sesgada, desconfiar de las reglas basadas en
+normalidad.
+
+> **Nota sobre el tema de trabajo final que mencionó el profesor.** El $h$ óptimo se
+> obtiene minimizando el *error cuadrático medio integrado* (MISE):
+> $\text{MISE}(h) = \mathbb{E}\!\int (\hat f_h(x) - f(x))^2 dx$. Ese funcional se
+> descompone en un término de sesgo que crece con $h^4$ y uno de varianza que decrece como
+> $1/(nh)$; minimizar la suma da el orden $h^\star \propto n^{-1/5}$ que aparece en todas
+> las fórmulas de arriba. Las reglas se diferencian solo en cómo estiman la constante.
+
+# El problema de la densidad negativa {#densidad-negativa}
+
+> *"El problema evidente es que tengo densidad negativa […] aquí hay países con producción
+> de carbón negativa. […] El histograma no tenía ese problema: solucionamos una cosa pero
+> generamos otro problema."*
+
+## El diagnóstico
+
+```{r dn-evidencia}
+tibble(
+  concepto = c("Mínimo del dominio del KDE",
+               "Densidad estimada en x = -100",
+               "Masa de probabilidad asignada a x < 0 (%)",
+               "Mínimo real de los datos"),
+  valor = c(min(kde$x),
+            approx(kde$x, kde$y, xout = -100)$y,
+            100 * integrar_kde(kde, min(kde$x), 0),
+            min(x))
+)
+```
+
+El KDE asigna un `r round(100*integrar_kde(kde, min(kde$x), 0), 2)`% de probabilidad a
+**producción negativa**, que es un imposible físico.
+
+**Por qué pasa.** Esto se llama **sesgo de frontera**. La variable tiene soporte
+$[0, \infty)$, pero el kernel gaussiano no lo sabe: es simétrico y se extiende a todos los
+reales. Como hay una enorme masa de países pegados al cero, cada uno de ellos pone su
+campanita centrada ahí, y **la mitad izquierda de cada campana se derrama hacia los
+negativos**. Cuantos más puntos haya cerca de la frontera, peor el derrame.
+
+Nótese que el histograma **no** tenía este problema, porque sus bins arrancan en el mínimo
+de los datos y no salen de ahí. Arreglamos la discontinuidad y a cambio rompimos el
+soporte.
+
+## Arreglo 1 — Reflexión en la frontera
+
+La idea: crear una copia especular de los datos al otro lado del cero
+($-x_1, \dots, -x_n$), estimar el KDE sobre el conjunto ampliado, y luego **doblar** la
+densidad sobre la parte positiva. La masa que se derramaba hacia los negativos se devuelve
+a los positivos.
+
+```{r dn-reflexion}
+kde_reflejado <- function(v, ...) {
+  ampliado <- c(v, -v)                 # datos + su espejo
+  k <- density(ampliado, ...)
+  sel <- k$x >= 0
+  list(x = k$x[sel], y = 2 * k$y[sel]) # doblar la densidad en el semieje positivo
+}
+
+kr <- kde_reflejado(x, bw = bw.SJ(x), n = 65536)
+
+tibble(
+  metodo = c("KDE estándar", "KDE con reflexión"),
+  `masa en x < 0 (%)` = c(100 * integrar_kde(kde, min(kde$x), 0), 0),
+  `área total` = c(area_kde_prd, trapecio(kr$x, kr$y))
+)
+```
+
+> **Por qué `n = 65536`.** Aquí reaparece exactamente la lección del reto
+> (\@ref(reto-kde)). Con `bw.SJ` el ancho de banda es `r round(bw.SJ(x), 1)`, pero el
+> dominio reflejado va de $-`r round(max(x))`$ a $+`r round(max(x))`$. Con la rejilla por
+> defecto de 512 puntos, el espaciado sería de ~`r round(2*(max(x)+3*bw.SJ(x))/512, 1)`
+> unidades: **más del doble del ancho de banda**. La rejilla no alcanzaría a resolver el
+> pico agudo junto al cero y el área daría ~0.79. No es que el método falle; es que la
+> rejilla es demasiado gruesa para medirlo. Compruébelo:
+
+```{r dn-reflexion-rejilla}
+map_dfr(c(512, 4096, 16384, 65536), function(nn) {
+  k <- kde_reflejado(x, bw = bw.SJ(x), n = nn)
+  tibble(n_rejilla = nn,
+         espaciado = diff(k$x)[1],
+         area      = trapecio(k$x, k$y))
+})
+```
+
+## Arreglo 2 — KDE en escala logarítmica (y por qué no basta)
+
+La idea: estimar la densidad de $Z = \log(X + 1)$ —una escala sin frontera, en principio—
+y devolverla a la escala original con el **cambio de variable**. Si $z = g(x) = \log(x+1)$,
+entonces:
+
+$$f_X(x) = f_Z(g(x)) \cdot \left|g'(x)\right| = f_Z(\log(x+1)) \cdot \frac{1}{x+1}$$
+
+```{r dn-log}
+kde_log <- function(v, ...) {
+  z  <- log(v + 1)
+  kz <- density(z, ...)
+  xs <- exp(kz$x) - 1
+  sel <- xs >= 0
+  list(x = xs[sel], y = kz$y[sel] / (xs[sel] + 1))   # jacobiano 1/(x+1)
+}
+
+kl <- kde_log(x, n = 65536)
+
+tibble(metodo = "KDE log-transformado",
+       `mínimo del dominio` = min(kl$x),
+       `área total` = trapecio(kl$x, kl$y))
+```
+
+**El área da `r round(trapecio(kl$x, kl$y), 4)`, no 1.** Y esta vez *no* es un problema de
+rejilla — sube la resolución cuanto quiera y no se mueve:
+
+```{r dn-log-rejilla}
+map_dfr(c(512, 4096, 16384, 65536), function(nn) {
+  k <- kde_log(x, n = nn)
+  tibble(n_rejilla = nn, area = trapecio(k$x, k$y))
+})
+```
+
+Converge a `r round(trapecio(kl$x, kl$y), 4)` y ahí se queda. Falta masa de verdad.
+
+**Por qué falla.** Porque la transformación **no elimina la frontera, solo la traslada**.
+El punto clave: $\log(0 + 1) = 0$. La función $x \mapsto \log(x+1)$ mapea $[0,\infty)$ en
+$[0,\infty)$ — sigue habiendo un borde en cero, ahora en la escala $z$. Y en estos datos
+hay `r sum(x < 1)` países con producción menor a 1, es decir, apiñados justo contra ese
+borde. El KDE gaussiano en el espacio $z$ se derrama hacia $z < 0$ exactamente igual que
+antes, y al filtrar `xs >= 0` esa masa se descarta.
+
+```{r dn-log-diagnostico}
+z  <- log(x + 1)
+kz <- density(z, n = 65536)
+
+tibble(
+  concepto = c("Mínimo de z = log(x+1)",
+               "Masa del KDE en z < 0 (se descarta)",
+               "Área recuperada en escala x",
+               "Suma (debe dar 1)"),
+  valor = c(min(z),
+            trapecio(kz$x[kz$x <= 0], kz$y[kz$x <= 0]),
+            trapecio(kl$x, kl$y),
+            trapecio(kz$x[kz$x <= 0], kz$y[kz$x <= 0]) + trapecio(kl$x, kl$y))
+)
+```
+
+La masa perdida y el área recuperada suman 1: **el déficit está explicado al 100%**.
+Diagnóstico cerrado.
+
+## Arreglo 3 — Combinar las dos ideas
+
+Si el problema del log es que deja una frontera en $z=0$, aplíquele a $z$ el mismo truco
+de reflexión del Arreglo 1:
+
+```{r dn-log-reflejado}
+kde_log_reflejado <- function(v, ...) {
+  z  <- log(v + 1)
+  k  <- density(c(z, -z), ...)          # reflexión, ahora en el espacio z
+  sel <- k$x >= 0
+  xs <- exp(k$x[sel]) - 1
+  list(x = xs, y = 2 * k$y[sel] / (xs + 1))
+}
+
+klr <- kde_log_reflejado(x, n = 65536)
+
+tibble(
+  metodo = c("KDE estándar", "KDE reflejado", "KDE log", "KDE log + reflexión"),
+  `mínimo del dominio` = c(min(kde$x), min(kr$x), min(kl$x), min(klr$x)),
+  `área total` = c(area_kde_prd, trapecio(kr$x, kr$y),
+                   trapecio(kl$x, kl$y), trapecio(klr$x, klr$y))
+)
+```
+
+`r round(trapecio(klr$x, klr$y), 5)`. Ahora sí.
+
+## Comparar los métodos
+
+```{r dn-comparacion}
+plot(kde$x, kde$y, type = "l", lwd = 2, col = "red",
+     xlim = c(-400, 3000), ylim = c(0, 0.006),
+     main = "Cuatro formas de estimar la misma densidad",
+     xlab = "Producción (miles de toneladas métricas)", ylab = "Densidad")
+abline(v = 0, col = "grey40", lty = 2)
+lines(kr$x,  kr$y,  lwd = 2, col = "blue",      lty = 2)
+lines(kl$x,  kl$y,  lwd = 2, col = "darkgreen", lty = 3)
+lines(klr$x, klr$y, lwd = 2, col = "purple",    lty = 4)
+rug(x, col = rgb(0, 0, 0, 0.3))
+legend("topright",
+       legend = c("KDE estándar (se derrama a negativos)",
+                  "KDE con reflexión en 0",
+                  "KDE log (pierde masa)",
+                  "KDE log + reflexión"),
+       col = c("red", "blue", "darkgreen", "purple"),
+       lwd = 2, lty = 1:4, bty = "n", cex = 0.85)
+```
+
+Los tres arreglos respetan el soporte: la densidad es exactamente cero a la izquierda del
+origen. Pero solo los que reflejan **conservan toda la masa**, que es la otra condición
+para ser una densidad legítima. Cumplir $\hat f \ge 0$ no basta; hace falta también
+$\int \hat f = 1$.
+
+```{r dn-prob-final}
+tibble(
+  estimador = c("Histograma", "KDE estándar", "KDE con reflexión", "Frecuencia empírica"),
+  `P(0 < X < 500) en %` = c(
+    100 * prob_B_hist,
+    100 * integrar_kde(kde, 0, 500),
+    100 * trapecio(kr$x[kr$x <= 500], kr$y[kr$x <= 500]),
+    100 * mean(x >= 0 & x < 500)
+  )
+)
+```
+
+Con el soporte corregido, la probabilidad del evento del Ejercicio 7 vuelve a subir hacia
+la frecuencia empírica: el KDE estándar la subestimaba justamente porque había regalado
+masa a los negativos.
+
+# Cierre: el hilo que conecta todo {#cierre}
+
+## La historia completa de la clase
+
+Cada paso de la sesión fue una respuesta a una limitación del paso anterior. Puesto en
+orden, se ve el argumento:
+
+1. **Descripción numérica.** Media, mediana, varianza, asimetría, curtosis. Resumen los
+   datos, pero son cinco números sueltos y hay que saber leerlos juntos.
+2. **Los datos vienen de un fenómeno aleatorio.** Ya no describimos una tabla: modelamos
+   el proceso que la generó. Aparece la función de densidad.
+3. **¿Usamos la normal?** No: estos datos están brutalmente sesgados
+   ($g_1 = `r round(g1_prd, 2)`$) y son leptocúrticos (exceso = `r round(exceso_prd, 1)`).
+   Ajustar una normal produciría países con producción negativa.
+4. **Entonces estimemos la densidad con el histograma** (`prob = TRUE`). Área = 1
+   (\@ref(area-hist)), permite calcular probabilidades (\@ref(prob-hist)).
+5. **Pero el histograma asume densidad constante dentro del bin**, lo cual aplana la
+   asimetría y sobreestima $P(0<X<500)$.
+6. **Entonces el KDE**, que pondera todos los puntos por distancia (\@ref(kde)). Curva
+   continua, sin saltos, sin elegir intervalos.
+7. **Pero el KDE depende del ancho de banda** (\@ref(ancho-banda)) y **asigna densidad a
+   valores negativos** (\@ref(densidad-negativa)).
+8. **Y eso también se arregla** — por reflexión en la frontera; y el intento con `log`
+   falla de una forma que enseña más que si hubiera funcionado. Cada solución revela el
+   siguiente problema. Así se hace estadística.
+
+## Tabla resumen: qué asume cada estimador
+
+| Estimador | Qué asume | Qué rompe aquí | Cómo se arregla |
+|---|---|---|---|
+| Media como centro | Distribución no muy sesgada | Media = `r round(media,1)` vs. mediana = `r round(mediana,1)` | Reportar la mediana |
+| Varianza / sd | Sin colas extremas | 5 países aportan el `r round(sum(contrib$pct_aporte[1:5]))`% de la varianza | IQR (robusto) |
+| Regla empírica 68-95-99.7 | Normalidad | Límites negativos, porcentajes no cuadran | Criterio del IQR |
+| Distribución normal | Simetría, soporte $\mathbb{R}$ | Genera producción negativa | KDE (no paramétrico) |
+| Histograma de densidad | Densidad constante en el bin | Sobreestima $P(0<X<500)$ | KDE |
+| KDE gaussiano | Soporte $\mathbb{R}$ | Densidad en $x<0$ | Reflexión (log solo no basta) |
+
+## Entonces, ¿para qué sirvió estudiar la distribución normal?
+
+Esta era la pregunta abierta de la clase, y la respuesta es el **teorema del límite
+central**: aunque la variable original no sea normal, **la distribución de sus promedios
+muestrales sí converge a una normal**.
+
+Comprobémoslo con nuestros propios datos, que es el peor caso imaginable para la
+normalidad:
+
+```{r tlc, fig.height=6}
+set.seed(2026)
+simular_medias <- function(v, n_muestra, reps = 5000) {
+  replicate(reps, mean(sample(v, n_muestra, replace = TRUE)))
+}
+
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+
+hist(x, breaks = 30, prob = TRUE, col = "grey85", border = "white",
+     main = "Datos originales (n = 1)\nNada normal", xlab = "Producción", ylab = "Densidad")
+
+for (nm in c(5, 30, 100)) {
+  medias <- simular_medias(x, nm)
+  hist(medias, breaks = 30, prob = TRUE, col = "lightblue", border = "white",
+       main = paste0("Medias de muestras de n = ", nm,
+                     "\ng1 = ", round(asimetria(medias), 2)),
+       xlab = "Media muestral", ylab = "Densidad")
+  curve(dnorm(x, mean(medias), sd(medias)), add = TRUE, col = "red", lwd = 2)
+}
+par(mfrow = c(1, 1))
+```
+
+```{r tlc-tabla}
+set.seed(2026)
+map_dfr(c(1, 5, 30, 100, 500), function(nm) {
+  medias <- if (nm == 1) x else simular_medias(x, nm)
+  tibble(tamano_muestra = nm,
+         asimetria = asimetria(medias),
+         exceso_curtosis = curtosis(medias) - 3)
+})
+```
+
+La asimetría arranca en `r round(g1_prd, 2)` y **se derrumba hacia cero** a medida que
+crece el tamaño de muestra. La curtosis hace lo mismo. Con $n = 100$ la distribución de
+las medias ya es prácticamente normal, partiendo de datos que no tenían absolutamente
+nada de normales.
+
+Por eso vale la pena estudiar la normal aunque casi ninguna variable real la siga: **casi
+nunca modelamos observaciones individuales, modelamos promedios**. Y los promedios sí son
+normales. La idea es la misma del *zoom out* de la clase — se sacrifica la individualidad
+de cada país para ganar una estructura que sí se entiende.
+
+## Nota de reproducibilidad
+
+```{r sesion}
+sessionInfo()
+```
