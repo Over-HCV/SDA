@@ -46,6 +46,31 @@ servidor_analisis <- function(input, output, session, dataset, muestreo) {
 # Auxiliares compartidos por las tres dimensiones
 # --------------------------------------------------------------------------
 
+#' Nombre de columna con su unidad declarada: "viento" -> "viento[m/h]".
+#'
+#' Solo para lo que se DIBUJA. Los chequeos de escala, las tablas y el código
+#' exportado siguen con el nombre real, que es el que existe en los datos.
+.rotulo <- function(ds, columnas) {
+  if (is.null(ds) || is.null(columnas) || !length(columnas)) return(columnas)
+  diccionario <- ds$diccionario
+  unidades <- diccionario$unidad[match(columnas, diccionario$columna)]
+  con_unidad <- !is.na(unidades) & nzchar(trimws(unidades))
+  columnas[con_unidad] <- sprintf("%s[%s]", columnas[con_unidad],
+                                  trimws(unidades[con_unidad]))
+  columnas
+}
+
+#' Los mismos datos con las columnas renombradas por .rotulo().
+#'
+#' Se renombra en la frontera y no dentro de cada graficar_*(): la dispersión
+#' con marginales devuelve un gtable al que no se le suman labs(), y en la
+#' matriz de pares los nombres salen como facetas, no como títulos de eje.
+.con_unidades <- function(ds, datos) {
+  if (is.null(datos)) return(datos)
+  names(datos) <- .rotulo(ds, names(datos))
+  datos
+}
+
 #' Escala declarada de una columna. Es lo que decide qué se habilita.
 .escala_de <- function(ds, columna) {
   if (is.null(ds) || is.null(columna)) return("razon")

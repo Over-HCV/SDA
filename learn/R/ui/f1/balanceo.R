@@ -37,7 +37,11 @@ salida_balanceo <- function(ns) {
     panel_resultado("f1.balanceo.frecuencias",
       shiny::tagList(
         shiny::plotOutput(ns("frecuencias"), height = "280px"),
-        shiny::tableOutput(ns("pesos"))),
+        shiny::tableOutput(ns("pesos")),
+        shiny::tags$p(class = "text-muted small mb-0",
+                      paste("peso_inverso = n / (clases · n_clase): la clase",
+                            "chica pesa más, así cada clase aporta lo mismo.",
+                            "Tras balancear, todos quedan en 1."))),
       contexto = salida_contexto(ns, "contexto_bal"),
       encabezado_extra = casilla_informe(ns, "f1.balanceo.frecuencias")),
     panel_resultado("f1.balanceo.nube_sinteticos",
@@ -63,6 +67,7 @@ servidor_balanceo <- function(input, output, session, dataset, muestreo) {
         sugerencia = NA_character_))))
       return(invisible(NULL))
     }
+    resultado$columna <- input$clase_bal
     ultimo(resultado)
     ds$df <- resultado$datos
     ds$n <- nrow(resultado$datos)
@@ -82,15 +87,24 @@ servidor_balanceo <- function(input, output, session, dataset, muestreo) {
     ds <- dataset()
     shiny::req(ds, input$clase_bal)
     previo <- ultimo()
-    if (!is.null(previo)) graficar_balance(previo$antes, previo$despues)
+    # El antes/después guardado solo vale mientras nadie tocó las filas ni la
+    # columna: si se filtró después, el gráfico y la tabla dejaban de coincidir.
+    vigente <- !is.null(previo) &&
+      identical(previo$columna, input$clase_bal) &&
+      length(previo$origen) == nrow(ds$df)
+    if (vigente) graficar_balance(previo$antes, previo$despues)
     else graficar_balance(resumir_balance(ds$df, input$clase_bal))
   })
 
   output$pesos <- shiny::renderTable({
     ds <- dataset()
     shiny::req(ds, input$clase_bal)
+    balance <- resumir_balance(ds$df, input$clase_bal)
+    shiny::req(nrow(balance))
     pesos <- pesos_clase(ds$df, input$clase_bal)
-    data.frame(clase = names(pesos), peso = as.numeric(pesos),
+    data.frame(clase = balance$clase, n = balance$n,
+               porcentaje = sprintf("%.1f %%", 100 * balance$proporcion),
+               peso_inverso = as.numeric(pesos[balance$clase]),
                stringsAsFactors = FALSE)
   })
 

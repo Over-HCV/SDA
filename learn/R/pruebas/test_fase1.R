@@ -252,6 +252,13 @@ muestra <- muestrear_para_grafico(sintetico, umbral = 200L, semilla = 8L)$datos
 probar("histograma con densidad superpuesta",
        dibuja(graficar_histograma(muestra, "valor", 24L, densidad = TRUE)))
 probar("densidad kernel", dibuja(graficar_densidad(muestra, "valor")))
+probar("la normal de la densidad se ajusta a los datos, no a la malla", {
+  grafico <- graficar_densidad(muestra, "valor", normal = TRUE)
+  normal <- ggplot2::layer_data(grafico, 3L)
+  valores <- muestra$valor[!is.na(muestra$valor)]
+  pico <- stats::dnorm(0, 0, stats::sd(valores))
+  abs(max(normal$y) - pico) / pico < 0.01
+})
 probar("caja y bigotes", dibuja(graficar_boxplot(muestra, "valor")))
 probar("cajas por grupo con violin",
        dibuja(graficar_boxplot_grupos(muestra, "valor", "grupo", violin = TRUE)))
@@ -311,6 +318,11 @@ probar("dispersion con histogramas marginales", {
       grDevices::pdf(NULL); on.exit(grDevices::dev.off())
       grid::grid.draw(compuesto)
     }, silent = TRUE), "try-error")
+})
+
+probar("las clases del balance van rotadas para no pisarse", {
+  grafico <- graficar_balance(resumir_balance(sintetico, "grupo"))
+  dibuja(grafico) && identical(grafico$theme$axis.text.x$angle, 20)
 })
 
 probar("un grafico sin datos suficientes no falla, avisa",

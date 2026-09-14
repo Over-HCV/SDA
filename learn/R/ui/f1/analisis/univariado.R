@@ -83,7 +83,8 @@ servidor_univariado <- function(input, output, session, dataset, muestreo) {
     ds <- dataset()
     shiny::req(ds, input$variable_uni)
     .exigir_operacion(ds, input$variable_uni, "histograma")
-    graficar_histograma(muestreo()$datos, input$variable_uni,
+    graficar_histograma(.con_unidades(ds, muestreo()$datos),
+                        .rotulo(ds, input$variable_uni),
                         clases = input$clases %||% 30L,
                         densidad = isTRUE(input$con_densidad),
                         ancho = ancho_elegido(),
@@ -95,7 +96,8 @@ servidor_univariado <- function(input, output, session, dataset, muestreo) {
     ds <- dataset()
     shiny::req(ds, input$variable_uni)
     .exigir_operacion(ds, input$variable_uni, "densidad")
-    graficar_densidad(muestreo()$datos, input$variable_uni, ancho_elegido(),
+    graficar_densidad(.con_unidades(ds, muestreo()$datos),
+                      .rotulo(ds, input$variable_uni), ancho_elegido(),
                       normal = isTRUE(input$con_normal))
   })
 
@@ -103,7 +105,8 @@ servidor_univariado <- function(input, output, session, dataset, muestreo) {
     ds <- dataset()
     shiny::req(ds, input$variable_uni)
     .exigir_operacion(ds, input$variable_uni, "boxplot")
-    graficar_boxplot(muestreo()$datos, input$variable_uni)
+    graficar_boxplot(.con_unidades(ds, muestreo()$datos),
+                     .rotulo(ds, input$variable_uni))
   })
 
   # Las cuentas van sobre ds$df, nunca sobre la muestra de dibujo (C8).
@@ -124,8 +127,10 @@ servidor_univariado <- function(input, output, session, dataset, muestreo) {
       if (length(.grupos_de(ds))) "Elegi una columna de grupo en el sidebar."
       else .motivo_sin_grupos(ds)))
     .exigir_operacion(ds, input$variable_uni, "boxplot")
-    grafico <- graficar_boxplot_grupos(muestreo()$datos, input$variable_uni,
-                                       input$grupo_uni, violin = TRUE)
+    grafico <- graficar_boxplot_grupos(.con_unidades(ds, muestreo()$datos),
+                                       .rotulo(ds, input$variable_uni),
+                                       .rotulo(ds, input$grupo_uni),
+                                       violin = TRUE)
     if (input$grupo_uni %in% .grupos_desbordados(ds))
       grafico <- grafico + ggplot2::labs(subtitle = sprintf(
         "%d niveles: mas cajas de las que se comparan de un vistazo",
@@ -137,7 +142,8 @@ servidor_univariado <- function(input, output, session, dataset, muestreo) {
     ds <- dataset()
     shiny::req(ds, input$variable_uni)
     .exigir_operacion(ds, input$variable_uni, "qq")
-    graficar_qq(muestreo()$datos, input$variable_uni)
+    graficar_qq(.con_unidades(ds, muestreo()$datos),
+                .rotulo(ds, input$variable_uni))
   })
 
   output$badge_uni <- shiny::renderUI(.badge_de_muestreo(ns, muestreo()))

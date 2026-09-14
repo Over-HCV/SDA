@@ -45,15 +45,19 @@ graficar_histograma <- function(datos, columna, clases = 30L,
 #' modelo normal "estimado", contra el que se compara la estimación kernel.
 graficar_densidad <- function(datos, columna, ancho = NULL, relleno = TRUE,
                               normal = FALSE) {
-  estimada <- estimar_densidad(as.numeric(datos[[columna]]), ancho)
+  valores <- as.numeric(datos[[columna]])
+  estimada <- estimar_densidad(valores, ancho)
   grafico <- ggplot2::ggplot(estimada$curva,
                              ggplot2::aes(x = .data$x, y = .data$densidad))
   if (relleno)
     grafico <- grafico + ggplot2::geom_area(fill = paleta_cat(1), alpha = 0.25)
   grafico <- grafico +
     ggplot2::geom_line(color = paleta_cat(1), linewidth = 0.9)
+  # Media y desvío de los DATOS. Antes salían de estimada$curva$x, la malla
+  # equiespaciada del kernel: la normal quedaba centrada en el rango y el doble
+  # de ancha, y cualquier variable parecía lejos de la normal.
   if (normal)
-    grafico <- grafico + .capa_normal(estimada$curva$x)
+    grafico <- grafico + .capa_normal(valores[!is.na(valores)])
   grafico +
     ggplot2::labs(x = columna, y = "densidad",
                   subtitle = sprintf("ancho de banda h = %.4g · n = %d",

@@ -81,7 +81,7 @@ graficar_dispersion_marginal <- function(datos, x, y, grupo = NULL, alfa = 0.6,
   # El resumen numerico sube al marginal de arriba: en el centro quedaria
   # encajonado entre el histograma y la nube.
   arriba <- .histograma_marginal(marco$x, clases) +
-    ggplot2::labs(subtitle = sprintf("r = %.3f · cov = %.3g · n = %d",
+    ggplot2::labs(subtitle = sprintf("r = %.4f · cov = %.4g · n = %d",
                                      asociacion$pearson, asociacion$covarianza,
                                      asociacion$n))
   derecha <- .histograma_marginal(marco$y, clases) + ggplot2::coord_flip()

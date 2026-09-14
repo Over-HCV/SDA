@@ -94,7 +94,9 @@ servidor_bivariado <- function(input, output, session, dataset, muestreo) {
     # devolviendo un objeto al que se le pueden sumar capas.
     dibujar <- if (isTRUE(input$marginales)) graficar_dispersion_marginal
                else graficar_dispersion
-    grafico <- dibujar(muestreo()$datos, input$x_bi, input$y_bi, grupo,
+    grafico <- dibujar(.con_unidades(ds, muestreo()$datos),
+                       .rotulo(ds, input$x_bi), .rotulo(ds, input$y_bi),
+                       .rotulo(ds, grupo),
                        alfa = input$alfa %||% 0.6,
                        jitter = isTRUE(input$jitter),
                        celdas = isTRUE(input$celdas),
@@ -107,14 +109,20 @@ servidor_bivariado <- function(input, output, session, dataset, muestreo) {
     shiny::req(ds, input$x_bi, input$y_bi)
     .exigir_operacion(ds, input$x_bi, "densidad")
     .exigir_operacion(ds, input$y_bi, "densidad")
-    graficar_densidad_conjunta(muestreo()$datos, input$x_bi, input$y_bi)
+    graficar_densidad_conjunta(.con_unidades(ds, muestreo()$datos),
+                               .rotulo(ds, input$x_bi), .rotulo(ds, input$y_bi))
   })
 
   output$mosaico <- shiny::renderPlot({
     shiny::validate(shiny::need(
       !identical(input$cruce_a, input$cruce_b),
       "Elegi dos columnas distintas para el cruce."))
-    graficar_mosaico(cruce())
+    resultado <- cruce()
+    # Solo los titulos de eje: el cruce sin rotular lo siguen usando la tabla
+    # de residuos y el contexto.
+    names(dimnames(resultado$tabla)) <- .rotulo(dataset(),
+                                                names(dimnames(resultado$tabla)))
+    graficar_mosaico(resultado)
   })
 
   output$residuos <- shiny::renderTable({

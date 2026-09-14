@@ -95,20 +95,28 @@ servidor_multivariado <- function(input, output, session, dataset, muestreo) {
     mahalanobis_cuadrado(ds$df, variables())
   })
 
-  output$pares <- shiny::renderPlot(
-    graficar_pares(muestreo()$datos, variables(), grupo_activo()))
+  # Lo que se dibuja lleva la unidad en el nombre; lo que se calcula, no.
+  rotulados <- function() .con_unidades(dataset(), muestreo()$datos)
 
-  output$heatmap <- shiny::renderPlot(
-    graficar_heatmap_correlacion(correlaciones()))
+  output$pares <- shiny::renderPlot(
+    graficar_pares(rotulados(), .rotulo(dataset(), variables()),
+                   .rotulo(dataset(), grupo_activo())))
+
+  output$heatmap <- shiny::renderPlot({
+    matriz <- correlaciones()
+    dimnames(matriz) <- lapply(dimnames(matriz),
+                               function(nombres) .rotulo(dataset(), nombres))
+    graficar_heatmap_correlacion(matriz)
+  })
 
   output$paralelas <- shiny::renderPlot(
-    graficar_coordenadas_paralelas(muestreo()$datos, variables(),
-                                   grupo_activo(),
+    graficar_coordenadas_paralelas(rotulados(), .rotulo(dataset(), variables()),
+                                   .rotulo(dataset(), grupo_activo()),
                                    metodo = input$normalizacion %||% "minmax"))
 
   output$elipsoide <- shiny::renderPlot({
-    elegidas <- variables()
-    graficar_elipsoide(muestreo()$datos, elegidas[1], elegidas[2],
+    elegidas <- .rotulo(dataset(), variables())
+    graficar_elipsoide(rotulados(), elegidas[1], elegidas[2],
                        niveles = c(0.5, input$nivel_elipse %||% 0.95))
   })
 
