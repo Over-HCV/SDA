@@ -11,7 +11,7 @@
 #   SDA_THEMER=1     monta el widget bs_themer() de bslib
 #   SDA_SESION=ruta  abre la app con una sesión ya restaurada
 #
-# En el navegador la sesión se pide por URL: `?sesion=sesiones/taller-01.json`
+# En el navegador la sesión se pide por URL: `?sesion=sesiones/taller-00.json`
 # (una ruta dentro del bundle). Es el camino que sobrevive en wasm, donde no
 # hay variables de entorno ni disco del usuario.
 

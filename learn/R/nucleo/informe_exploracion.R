@@ -37,10 +37,25 @@ NIVELES_TEXTO <- c("completo", "breve", "ninguno")
 # Las secciones del texto de un panel que sobreviven en modo `breve`.
 SECCIONES_BREVES <- c("Qué muestra", "Cuándo engaña")
 
+#' Mueve una entrada de la selección un lugar arriba (-1) o abajo (+1).
+#'
+#' El orden de la selección es el del cuaderno. Sin esto, un panel olvidado
+#' que debía abrir el informe obligaba a vaciar y volver a marcar todo.
+#' Fuera de rango o con un id que no está, la selección vuelve tal cual.
+mover_entrada <- function(entradas, id, direccion) {
+  ids <- vapply(entradas, function(e) e$id %||% "", "")
+  i <- match(id, ids)
+  j <- i + direccion
+  if (is.na(i) || is.na(j) || j < 1L || j > length(entradas)) return(entradas)
+  entradas[c(i, j)] <- entradas[c(j, i)]
+  entradas
+}
+
 #' Arma el cuaderno de exploración.
 #'
 #' @param seleccion lista de entradas {clave, titulo, cuando, params, tabla,
-#'   nota} en el orden en que se marcaron las casillas
+#'   nota} en el orden de la pestaña Informe (se marcan en orden y ahí se
+#'   reordenan)
 #' @param dataset el dataset vivo al exportar (nombre, fuente, n, p, n_crudo,
 #'   transformaciones), o NULL si se exportó sin datos cargados
 #' @param texto uno de NIVELES_TEXTO

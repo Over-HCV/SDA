@@ -66,7 +66,7 @@ cat("\n[sesión guardada · arrancar con todo puesto]\n")
 # filtro aplicado, el diccionario declarado y los paneles del taller marcados,
 # en vez de rehacer los clics cada vez.
 app2 <- local({
-  Sys.setenv(SDA_SESION = "sesiones/taller-01.json")
+  Sys.setenv(SDA_SESION = "workshops/taller-01/sesion-taller-01.json")
   on.exit(Sys.unsetenv("SDA_SESION"), add = TRUE)
   AppDriver$new(app_dir = "learn/R", name = "sda-lab-sesion",
                 load_timeout = 60000, timeout = 20000, seed = 42,
@@ -96,12 +96,32 @@ probar("Inicio muestra la sesión abierta: dataset, filtro y paneles", {
 })
 probar("Inicio ofrece guardar y abrir la sesión, con la de ejemplo",
        grepl("Guardar JSON", html_inicio, fixed = TRUE) &&
-         grepl("taller-01", html_inicio, fixed = TRUE))
+         grepl("taller-00", html_inicio, fixed = TRUE))
 probar("recién abierta, la sesión no cuenta como cambios sin guardar",
        !grepl("Cambios sin guardar", html_inicio, fixed = TRUE))
 
-# Guardar, cerrar y volver a abrir: lo que antes se perdía al recargar.
+# Las flechas reordenan el cuaderno. Se sube p2 (Frecuencias por clase) por
+# encima de p1 (Vista previa) y se devuelve a su lugar, para no cambiar lo que
+# prueban los pasos de abajo.
+posicion <- function(html, texto) regexpr(texto, html, fixed = TRUE)[1]
 invisible(ir_a(app2, "Informe", "va al cuaderno"))
+app2$click(selector = "#informe-lista button[data-mover='p2|-1']")
+app2$wait_for_idle(duration = 600, timeout = 20000)
+html_movida <- app2$get_html("#informe-lista")
+probar("la flecha sube un panel y la numeración lo sigue", {
+  grepl("1. Frecuencias por clase", html_movida, fixed = TRUE) &&
+    posicion(html_movida, "Frecuencias por clase") <
+      posicion(html_movida, "Vista previa del dataset")
+})
+probar("el primer panel no se puede subir más",
+       grepl("data-mover=\"p2[|]-1\"[^>]*disabled", html_movida))
+app2$click(selector = "#informe-lista button[data-mover='p2|1']")
+app2$wait_for_idle(duration = 600, timeout = 20000)
+probar("y la otra flecha lo devuelve a su lugar",
+       grepl("1. Vista previa del dataset", app2$get_html("#informe-lista"),
+             fixed = TRUE))
+
+# Guardar, cerrar y volver a abrir: lo que antes se perdía al recargar.
 app2$set_inputs(`informe-nota_p1` = "Lectura escrita antes de guardar.",
                 wait_ = FALSE)
 app2$wait_for_idle(duration = 1200, timeout = 20000)

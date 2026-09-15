@@ -83,10 +83,40 @@ probar("balanceo, particion, lecturas y nivel de texto vuelven con la sesion", {
     identical(vuelta$particion$asignacion, ds_rec$particion$asignacion) &&
     is.null(importar_sesion_json(archivo)$fase1$particion$asignacion)
 })
-probar("la sesion de ejemplo del taller (sin balanceo ni particion) abre igual", {
+probar("una sesion vieja (sin balanceo ni particion) abre igual", {
+  # La del Taller 01 ya no viaja con la app (no se reparte resuelto); vive con
+  # el taller y sirve de archivo anterior a estos campos.
   vieja <- dataset_de_sesion(importar_sesion_json(
-    ruta_app("sesiones", "taller-01.json"))$fase1)$dataset
+    ruta_app("workshops", "taller-01", "sesion-taller-01.json"))$fase1)$dataset
   vieja$n == 118L && is.null(vieja$balanceo) && is.null(vieja$particion)
+})
+probar("la sesion de ejemplo que trae la app es la del Taller 0", {
+  ejemplos <- basename(list.files(ruta_app("sesiones")))
+  ejemplo <- importar_sesion_json(ruta_app("sesiones", "taller-00.json"))$fase1
+  identical(ejemplos, "taller-00.json") &&
+    dataset_de_sesion(ejemplo)$dataset$n == 183L &&
+    length(seleccion_de_sesion(ejemplo)) == 7L
+})
+probar("mover una entrada la sube, la baja y no se sale de la lista", {
+  ids <- function(entradas) vapply(entradas, function(e) e$id, "")
+  identical(ids(mover_entrada(seleccion_sesion, "p2", -1L)), c("p2", "p1")) &&
+    identical(ids(mover_entrada(seleccion_sesion, "p1", 1L)), c("p2", "p1")) &&
+    identical(mover_entrada(seleccion_sesion, "p1", -1L), seleccion_sesion) &&
+    identical(mover_entrada(seleccion_sesion, "p2", 1L), seleccion_sesion) &&
+    identical(mover_entrada(seleccion_sesion, "p9", -1L), seleccion_sesion)
+})
+probar("el orden nuevo es el del cuaderno y el de la sesion guardada", {
+  # Un panel olvidado que debia abrir el informe: se sube y queda primero.
+  movida <- mover_entrada(seleccion_sesion, "p2", -1L)
+  cuaderno <- armar_informe_exploracion(movida, ds_sesion)
+  archivo <- tempfile(fileext = ".json")
+  exportar_sesion_json(sesion_actual(nuevo_almacen(), ds_sesion, movida),
+                       archivo)
+  vuelta <- seleccion_de_sesion(importar_sesion_json(archivo)$fase1)
+  which(grepl("^## Diccionario", cuaderno))[1] <
+    which(grepl("^## Resumen", cuaderno))[1] &&
+    identical(vapply(vuelta, function(e) e$id, ""), c("p2", "p1")) &&
+    identical(vuelta[[2]]$nota, "La media queda debajo de la mediana.")
 })
 probar("un archivo viejo (solo el almacen) se sigue abriendo", {
   viejo <- tempfile(fileext = ".rds")

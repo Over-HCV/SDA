@@ -1,0 +1,286 @@
+{
+  "proyecto": "sda-lab",
+  "tipo": "sesion",
+  "version": 1,
+  "exportado": "2026-09-14 23:10:28",
+  "modo": "servidor",
+  "fase1": {
+    "fuente": "twins",
+    "nombre": "twins",
+    "semilla": 42,
+    "n_crudo": 183,
+    "transformaciones": [],
+    "balanceo": {},
+    "particion": {},
+    "diccionario": [
+      {
+        "columna": "DLHRWAGE",
+        "etiqueta": "DLHRWAGE",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 18.58,
+        "n_unicos": 124
+      },
+      {
+        "columna": "DEDUC1",
+        "etiqueta": "DEDUC1",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 14
+      },
+      {
+        "columna": "AGE",
+        "etiqueta": "AGE",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 181
+      },
+      {
+        "columna": "AGESQ",
+        "etiqueta": "AGESQ",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 181
+      },
+      {
+        "columna": "HRWAGEH",
+        "etiqueta": "HRWAGEH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 12.02,
+        "n_unicos": 99
+      },
+      {
+        "columna": "WHITEH",
+        "etiqueta": "WHITEH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "discreta",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 2
+      },
+      {
+        "columna": "MALEH",
+        "etiqueta": "MALEH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "discreta",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 2
+      },
+      {
+        "columna": "EDUCH",
+        "etiqueta": "EDUCH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 13
+      },
+      {
+        "columna": "HRWAGEL",
+        "etiqueta": "HRWAGEL",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 11.48,
+        "n_unicos": 111
+      },
+      {
+        "columna": "WHITEL",
+        "etiqueta": "WHITEL",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "discreta",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 2
+      },
+      {
+        "columna": "MALEL",
+        "etiqueta": "MALEL",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "discreta",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 2
+      },
+      {
+        "columna": "EDUCL",
+        "etiqueta": "EDUCL",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "discreta",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 12
+      },
+      {
+        "columna": "DEDUC2",
+        "etiqueta": "DEDUC2",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "discreta",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 12
+      },
+      {
+        "columna": "DTEN",
+        "etiqueta": "DTEN",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 2.19,
+        "n_unicos": 90
+      },
+      {
+        "columna": "DMARRIED",
+        "etiqueta": "DMARRIED",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "discreta",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 3
+      },
+      {
+        "columna": "DUNCOV",
+        "etiqueta": "DUNCOV",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "discreta",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 3
+      }
+    ],
+    "seleccion": [
+      {
+        "id": "p1",
+        "clave": "f1.fuente.vista_previa",
+        "titulo": "Vista previa del dataset",
+        "cuando": "00:00:00",
+        "params": {
+          "filas": 183,
+          "columnas": 16
+        },
+        "nota": ""
+      },
+      {
+        "id": "p2",
+        "clave": "f1.diccionario.tabla",
+        "titulo": "Diccionario de columnas",
+        "cuando": "00:00:00",
+        "params": {
+          "columnas": 16
+        },
+        "nota": ""
+      },
+      {
+        "id": "p3",
+        "clave": "f1.analisis.boxplot",
+        "titulo": "Diagrama de caja",
+        "cuando": "00:00:00",
+        "params": {
+          "variable": "HRWAGEL"
+        },
+        "nota": ""
+      },
+      {
+        "id": "p4",
+        "clave": "f1.analisis.boxplot",
+        "titulo": "Diagrama de caja",
+        "cuando": "00:00:00",
+        "params": {
+          "variable": "HRWAGEH"
+        },
+        "nota": ""
+      },
+      {
+        "id": "p5",
+        "clave": "f1.calidad.atipicos",
+        "titulo": "Atípicos detectados",
+        "cuando": "00:00:00",
+        "params": {
+          "columna": "HRWAGEL",
+          "metodo": "iqr",
+          "umbral": 1.5
+        },
+        "nota": ""
+      },
+      {
+        "id": "p6",
+        "clave": "f1.calidad.atipicos",
+        "titulo": "Atípicos detectados",
+        "cuando": "00:00:00",
+        "params": {
+          "columna": "HRWAGEH",
+          "metodo": "iqr",
+          "umbral": 1.5
+        },
+        "nota": ""
+      },
+      {
+        "id": "p7",
+        "clave": "f1.analisis.dispersion",
+        "titulo": "Diagrama de dispersión",
+        "cuando": "00:00:00",
+        "params": {
+          "x": "HRWAGEL",
+          "y": "HRWAGEH",
+          "marginales": true
+        },
+        "nota": ""
+      }
+    ],
+    "texto": "completo"
+  },
+  "almacen": {
+    "contadores": {
+      "dataset": 0,
+      "modelo": 0,
+      "receta": 0,
+      "corrida": 0
+    },
+    "datasets": [],
+    "modelos": [],
+    "recetas": [],
+    "corridas": []
+  }
+}

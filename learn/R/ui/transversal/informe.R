@@ -28,7 +28,8 @@ mod_informe_ui <- function(id) {
         shiny::tags$p(class = "small text-muted",
                       paste("Cada panel marcado con la casilla Añadir entra",
                             "como una sección del cuaderno: su texto, sus",
-                            "parámetros y el código R que lo redibuja.")),
+                            "parámetros y el código R que lo redibuja, en el",
+                            "orden de la lista: las flechas lo cambian.")),
         shiny::radioButtons(
           ns("texto"), "Texto explicativo de cada panel",
           choices = c("completo", "breve", "ninguno"), selected = "completo"),
@@ -56,6 +57,22 @@ mod_informe_ui <- function(id) {
           shiny::column(4, class = "text-end",
                         shiny::uiOutput(ns("estado_datos"))))),
       bslib::card_body(shiny::uiOutput(ns("lista")))))
+}
+
+#' Flecha para subir (-1) o bajar (+1) un panel en la lista. `data-mover`
+#' existe para que las pruebas la encuentren sin depender del ícono.
+.flecha <- function(ns, id, direccion, apagada) {
+  subir <- direccion < 0L
+  shiny::tags$button(
+    type = "button", class = "btn btn-outline-secondary",
+    title = if (subir) "Subir" else "Bajar",
+    `aria-label` = if (subir) "Subir" else "Bajar",
+    `data-mover` = sprintf("%s|%d", id, direccion),
+    disabled = if (apagada) NA else NULL,
+    onclick = sprintf(
+      "Shiny.setInputValue('%s', {id: '%s', dir: %d}, {priority: 'event'})",
+      ns("mover"), id, direccion),
+    shiny::icon(if (subir) "arrow-up" else "arrow-down"))
 }
 
 #' @param texto reactiveVal del nivel de texto (app.R): viaja con la sesión
@@ -119,7 +136,9 @@ mod_informe_server <- function(id, seleccion, dataset, texto = NULL) {
                        sprintf("%s · %d x %d", ds$nombre, ds$n, ds$p))
     })
 
-    # Texto puro: renderUI acá es el uso permitido (fragmentos sin controles).
+    # Cada panel trae su caja de lectura (nota_<id>) y sus flechas. Las cajas se
+    # llaman por id y no por posición, así que reordenar las redibuja con su
+    # texto intacto.
     output$lista <- shiny::renderUI({
       entradas <- estructura()
       notas <- stats::setNames(
@@ -140,10 +159,19 @@ mod_informe_server <- function(id, seleccion, dataset, texto = NULL) {
         campo <- paste0("nota_", entrada$id %||% paste0("p", i))
         shiny::tags$div(
           class = "border rounded p-2 mb-2",
-          shiny::tags$span(class = "fw-bold",
-                           sprintf("%d. %s", i, entrada$titulo)),
-          shiny::tags$span(class = "text-muted small ms-2",
-                           sprintf("%s · %s", entrada$clave, entrada$cuando)),
+          shiny::tags$div(
+            class = "d-flex align-items-start gap-2",
+            shiny::tags$div(
+              class = "flex-grow-1",
+              shiny::tags$span(class = "fw-bold",
+                               sprintf("%d. %s", i, entrada$titulo)),
+              shiny::tags$span(class = "text-muted small ms-2",
+                               sprintf("%s · %s", entrada$clave,
+                                       entrada$cuando))),
+            shiny::tags$div(
+              class = "btn-group btn-group-sm",
+              .flecha(ns, entrada$id, -1L, i == 1L),
+              .flecha(ns, entrada$id, 1L, i == length(entradas)))),
           if (nzchar(resumen)) shiny::tags$p(
             class = "text-muted small mb-0 mt-1", resumen) else NULL,
           # La lectura se escribe acá y viaja al cuaderno en el lugar del
@@ -157,6 +185,13 @@ mod_informe_server <- function(id, seleccion, dataset, texto = NULL) {
             value = shiny::isolate(input[[campo]]) %||%
               (notas[[entrada$id %||% ""]] %||% "")))
       }))
+    })
+
+    # Un solo evento para todas las flechas: {id, dir} lo manda el onclick de
+    # .flecha(). Un actionButton por panel pediría un observador por id.
+    shiny::observeEvent(input$mover, {
+      seleccion(mover_entrada(seleccion(), input$mover$id,
+                              as.integer(input$mover$dir)))
     })
 
     shiny::observeEvent(input$quitar_ultima, {
