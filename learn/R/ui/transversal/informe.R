@@ -1,4 +1,4 @@
-ch# learn/R/ui/transversal/informe.R
+# learn/R/ui/transversal/informe.R
 #
 # ⤓ Informe · exportar la exploración de la fase 1 como cuaderno reproducible.
 #
