@@ -7,6 +7,7 @@
 #   cargar_charcoal()     -> data.frame limpio (Country_Area, flujo, Year, Quantity)
 #   cargar_twins()        -> data.frame gemelos (16 vars numéricas)
 #   cargar_ori()          -> data.frame meteorológico del Taller 01 (18 vars)
+#   descargar_ori()       -> ruta a ORI.csv bajado de Kaggle (overhcv/ori-dataset)
 #   listar_flujos()       -> character() con los flujos disponibles
 #   listar_paises()       -> character() con los países disponibles
 #   filtrar_charcoal()    -> data.frame filtrado por país/año/flujo
@@ -150,6 +151,33 @@ listar_vars_twins <- function() names(twins_diccionario())
 #      se recortan los nombres para que los selectores no muestren basura.
 # ---------------------------------------------------------------------------
 ruta_ori <- function() file.path(proyecto_raiz(), "data", "ORI.csv")
+
+# La misma base publicada en Kaggle. El endpoint es público (no pide token),
+# redirige a un zip firmado en Google Storage y los dos saltos mandan CORS, así
+# que en principio sirve también desde webR. El zip trae un solo ORI.csv,
+# idéntico byte a byte a data/ORI.csv.
+URL_ORI_KAGGLE <- "https://www.kaggle.com/api/v1/datasets/download/overhcv/ori-dataset"
+
+#' Baja ORI.csv de Kaggle y devuelve la ruta al CSV descomprimido.
+#'
+#' Se guarda en tempdir(): dentro de una sesión se baja una sola vez. Falla con
+#' error si no hay red; quien llama decide si cae a la copia local.
+descargar_ori <- function(url = URL_ORI_KAGGLE,
+                          destino = file.path(tempdir(), "ori-kaggle"),
+                          espera = 20) {
+  csv <- file.path(destino, "ORI.csv")
+  if (file.exists(csv)) return(csv)
+  dir.create(destino, recursive = TRUE, showWarnings = FALSE)
+  zip <- file.path(destino, "ori-dataset.zip")
+  previo <- options(timeout = espera)
+  on.exit(options(previo), add = TRUE)
+  utils::download.file(url, zip, mode = "wb", quiet = TRUE)
+  extraidos <- utils::unzip(zip, exdir = destino)
+  if (!file.exists(csv))
+    stop("el zip de Kaggle no trae ORI.csv: ", paste(basename(extraidos),
+                                                     collapse = ", "))
+  csv
+}
 
 cargar_ori <- function(ruta = ruta_ori()) {
   df <- utils::read.csv(ruta, sep = ";", dec = ".",

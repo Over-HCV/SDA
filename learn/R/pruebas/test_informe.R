@@ -50,6 +50,16 @@ probar("el cuaderno abre con el YAML de R Markdown",
 probar("la fuente ori se recarga desde el CSV original, no desde el exportado",
        any(grepl('c("ORI.csv", "data/ORI.csv",', cuaderno, fixed = TRUE)) &&
          !any(grepl("datos-sda-lab.csv", cuaderno, fixed = TRUE)))
+probar("la fuente ori se baja de Kaggle y cae a la copia local sin red",
+       any(grepl("datasets/download/overhcv/ori-dataset", cuaderno, fixed = TRUE)) &&
+         any(grepl("tryCatch", cuaderno, fixed = TRUE)))
+probar("la recta de regresion viaja al codigo del cuaderno", {
+  codigo <- codigo_artefacto("f1.analisis.dispersion",
+                             list(x = "Temperatura", y = "Velocidad_del_Viento",
+                                  regresion = TRUE))
+  any(grepl('method = "lm"', codigo, fixed = TRUE)) &&
+    any(grepl("lm(Velocidad_del_Viento ~ Temperatura", codigo, fixed = TRUE))
+})
 probar("la codificacion se detecta en vez de suponerse", {
   # Hardcodear latin1 rompia las tildes de los municipios sobre la copia UTF-8
   # del repo, y el cuaderno salia con ACACÃAS donde el panel decia ACACÍAS.
@@ -231,6 +241,7 @@ probar("el codigo de cada panel CORRE sobre los datos, no solo parsea", {
                      b = "Pronostico",
                      variables = c("Temperatura", "Presion", "Humedad"),
                      normal = TRUE, densidad = TRUE, marginales = TRUE,
+                     suavizado = TRUE, regresion = TRUE,
                      clases = 20L, umbral = 1.5, nivel = 0.95)
   # `metodo` significa cosas distintas segun el panel (iqr/z en Calidad,
   # pearson/spearman en el mapa de calor), asi que va por clave y no en el

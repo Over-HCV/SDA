@@ -178,3 +178,15 @@ ggplot(datos_noon, aes(x = Velocidad_del_Viento)) +
        caption = "Azul: Densidad Kernel (empírica) | Rojo punteado: Normal teórica") +
   theme_minimal()
 ```
+
+
+<!--
+
+Complementar explicaciones / deduccione. Exportar bien las grafiquitas.
+Generar versión final Latex con portada (learn/workshops/template).
+
+#!/bin/bash
+curl -L -o ~/Downloads/ori-dataset.zip\
+  https://www.kaggle.com/api/v1/datasets/download/overhcv/ori-dataset
+
+-->

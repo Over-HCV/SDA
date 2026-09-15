@@ -26,7 +26,8 @@ fuentes_disponibles <- function() {
       "Produccion y comercio de carbon vegetal por pais, ano y flujo.",
       "Matriz pais x anio de un solo flujo, ya agregada.",
       "Gemelos: salario, educacion y controles. 16 variables numericas.",
-      "Taller 01: clima por municipio y hora en la Orinoquia. 18 variables.",
+      paste("Taller 01: clima por municipio y hora en la Orinoquia.",
+            "18 variables. Se baja de Kaggle (overhcv/ori-dataset)."),
       "k grupos normales con medias separadas por 'efecto'.",
       "Relacion cubica con ruido: la recta se queda corta a proposito."),
     filas_aprox = c(35113L, 145L, 182L, 4543L, 100L, 100L),
@@ -73,7 +74,18 @@ cargar_fuente <- function(clave, semilla = 42L, n = 100L, k_grupos = 4L,
             as.data.frame(matriz))
     },
     twins = cargar_twins(),
-    ori = cargar_ori(),
+    ori = {
+      # Primero la copia publicada en Kaggle; sin red, la del bundle. Se avisa
+      # solo cuando cae a la local, que es el caso que hay que saber.
+      ruta <- tryCatch(suppressWarnings(descargar_ori()),
+                       error = function(e) {
+                         agregar(paste("no se pudo bajar ORI de Kaggle; se usa",
+                                       "la copia incluida en la app"),
+                                 conditionMessage(e))
+                         ruta_ori()
+                       })
+      cargar_ori(ruta)
+    },
     sintetico_anova = gen_sintetico(n = n, k_grupos = k_grupos, efecto = efecto,
                                     semilla = semilla, tipo = "anova"),
     sintetico_regresion = gen_sintetico(n = n, semilla = semilla,

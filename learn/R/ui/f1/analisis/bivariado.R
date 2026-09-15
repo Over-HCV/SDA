@@ -17,6 +17,7 @@ controles_bivariado <- function(ns) {
     shiny::checkboxInput(ns("celdas"), "Contar por celda en vez de puntos",
                          FALSE),
     shiny::checkboxInput(ns("suavizado"), "Curva loess", FALSE),
+    shiny::checkboxInput(ns("regresion"), "Recta de regresion (MCO)", FALSE),
     shiny::checkboxInput(ns("marginales"), "Histogramas marginales", FALSE),
     shiny::tags$hr(),
     shiny::selectInput(ns("cruce_a"), "Cruce: primera categorica",
@@ -100,7 +101,8 @@ servidor_bivariado <- function(input, output, session, dataset, muestreo) {
                        alfa = input$alfa %||% 0.6,
                        jitter = isTRUE(input$jitter),
                        celdas = isTRUE(input$celdas),
-                       suavizado = isTRUE(input$suavizado))
+                       suavizado = isTRUE(input$suavizado),
+                       regresion = isTRUE(input$regresion))
     if (inherits(grafico, "gtable")) grid::grid.draw(grafico) else grafico
   })
 
@@ -140,6 +142,8 @@ servidor_bivariado <- function(input, output, session, dataset, muestreo) {
                                    dataset()$df[[input$y_bi]])
     list(x = input$x_bi, y = input$y_bi,
          marginales = isTRUE(input$marginales),
+         regresion = if (isTRUE(input$regresion)) describir_recta(ajustar_recta(
+           dataset()$df[[input$x_bi]], dataset()$df[[input$y_bi]])) else "no",
          covarianza = round(asociacion$covarianza, 4),
          pearson = round(asociacion$pearson, 4),
          spearman = round(asociacion$spearman, 4),

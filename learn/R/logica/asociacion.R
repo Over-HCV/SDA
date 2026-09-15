@@ -38,6 +38,35 @@ medir_asociacion <- function(x, y, metodo = "pearson") {
        comentario = comentario)
 }
 
+#' Recta de mínimos cuadrados de y sobre x.
+#'
+#' Va aparte de medir_asociacion() porque no es simétrica: regresar y sobre x
+#' no da la misma recta que x sobre y. R² es el cuadrado de Pearson solo en
+#' este caso simple, y se devuelve para que el subtítulo lo muestre sin que el
+#' lector tenga que saberlo.
+#'
+#' @return list(n, corte, pendiente, r2)
+ajustar_recta <- function(x, y) {
+  completos <- !is.na(x) & !is.na(y)
+  x <- x[completos]; y <- y[completos]
+  n <- length(x)
+  if (n < 3L || stats::var(x) == 0)
+    return(list(n = n, corte = NA_real_, pendiente = NA_real_, r2 = NA_real_))
+  ajuste <- stats::lm.fit(cbind(1, x), y)
+  residual <- sum(ajuste$residuals^2)
+  total <- sum((y - mean(y))^2)
+  list(n = n, corte = unname(ajuste$coefficients[1]),
+       pendiente = unname(ajuste$coefficients[2]),
+       r2 = if (total > 0) 1 - residual / total else NA_real_)
+}
+
+#' Texto corto de la recta para un subtítulo: "y = 1.2 + 0.35x · R² = 0.41".
+describir_recta <- function(recta) {
+  if (is.na(recta$pendiente)) return("recta no calculable")
+  sprintf("y = %.3g %s %.3gx · R² = %.3f", recta$corte,
+          if (recta$pendiente < 0) "-" else "+", abs(recta$pendiente), recta$r2)
+}
+
 #' Matriz de correlación de las columnas numéricas.
 #'
 #' @param reordenar TRUE agrupa las variables parecidas con un dendrograma;

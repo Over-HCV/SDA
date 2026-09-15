@@ -173,7 +173,9 @@ codigo_artefacto <- function(clave, params, tabla = NULL) {
     sprintf('cat("Pearson:   ", cor(datos$%s, datos$%s, use = "complete.obs"), "\\n")', p$x, p$y),
     sprintf('cat("Spearman:  ", cor(datos$%s, datos$%s, use = "complete.obs",', p$x, p$y),
     '    method = "spearman"), "\\n")',
-    sprintf('print(cor.test(datos$%s, datos$%s))', p$x, p$y))
+    sprintf('print(cor.test(datos$%s, datos$%s))', p$x, p$y),
+    if (isTRUE(p$regresion))
+      sprintf('print(summary(lm(%s ~ %s, data = datos)))', p$y, p$x) else NULL)
   color <- if (!is.null(p$grupo) && nzchar(p$grupo))
     sprintf(", color = %s", p$grupo) else ""
   capa_puntos <- if (isTRUE(p$celdas)) "  geom_bin2d(bins = 40) +"
@@ -186,6 +188,9 @@ codigo_artefacto <- function(clave, params, tabla = NULL) {
     capa_puntos,
     if (isTRUE(p$suavizado))
       '  geom_smooth(method = "loess", formula = y ~ x, se = TRUE) +' else NULL,
+    if (isTRUE(p$regresion))
+      '  geom_smooth(method = "lm", formula = y ~ x, se = TRUE, color = "firebrick") +'
+    else NULL,
     sprintf('  labs(x = "%s", y = "%s")', p$x, p$y))
   # Con marginales el dibujo lo compone ggExtra, que es la vía que sugiere el
   # enunciado del taller. El lab lo arma a mano con gtable para no sumar una

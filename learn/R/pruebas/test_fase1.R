@@ -266,6 +266,19 @@ probar("Q-Q normal", dibuja(graficar_qq(muestra, "valor")))
 probar("dispersion con conteo por celda",
        dibuja(graficar_dispersion(muestra, "valor", "observacion",
                                   celdas = TRUE)))
+probar("la recta de regresion coincide con lm()", {
+  recta <- ajustar_recta(sintetico$valor, sintetico$observacion)
+  modelo <- stats::lm(observacion ~ valor, data = sintetico)
+  isTRUE(all.equal(c(recta$corte, recta$pendiente), unname(stats::coef(modelo)))) &&
+    isTRUE(all.equal(recta$r2, summary(modelo)$r.squared))
+})
+probar("sin variacion en x la recta no se inventa",
+       is.na(ajustar_recta(rep(1, 10), 1:10)$pendiente))
+probar("dispersion con recta de regresion y su ecuacion", {
+  grafico <- graficar_dispersion(muestra, "valor", "observacion",
+                                 suavizado = TRUE, regresion = TRUE)
+  dibuja(grafico) && grepl("R²", grafico$labels$subtitle, fixed = TRUE)
+})
 probar("densidad conjunta",
        dibuja(graficar_densidad_conjunta(muestra, "valor", "observacion")))
 probar("mosaico de dos cualitativas", {

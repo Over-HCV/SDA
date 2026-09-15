@@ -39,7 +39,7 @@ salida_balanceo <- function(ns) {
         shiny::plotOutput(ns("frecuencias"), height = "280px"),
         shiny::tableOutput(ns("pesos")),
         shiny::tags$p(class = "text-muted small mb-0",
-                      paste("peso_inverso = n / (clases · n_clase): la clase",
+                      paste("peso = n / (clases · n_clase): la clase",
                             "chica pesa más, así cada clase aporta lo mismo.",
                             "Tras balancear, todos quedan en 1."))),
       contexto = salida_contexto(ns, "contexto_bal"),

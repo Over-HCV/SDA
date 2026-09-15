@@ -67,6 +67,7 @@ params_de_artefacto <- function(clave, input, ds) {
            marginales = isTRUE(input$marginales), alfa = input$alfa,
            jitter = isTRUE(input$jitter), celdas = isTRUE(input$celdas),
            suavizado = isTRUE(input$suavizado),
+           regresion = isTRUE(input$regresion),
            pearson = round(a$pearson, 4), covarianza = round(a$covarianza, 4),
            spearman = round(a$spearman, 4), n = a$n)
     },

@@ -33,11 +33,15 @@ library(ggExtra)
 
 
 ```{r cargar-datos}
-# ORI.csv es la base del Taller 01 (IDEAM). Dejalo al lado del cuaderno o
-# ajustá `ruta`: se prueban los lugares habituales, en orden.
-# ruta <- Filter(file.exists, c("ORI.csv", "data/ORI.csv",
-# https://www.kaggle.com/api/v1/datasets/download/overhcv/ori-dataset
-                              "../../../data/ORI.csv"))[1]
+# ORI.csv es la base del Taller 01 (IDEAM), publicada en Kaggle como
+# overhcv/ori-dataset. Se baja de ahí; sin internet se busca una copia
+# local en los lugares habituales, en orden.
+url_ori <- "https://www.kaggle.com/api/v1/datasets/download/overhcv/ori-dataset"
+zip_ori <- file.path(tempdir(), "ori-dataset.zip")
+ruta <- tryCatch({
+  download.file(url_ori, zip_ori, mode = "wb", quiet = TRUE)
+  unzip(zip_ori, files = "ORI.csv", exdir = tempdir())
+})
 # La copia que reparte el curso viene en ISO-8859-1 y la de data/ del repo
 # en UTF-8. Se detecta en vez de suponer: suponer es lo que rompe las
 # tildes de los municipios (ACACÍAS -> ACACÃAS).

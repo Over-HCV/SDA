@@ -19,6 +19,11 @@ rho = correlación de Spearman → mide relación MONÓTONA
 
 Cuando `|rho|` es bastante mayor que `|r|`, hay relación y no es una recta.
 
+Con **Recta de regresion (MCO)** se superpone la recta de mínimos cuadrados de
+Y sobre X, con su banda de confianza, y el subtítulo suma su ecuación y R².
+Prendé también la **Curva loess**: donde las dos se separan, la recta se queda
+corta. Regresar Y sobre X no da la misma recta que X sobre Y.
+
 ## Qué buscar
 
 - **Forma**: recta, curva, abanico, nube sin estructura.

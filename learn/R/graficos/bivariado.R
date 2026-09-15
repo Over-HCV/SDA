@@ -11,9 +11,12 @@
 #'
 #' @param celdas TRUE cambia los puntos por conteo en rejilla
 #' @param suavizado añade una curva loess con su banda
+#' @param regresion añade la recta de mínimos cuadrados con su banda, y su
+#'   ecuación al subtítulo. Con las dos a la vista se ve dónde la recta se
+#'   queda corta: donde la loess se despega de ella.
 graficar_dispersion <- function(datos, x, y, grupo = NULL, alfa = 0.6,
                                 jitter = FALSE, celdas = FALSE,
-                                suavizado = FALSE) {
+                                suavizado = FALSE, regresion = FALSE) {
   marco <- data.frame(x = as.numeric(datos[[x]]), y = as.numeric(datos[[y]]))
   if (!is.null(grupo)) marco$grupo <- as.character(datos[[grupo]])
   marco <- marco[stats::complete.cases(marco), ]
@@ -39,11 +42,20 @@ graficar_dispersion <- function(datos, x, y, grupo = NULL, alfa = 0.6,
       method = "loess", formula = y ~ x, se = TRUE, color = paleta_cat(2)[2],
       linewidth = 0.8)
 
+  # Sin `color` en el aes: con grupo, la recta es la del total, no una por nivel.
+  if (regresion)
+    grafico <- grafico + ggplot2::geom_smooth(
+      method = "lm", formula = y ~ x, se = TRUE, color = paleta_cat(6)[6],
+      linewidth = 0.8)
+
+  subtitulo <- sprintf("r = %.3f · rho = %.3f · n = %d · %s",
+                       asociacion$pearson, asociacion$spearman,
+                       asociacion$n, asociacion$comentario)
+  if (regresion)
+    subtitulo <- paste0(subtitulo, "\n",
+                        describir_recta(ajustar_recta(marco$x, marco$y)))
   grafico +
-    ggplot2::labs(x = x, y = y,
-                  subtitle = sprintf("r = %.3f · rho = %.3f · n = %d · %s",
-                                     asociacion$pearson, asociacion$spearman,
-                                     asociacion$n, asociacion$comentario)) +
+    ggplot2::labs(x = x, y = y, subtitle = subtitulo) +
     tema_ggplot()
 }
 
@@ -67,23 +79,26 @@ graficar_dispersion <- function(datos, x, y, grupo = NULL, alfa = 0.6,
 #'   ggplot, pero no se le pueden sumar capas despues.
 graficar_dispersion_marginal <- function(datos, x, y, grupo = NULL, alfa = 0.6,
                                          jitter = FALSE, celdas = FALSE,
-                                         suavizado = FALSE, clases = 30L) {
+                                         suavizado = FALSE, regresion = FALSE,
+                                         clases = 30L) {
   marco <- data.frame(x = as.numeric(datos[[x]]), y = as.numeric(datos[[y]]))
   marco <- marco[stats::complete.cases(marco), ]
   asociacion <- medir_asociacion(marco$x, marco$y)
 
   centro <- graficar_dispersion(datos, x, y, grupo = grupo, alfa = alfa,
                                 jitter = jitter, celdas = celdas,
-                                suavizado = suavizado) +
+                                suavizado = suavizado,
+                                regresion = regresion) +
     ggplot2::labs(subtitle = NULL) +
     ggplot2::theme(legend.position = "none")
 
   # El resumen numerico sube al marginal de arriba: en el centro quedaria
   # encajonado entre el histograma y la nube.
   arriba <- .histograma_marginal(marco$x, clases) +
-    ggplot2::labs(subtitle = sprintf("r = %.4f · cov = %.4g · n = %d",
-                                     asociacion$pearson, asociacion$covarianza,
-                                     asociacion$n))
+    ggplot2::labs(subtitle = paste0(
+      sprintf("r = %.4f · cov = %.4g · n = %d", asociacion$pearson,
+              asociacion$covarianza, asociacion$n),
+      if (regresion) paste0("\n", describir_recta(ajustar_recta(marco$x, marco$y)))))
   derecha <- .histograma_marginal(marco$y, clases) + ggplot2::coord_flip()
 
   rejilla_centro <- ggplot2::ggplotGrob(centro)
