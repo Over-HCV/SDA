@@ -42,7 +42,7 @@ ui <- bslib::page_navbar(
   # KaTeX, una vez para toda la app. No pinta nada por sí sola: engancha el JS
   # y el CSS que convierten en matemáticas los nodos que deja
   # R/nucleo/formulas.R. Ver R/ui/piezas/formulas.R.
-  header = dependencia_formulas(),
+  header = shiny::tagList(dependencia_formulas(), dependencia_salida()),
 
   bslib::nav_panel("Inicio", icon = bsicons::bs_icon("house"),
                    mod_inicio_ui("inicio")),
@@ -87,14 +87,23 @@ server <- function(input, output, session) {
   # (que los exporta) compartan el mismo estado toda la sesión.
   seleccion <- shiny::reactiveVal(list())
 
-  mod_inicio_server("inicio", almacen)
+  # Nivel de texto del cuaderno y cambios sin guardar: los dos viajan con la
+  # sesión y los leen varias pestañas (Inicio, Objetos, Informe).
+  texto <- shiny::reactiveVal("completo")
+  guardado <- nuevo_estado_guardado()
+
   estado_datos <- mod_datos_server("datos", almacen, seleccion)
+  mod_inicio_server("inicio", almacen, estado_datos$dataset, seleccion, texto,
+                    guardado)
   mod_modelado_server("modelado", almacen)
   mod_ajuste_server("ajuste", almacen)
   mod_evaluacion_server("evaluacion", almacen)
-  mod_objetos_server("objetos", almacen, estado_datos$dataset, seleccion)
+  mod_objetos_server("objetos", almacen, estado_datos$dataset, seleccion,
+                     texto, guardado)
   mod_referencia_server("referencia")
-  mod_informe_server("informe", seleccion, estado_datos$dataset)
+  mod_informe_server("informe", seleccion, estado_datos$dataset, texto)
+  vigilar_cambios(session, almacen, estado_datos$dataset, seleccion, texto,
+                  guardado)
 
   # Arrancar con una sesión puesta: el caso de uso es entrar al lab y que el
   # dataset, el filtro, el diccionario y los paneles del taller ya estén,
@@ -112,10 +121,11 @@ server <- function(input, output, session) {
         NULL
       })
     if (is.null(bruto)) return(invisible(NULL))
-    if (!is.null(bruto$almacen)) almacen(bruto$almacen)
+    if (length(bruto$almacen$contadores)) almacen(bruto$almacen)
     shiny::showNotification(
-      restaurar_fase1_en(bruto$fase1, estado_datos$dataset, seleccion),
+      restaurar_fase1_en(bruto$fase1, estado_datos$dataset, seleccion, texto),
       type = "message", duration = 6)
+    .marcar_guardada(guardado)
   }, once = TRUE, ignoreNULL = FALSE)
 
   # cambiar_tema() reconstruye el preset COMPLETO en vez de usar

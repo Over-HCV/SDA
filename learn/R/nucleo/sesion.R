@@ -10,7 +10,11 @@
 #   - qué fuente está cargada y con qué pila de filtros y transformaciones,
 #   - qué declaró el diccionario (escala, clase, rol de cada columna),
 #   - qué paneles quedaron marcados con "Añadir", con qué parámetros y con qué
-#     lectura escrita al lado.
+#     lectura escrita al lado,
+#   - si se balanceó o se particionó, con qué técnica y qué semilla.
+#
+# Balanceo y partición no se guardan como filas ni como asignación: se guarda
+# la receta (técnica + semilla) y se rehace al abrir, igual que la pila.
 #
 # Eso es una sesión. Guardarla y volver a abrirla es entrar al lab con todo
 # puesto: el filtro de mediodía aplicado, Temperatura declarada de intervalo y
@@ -39,6 +43,8 @@ sesion_actual <- function(almacen = NULL, dataset = NULL, seleccion = list(),
       semilla = dataset$semilla %||% 42L,
       n_crudo = dataset$n_crudo %||% NA_integer_,
       transformaciones = dataset$transformaciones %||% list(),
+      balanceo = dataset$balanceo,
+      particion = .receta_particion(dataset$particion),
       diccionario = dataset$diccionario,
       # Sin las tablas congeladas: se recalculan al abrirla
       # (seleccion_con_tablas). Guardarlas metía la vista previa y el
@@ -49,6 +55,14 @@ sesion_actual <- function(almacen = NULL, dataset = NULL, seleccion = list(),
       }),
       texto = texto),
     almacen = almacen)
+}
+
+#' La partición sin su asignación: con la semilla alcanza para rehacerla, y la
+#' asignación son tantas cadenas como filas.
+.receta_particion <- function(particion) {
+  if (is.null(particion)) return(NULL)
+  particion$asignacion <- NULL
+  particion
 }
 
 #' Una sesión leída de disco, venga del formato que venga.
@@ -77,6 +91,8 @@ sesion_normalizada <- function(bruto) {
     fase1$diccionario <- .filas_a_df(fase1$diccionario)
   fase1$transformaciones <- lapply(fase1$transformaciones %||% list(),
                                    .transformacion_normalizada)
+  fase1$balanceo <- .bloque_normalizado(fase1$balanceo)
+  fase1$particion <- .bloque_normalizado(fase1$particion)
   fase1$seleccion <- lapply(fase1$seleccion %||% list(), .entrada_normalizada)
   fase1
 }
@@ -88,6 +104,15 @@ sesion_normalizada <- function(bruto) {
   if (is.null(x) || !length(x)) return(NULL)
   valor <- unlist(x, use.names = FALSE)[1]
   if (is.na(valor)) NULL else valor
+}
+
+# Un bloque de escalares (balanceo, partición): cada campo a su valor, NA y
+# listas vacías a NULL. Un bloque vacío es "no se hizo".
+.bloque_normalizado <- function(bloque) {
+  if (is.null(bloque) || !length(bloque)) return(NULL)
+  limpio <- lapply(bloque, .valor_unico)
+  limpio <- limpio[!vapply(limpio, is.null, logical(1))]
+  if (length(limpio)) limpio else NULL
 }
 
 .filas_a_df <- function(filas) {
@@ -147,6 +172,38 @@ dataset_de_sesion <- function(fase1) {
     ds$transformaciones <- fase1$transformaciones
     ds$n <- nrow(resultado$datos)
     ds$p <- ncol(resultado$datos)
+  }
+  # Primero balanceo y después partición: balancear cambia las filas y la
+  # app limpia la partición, así que en el orden inverso no pudo haber pasado.
+  receta_bal <- fase1$balanceo
+  if (!is.null(receta_bal$columna) && receta_bal$columna %in% names(ds$df)) {
+    balanceado <- tryCatch(
+      balancear(ds$df, receta_bal$columna, receta_bal$metodo %||% "submuestreo",
+                as.integer(receta_bal$semilla %||% 42L)),
+      error = function(e) NULL)
+    if (is.null(balanceado)) {
+      avisos <- c(avisos, list(list(
+        severidad = "aviso", mensaje = "no se pudo rehacer el balanceo",
+        sugerencia = "Volvé a balancear en ① Datos.")))
+    } else {
+      ds$df <- balanceado$datos
+      ds$n <- nrow(balanceado$datos)
+      ds$balanceo <- list(metodo = balanceado$metodo,
+                          columna = receta_bal$columna,
+                          semilla = balanceado$semilla)
+    }
+  }
+  receta_part <- fase1$particion
+  if (!is.null(receta_part$tipo)) {
+    estrato <- receta_part$estratificar
+    if (!is.null(estrato) && !estrato %in% names(ds$df)) estrato <- NULL
+    ds$particion <- tryCatch(
+      particionar(ds$df, tipo = receta_part$tipo,
+                  proporcion = as.numeric(receta_part$proporcion %||% 0.7),
+                  k = as.integer(receta_part$k %||% 5L),
+                  estratificar = estrato,
+                  semilla = as.integer(receta_part$semilla %||% 42L)),
+      error = function(e) NULL)
   }
   # El diccionario declarado manda sobre la autodetección: es la mitad de lo
   # que se guarda una sesión.

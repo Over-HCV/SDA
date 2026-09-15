@@ -25,7 +25,9 @@
 source("learn/R/cargar.R")
 
 # Lo que la app necesita en tiempo de ejecución. Nada más entra al espejo.
-.SUBCARPETAS_ESPEJO <- c("R", "textos", "fichas", "metodos")
+# www/ trae KaTeX y el aviso de salida; sesiones/ las sesiones de ejemplo que
+# Inicio ofrece abrir. Faltaban: en Posit las fórmulas no se pintaban.
+.SUBCARPETAS_ESPEJO <- c("R", "textos", "fichas", "metodos", "www", "sesiones")
 
 # Generados o de desarrollo: se reconstruyen, no se despliegan.
 .FUERA_DEL_ESPEJO <- c("R/pruebas", "R/mapa.R")

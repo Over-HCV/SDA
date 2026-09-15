@@ -152,7 +152,7 @@ probar("la ficha muestra metadatos del registro",
 
 cat("\n[resto de secciones]\n")
 marcas <- c("① Datos" = "Vista previa del dataset", "③ Ajuste" = "En construcción",
-            "④ Evaluación" = "En construcción", "Objetos" = "Exportar JSON",
+            "④ Evaluación" = "En construcción", "Objetos" = "Guardar JSON",
             "Referencia" = "Glosario")
 for (seccion in names(marcas)) {
   html <- ir_a(app, seccion, marcas[[seccion]])
@@ -335,8 +335,10 @@ app$wait_for_idle(duration = 600, timeout = 20000)
 # estática y ya está en el DOM del panel oculto, así que devolvería el HTML de
 # antes de que el servidor rindiera la selección.
 html_informe <- ir_a(app, "Informe", "1 panel")
+# En la lista y no en todo el body: la clave también sale en el contexto de la
+# card, y buscarla en cualquier lado dejó pasar una selección vacía.
 probar("la pestaña Informe lista el panel marcado en ① Datos",
-       grepl("f1.analisis.boxplot", html_informe, fixed = TRUE))
+       grepl("f1.analisis.boxplot", app$get_html("#informe-lista"), fixed = TRUE))
 probar("el conteo de paneles refleja la selección",
        grepl("1 panel", html_informe, fixed = TRUE))
 probar("el cuaderno sabe sobre qué dataset se armó",
@@ -379,37 +381,6 @@ app$click("tema_darkly")
 Sys.sleep(2)
 probar("el cambio de tema no rompe la app",
        grepl("SDA Lab", app$get_html("body"), fixed = TRUE))
-
-# ---------------------------------------------------------------------------
-cat("\n[sesión guardada · arrancar con todo puesto]\n")
-# La app abierta con SDA_SESION: el caso de uso es entrar al lab y encontrar el
-# filtro aplicado, el diccionario declarado y los paneles del taller marcados,
-# en vez de rehacer los clics cada vez.
-app2 <- local({
-  Sys.setenv(SDA_SESION = "sesiones/taller-01.json")
-  on.exit(Sys.unsetenv("SDA_SESION"), add = TRUE)
-  AppDriver$new(app_dir = "learn/R", name = "sda-lab-sesion",
-                load_timeout = 60000, timeout = 20000, seed = 42,
-                options = list(shiny.autoreload = FALSE))
-})
-on.exit(app2$stop(), add = TRUE)
-
-probar("al abrir con una sesión, el dataset ya está cargado y filtrado",
-       grepl("ori · 118 x 18", esperar_html(app2, "ori · 118 x 18"),
-             fixed = TRUE))
-# Se espera por el texto de la caja de lectura y no por el conteo: el
-# encabezado se pinta un ciclo antes que la lista de paneles.
-html_sesion <- ir_a(app2, "Informe", "va al cuaderno")
-probar("y los paneles del taller ya están en el cuaderno, sin duplicarse", {
-  # Restaurar re-marca las casillas de ① Datos, y cada marca dispara el
-  # observador que añade: sin la guarda de identidad, los 14 se volvían 24.
-  grepl("14 paneles", html_sesion, fixed = TRUE) &&
-    grepl("Resumen numérico", html_sesion, fixed = TRUE)
-})
-probar("la lectura de cada panel tiene dónde escribirse",
-       grepl("va al cuaderno", html_sesion, fixed = TRUE))
-probar("cero errores de consola al restaurar",
-       length(errores_de_consola(app2)) == 0)
 
 cat("\n[consola del navegador]\n")
 errores <- errores_de_consola(app)

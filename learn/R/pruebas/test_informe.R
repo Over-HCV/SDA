@@ -320,9 +320,9 @@ probar("el cuaderno del taller cita ORI.csv y no el CSV exportado", {
 })
 
 # ---------------------------------------------------------------------------
-cat("\n[sesiones]\n")
-# Una sesión es fuente + pila + diccionario + paneles marcados: lo que uno
-# arma cada vez que abre la app y hasta ahora perdía al cerrar la pestaña.
+cat("\n[cuaderno desde una sesion]\n")
+# Guardar y abrir sesiones se prueba en test_sesion.R; acá solo que el
+# cuaderno se arma desde una.
 ds_sesion <- ds_cli
 ds_sesion$diccionario$escala[ds_sesion$diccionario$columna == "Temperatura"] <-
   "intervalo"
@@ -337,31 +337,6 @@ archivo_sesion <- tempfile(fileext = ".json")
 exportar_sesion_json(sesion_actual(nuevo_almacen(), ds_sesion, seleccion_sesion),
                      archivo_sesion)
 
-probar("la sesion guarda la fuente, la pila y los paneles marcados", {
-  leida <- importar_sesion_json(archivo_sesion)
-  identical(leida$fase1$fuente, "ori") &&
-    identical(leida$fase1$transformaciones[[1]]$tipo, "filtro") &&
-    length(leida$fase1$seleccion) == 2L &&
-    identical(leida$fase1$seleccion[[1]]$nota,
-              "La media queda debajo de la mediana.")
-})
-probar("al abrirla, el dataset se reconstruye con el filtro puesto", {
-  reconstruido <- dataset_de_sesion(importar_sesion_json(archivo_sesion)$fase1)
-  reconstruido$dataset$n == 118L && reconstruido$dataset$n_crudo == 4543L
-})
-probar("lo declarado en el diccionario sobrevive al viaje", {
-  # Es la mitad del valor de guardar una sesion: Temperatura es de intervalo
-  # porque alguien lo decidio, y R no lo puede volver a deducir.
-  dicc <- dataset_de_sesion(
-    importar_sesion_json(archivo_sesion)$fase1)$dataset$diccionario
-  identical(dicc$escala[dicc$columna == "Temperatura"], "intervalo")
-})
-probar("un archivo viejo (solo el almacen) se sigue abriendo", {
-  viejo <- tempfile(fileext = ".rds")
-  saveRDS(nuevo_almacen(), viejo)
-  leida <- importar_sesion_rds(viejo)
-  !is.null(leida$almacen) && is.null(leida$fase1)
-})
 probar("el cuaderno se arma desde la sesion, sin listar claves", {
   lineas <- COMANDOS$cuaderno(ds_sesion, character(0),
                               list(sesion = archivo_sesion))
@@ -382,8 +357,9 @@ probar("el de una nominal no calcula una media que no existe", {
 })
 probar("los atipicos se piden con el criterio que pide el enunciado", {
   # `boxplot(x, plot = FALSE)$out`: bisagras de Tukey, no quantile(type = 7).
+  # Sin umbral elegido va el 1.5 de Tukey, escrito para que se vea.
   codigo <- codigo_artefacto("f1.calidad.atipicos", list(columna = "Presion"))
-  any(grepl("boxplot(x, plot = FALSE)", codigo, fixed = TRUE))
+  any(grepl("boxplot(x, range = 1.5, plot = FALSE)", codigo, fixed = TRUE))
 })
 probar("el diccionario declarado viaja dentro del chunk", {
   tabla <- ds_sesion$diccionario[, c("columna", "escala", "clase", "rol")]

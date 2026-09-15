@@ -41,25 +41,11 @@ mod_objetos_ui <- function(id) {
       shiny::div(
         style = ESTILO_CONTROLES,
         shiny::tags$p(class = "small text-muted",
-                      paste("Todo vive en memoria. Exportá antes de cerrar la",
+                      paste("Todo vive en memoria. Guardá antes de cerrar la",
                             "pestaña si querés conservarlo. La sesión lleva",
                             "además el estado de ① Datos: fuente, pila,",
-                            "diccionario y paneles marcados.")),
-        shiny::downloadButton(ns("bajar_json"), "Exportar JSON",
-                              class = "btn-sm btn-outline-primary w-100 mb-2"),
-        shiny::downloadButton(ns("bajar_rds"), "Exportar RDS",
-                              class = "btn-sm btn-outline-primary w-100 mb-3"),
-        shiny::fileInput(ns("subir"), "Importar sesión",
-                         accept = c(".json", ".rds"), buttonLabel = "Elegir"),
-        shiny::hr(),
-        plegable("¿JSON o RDS?", shiny::tags$div(
-          class = "small",
-          shiny::tags$p(shiny::tags$strong("JSON"), " viaja entre máquinas y lo",
-                        " puede leer un agente, pero pierde fidelidad: los",
-                        " objetos de ajuste no se serializan y los datasets se",
-                        " truncan a 200 filas."),
-          shiny::tags$p(class = "mb-0", shiny::tags$strong("RDS"), " conserva",
-                        " todo exactamente, pero solo lo abre R."))))
+                            "diccionario, paneles marcados y lecturas.")),
+        controles_sesion(ns))
     ),
     do.call(bslib::navset_card_tab, paneles)
   )
@@ -67,16 +53,14 @@ mod_objetos_ui <- function(id) {
 
 #' @param dataset reactiveVal del dataset vivo de la fase 1 (puede ser NULL)
 #' @param seleccion reactiveVal de los paneles marcados (puede ser NULL)
-mod_objetos_server <- function(id, almacen, dataset = NULL, seleccion = NULL) {
+#' @param texto,guardado reactiveVal del nivel de texto y estado de guardado
+mod_objetos_server <- function(id, almacen, dataset = NULL, seleccion = NULL,
+                               texto = NULL, guardado = NULL) {
   shiny::moduleServer(id, function(input, output, session) {
 
-    # La sesión es almacén + estado de la fase 1. Las dos mitades se piden al
-    # descargar y se devuelven al importar; si el cableado no las pasó, se
-    # exporta lo que hay y se dice cuál falta.
-    .sesion <- function() sesion_actual(
-      almacen(),
-      if (is.null(dataset)) NULL else dataset(),
-      if (is.null(seleccion)) list() else seleccion())
+    # Guardar y abrir: el mismo componente que Inicio (transversal/sesion.R).
+    servidor_sesion(input, output, session, almacen, dataset, seleccion,
+                    texto, guardado)
 
     for (tipo in TIPOS_OBJETO) {
       local({
@@ -102,33 +86,6 @@ mod_objetos_server <- function(id, almacen, dataset = NULL, seleccion = NULL) {
       })
     }
 
-    output$bajar_json <- shiny::downloadHandler(
-      filename = function() nombre_descarga("sesion", "json"),
-      content = function(archivo) exportar_sesion_json(.sesion(), archivo))
-
-    output$bajar_rds <- shiny::downloadHandler(
-      filename = function() nombre_descarga("sesion", "rds"),
-      content = function(archivo) exportar_sesion_rds(.sesion(), archivo))
-
-    shiny::observeEvent(input$subir, {
-      ruta <- input$subir$datapath
-      recuperado <- tryCatch({
-        if (grepl("[.]rds$", input$subir$name, ignore.case = TRUE))
-          importar_sesion_rds(ruta) else importar_sesion_json(ruta)
-      }, error = function(e) {
-        shiny::showNotification(paste("No se pudo importar:", conditionMessage(e)),
-                                type = "error", duration = 6)
-        NULL
-      })
-      if (!is.null(recuperado)) {
-        if (!is.null(recuperado$almacen)) almacen(recuperado$almacen)
-        shiny::showNotification(.restaurar_fase1(recuperado$fase1),
-                                type = "message", duration = 6)
-      }
-    })
-
-    .restaurar_fase1 <- function(fase1)
-      restaurar_fase1_en(fase1, dataset, seleccion)
   })
 }
 
@@ -141,8 +98,9 @@ mod_objetos_server <- function(id, almacen, dataset = NULL, seleccion = NULL) {
 #' ⚙ Objetos y abrir la app con una sesión ya puesta (`?sesion=`).
 #'
 #' @param dataset,seleccion los reactiveVal de app.R
+#' @param texto reactiveVal del nivel de texto del cuaderno, o NULL
 #' @return el mensaje que se le muestra a quien importó
-restaurar_fase1_en <- function(fase1, dataset, seleccion) {
+restaurar_fase1_en <- function(fase1, dataset, seleccion, texto = NULL) {
   if (is.null(fase1)) return("Sesión importada (sin estado de ① Datos).")
   if (is.null(dataset) || is.null(seleccion))
     return("Sesión importada; los objetos, sí; el estado de ① Datos no.")
@@ -152,6 +110,7 @@ restaurar_fase1_en <- function(fase1, dataset, seleccion) {
     return(paste("Sesión importada, pero el dataset no se pudo recrear:",
                  reconstruido$avisos[[1]]$mensaje))
   dataset(reconstruido$dataset)
+  if (!is.null(texto) && !is.null(fase1$texto)) texto(fase1$texto)
   marcados <- seleccion_con_tablas(seleccion_de_sesion(fase1),
                                    reconstruido$dataset)
   seleccion(marcados)

@@ -107,6 +107,9 @@ Rscript learn/R/pruebas/test_fase1.R
 # The exportable notebook and the console CLI, no GUI
 Rscript learn/R/pruebas/test_informe.R
 
+# Saved sessions round-trip (pile, dictionary, balance, partition, notes), no GUI
+Rscript learn/R/pruebas/test_sesion.R
+
 # One file per implemented method, no GUI
 Rscript learn/R/pruebas/test_acp.R
 Rscript learn/R/pruebas/test_kmeans.R
@@ -119,10 +122,12 @@ Rscript learn/R/pruebas/test_contrato.R
 #   test_app_piezas.R  the chrome every card shares: seal, formulas, sidebar
 #   test_app_metodo.R  ACP walked through phases 2 -> 3 -> 4
 #   test_app_kmeans.R  k-means, same walk, different family
+#   test_app_sesion.R  open a session, edit, save from Inicio, reopen elsewhere
 Rscript learn/R/pruebas/test_app.R
 Rscript learn/R/pruebas/test_app_piezas.R
 Rscript learn/R/pruebas/test_app_metodo.R
 Rscript learn/R/pruebas/test_app_kmeans.R
+Rscript learn/R/pruebas/test_app_sesion.R
 
 # Run a method outside the app: same JSON the UI produces (S2)
 Rscript -e 'source("learn/R/run_headless.R"); correr("acp-twins")'
