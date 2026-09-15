@@ -1,0 +1,15 @@
+% main-es.tex — driver español (clase MIT)
+% !TEX program = xelatex
+\def\oaslang{es}
+\DocumentMetadata{lang=es, pdfversion=1.7, pdfstandard=a-2b}
+% Guardarraíl de motor: la clase usa fontset=libertinus (OpenType) y el proyecto
+% está fijado a XeLaTeX en .latexmkrc/Makefile. Compilar con pdflatex produce un
+% PDF con fuentes Type1, acentos rotos e índices vacíos (una sola pasada), así
+% que aquí se aborta en vez de emitir salida silenciosamente mala.
+\RequirePackage{iftex}\RequireXeTeX
+\documentclass[twoside, openany, fontset=libertinus]{mitthesis}
+\input{common/preamble}
+\begin{document}
+\input{common/frontmatter}
+\input{common/body}
+\end{document}

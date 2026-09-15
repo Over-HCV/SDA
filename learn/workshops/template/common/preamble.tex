@@ -1,0 +1,121 @@
+% !TEX root = ../main-es.tex
+% common/preamble.tex — paquetes compartidos ES/EN (sobre mitthesis.cls)
+% La clase mitthesis carga: report (12pt), hyperref[psdextra], microtype,
+% fontspec/unicode-math (vía fontset libertinus), caption, subcaption.
+% No recargarlos aquí.
+
+% --- Utilidades bajas (la clase no las carga) ---
+\RequirePackage{iftex}     % \ifPDFTeX (todavía útil)
+\RequirePackage{etoolbox}  % \ifdefstring
+
+% --- Idioma: babel unificado ---
+% es-noshorthands: desactiva los shorthands < > ~ . de babel-spanish. Rompen
+% cleveref y, en modo matemático, las columnas d{..} de dcolumn. Hace falta en
+% AMBAS ramas, porque en ambas se carga spanish.
+% El idioma principal de babel es el ÚLTIMO nombre de idioma de la lista: de él
+% salen \bibname, la localización de sort de biber y la partición de palabras.
+\ifdefstring{\oaslang}{es}{%
+  \usepackage[english,spanish,es-noshorthands]{babel}%
+  \selectlanguage{spanish}%
+}{%
+  \usepackage[spanish,es-noshorthands,english]{babel}%
+  \selectlanguage{english}%
+}
+
+% --- Matemáticas (ANTES que cleveref) ---
+% unicode-math ya cargado por el fontset libertinus
+\usepackage{amsthm,mathtools}
+\usepackage{mathrsfs}
+\usepackage{stmaryrd}   % \llbracket, \rrbracket
+
+% --- cleveref (después de amsmath y hyperref, que ya viene con la clase) ---
+\usepackage[capitalise,noabbrev]{cleveref}
+\crefname{figure}{Fig.}{Figs.}
+\crefname{table}{Tabla}{Tablas}
+
+% --- Color y listados ---
+\usepackage{xcolor}
+\usepackage{listings}
+
+% --- Cajas y figuras ---
+\usepackage[most]{tcolorbox}
+% graphicx ya lo carga mitthesis.cls; aquí solo se declaran las rutas de imagen.
+\graphicspath{{assets/pics/}{figures/}}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc,fit,shapes.geometric,backgrounds}
+% algorithm2e tiene bytes UTF-8 inválidos en su .sty (líneas 284/299/550) que
+% disparan warnings "Invalid UTF-8 ... U+FFFD" bajo xetex — inofensivos pero ruidosos.
+% Ningún capítulo lo usa hoy; reactivar cuando un \begin{algorithm} haga falta.
+
+% --- Bibliografía ---
+\usepackage[backend=biber,style=authoryear,sorting=nyt,maxcitenames=2,maxbibnames=99,giveninits=true,uniquelist=false,doi=true,url=true,eprint=true,isbn=false]{biblatex}
+\addbibresource{bib/refs.bib}
+
+% --- Tablas (estilo MIT: booktabs, dcolumn, longtable, array, multicol) ---
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{dcolumn}
+  \newcolumntype{d}[1]{D{.}{.}{#1}}% alineación decimal (math mode)
+\usepackage{multicol}
+
+% --- Utilidades ---
+\usepackage{xstring}
+
+% --- Logo institucional (Universidad del Rosario) ---
+% El archivo vive en assets/pics/ur-logo.png y se resuelve por \graphicspath.
+\newcommand{\urlogo}[1][3.2cm]{\includegraphics[width=#1]{ur-logo}}
+
+% Logo pequeño y centrado al pie de cada página, a partir de los índices.
+% INTERRUPTOR: cambiar a \URfooterlogofalse para apagarlo; no hay que tocar
+% nada más. La portada y la página de comité nunca lo llevan (ya traen el
+% logo grande), por eso el pie se activa desde common/frontmatter.tex con
+% \URactivatefooterlogo.
+\newif\ifURfooterlogo   \URfooterlogotrue
+\newif\ifURlogoactive   \URlogoactivefalse
+\newcommand{\URactivatefooterlogo}{\ifURfooterlogo\URlogoactivetrue\fi}
+
+\usepackage{eso-pic}
+% Va al margen EXTERIOR (derecha en impares, izquierda en pares) porque el
+% número de página de la clase ocupa el centro del pie.
+\newlength{\URlogomargin}\setlength{\URlogomargin}{25.4mm} % = margen de geometry
+\AddToShipoutPictureFG{%
+  \ifURlogoactive
+    \AtPageLowerLeft{%
+      \raisebox{10mm}{\makebox[\paperwidth]{%
+        \ifodd\value{page}%
+          \hfill\includegraphics[height=8mm]{ur-logo}\hspace*{\URlogomargin}%
+        \else
+          \hspace*{\URlogomargin}\includegraphics[height=8mm]{ur-logo}\hfill
+        \fi}}%
+    }%
+  \fi
+}
+
+% --- Color de acento ---
+\definecolor{accent}{HTML}{1F4E79}
+\definecolor{oscrit}{HTML}{8B2500}
+% Rojo institucional UR, muestreado del pixel dominante de assets/pics/ur-logo.png.
+\definecolor{urred}{HTML}{C00D1E}
+
+% --- Macros del proyecto (dependen de etoolbox, tcolorbox, amsmath) ---
+\input{common/theorems}
+\input{common/macros}
+\input{common/listings-os}
+
+% --- Hyperref setup (la clase ya cargó hyperref; sólo afinamos colores) ---
+\hypersetup{
+  pdftitle={\OASys{} --- Semantica categorica de un DSL de orquestacion},
+  pdfauthor={Over Haider Castrillón Valencia},
+  colorlinks=true
+}
+% mitthesis.cls:266 fija linkcolor=Blue3 / urlcolor=violet dentro de un
+% \AtBeginDocument, que se ejecuta después del preámbulo y pisaría lo de arriba.
+% La propia clase documenta este hook como la vía para cambiarlo (cls:398).
+\AtBeginDocument{%
+  \hypersetup{linkcolor=urred,citecolor=urred,urlcolor=urred,filecolor=urred}%
+}
+
+% --- Profundidad de TOC ---
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{3}

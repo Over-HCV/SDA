@@ -1,0 +1,24 @@
+% !TEX root = ../main-es.tex
+% common/body.tex — lista única de capítulos, enruta por \oaslang
+% Añadir un capítulo en UN solo sitio.
+% (mitthesis.cls carga report, no book: no hay \mainmatter/\frontmatter.)
+
+% Cap 0 (Resumen / abstract / palabras clave) vive en frontmatter.tex
+\input{chapters/\oaslang/01-introduccion}
+\input{chapters/\oaslang/02-estado-del-arte}
+\input{chapters/\oaslang/03-marco-formal}
+\input{chapters/\oaslang/04-teorema}
+\input{chapters/\oaslang/05-implementacion}
+\input{chapters/\oaslang/06-experimentos}
+\input{chapters/\oaslang/07-discusion}
+\input{chapters/\oaslang/08-conclusiones}
+
+% --- Bibliografía (heading=bibintoc => entra en el índice general) ---
+\printbibliography[heading=bibintoc]
+
+\appendix
+\input{appendix/\oaslang/A-criterios}
+\input{appendix/\oaslang/B-gramatica}
+\input{appendix/\oaslang/C-reproducibilidad}
+\input{appendix/\oaslang/D-declaraciones}
+\input{appendix/\oaslang/E-tipos-operadores}

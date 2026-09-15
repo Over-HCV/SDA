@@ -1,0 +1,29 @@
+% !TEX root = ../main-es.tex
+% common/frontmatter.tex — portada, abstract, TOC/LOF/LOT (clase mitthesis)
+% La clase gestiona titlepage, committee page y abstract page automáticamente
+% a partir de los comandos emitidos en common/meta-\oaslang.
+
+\input{common/meta-\oaslang}
+
+% --- Portada + página de comité (automática si hay \Reader) ---
+% Forma estrella: omite el texto de permiso MIT en el bloque de copyright.
+\maketitle*
+
+% --- Página de abstract (título centrado Large bold + autor/grado/institución) ---
+\begin{abstract}
+\tesisresumen
+\medskip\noindent\textbf{\tesislabelkeyw:}\enspace \tesispalabras
+\end{abstract}
+
+% --- Declaración corta (versión firmada en Apéndice \ref{app:declaraciones}) ---
+\clearpage
+\noindent\fbox{\parbox{0.95\textwidth}{\footnotesize
+\textbf{\tesislabeldecl}\,\textit{\tesisdeclcorta}}}
+
+% --- A partir de aquí, logo pequeño al pie (ver \ifURfooterlogo en preamble) ---
+\URactivatefooterlogo
+
+% --- Índices (TOC, LOF, LOT) ---
+\tableofcontents
+\listoffigures
+\listoftables

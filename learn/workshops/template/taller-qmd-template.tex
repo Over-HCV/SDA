@@ -1,0 +1,47 @@
+% taller-qmd-template.tex — plantilla pandoc/quarto para TALLERES del curso AED
+% Basada en el driver de tesis main-es.tex (clase mitthesis parcheada UR), con
+% portada y resumen a medida para trabajos de curso. Compilar con XeLaTeX
+% (build.sh usa latexmk -pdfxe).
+%
+%   Metadatos por taller (YAML del .qmd): title, subtitle, fecha, resumen, palabras
+%   (fecha: clave propia; quarto reformatea `date:` a ISO-8601)
+%   Datos del curso (compartidos):         common/meta-taller-es.tex
+%   Preliminares (portada/resumen/índice): common/frontmatter-taller.tex
+\def\oaslang{es}
+\DocumentMetadata{lang=es, pdfversion=1.7, pdfstandard=a-2b}
+% Guardarraíl de motor: fontset=libertinus exige XeLaTeX (ver main-es.tex).
+\RequirePackage{iftex}\RequireXeTeX
+\documentclass[oneside, openany, fontset=libertinus]{mitthesis}
+\input{common/preamble}
+
+% --- Compatibilidad con la salida de pandoc ---
+\usepackage{fancyvrb}   % entornos Shaded/Highlighting del código R
+\usepackage{upquote}    % comillas rectas en verbatim
+\usepackage{float}      % opción de flotante [H] que quarto usa en las figuras
+$highlighting-macros$
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\pandocbounded}[1]{#1}
+% pandoc marca las tablas sin caption con \def\LTcaptype{none}: necesita el contador
+\makeatletter\@ifundefined{c@none}{\newcounter{none}}{}\makeatother
+
+% --- Resolución de recursos hacia la plantilla (layout taller-XX junto a template/) ---
+\graphicspath{{assets/pics/}{figures/}{../template/assets/pics/}{../template/figures/}}
+\addbibresource{../template/bib/refs-taller.bib}
+
+% --- Metadatos del taller (vienen del YAML del .qmd vía pandoc) ---
+\newcommand{\tallertitulo}{$title$}
+\newcommand{\tallersubtitulo}{$subtitle$}
+\newcommand{\tallerfecha}{$fecha$}
+\newcommand{\tallerresumen}{$resumen$}
+\newcommand{\tallerpalabras}{$palabras$}
+\input{common/meta-taller-es}
+
+\begin{document}
+\input{common/frontmatter-taller}
+
+$body$
+
+% --- Referencias mínimas (fuente de datos + software usado) ---
+\nocite{ideam-datos, r-core, ggplot2, ggextra}
+\printbibliography[heading=bibintoc]
+\end{document}

@@ -1,0 +1,30 @@
+% !TEX root = ../../main-es.tex
+% appendix/es/A-criterios.tex
+\chapter{Correlación objetivos \ensuremath{\leftrightarrow} criterios EICT}
+\label{app:criterios}
+
+\porque{Trazabilidad institucional.}{%
+  Tabla auto-generada por cada llamada a \texttt{\textbackslash criterio} a lo largo del
+  documento. Si una sección falta aquí, no está etiquetada. La correlación con
+  \texttt{docs/institucion/normativa/criterios-tesis.md} vive \emph{dentro} del PDF y no se desincroniza a mano.}
+
+\section*{Mapa de secciones por dimensión EICT}
+\listacriterios
+
+\section{Análisis de viabilidad por objetivo}
+\porque{Reescritura de docs/institucion/normativa/criterios-tesis.md §"Análisis de Viabilidad".}{%
+  Para O1--O5 (no los viejos O1--O5 de atención). Formato: una fila por objetivo con
+  métrica, criterio EICT afectado y viabilidad académica. Las fases administrativas y
+  la rúbrica de \texttt{docs/institucion/normativa/criterios-tesis.md} no se repiten aquí: son hechos institucionales.}
+
+\begin{longtable}{p{0.10\textwidth} p{0.30\textwidth} p{0.25\textwidth} p{0.30\textwidth}}
+\toprule
+\textbf{Obj.} & \textbf{Métrica} & \textbf{Criterio EICT} & \textbf{Viabilidad} \\
+\midrule
+O1 & Semántica total; leyes verificadas & Rigor metodológico & Alta: lectura literal del código existente \\
+O2 & Demostración revisada & Fundamentación teórica & Media: requiere revisor con perfil formal \\
+O3 & Soundness + 0 FP + cobertura & Plan de acción / rigor & Alta: esquema de salida ya presente en el motor \\
+O4 & OR e IC 95\% pre-declarados & Análisis crítico & Media-alta: arnés con ablación \\
+O5 & Arnés versionado M1; M2/M3 especificadas & Reproducibilidad & Alta \\
+\bottomrule
+\end{longtable}

@@ -1,0 +1,38 @@
+% !TEX root = ../main-es.tex
+% common/listings-os.tex — definición del lenguaje .os para listings
+% Keywords reales tomadas de OASys context/features/dsl.md y specs 14/17/18.
+
+\lstdefinelanguage{oasys}{%
+  morekeywords={ASK,AI,CALL,RET,LET,BIF,MAP,FILTER,REDUCE,FOREACH,HTTP,TOOL,
+    agent,book,page,line,cell,import,scope,ignore,exit,
+    output,input,subscribe,widget,true,false,null},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  alsoletter={$,.},
+  keywordstyle=\color{oscrit}\bfseries,
+  commentstyle=\color{gray!70!black}\itshape,
+  stringstyle=\color{accent!70!black},
+  identifierstyle=\color{black},
+}
+
+\lstset{%
+  language=oasys,
+  basicstyle=\ttfamily\small,
+  showstringspaces=false,
+  breaklines=true,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  frame=single,
+  rulecolor=\color{gray!40},
+  framerule=0.3pt,
+  framesep=4pt,
+  xleftmargin=12pt,
+  aboveskip=8pt,
+  belowskip=8pt,
+  tabsize=2,
+  literate={\$}{{\textcolor{oscrit}{\$}}}1
+           {->}{{$\rightarrow$}}2
+           {=>}{{$\Rightarrow$}}2,
+}

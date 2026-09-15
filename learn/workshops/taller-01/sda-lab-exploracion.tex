@@ -1,0 +1,1150 @@
+% taller-qmd-template.tex — plantilla pandoc/quarto para TALLERES del curso AED
+% Basada en el driver de tesis main-es.tex (clase mitthesis parcheada UR), con
+% portada y resumen a medida para trabajos de curso. Compilar con XeLaTeX
+% (build.sh usa latexmk -pdfxe).
+%
+%   Metadatos por taller (YAML del .qmd): title, subtitle, fecha, resumen, palabras
+%   (fecha: clave propia; quarto reformatea `date:` a ISO-8601)
+%   Datos del curso (compartidos):         common/meta-taller-es.tex
+%   Preliminares (portada/resumen/índice): common/frontmatter-taller.tex
+\def\oaslang{es}
+\DocumentMetadata{lang=es, pdfversion=1.7, pdfstandard=a-2b}
+% Guardarraíl de motor: fontset=libertinus exige XeLaTeX (ver main-es.tex).
+\RequirePackage{iftex}\RequireXeTeX
+\documentclass[oneside, openany, fontset=libertinus]{mitthesis}
+\input{common/preamble}
+
+% --- Compatibilidad con la salida de pandoc ---
+\usepackage{fancyvrb}   % entornos Shaded/Highlighting del código R
+\usepackage{upquote}    % comillas rectas en verbatim
+\usepackage{float}      % opción de flotante [H] que quarto usa en las figuras
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\pandocbounded}[1]{#1}
+% pandoc marca las tablas sin caption con \def\LTcaptype{none}: necesita el contador
+\makeatletter\@ifundefined{c@none}{\newcounter{none}}{}\makeatother
+
+% --- Resolución de recursos hacia la plantilla (layout taller-XX junto a template/) ---
+\graphicspath{{assets/pics/}{figures/}{../template/assets/pics/}{../template/figures/}}
+\addbibresource{../template/bib/refs-taller.bib}
+
+% --- Metadatos del taller (vienen del YAML del .qmd vía pandoc) ---
+\newcommand{\tallertitulo}{Taller 1 --- Exploración de datos
+meteorológicos (ORI)}
+\newcommand{\tallersubtitulo}{Análisis Estadístico de Datos}
+\newcommand{\tallerfecha}{Bogotá D.C., septiembre de 2026}
+\newcommand{\tallerresumen}{Se explora de forma descriptiva la base
+meteorológica ORI del IDEAM (región Orinoquía), la cual cuenta con 4543
+registros y 18 variables, de los que se toman los 118 medidos a medio
+día para desarrollar el resto del taller. Primeramente se identifican
+las unidades estadísticas, las frecuencias del pronóstico y la escala y
+clase de las variables, progresivamente se resumen la temperatura y la
+velocidad del viento de forma gráfica y numérica, se detectan atípicos
+por el criterio de Tukey en la presión y el punto de rocío y se estudia
+la asociación entre temperatura y viento mediante covarianza y
+correlación de Pearson, para finalmente estimar densidades por
+histograma y por kernel y compararlas con el modelo normal, encontrando
+que un pequeño grupo de municipios de piedemonte explica buena parte de
+las colas observadas.}
+\newcommand{\tallerpalabras}{estadística descriptiva; diagrama de caja;
+atípicos de Tukey; covarianza; correlación de Pearson; densidad kernel;
+IDEAM}
+\input{common/meta-taller-es}
+
+\begin{document}
+\input{common/frontmatter-taller}
+
+\chapter{Los datos}\label{datos}
+
+La base \texttt{ORI.csv} contiene mediciones meteorológicas de
+municipios de la región Orinoquía (IDEAM), donde cada observación
+corresponde a la medición de un municipio a una hora concreta de un día
+dado, y las unidades se toman del enunciado del taller (temperatura y
+punto de rocío en °C, velocidad del viento en mph, es decir, millas por
+hora, y presión en hPa). La base se descarga de Kaggle y, en caso de no
+haber conexión, se busca una copia local, detectando la codificación del
+archivo en vez de suponerla (suponerla es lo que rompe las tildes de los
+municipios).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{url\_ori }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"https://www.kaggle.com/api/v1/datasets/download/"}\NormalTok{,}
+                  \StringTok{"overhcv/ori{-}dataset"}\NormalTok{)}
+\NormalTok{zip\_ori }\OtherTok{\textless{}{-}} \FunctionTok{file.path}\NormalTok{(}\FunctionTok{tempdir}\NormalTok{(), }\StringTok{"ori{-}dataset.zip"}\NormalTok{)}
+\NormalTok{ruta }\OtherTok{\textless{}{-}} \FunctionTok{tryCatch}\NormalTok{(\{}
+  \FunctionTok{download.file}\NormalTok{(url\_ori, zip\_ori, }\AttributeTok{mode =} \StringTok{"wb"}\NormalTok{, }\AttributeTok{quiet =} \ConstantTok{TRUE}\NormalTok{)}
+  \FunctionTok{unzip}\NormalTok{(zip\_ori, }\AttributeTok{files =} \StringTok{"ORI.csv"}\NormalTok{, }\AttributeTok{exdir =} \FunctionTok{tempdir}\NormalTok{())}
+\NormalTok{\}, }\AttributeTok{error =} \ControlFlowTok{function}\NormalTok{(e) \{}
+  \FunctionTok{Filter}\NormalTok{(file.exists,}
+         \FunctionTok{c}\NormalTok{(}\StringTok{"ORI.csv"}\NormalTok{, }\StringTok{"data/ORI.csv"}\NormalTok{, }\StringTok{"../../../data/ORI.csv"}\NormalTok{))[}\DecValTok{1}\NormalTok{]}
+\NormalTok{\})}
+\NormalTok{codificacion }\OtherTok{\textless{}{-}} \ControlFlowTok{if}\NormalTok{ (}\FunctionTok{all}\NormalTok{(}\FunctionTok{validUTF8}\NormalTok{(}\FunctionTok{readLines}\NormalTok{(ruta, }\AttributeTok{warn =} \ConstantTok{FALSE}\NormalTok{,}
+                                            \AttributeTok{encoding =} \StringTok{"bytes"}\NormalTok{))))}
+  \StringTok{"UTF{-}8"} \ControlFlowTok{else} \StringTok{"latin1"}
+\NormalTok{base }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(ruta, }\AttributeTok{sep =} \StringTok{";"}\NormalTok{, }\AttributeTok{dec =} \StringTok{"."}\NormalTok{,}
+                 \AttributeTok{fileEncoding =}\NormalTok{ codificacion,}
+                 \AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}\NormalTok{)}
+\FunctionTok{names}\NormalTok{(base) }\OtherTok{\textless{}{-}} \FunctionTok{trimws}\NormalTok{(}\FunctionTok{names}\NormalTok{(base))  }\CommentTok{\# el encabezado trae "Pronostico "}
+\NormalTok{datos }\OtherTok{\textless{}{-}}\NormalTok{ base[base}\SpecialCharTok{$}\NormalTok{Hora }\SpecialCharTok{==} \StringTok{"12:00"}\NormalTok{, ] }\CommentTok{\# registros de medio día}
+\end{Highlighting}
+\end{Shaded}
+
+\chapter{Parte 1. Fundamentos estadísticos}\label{parte1}
+
+\section{Pregunta 1: unidades estadísticas y variables}\label{p1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{dim}\NormalTok{(base)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 4543   18
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{nrow}\NormalTok{(datos)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 118
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{table}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Fecha)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+26/08/2022 27/08/2022 
+        59         59 
+\end{verbatim}
+
+La tabla cuenta con \textbf{4543 filas y 18 columnas}, de forma que
+existen 4543 unidades estadísticas (UE), entendidas como la entidad
+sobre la que se registra una medición completa, que en este caso es una
+medición meteorológica efectuada en un municipio a una hora y fecha
+específicas, así como 18 variables asociadas a cada una de ellas. De
+estos registros, \textbf{118 fueron recolectados a medio día}
+(\texttt{Hora\ =\ "12:00"}), lo que corresponde a los 59 municipios de
+la base medidos en cada una de las 2 fechas (26 y 27 de agosto de 2022),
+y es sobre este subconjunto que se desarrolla el resto del taller.
+
+Cabe mencionar que no se imprime la tabla original porque sus 18
+columnas no caben en el ancho de la página, y que no todas las columnas
+varían de igual forma, pues \texttt{Region} toma un único valor
+(\texttt{ORI}) en toda la base y \texttt{Hora}, aunque en la base
+completa tiene 24 valores, queda constante una vez se filtra el medio
+día. Técnicamente una columna constante no aporta variación, pero se
+cuentan igualmente como variables porque forman parte del diseño de la
+medición (en otra región u hora sí cambiarían el resultado).
+
+\section{Pregunta 2: pronóstico más y menos frecuente}\label{p2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tabla }\OtherTok{\textless{}{-}} \FunctionTok{sort}\NormalTok{(}\FunctionTok{table}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Pronostico), }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{Pronostico =} \FunctionTok{names}\NormalTok{(tabla),}
+                        \AttributeTok{n =} \FunctionTok{as.vector}\NormalTok{(tabla),}
+                        \AttributeTok{porcentaje =} \FunctionTok{round}\NormalTok{(}\DecValTok{100} \SpecialCharTok{*} \FunctionTok{as.vector}\NormalTok{(tabla) }\SpecialCharTok{/}
+                                             \FunctionTok{sum}\NormalTok{(tabla), }\DecValTok{2}\NormalTok{)),}
+             \AttributeTok{caption =} \StringTok{"Frecuencias del pronóstico a medio día."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}lrr@{}}
+\caption{Frecuencias del pronóstico a medio día.}\tabularnewline
+\toprule\noalign{}
+Pronostico & n & porcentaje \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Pronostico & n & porcentaje \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Parcialmente Nublado & 63 & 53.39 \\
+Nublado & 31 & 26.27 \\
+Parcialmente Nublado - Lluvia Fuerte & 6 & 5.08 \\
+Parcialmente Nublado - Llovizna & 5 & 4.24 \\
+Nublado - Llovizna & 4 & 3.39 \\
+Nublado - Lluvia & 4 & 3.39 \\
+Despejado & 3 & 2.54 \\
+Parcialmente Nublado - Tormenta Ligera & 2 & 1.69 \\
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mar =} \FunctionTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{17}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{))}
+\FunctionTok{barplot}\NormalTok{(}\FunctionTok{rev}\NormalTok{(tabla), }\AttributeTok{horiz =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{las =} \DecValTok{1}\NormalTok{, }\AttributeTok{cex.names =} \FloatTok{0.75}\NormalTok{,}
+        \AttributeTok{col =} \StringTok{"steelblue"}\NormalTok{, }\AttributeTok{xlab =} \StringTok{"Frecuencia"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p2-barras-1.pdf}}
+
+}
+
+\caption{Frecuencias del pronóstico climático a medio día (n = 118).}
+
+\end{figure}%
+
+De las 8 categorías de pronóstico presentes a medio día (de las 11 que
+tiene la base completa), el \textbf{más frecuente es Parcialmente
+Nublado}, con 63 registros (53,39 \% de los casos), mientras que el
+\textbf{menos frecuente es Parcialmente Nublado - Tormenta Ligera}, con
+apenas 2 registros (1,69 \%). La masa se concentra entonces en estados
+de cielo parcial o totalmente nublado (el 80 \% entre ambos), con los
+eventos de lluvia y tormenta como casos poco frecuentes.
+
+\section{Pregunta 3: escala y clase de las variables}\label{p3}
+
+La escala de medición indica qué operaciones tienen sentido sobre una
+variable (igualdad, orden, diferencias o cocientes), mientras que la
+clase describe su recorrido (categorías, valores contables o cualquier
+valor de un intervalo real), y ambos son ejes independientes, de forma
+que cada variable recibe una escala y una clase. Ninguno de los dos se
+puede deducir del tipo de dato en R, pues un código postal es numérico y
+sin embargo nominal, y los grados centígrados son numéricos pero de
+intervalo, no de razón.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{Variable =} \FunctionTok{c}\NormalTok{(}\StringTok{"Pronóstico"}\NormalTok{, }\StringTok{"Municipio"}\NormalTok{, }\StringTok{"Temperatura (°C)"}\NormalTok{,}
+               \StringTok{"Velocidad del viento (mph)"}\NormalTok{),}
+  \StringTok{\textasciigrave{}}\AttributeTok{Tipo en R}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{sapply}\NormalTok{(datos[}\FunctionTok{c}\NormalTok{(}\StringTok{"Pronostico"}\NormalTok{, }\StringTok{"Municipio"}\NormalTok{,}
+                               \StringTok{"Temperatura"}\NormalTok{,}
+                               \StringTok{"Velocidad\_del\_Viento"}\NormalTok{)], class),}
+  \AttributeTok{Escala =} \FunctionTok{c}\NormalTok{(}\StringTok{"Nominal"}\NormalTok{, }\StringTok{"Nominal"}\NormalTok{, }\StringTok{"Intervalo"}\NormalTok{, }\StringTok{"Razón"}\NormalTok{),}
+  \AttributeTok{Clase =} \FunctionTok{c}\NormalTok{(}\StringTok{"Cualitativa politómica"}\NormalTok{, }\StringTok{"Cualitativa politómica"}\NormalTok{,}
+            \StringTok{"Cuantitativa continua"}\NormalTok{, }\StringTok{"Cuantitativa continua"}\NormalTok{),}
+  \AttributeTok{check.names =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{row.names =} \ConstantTok{NULL}\NormalTok{),}
+  \AttributeTok{caption =} \StringTok{"Escala y clase de las cuatro variables del enunciado."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3857}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1429}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3286}}@{}}
+\caption{Escala y clase de las cuatro variables del
+enunciado.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Tipo en R
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Escala
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Clase
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Variable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Tipo en R
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Escala
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Clase
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Pronóstico & character & Nominal & Cualitativa politómica \\
+Municipio & character & Nominal & Cualitativa politómica \\
+Temperatura (°C) & numeric & Intervalo & Cuantitativa continua \\
+Velocidad del viento (mph) & numeric & Razón & Cuantitativa continua \\
+\end{longtable}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Pronóstico}: Es nominal y cualitativa politómica (más de dos
+  categorías), con el pequeño detalle que pudo haber sido ordinal, pues
+  la nubosidad sí tiene orden (Despejado, Parcialmente Nublado, Nublado)
+  y la precipitación también (Llovizna, Lluvia, Lluvia Fuerte), pero al
+  combinarse ambas dimensiones en una misma etiqueta no existe un orden
+  total, ya que no hay forma de decidir si ``Nublado - Llovizna'' está
+  por encima o por debajo de ``Parcialmente Nublado - Lluvia Fuerte''.
+\item
+  \textbf{Municipio}: Es nominal y cualitativa politómica, puesto que es
+  una etiqueta geográfica sobre la que solo tiene sentido preguntar si
+  dos registros son del mismo municipio o no.
+\item
+  \textbf{Temperatura}: Es de intervalo y cuantitativa continua, dado
+  que las diferencias son equidistantes pero su cero es relativo (0 °C
+  no es ausencia de temperatura), por lo que 30 °C no es el doble de
+  calor que 15 °C, y cabe aclarar que R la carga como \texttt{numeric}
+  sin distinguir esto, así que la escala la declara quien analiza y no
+  la detección automática.
+\item
+  \textbf{Velocidad del viento}: Es de razón y cuantitativa continua, ya
+  que su cero es absoluto (0 mph sí es ausencia de viento), de forma que
+  los cocientes tienen sentido y 2 mph es efectivamente el doble que 1
+  mph.
+\end{itemize}
+
+Las figuras siguientes resumen ambos ejes por separado, leyéndose cada
+una de arriba hacia abajo hasta llegar a los ejemplos de la base.
+
+\includegraphics[width=5.2in,height=2.53in]{sda-lab-exploracion_files/figure-latex/mermaid-figure-1.png}
+
+Eje 1, escala de medición: cada nivel hereda las operaciones del
+anterior.
+
+\includegraphics[width=5.2in,height=2.55in]{sda-lab-exploracion_files/figure-latex/mermaid-figure-2.png}
+
+Eje 2, clase según el recorrido: es independiente de la escala.
+
+\section{Pregunta 4: diagramas de caja de temperatura y
+viento}\label{p4}
+
+El diagrama de caja resume una variable en cinco posiciones, donde la
+caja va del primer cuartil (\(Q_1\)) al tercero (\(Q_3\)) y encierra el
+50 \% central de los datos, la línea interior es la mediana y los
+bigotes llegan hasta la observación más lejana que todavía cae dentro de
+las cercas de Tukey,
+
+\[
+\text{cerca inferior} = Q_1 - 1{,}5 \cdot \text{RIC}
+\qquad
+\text{cerca superior} = Q_3 + 1{,}5 \cdot \text{RIC},
+\qquad \text{RIC} = Q_3 - Q_1,
+\]
+
+dibujándose punto por punto lo que queda por fuera. Para no leer las
+posiciones a ojo, se anotan sobre cada caja los valores de \(Q_1\),
+mediana y \(Q_3\).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{caja }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(variable, etiqueta) \{}
+\NormalTok{  x }\OtherTok{\textless{}{-}}\NormalTok{ datos[[variable]]}
+\NormalTok{  q }\OtherTok{\textless{}{-}} \FunctionTok{quantile}\NormalTok{(x, }\FunctionTok{c}\NormalTok{(}\FloatTok{0.25}\NormalTok{, }\FloatTok{0.5}\NormalTok{, }\FloatTok{0.75}\NormalTok{))}
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(x), }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{y =} \StringTok{""}\NormalTok{)) }\SpecialCharTok{+}
+    \FunctionTok{geom\_boxplot}\NormalTok{(}\AttributeTok{fill =} \StringTok{"steelblue"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{,}
+                 \AttributeTok{outlier.colour =} \StringTok{"firebrick"}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\AttributeTok{x =}\NormalTok{ q, }\AttributeTok{y =} \FloatTok{1.5}\NormalTok{, }\AttributeTok{label =} \FunctionTok{format}\NormalTok{(}\FunctionTok{round}\NormalTok{(q, }\DecValTok{2}\NormalTok{)),}
+             \AttributeTok{size =} \DecValTok{3}\NormalTok{, }\AttributeTok{check\_overlap =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =}\NormalTok{ etiqueta, }\AttributeTok{y =} \ConstantTok{NULL}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{caja}\NormalTok{(}\StringTok{"Temperatura"}\NormalTok{, }\StringTok{"Temperatura (°C)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p4-temperatura-1.pdf}}
+
+}
+
+\caption{Diagrama de caja de la temperatura a medio día, con Q1, mediana
+y Q3 anotados.}
+
+\end{figure}%
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{caja}\NormalTok{(}\StringTok{"Velocidad\_del\_Viento"}\NormalTok{, }\StringTok{"Velocidad del viento (mph)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p4-viento-1.pdf}}
+
+}
+
+\caption{Diagrama de caja de la velocidad del viento a medio día, con
+Q1, mediana y Q3 anotados.}
+
+\end{figure}%
+
+\textbf{Temperatura.} El centro se ubica alrededor de los 30,4 °C y la
+caja es estrecha (aproximadamente entre 28,8 y 31,3 °C), de forma que la
+mitad de los municipios registra a medio día temperaturas muy parecidas,
+con el pequeño detalle que la mediana está corrida hacia el borde
+derecho de la caja y el bigote superior es corto (llega a 32,7 °C),
+mientras que el inferior se extiende hasta los 26,5 °C y por debajo
+aparecen 8 puntos atípicos entre 22 y 25 °C. Todo esto indica que la
+localización es alta y concentrada, y que la dispersión no es simétrica,
+pues unos pocos registros frescos estiran la distribución hacia la
+izquierda (asimetría negativa).
+
+\textbf{Velocidad del viento.} El centro está cerca de 1,7 mph y la caja
+va aproximadamente de 1,0 a 2,2 mph, así que en términos relativos la
+dispersión es mucho mayor que la de la temperatura, pues la caja ocupa
+buena parte del recorrido total (de 0,4 a 3,7 mph). Los bigotes son
+relativamente balanceados, aunque el superior es algo más largo, lo que
+sugiere una leve asimetría hacia valores altos, coherente con una
+variable que tiene piso físico en cero y solo puede estirarse hacia
+arriba, y no se observan atípicos.
+
+\section{Pregunta 5: resumen numérico}\label{p5}
+
+Además de los cuartiles, se calculan la desviación estándar (\(s\),
+dispersión promedio alrededor de la media, sensible a extremos), el
+rango intercuartílico (RIC, dispersión del 50 \% central, robusta a
+extremos) y el coeficiente de asimetría \(g_1\), cuyo signo indica hacia
+dónde va la cola,
+
+\[
+g_1 = \frac{\frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^3}
+           {\left(\frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^2\right)^{3/2}},
+\]
+
+que vale cero para una distribución simétrica, es negativo con cola a la
+izquierda y positivo con cola a la derecha.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  22.40   28.82   30.40   29.75   31.30   32.70 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{summary}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.400   1.000   1.700   1.719   2.175   3.700 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{g1 }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x) \{}
+\NormalTok{  d }\OtherTok{\textless{}{-}}\NormalTok{ x }\SpecialCharTok{{-}} \FunctionTok{mean}\NormalTok{(x)}
+  \FunctionTok{mean}\NormalTok{(d}\SpecialCharTok{\^{}}\DecValTok{3}\NormalTok{) }\SpecialCharTok{/} \FunctionTok{mean}\NormalTok{(d}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}\SpecialCharTok{\^{}}\NormalTok{(}\DecValTok{3}\SpecialCharTok{/}\DecValTok{2}\NormalTok{)}
+\NormalTok{\}}
+\NormalTok{variables }\OtherTok{\textless{}{-}}\NormalTok{ datos[}\FunctionTok{c}\NormalTok{(}\StringTok{"Temperatura"}\NormalTok{, }\StringTok{"Velocidad\_del\_Viento"}\NormalTok{)]}
+\NormalTok{resumen }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(variables, }\ControlFlowTok{function}\NormalTok{(x)}
+  \FunctionTok{c}\NormalTok{(}\AttributeTok{media =} \FunctionTok{mean}\NormalTok{(x), }\AttributeTok{mediana =} \FunctionTok{median}\NormalTok{(x), }\AttributeTok{s =} \FunctionTok{sd}\NormalTok{(x), }\AttributeTok{RIC =} \FunctionTok{IQR}\NormalTok{(x),}
+    \AttributeTok{g1 =} \FunctionTok{g1}\NormalTok{(x), }\AttributeTok{faltantes =} \FunctionTok{sum}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(x))))}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{round}\NormalTok{(resumen, }\DecValTok{3}\NormalTok{),}
+             \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"Temperatura"}\NormalTok{, }\StringTok{"Viento"}\NormalTok{),}
+             \AttributeTok{caption =} \StringTok{"Estadísticos complementarios a summary()."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}lrr@{}}
+\caption{Estadísticos complementarios a summary().}\tabularnewline
+\toprule\noalign{}
+& Temperatura & Viento \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+& Temperatura & Viento \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+media & 29.754 & 1.719 \\
+mediana & 30.400 & 1.700 \\
+s & 2.276 & 0.789 \\
+RIC & 2.475 & 1.175 \\
+g1 & -1.391 & 0.485 \\
+faltantes & 0.000 & 0.000 \\
+\end{longtable}
+
+La descripción numérica \textbf{concuerda con los diagramas de caja},
+pues los cinco números de \texttt{summary()} son exactamente los que
+dibuja cada caja (mínimo, \(Q_1\), mediana, \(Q_3\) y máximo), y agregan
+lo que el gráfico solo sugería:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Temperatura}: La media (29,75 °C) queda por debajo de la
+  mediana (30,40 °C), que es la firma numérica de la asimetría negativa
+  que se veía en el bigote inferior largo, y el coeficiente
+  \(g_1 = -1{,}39\) lo confirma, al tiempo que la desviación estándar
+  (2,28 °C) es casi igual al RIC (2,48 °C) a pesar de que el RIC deja
+  por fuera los extremos, lo que muestra que los 8 registros frescos
+  están inflando \(s\).
+\item
+  \textbf{Velocidad del viento}: La media (1,719 mph) y la mediana
+  (1,700 mph) casi coinciden, con la media apenas por encima, y
+  \(g_1 = 0{,}49\) confirma una asimetría positiva leve, coherente con
+  el bigote superior más largo, así como un coeficiente de variación
+  (\(s/\bar{x}\)) de 46 \% que expresa la mayor dispersión relativa
+  (este cociente solo tiene sentido para el viento, por ser de razón, y
+  no para la temperatura, que es de intervalo).
+\end{itemize}
+
+Finalmente, no hay datos faltantes, pues las 118 filas están completas
+en ambas variables.
+
+\section{Pregunta 6: atípicos de Tukey en presión y punto de
+rocío}\label{p6}
+
+Siguiendo la ayuda del enunciado, se usa
+\texttt{boxplot(x,\ plot\ =\ FALSE)\$out}, que calcula las cercas a
+partir de las bisagras de Tukey (muy cercanas a los cuartiles, pero no
+idénticas a las de \texttt{summary()}, lo que explica diferencias de
+centésimas en los límites).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{boxplot}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Presion, }\AttributeTok{plot =} \ConstantTok{FALSE}\NormalTok{)}\SpecialCharTok{$}\NormalTok{out}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 1015.7
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{boxplot}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Punto\_de\_Rocio, }\AttributeTok{plot =} \ConstantTok{FALSE}\NormalTok{)}\SpecialCharTok{$}\NormalTok{out}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+numeric(0)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tukey }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"Presion"}\NormalTok{, }\StringTok{"Punto\_de\_Rocio"}\NormalTok{), }\ControlFlowTok{function}\NormalTok{(v) \{}
+\NormalTok{  x }\OtherTok{\textless{}{-}}\NormalTok{ datos[[v]]}
+\NormalTok{  b }\OtherTok{\textless{}{-}} \FunctionTok{boxplot}\NormalTok{(x, }\AttributeTok{plot =} \ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{  ric }\OtherTok{\textless{}{-}}\NormalTok{ b}\SpecialCharTok{$}\NormalTok{stats[}\DecValTok{4}\NormalTok{] }\SpecialCharTok{{-}}\NormalTok{ b}\SpecialCharTok{$}\NormalTok{stats[}\DecValTok{2}\NormalTok{]}
+  \FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{cerca inferior}\StringTok{\textasciigrave{}} \OtherTok{=}\NormalTok{ b}\SpecialCharTok{$}\NormalTok{stats[}\DecValTok{2}\NormalTok{] }\SpecialCharTok{{-}} \FloatTok{1.5} \SpecialCharTok{*}\NormalTok{ ric,}
+    \StringTok{\textasciigrave{}}\AttributeTok{cerca superior}\StringTok{\textasciigrave{}} \OtherTok{=}\NormalTok{ b}\SpecialCharTok{$}\NormalTok{stats[}\DecValTok{4}\NormalTok{] }\SpecialCharTok{+} \FloatTok{1.5} \SpecialCharTok{*}\NormalTok{ ric,}
+    \StringTok{\textasciigrave{}}\AttributeTok{mínimo}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{min}\NormalTok{(x), }\StringTok{\textasciigrave{}}\AttributeTok{máximo}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{max}\NormalTok{(x),}
+    \StringTok{\textasciigrave{}}\AttributeTok{atípicos}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{length}\NormalTok{(b}\SpecialCharTok{$}\NormalTok{out))}
+\NormalTok{\})}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{format}\NormalTok{(tukey, }\AttributeTok{nsmall =} \DecValTok{2}\NormalTok{, }\AttributeTok{drop0trailing =} \ConstantTok{TRUE}\NormalTok{),}
+             \AttributeTok{align =} \StringTok{"r"}\NormalTok{,}
+             \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"Presión (hPa)"}\NormalTok{,}
+                           \StringTok{"Punto de rocío (°C)"}\NormalTok{),}
+             \AttributeTok{caption =} \StringTok{"Cercas de Tukey y conteo de atípicos."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}lrr@{}}
+\caption{Cercas de Tukey y conteo de atípicos.}\tabularnewline
+\toprule\noalign{}
+& Presión (hPa) & Punto de rocío (°C) \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+& Presión (hPa) & Punto de rocío (°C) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+cerca inferior & 1009.65 & 13.35 \\
+cerca superior & 1015.65 & 30.55 \\
+mínimo & 1010.9 & 16.5 \\
+máximo & 1015.7 & 29.9 \\
+atípicos & 1 & 0 \\
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{), }\AttributeTok{mar =} \FunctionTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{1}\NormalTok{))}
+\FunctionTok{boxplot}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Presion, }\AttributeTok{horizontal =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{col =} \StringTok{"orange"}\NormalTok{,}
+        \AttributeTok{main =} \StringTok{"Presión (hPa)"}\NormalTok{)}
+\FunctionTok{boxplot}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Punto\_de\_Rocio, }\AttributeTok{horizontal =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{col =} \StringTok{"lightblue"}\NormalTok{,}
+        \AttributeTok{main =} \StringTok{"Punto de rocío (°C)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p6-cajas-1.pdf}}
+
+}
+
+\caption{Diagramas de caja de Tukey para la presión y el punto de rocío
+a medio día.}
+
+\end{figure}%
+
+La \textbf{presión presenta el mayor número de atipicidades}, aunque se
+trata de una sola y por un margen mínimo, pues el valor 1015,7 hPa
+(Chámeza, 26 de agosto) supera la cerca superior de 1015,65 hPa por
+apenas 0,05 hPa, mientras que el \textbf{punto de rocío no presenta
+ninguna} (\texttt{numeric(0)}) a pesar de moverse en un rango mucho más
+ancho (de 16,5 a 29,9 °C). Esto se debe a que el criterio de Tukey es
+relativo a la dispersión de cada variable y no a una escala absoluta, de
+forma que el RIC del punto de rocío (4,3 °C) genera cercas amplias
+({[}13,35 ; 30,55{]}) mientras que el de la presión (1,5 hPa) las deja
+estrechas ({[}1009,65 ; 1015,65{]}). Cabe mencionar que atípico no es
+sinónimo de error, pues el criterio es geométrico y no sabe nada del
+fenómeno, y de hecho, como se verá en la Pregunta 11, este registro
+pertenece a un grupo de municipios con comportamiento propio.
+
+\section{Pregunta 7: dispersión entre temperatura y viento}\label{p7}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{temp }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Temperatura}
+\NormalTok{viento }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento}
+\NormalTok{recta }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(viento }\SpecialCharTok{\textasciitilde{}}\NormalTok{ temp)}
+\NormalTok{subtitulo }\OtherTok{\textless{}{-}} \FunctionTok{sprintf}\NormalTok{(}
+  \StringTok{"r = \%.4f · cov = \%.5f · n = \%d}\SpecialCharTok{\textbackslash{}n}\StringTok{y = \%.2f + \%.5fx · R² = \%.3f"}\NormalTok{,}
+  \FunctionTok{cor}\NormalTok{(temp, viento), }\FunctionTok{cov}\NormalTok{(temp, viento), }\FunctionTok{length}\NormalTok{(temp),}
+  \FunctionTok{coef}\NormalTok{(recta)[}\DecValTok{1}\NormalTok{], }\FunctionTok{coef}\NormalTok{(recta)[}\DecValTok{2}\NormalTok{], }\FunctionTok{summary}\NormalTok{(recta)}\SpecialCharTok{$}\NormalTok{r.squared)}
+\NormalTok{grafico }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(datos,}
+                  \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Temperatura, }\AttributeTok{y =}\NormalTok{ Velocidad\_del\_Viento)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.6}\NormalTok{, }\AttributeTok{colour =} \StringTok{"\#3572a8"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{formula =}\NormalTok{ y }\SpecialCharTok{\textasciitilde{}}\NormalTok{ x, }\AttributeTok{colour =} \StringTok{"\#d2601a"}\NormalTok{,}
+              \AttributeTok{fill =} \StringTok{"grey70"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{0.9}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Temperatura (°C)"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Velocidad del viento (mph)"}\NormalTok{,}
+       \AttributeTok{subtitle =}\NormalTok{ subtitulo) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+\FunctionTok{ggMarginal}\NormalTok{(grafico, }\AttributeTok{type =} \StringTok{"histogram"}\NormalTok{, }\AttributeTok{fill =} \StringTok{"\#3572a8"}\NormalTok{,}
+           \AttributeTok{colour =} \StringTok{"white"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p7-1.pdf}}
+
+}
+
+\caption{Diagrama de dispersión de temperatura y velocidad del viento a
+medio día, con recta de mínimos cuadrados, banda de confianza del 95 \%
+e histogramas marginales.}
+
+\end{figure}%
+
+La nube de puntos no presenta estructura, pues para cualquier
+temperatura aparecen vientos de todo el recorrido, tanto en los
+registros cálidos (entre 29 y 32 °C, donde se concentra la mayoría) como
+en los pocos registros frescos de la izquierda, y la banda de puntos no
+sube ni baja al avanzar en el eje horizontal, así que \textbf{las dos
+variables no parecen correlacionarse}. La recta de mínimos cuadrados lo
+confirma, pues es prácticamente plana (el viento sube apenas 0,009 mph
+por cada grado de temperatura, con \(R^2 = 0{,}001\), es decir, la
+temperatura explica el 0,1 \% de la variación del viento), y su banda de
+confianza se abre hacia la izquierda porque en esa zona solo están los 8
+registros frescos, de forma que ahí la recta está mucho peor
+determinada. Los histogramas marginales describen cada variable por
+separado (la temperatura apilada a la derecha con cola a la izquierda, y
+el viento con su masa entre 1 y 2 mph con cola a la derecha), y la razón
+de verlos junto a la nube es que dos variables pueden ser asimétricas
+cada una y aun así no tener ninguna relación entre sí.
+
+\section{Pregunta 8: covarianza y correlación de Pearson}\label{p8}
+
+La covarianza muestral mide si dos variables se desvían de sus medias en
+la misma dirección, y el coeficiente de correlación de Pearson es esa
+misma covarianza estandarizada por ambas desviaciones,
+
+\[
+s_{xy} = \frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y}),
+\qquad
+r = \frac{s_{xy}}{s_x \, s_y} \in [-1, 1],
+\]
+
+de forma que \(r\) mide la fuerza de la relación \textbf{lineal}, siendo
+\(\pm 1\) una recta perfecta y \(0\) la ausencia de relación lineal.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cov}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura, datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 0.04718528
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cor}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura, datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 0.02627245
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cor.test}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura, datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+    Pearson's product-moment correlation
+
+data:  datos$Temperatura and datos$Velocidad_del_Viento
+t = 0.28306, df = 116, p-value = 0.7776
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ -0.1552241  0.2060533
+sample estimates:
+       cor 
+0.02627245 
+\end{verbatim}
+
+La covarianza es \(s_{xy} = 0{,}0472\) y la correlación es
+\(r = 0{,}026\), lo que indica que \textbf{las variables no parecen
+correlacionarse}, pues \(r\) es prácticamente cero y la prueba asociada
+no lo distingue del azar con 118 datos (\(p = 0{,}78\), con intervalo de
+confianza del 95 \% entre \(-0{,}16\) y \(0{,}21\), que contiene al
+cero), confirmando lo que se veía en la nube de la Pregunta 7. Como
+verificación adicional se calculó la correlación de Spearman (que en vez
+de los valores usa sus rangos, es decir, sus posiciones de menor a
+mayor, y detecta relaciones monótonas, aquellas en las que al crecer una
+variable la otra tiende a crecer o a decrecer aunque no sea en línea
+recta), obteniendo \(-0{,}011\), así que tampoco hay una relación curva
+escondida.
+
+En cuanto a las unidades:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Covarianza}: Se expresa en el producto de las unidades de las
+  dos variables, en este caso °C·mph, por lo que su valor por sí solo no
+  dice si la relación es fuerte o débil, y además cambiaría si se
+  midiera el viento en km/h (pasaría a 0,0759 °C·km/h sin que la
+  relación haya cambiado).
+\item
+  \textbf{Correlación de Pearson}: Es adimensional, pues al dividir por
+  \(s_x\) (°C) y \(s_y\) (mph) las unidades se cancelan, y por esto
+  siempre queda en \([-1, 1]\) y es comparable entre cualquier par de
+  variables.
+\end{itemize}
+
+\section{Pregunta 9: dimensión de los datos}\label{p9}
+
+Los datos son \textbf{multivariados}, ya que sobre cada unidad
+estadística (una medición en un municipio a las 12:00) se registran
+simultáneamente 18 variables, y las 118 observaciones comparten esa
+estructura. Que en las preguntas 4 a 6 se haya mirado una variable a la
+vez (análisis univariado) y en las preguntas 7 y 8 dos variables
+(análisis bivariado) no cambia la naturaleza de los datos, sino que
+describe el corte que se hace sobre ellos, de forma que los datos son
+multivariados y es el análisis el que va cambiando de dimensión.
+
+Esta distinción no es solo de nombre, pues como se mencionó en clase, si
+un conjunto de variables sigue una distribución normal multivariada
+entonces cada variable por separado es normal, pero que cada variable
+sea normal univariadamente no garantiza que el conjunto sea normal
+multivariado, así que las conclusiones obtenidas mirando variable por
+variable no se pueden extender sin más al comportamiento conjunto.
+
+\chapter{Parte 2. Estimación de la densidad}\label{parte2}
+
+Para las tres preguntas siguientes se usan dos estimadores de la
+densidad. El \textbf{histograma de densidad} divide el recorrido en
+clases y divide cada conteo por \(n\) y por el ancho de la clase, de
+forma que el área total vale 1, y el número de clases se toma con la
+regla de Sturges, \(k = \lceil \log_2 n \rceil
++ 1 = 8\) para \(n = 118\) (la regla por defecto de \texttt{hist()} en
+R, pensada para muestras moderadas y que evita tanto una campana
+artificial por pocas clases como un dentado ruidoso por demasiadas). La
+\textbf{estimación kernel} (KDE), por su parte, pone una pequeña campana
+(el núcleo \(K\), gaussiano) sobre cada observación y las suma,
+
+\[
+\hat{f}(x) = \frac{1}{n h} \sum_{i=1}^{n} K\!\left( \frac{x - x_i}{h} \right),
+\qquad
+h = 0{,}9 \cdot \min\!\left(s, \frac{\text{RIC}}{1{,}34}\right) \cdot n^{-1/5},
+\]
+
+donde el ancho de banda \(h\) se toma con la regla de Silverman (el
+valor por defecto de \texttt{density()} y \texttt{geom\_density()}), que
+es óptima si los datos fueran normales y usa el mínimo entre \(s\) y
+\(\text{RIC}/1{,}34\) para no suavizar de más cuando hay extremos. Un
+\(h\) pequeño inventa modas y uno grande las borra, así que como
+verificación se recalcula la KDE con \(2h\) y se reportan solo las modas
+que sobreviven.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{modas }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x, }\AttributeTok{ajuste =} \DecValTok{1}\NormalTok{) \{}
+\NormalTok{  k }\OtherTok{\textless{}{-}} \FunctionTok{density}\NormalTok{(x, }\AttributeTok{adjust =}\NormalTok{ ajuste)}
+  \FunctionTok{round}\NormalTok{(k}\SpecialCharTok{$}\NormalTok{x[}\FunctionTok{which}\NormalTok{(}\FunctionTok{diff}\NormalTok{(}\FunctionTok{sign}\NormalTok{(}\FunctionTok{diff}\NormalTok{(k}\SpecialCharTok{$}\NormalTok{y))) }\SpecialCharTok{==} \SpecialCharTok{{-}}\DecValTok{2}\NormalTok{) }\SpecialCharTok{+} \DecValTok{1}\NormalTok{], }\DecValTok{2}\NormalTok{)}
+\NormalTok{\}}
+\NormalTok{densidad }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(variable, etiqueta, color) \{}
+\NormalTok{  x }\OtherTok{\textless{}{-}}\NormalTok{ datos[[variable]]}
+  \FunctionTok{ggplot}\NormalTok{(datos, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ .data[[variable]])) }\SpecialCharTok{+}
+    \FunctionTok{geom\_histogram}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{y =} \FunctionTok{after\_stat}\NormalTok{(density)),}
+                   \AttributeTok{bins =} \FunctionTok{nclass.Sturges}\NormalTok{(x), }\AttributeTok{fill =}\NormalTok{ color,}
+                   \AttributeTok{colour =} \StringTok{"black"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{colour =} \StringTok{"black"}\NormalTok{, }\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =}\NormalTok{ etiqueta, }\AttributeTok{y =} \StringTok{"Densidad"}\NormalTok{,}
+         \AttributeTok{subtitle =} \FunctionTok{sprintf}\NormalTok{(}\StringTok{"h (Silverman) = \%.3f"}\NormalTok{, }\FunctionTok{bw.nrd0}\NormalTok{(x))) }\SpecialCharTok{+}
+    \FunctionTok{theme\_minimal}\NormalTok{()}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Pregunta 10: densidad de la temperatura}\label{p10}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{densidad}\NormalTok{(}\StringTok{"Temperatura"}\NormalTok{, }\StringTok{"Temperatura (°C)"}\NormalTok{, }\StringTok{"lightblue"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p10-1.pdf}}
+
+}
+
+\caption{Estimación histograma y kernel de la densidad de la temperatura
+a medio día.}
+
+\end{figure}%
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Temperatura}
+\FunctionTok{c}\NormalTok{(}\AttributeTok{h =} \FunctionTok{bw.nrd0}\NormalTok{(x), }\AttributeTok{g1 =} \FunctionTok{g1}\NormalTok{(x))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+         h         g1 
+ 0.6402307 -1.3912340 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{list}\NormalTok{(}\AttributeTok{modas\_h =} \FunctionTok{modas}\NormalTok{(x), }\AttributeTok{modas\_2h =} \FunctionTok{modas}\NormalTok{(x, }\DecValTok{2}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$modas_h
+[1] 23.50 31.08
+
+$modas_2h
+[1] 23.77 30.84
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{shapiro.test}\NormalTok{(x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+    Shapiro-Wilk normality test
+
+data:  x
+W = 0.85961, p-value = 3.403e-09
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{datos[x }\SpecialCharTok{\textless{}} \DecValTok{26}\NormalTok{, }\FunctionTok{c}\NormalTok{(}\StringTok{"Municipio"}\NormalTok{, }\StringTok{"Departamento"}\NormalTok{, }\StringTok{"Temperatura"}\NormalTok{)]}
+\end{Highlighting}
+\end{Shaded}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lllr@{}}
+\toprule\noalign{}
+& Municipio & Departamento & Temperatura \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+637 & CHÁMEZA & CASANARE & 23.0 \\
+661 & CHÁMEZA & CASANARE & 23.7 \\
+2254 & PAJARITO & BOYACÁ & 22.4 \\
+2278 & PAJARITO & BOYACÁ & 23.4 \\
+2408 & PAYA & BOYACÁ & 23.5 \\
+2432 & PAYA & BOYACÁ & 23.7 \\
+3178 & RECETOR & CASANARE & 23.7 \\
+3202 & RECETOR & CASANARE & 24.8 \\
+\end{longtable}
+}
+
+\textbf{No se podría afirmar que los datos provienen de una distribución
+normal}, pues ambas estimaciones (\(h = 0{,}640\) °C) muestran una forma
+que una campana no puede producir. Primeramente, la masa se apila entre
+29 y 32 °C con una moda cerca de 31,1 °C y una cola larga hacia la
+izquierda (\(g_1 = -1{,}39\)), cuando una normal es simétrica.
+Progresivamente, en esa cola aparece una segunda moda pequeña cerca de
+23,5 °C, que sobrevive al duplicar el ancho de banda y por tanto no es
+ruido del suavizado, formada por los 8 registros frescos que ya se
+habían marcado como atípicos en la Pregunta 4, y que corresponden a solo
+cuatro municipios medidos en ambas fechas (Chámeza y Recetor en
+Casanare, Pajarito y Paya en Boyacá), es decir, a una subpoblación de
+municipios más frescos y no a mediciones aisladas. Finalmente, la prueba
+de Shapiro-Wilk (cuya hipótesis nula es que los datos son normales) la
+rechaza con contundencia (\(W = 0{,}860\), \(p < 0{,}001\)), aunque la
+decisión se sostiene principalmente en la forma del gráfico.
+
+\begin{quote}
+\textbf{Nota.} Se atribuye el grupo fresco a que son municipios de
+piedemonte o de la cordillera, pero la base no tiene una columna de
+altitud, así que esta explicación geográfica no se verificó con los
+datos.
+\end{quote}
+
+\section{Pregunta 11: densidad de la presión}\label{p11}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{densidad}\NormalTok{(}\StringTok{"Presion"}\NormalTok{, }\StringTok{"Presión (hPa)"}\NormalTok{, }\StringTok{"orange"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p11-1.pdf}}
+
+}
+
+\caption{Estimación histograma y kernel de la densidad de la presión a
+medio día.}
+
+\end{figure}%
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Presion}
+\FunctionTok{c}\NormalTok{(}\AttributeTok{h =} \FunctionTok{bw.nrd0}\NormalTok{(x), }\AttributeTok{g1 =} \FunctionTok{g1}\NormalTok{(x), }\AttributeTok{media =} \FunctionTok{mean}\NormalTok{(x), }\AttributeTok{mediana =} \FunctionTok{median}\NormalTok{(x))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+           h           g1        media      mediana 
+   0.3844894    0.8384434 1012.7762712 1012.5000000 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{list}\NormalTok{(}\AttributeTok{modas\_h =} \FunctionTok{modas}\NormalTok{(x), }\AttributeTok{modas\_2h =} \FunctionTok{modas}\NormalTok{(x, }\DecValTok{2}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$modas_h
+[1] 1012.00 1015.46
+
+$modas_2h
+[1] 1012.28
+\end{verbatim}
+
+\textbf{La distribución estimada no es simétrica, sino que presenta
+asimetría positiva} (cola a la derecha), lo cual se sostiene por varias
+vías que coinciden:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Coeficiente de asimetría}: Vale \(g_1 = +0{,}84\), de signo
+  opuesto al de la temperatura.
+\item
+  \textbf{Media contra mediana}: La media (1012,78 hPa) queda por encima
+  de la mediana (1012,50 hPa), y los cuartiles lo confirman, pues de
+  \(Q_1\) a la mediana hay 0,6 hPa mientras que de la mediana a \(Q_3\)
+  hay 0,9 hPa.
+\item
+  \textbf{Forma de la KDE}: Con \(h = 0{,}384\) hPa la curva sube rápido
+  desde 1010,9 hPa, hace su moda cerca de 1012 hPa y baja despacio con
+  una pequeña joroba alrededor de 1015,5 hPa, hasta el valor 1015,7 hPa
+  que la Pregunta 6 marcó como atípico.
+\end{itemize}
+
+Cabe mencionar que esa joroba la forman los mismos cuatro municipios de
+la cola fresca de la temperatura (Chámeza, Recetor, Pajarito y Paya), de
+forma que un único grupo de municipios estira a la vez la cola izquierda
+de una variable y la derecha de la otra. A diferencia de la moda
+secundaria de la temperatura, esta joroba desaparece al duplicar el
+ancho de banda, así que no se afirma una bimodalidad, pero la asimetría
+positiva sí se mantiene con cualquier \(h\) razonable.
+
+\begin{quote}
+\textbf{Nota.} Que municipios presumiblemente más altos registren más
+presión resulta extraño si fuera presión de estación, lo que sugiere que
+el IDEAM reporta presión reducida al nivel del mar, sin embargo esto no
+se confirmó en la documentación de la fuente.
+\end{quote}
+
+\section{Pregunta 12: densidad del viento frente a la normal}\label{p12}
+
+La densidad normal teórica se construye con la media y la desviación
+estándar observadas, \(\bar{x} = 1{,}719\) mph y \(s = 0{,}789\) mph,
+
+\[
+f(x) = \frac{1}{s\sqrt{2\pi}} \exp\!\left( -\frac{(x - \bar{x})^2}{2 s^2} \right),
+\]
+
+y se superpone sobre la KDE de la velocidad del viento.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{media\_v }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento)}
+\NormalTok{sd\_v }\OtherTok{\textless{}{-}} \FunctionTok{sd}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento)}
+\FunctionTok{ggplot}\NormalTok{(datos, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Velocidad\_del\_Viento)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{colour =} \StringTok{"blue"}\NormalTok{, }\AttributeTok{fill =} \StringTok{"blue"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.2}\NormalTok{,}
+               \AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{stat\_function}\NormalTok{(}\AttributeTok{fun =}\NormalTok{ dnorm, }\AttributeTok{args =} \FunctionTok{list}\NormalTok{(}\AttributeTok{mean =}\NormalTok{ media\_v, }\AttributeTok{sd =}\NormalTok{ sd\_v),}
+                \AttributeTok{colour =} \StringTok{"firebrick"}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{,}
+                \AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{xlim}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{, }\FloatTok{4.5}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Velocidad del viento (mph)"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Densidad"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p12-1.pdf}}
+
+}
+
+\caption{Estimación kernel de la densidad de la velocidad del viento
+(azul) frente a la normal con media y desviación observadas (rojo
+punteado).}
+
+\end{figure}%
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento}
+\FunctionTok{list}\NormalTok{(}\AttributeTok{modas\_h =} \FunctionTok{modas}\NormalTok{(x), }\AttributeTok{modas\_2h =} \FunctionTok{modas}\NormalTok{(x, }\DecValTok{2}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$modas_h
+[1] 1.01 1.93 3.28
+
+$modas_2h
+[1] 1.63
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{P(X \textless{} 0) normal}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{pnorm}\NormalTok{(}\DecValTok{0}\NormalTok{, media\_v, sd\_v))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+P(X < 0) normal 
+     0.01471799 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{shapiro.test}\NormalTok{(x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+    Shapiro-Wilk normality test
+
+data:  x
+W = 0.96155, p-value = 0.001885
+\end{verbatim}
+
+El modelo normal \(N(1{,}719;\ 0{,}789)\) \textbf{se aproxima solo de
+lejos} a la densidad estimada, pues acierta el centro y el ancho general
+de la distribución, pero falla en la forma por tres motivos:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Asimetría y jorobas}: La KDE (\(h = 0{,}274\) mph) tiene su
+  masa entre 1 y 2 mph con jorobas locales cerca de 1,0, 1,9 y 3,3 mph y
+  una cola derecha más pesada (\(g_1 = +0{,}49\)), mientras que la
+  normal es una sola campana simétrica, con el pequeño detalle que esas
+  jorobas se funden en una sola moda al duplicar \(h\), así que lo
+  robusto es la asimetría y no la multimodalidad.
+\item
+  \textbf{Masa imposible}: Con esa media y desviación, la normal le
+  asigna un 1,5 \% de probabilidad a velocidades negativas, lo cual es
+  imposible para una variable de razón acotada por cero, siendo este el
+  defecto conceptual del ajuste y no un detalle de la muestra (la KDE
+  también derrama algo de masa bajo cero, pero por la cola infinita de
+  su núcleo gaussiano).
+\item
+  \textbf{Prueba de normalidad}: Shapiro-Wilk rechaza la normalidad
+  (\(W = 0{,}962\), \(p = 0{,}002\)), aunque de forma mucho menos
+  rotunda que en la temperatura, coherente con que aquí las dos curvas
+  al menos se parecen.
+\end{itemize}
+
+En resumen, la normal sirve como aproximación gruesa del centro y la
+dispersión del viento a medio día, pero no como modelo de su forma, y en
+particular no describe bien la cola derecha ni el piso físico en cero.
+
+% --- Referencias mínimas (fuente de datos + software usado) ---
+\nocite{ideam-datos, r-core, ggplot2, ggextra}
+\printbibliography[heading=bibintoc]
+\end{document}

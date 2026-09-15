@@ -1,0 +1,81 @@
+% !TEX root = ../../main-es.tex
+% appendix/es/E-tipos-operadores.tex
+% Longtable multipage con tipos y operadores del fragmento .os formalizado.
+% Estilo: booktabs + dcolumn (alineación decimal para aridades) + endhead/endfoot.
+
+\chapter{Tipos y operadores del fragmento \dsl{.os}}
+\label{app:tipos-operadores}
+
+\porque{Referencia rápida.}{%
+  Tabla de referencia del fragmento \dsl{.os} cuyo marco formal vive en el
+  cap.~\ref{cap:marco-formal}. Cada fila ata un operador a su kind, su aridad y
+  la categoría denotacional que lo modela. La columna \emph{Ref.} apunta a la
+  sección donde se define.}
+
+\section{Catálogo de operadores}
+
+La tabla~\ref{tab:ops-os} cataloga los operadores del fragmento \dsl{.os}
+incluidos en la semántica denotacional (cap.~\ref{cap:marco-formal}). Los
+operadores se agrupan por \emph{kind}: \textsc{Control} (plano determinista),
+\textsc{Effect} (plano del LLM) y \textsc{Pure} (sin efecto). La aridad se
+expresa como $n{\to}m$ donde $n$ es el número de snapshots de entrada y $m$ el
+de salida; el peso $w$ es el coste relativo de invocación (estimado, ver
+cap.~\ref{cap:experimentos}).
+
+\begin{longtable}{@{}ll d{2.1} c c@{}}
+\caption[Operadores del fragmento \dsl{.os} y su clasificación.]%
+        {Operadores del fragmento \dsl{.os}: kind, aridad $n{\to}m$, peso $w$
+         (invocaciones relativas) y sección de definición.}%
+\label{tab:ops-os}\\
+\toprule
+\textbf{Operador} & \textbf{Kind} & \multicolumn{1}{c}{\textbf{Aridad}} &
+\textbf{Peso} & \textbf{Ref.} \\
+\midrule
+\endfirsthead
+
+\caption[]{(continuación)}\\
+\toprule
+\textbf{Operador} & \textbf{Kind} & \multicolumn{1}{c}{\textbf{Aridad}} &
+\textbf{Peso} & \textbf{Ref.} \\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{5}{r}{\footnotesize Continúa en la página siguiente.} \\
+\endfoot
+
+\bottomrule
+\endlastfoot
+
+\oskw{literal}   & \textsc{Pure}    & 0.0 & 0.01 & \S\ref{sec:semantica} \\
+\oskw{formula}   & \textsc{Pure}    & 0.0 & 0.02 & \S\ref{sec:semantica} \\
+\oskw{bif}       & \textsc{Control} & 1.1 & 0.05 & \S\ref{sec:semantica} \\
+\oskw{call}      & \textsc{Control} & 1.1 & 0.10 & \S\ref{sec:semantica} \\
+\oskw{ret}       & \textsc{Control} & 1.1 & 0.05 & \S\ref{sec:semantica} \\
+\oskw{ask}       & \textsc{Effect}  & 1.1 & 1.00 & \S\ref{sec:semantica} \\
+\oskw{ai}        & \textsc{Effect}  & 1.1 & 1.20 & \S\ref{sec:semantica} \\
+\oskw{map}       & \textsc{Control} & 1.1 & 0.08 & \S\ref{sec:semantica} \\
+\oskw{filter}    & \textsc{Control} & 1.1 & 0.08 & \S\ref{sec:semantica} \\
+\oskw{reduce}    & \textsc{Control} & 1.1 & 0.09 & \S\ref{sec:semantica} \\
+\oskw{foreach}   & \textsc{Control} & 1.1 & 0.10 & \S\ref{sec:semantica} \\
+\oskw{fork}      & \textsc{Control} & 1.n & 0.15 & \S\ref{sec:semantica} \\
+\oskw{join}      & \textsc{Control} & n.1 & 0.20 & \S\ref{sec:semantica} \\
+\oskw{call-multi}& \textsc{Control} & 1.n & 0.40 & \S\ref{sec:semantica} \\
+\oskw{hot-run}   & ---              & --- & ---  & fuera del fragmento \\
+\oskw{reflect}   & ---              & --- & ---  & dirección futura (M3) \\
+\end{longtable}
+
+\section{Convenciones de la tabla}
+
+\begin{itemize}
+\item \textbf{Kind}: \textsc{Pure} no invoca al LLM; \textsc{Control} esparte
+  del plano determinista; \textsc{Effect} cuarentena la invocación al LLM
+  (\S\ref{sec:semantica}).
+\item \textbf{Aridad} $n{\to}m$: $n$ snapshots de entrada, $m$ de salida.
+  \texttt{1.n} indica fan-out (fork); \texttt{n.1} fan-in (join).
+\item \textbf{Peso}: invocaciones relativas normalizadas a
+  \oskw{ask}$=1{,}00$. Estimación empírica del cap.~\ref{cap:experimentos}.
+\item Los operadores fuera del fragmento (\oskw{hot-run}, \oskw{reflect}) se
+  listan para acotar el alcance; su semántica queda como trabajo futuro
+  (\S\ref{sec:reflexion}).
+\end{itemize}

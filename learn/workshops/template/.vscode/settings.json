@@ -1,0 +1,65 @@
+{
+  "latex-workshop.latex.rootFile.doNotPrompt": true,
+  "latex-workshop.latex.search.rootFiles.include": ["main-es.tex", "main-en.tex"],
+  "latex-workshop.latex.build.forceRecipeUsage": true,
+  "latex-workshop.latex.recipe.default": "lastUsed",
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "make es (draft, with \\porque boxes)",
+      "tools": ["make-es"]
+    },
+    {
+      "name": "make es FINAL (deliverable, boxes hidden)",
+      "tools": ["make-es-final"]
+    },
+    {
+      "name": "make en",
+      "tools": ["make-en"]
+    }
+  ],
+  "latex-workshop.latex.tools": [
+    {
+      "name": "make-es",
+      "command": "make",
+      "args": ["es"],
+      "cwd": "%DIR%"
+    },
+    {
+      "name": "make-es-final",
+      "command": "make",
+      "args": ["es", "FINAL=1"],
+      "cwd": "%DIR%"
+    },
+    {
+      "name": "make-en",
+      "command": "make",
+      "args": ["en"],
+      "cwd": "%DIR%"
+    }
+  ],
+  "latex-workshop.latex.outDir": "%DIR%/build",
+  "latex-workshop.view.pdf.internal.synctex.keybinding": "double-click",
+  "latex-workshop.view.pdf.ref.viewer": "tab",
+  "latex-workshop.latex.autoBuild.run": "onFileChange",
+  "latex-workshop.message.error.show": true,
+  "latex-workshop.message.warning.show": false,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/main-es.aux": true,
+    "**/main-es.bbl": true,
+    "**/main-es.bcf": true,
+    "**/main-es.blg": true,
+    "**/main-es.fdb_latexmk": true,
+    "**/main-es.fls": true,
+    "**/main-es.lof": true,
+    "**/main-es.log": true,
+    "**/main-es.lot": true,
+    "**/main-es.out": true,
+    "**/main-es.run.xml": true,
+    "**/main-es.synctex.gz": true,
+    "**/main-es.toc": true,
+    "**/main-es.crt": true,
+    "**/main-es.xdv": true
+  }
+}

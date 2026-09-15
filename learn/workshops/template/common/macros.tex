@@ -1,0 +1,61 @@
+% !TEX root = ../main-es.tex
+% common/macros.tex — \criterio, \porque, marcas categóricas, \OASys
+% Carga: tras etoolbox, tcolorbox, amsmath, polyglossia.
+
+% ===== Modo final (FINAL=1 => \porque invisible) =====
+% El Makefile crea .final-mode cuando se invoca `make es FINAL=1`;
+% \IfFileExists lo detecta sin depender del motor ni de flags de latexmk.
+\newif\iffinalmode
+\finalmodefalse
+\IfFileExists{.final-mode}{\finalmodetrue}{}
+
+% ===== Marca de producto =====
+\newcommand{\OASys}{\textsc{OASys}}
+\newcommand{\dsl}[1]{\texttt{#1}}
+\newcommand{\cellref}[2]{\texttt{\$#1.#2}}  % p.ej. \cellref{Reply}{campo}
+\newcommand{\oskw}[1]{\textcolor{oscrit}{\texttt{#1}}}  % keyword .os en texto
+
+% ===== Macros categóricas =====
+\newcommand{\catname}[1]{\mathscr{#1}}
+\newcommand{\Obj}{\mathrm{Ob}}
+\newcommand{\Hom}[2]{\mathrm{Hom}_{#1}(#2)}
+\newcommand{\seqcomp}{\mathbin{;}}
+\newcommand{\tensor}{\otimes}
+\newcommand{\id}{\mathrm{id}}
+\newcommand{\smcc}{\mathbf{SMC}}
+\newcommand{\freyd}{\mathbf{Fr}}
+\newcommand{\interp}[1]{\llbracket #1 \rrbracket}  % denotación
+
+% ===== \porque: caja "qué va aquí y por qué" (solo draft) =====
+\newtcolorbox{porquebox}[1]{%
+  enhanced, breakable, sharp corners,
+  colback=yellow!4, colframe=orange!75!black,
+  boxrule=0.4pt, left=6pt, right=6pt, top=4pt, bottom=4pt,
+  fonttitle=\bfseries\footnotesize,
+  coltitle=white,
+  attach boxed title to top left={xshift=4pt,yshift=-2pt},
+  boxed title style={colback=orange!75!black, sharp corners, boxrule=0pt,
+    top=1pt,bottom=1pt,left=4pt,right=4pt},
+  title={¿Qué va aquí? \, #1}%
+}
+\newcommand{\porque}[2]{%
+  \iffinalmode\else
+    \par\medskip
+    \begin{porquebox}{#1}#2\end{porquebox}
+    \par\medskip
+  \fi
+}
+
+% ===== \criterio: tag de margen + entrada en .crt recolectada en Apéndice A =====
+\makeatletter
+\newcommand{\criterio}[2]{%
+  \@bsphack
+  \marginpar{\footnotesize\sffamily\color{accent!85!black}\textbf{#1}\,\textsf{#2}\%}%
+  \addcontentsline{crt}{section}{\protect\numberline{\thechapter.\thesection}#1\,\textemdash\,#2\%}%
+  \@esphack
+}
+% Recolector: Apéndice A invoca \listacriterios
+\newcommand{\listacriterios}{%
+  \@starttoc{crt}%
+}
+\makeatother

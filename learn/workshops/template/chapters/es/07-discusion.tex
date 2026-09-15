@@ -1,0 +1,25 @@
+% !TEX root = ../../main-es.tex
+% chapters/es/07-discusion.tex
+\chapter{Discusión, amenazas a la validez y trabajo futuro}
+\criterio{oral-dominio}{20}\criterio{oral-debate}{20}
+\label{cap:discusion}
+
+\porque{Sustentación oral (EICT 40\%).}{%
+  El capítulo que más pesa en la defensa. Fallo típico: inflar los claims o esconder las
+  limitaciones. Hacer lo contrario: declarar lo que el diseño NO garantiza y por qué es
+  aceptable.}
+
+\section{Amenazas a la validez}
+\porque{Validez interna/externa.}{Confounder más plausible: el verificador obliga a escribir mejores devices (efecto Hawthorne). La ablación (B) aísla la variable. Validez externa acotada al fragmento formalizado.}
+\porque{Evidencia cuantitativa, no sólo argumental.}{%
+  El GLMM de §\ref{sec:protocolo} da una medida directa del confounder: la varianza del
+  efecto aleatorio por tarea, $\sigma_t^2$, frente a la magnitud de los coeficientes de
+  brazo. Si $\sigma_t^2$ domina, la diferencia entre brazos es pequeña comparada con la
+  heterogeneidad entre tareas y el claim debe atenuarse. Si el contraste por permutación
+  y el GLMM divergen, la discrepancia se reporta aquí, no se esconde.}
+
+\section{Limitaciones}
+\porque{Honestidad.}{(i) Hot-run fuera de alcance; (ii) cross-book con targets computados fuera; (iii) auto-modificación fuera (M3); (iv) medición restringida a M1 (degradación por profundidad).}
+
+\section{Trabajo futuro}
+\porque{Proyección.}{M2 (incompatibilidad de contexto), M3 (seguridad de auto-modificación — la dirección original de \OASys{}), hot-run, mecanización Lean del teorema \ref{thm:noi}.}

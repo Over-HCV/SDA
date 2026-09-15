@@ -1,0 +1,62 @@
+% !TEX root = ../../main-es.tex
+% chapters/es/03-marco-formal.tex
+\chapter{Marco formal}
+\criterio{plan}{15}
+\label{cap:marco-formal}
+
+\porque{Plan de acción / rigor metodológico (EICT 15\%).}{%
+  Define el lenguaje formal que los capítulos 4--6 usan. Fallo típico: mezclar sintaxis
+  y semántica, o declarar la semántica ``obvia''. Aquí la semántica es la contribución,
+  no un trámite.}
+
+\section{Sintaxis del fragmento \dsl{.os}}
+\porque{Fragmento formalizado.}{%
+  Gramática de: literal, formula, bif, call, ret, ask, ai, map/filter/reduce/foreach,
+  fork-join. Tabla de kinds de expresión. Fuente: \texttt{context/features/dsl.md} y
+  spec 18. Lo que queda fuera (hot-run, cross-book con targets computados, reflexión)
+  se lista explícitamente.}
+
+\section{Semántica denotacional}
+\label{sec:semantica}
+\porque{Núcleo de O1.}{%
+  Función de interpretación $\interp{-}$ del fragmento a morfismos. Totalidad: cada
+  término bien tipado denota. Las leyes (asociatividad, identidad) se enuncian aquí y
+  se verifican en el cap. \ref{cap:teorema}.}
+
+\section{La SMC del plano fork-join}
+\porque{Tensor genuino (O1).}{%
+  Especificación 18 ruling 4: CALL multi-target $=$ fork-join sobre snapshots aislados,
+  escrituras descartadas, unión determinista en orden de lista. El producto tensorial
+  $\tensor$ vale la ley de intercambio — es la base del teorema de no-interferencia.}
+
+\section{La categoría de Freyd del plano secuencial}
+\porque{Efectos cuarentenados.}{%
+  ADR-003 $=$ plano de control determinista con efecto (LLM) cuarenteno. CALL single-target
+  $=$ morfismo no central. La estructura premonoidal/de Freyd separa composición de efectos
+  de composición pura.}
+
+\section{Sistema de tipos de referencias}
+\porque{Base de O3.}{%
+  Tipos de \cellref{}{}: una ref es válida ssi la celda productora publica un esquema que
+  habilita el campo. Hoy esto se resuelve en runtime; el verificador (cap.
+  \ref{cap:implementacion}) lo sube a compile. Soundness vive en cap. \ref{cap:teorema}.}
+
+% ====== Nomenclatura del marco formal (doble columna, estilo MIT) ======
+\begin{nomenclature*}[2em][Nomenclatura del marco formal][section]
+\EntryHeading{Categorías y estructuras}
+\entry{$\catname{C}$}{categoría base del plano de efectos}
+\entry{$\smcc$}{categoría monoidal simétrica del sub-fragmento fork-join}
+\entry{$\freyd$}{categoría de Freyd del plano secuencial}
+\entry{$\Obj(\catname{C})$}{objetos de $\catname{C}$}
+\entry{$\Hom{\catname{C}}{A,B}$}{morfismos $A \to B$ en $\catname{C}$}
+\EntryHeading{Constructores}
+\entry{$\interp{-}$}{función de interpretación (sintaxis $\to$ morfismos)}
+\entry{$\tensor$}{producto tensorial (fork-join paralelo)}
+\entry{$\seqcomp$}{composición secuencial ($f \,;\, g$)}
+\entry{$\id_A$}{morfismo identidad en $A$}
+\EntryHeading{Dominios}
+\entry{$\mathrm{Cell}$}{tipo de celda direccionable}
+\entry{$\mathrm{Snap}$}{snapshot aislado (input de fork)}
+\entry{$\mathrm{LLM}$}{morfismo estocástico (efecto)}
+\end{nomenclature*}
+

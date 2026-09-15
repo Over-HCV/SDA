@@ -1,0 +1,154 @@
+{
+  "proyecto": "sda-lab",
+  "tipo": "exploracion",
+  "modo": "servidor",
+  "seleccion": [
+    {
+      "id": "p15",
+      "clave": "f1.filtro.filas",
+      "titulo": "Filas antes y después del filtro",
+      "cuando": "20:38:40",
+      "params": {
+        "al_cargar": 4543,
+        "ahora": 118,
+        "filtros": "Hora en [12:00]"
+      },
+      "nota": "Pregunta primera:\nLa tabla tiene 4.543 filas y 18 columnas: 4.543 unidades estadísticas pues cada una es una medición en un municipio a una hora concreta— y 18 variables. A medio día (Hora a las \"12:00\") hay 118 registros, uno por cada uno de los 59 municipios en cada una de las 2 fechas de la base.\nDimensiones de la base: La tabla cuenta con 4543 filas y 18 columnas.\nUnidades Estadísticas / Experimentales (UE): Existen 4543 UE, donde cada unidad corresponde a una medición meteorológica efectuada en un momento y municipio específico.\nVariables: Se registran 18 variables asociadas a cada observación.\nRegistros a medio día (12:00): Se recolectaron un total de 118 observaciones a las 12:00.\n\nLa única razón por la que no pongo la tabla original es porque tiene demasiadas columnas y no se ven bien, se rompe el width.\nAdemás me gustaría mencionar que las columnas o \"variables\" `Región` y `Hora` puesto que no cambian implicaría que son constantes y técnicamente no serían variables, pero bueno, que se van a aceptar como \"variables\" en cuanto podrían crear variación al resultado... O no sé..."
+    },
+    {
+      "id": "p2",
+      "clave": "f1.balanceo.frecuencias",
+      "titulo": "Frecuencias por clase",
+      "cuando": "07:25:51",
+      "params": {
+        "clase": "Pronostico"
+      },
+      "nota": "Pregunta segunda:\nEl más frecuente es Parcialmente Nublado (63 de 118, el 53 %) y el menos frecuente Parcialmente Nublado - Tormenta Ligera (2, el 1.7%).\n\nPronóstico más frecuente: Parcialmente Nublado, con 63 registros (representa el 53.39% de los casos).\nPronóstico menos frecuente: Parcialmente Nublado - Tormenta Ligera, con 2 registros (representa el 1.69% de los casos)."
+    },
+    {
+      "id": "p3",
+      "clave": "f1.diccionario.tabla",
+      "titulo": "Diccionario de columnas",
+      "cuando": "07:25:51",
+      "params": [],
+      "nota": "Pregunta tercera:\nAcá estaría bien hacer quizás una tabla con:\nVariable\tEscala\tClase\nPronóstico\tNominal — las categorías no tienen orden\tCualitativa\nMunicipio\tNominal — es una etiqueta geográfica\tCualitativa\nTemperatura\tIntervalo — el 0 °C es convencional, no ausencia de temperatura\tCuantitativa continua\nVelocidad del viento\tRazón — el 0 mph sí es ausencia de viento\tCuantitativa continua\n\nAdemás me gustaría mencionar cómo la variable `Pronóstico` pudo haber sido ordinal pero como se combinó con una segunda denotación eso causa ambiguedades, lo que causa que se vuelva realmente **Nominal**.\n\nTambién decir que la columna de temperatura no se interpreta automáticamente como intervalo.\n\n---\nPor otro lado sería cool dejar este diagrama para que se vea de forma gráfica como clasificar, pero no sé dónde:\n```{mermaid}\n---\nconfig:\n  layout: elk\n  theme: default\n---\nflowchart TD\n    V[\"CLASIFICACIÓN DE VARIABLES<br/>(NB1: escala × clase, ejes independientes)\"]\n\n    V --> ESC[\"EJE 1 · ESCALA<br/>¿qué operaciones tienen sentido?\"]\n    V --> CLA[\"EJE 2 · CLASE<br/>¿cuál es el recorrido?\"]\n\n    %% ================= EJE 1: ESCALA =================\n    ESC --> CUAL[\"CUALITATIVA<br/>mide atributos → categorías\"]\n    ESC --> CUAN[\"CUANTITATIVA<br/>mide cantidades → números\"]\n\n    CUAL --> NOM[\"NOMINAL<br/>solo = / ≠\"]\n    CUAL --> ORD[\"ORDINAL<br/>= / ≠ + orden<br/>(distancias sin significado)\"]\n    CUAN --> INT[\"INTERVALO<br/>+ intervalos equidistantes<br/>CERO RELATIVO\"]\n    CUAN --> RAZ[\"RAZÓN<br/>+ razones válidas<br/>CERO ABSOLUTO\"]\n\n    NOM --> NOME[\"Municipio, Pronóstico, Region<br/>(código postal: numérico pero nominal)\"]\n    ORD --> ORDE[\"Estrato {bajo, medio, alto}<br/>consumo eléctrico {alto, medio, bajo}\"]\n    INT --> INTE[\"Temperatura en °C<br/>0 °C no es ausencia de temperatura\"]\n    RAZ --> RAZE[\"Velocidad del viento (mph)<br/>Presion, Latitud — 0 = ausencia\"]\n\n    %% ================= EJE 2: CLASE =================\n    CLA --> CUAL2[\"si es CUALITATIVA\"]\n    CLA --> CUAN2[\"si es CUANTITATIVA\"]\n\n    CUAL2 --> BIN[\"BINARIA / DICOTÓMICA<br/>2 categorías\"]\n    CUAL2 --> POL[\"POLITÓMICA<br/>más de 2 categorías\"]\n    CUAN2 --> DIS[\"DISCRETA<br/>valores contables\"]\n    CUAN2 --> CON[\"CONTINUA<br/>cualquier valor de un intervalo real\"]\n\n    BIN --> BINE[\"Sí / No · Presence {Sí, No}\"]\n    POL --> POLE[\"Pronóstico (11 categorías)<br/>Municipio, Departamento\"]\n    DIS --> DISE[\"n.° de turbinas<br/>n.° de hijos\"]\n    CON --> CONE[\"Temperatura, Presion<br/>Velocidad del viento\"]\n```\nAunque no siento que sea muy claro cómo navegar en las ramas pero bueno."
+    },
+    {
+      "id": "p4",
+      "clave": "f1.analisis.boxplot",
+      "titulo": "Diagrama de caja",
+      "cuando": "07:25:51",
+      "params": {
+        "variable": "Temperatura"
+      },
+      "nota": "Pregunta cuarta:\n\n1. Temperatura:\nCentro: La mediana se sitúa en .\nLocalización y forma: El 50% central de los datos se ubica entre () y (). La distancia es superior a , y el bigote inferior se extiende hasta los , lo cual demuestra una asimetría hacia la izquierda (hacia valores menores).\nDispersión: La dispersión intermedia es moderada (), oscilando los valores dentro de una amplitud total de .\n\n---\n\nOkay, como en esta pregunta se complementa con el siguiente sección por lo que hay que tener cuidado, pero lo relevante es que acá no se hablan temas técnicos todavía como lo ofrecería el análisis numérico"
+    },
+    {
+      "id": "p5",
+      "clave": "f1.analisis.boxplot",
+      "titulo": "Diagrama de caja",
+      "cuando": "07:25:51",
+      "params": {
+        "variable": "Velocidad_del_Viento"
+      },
+      "nota": "2. Velocidad del viento:\nCentro: La mediana se ubica en .\nLocalización y forma: El rango intercuartílico se localiza entre () y (). La caja y los bigotes son relativamente balanceados en torno al centro, con un bigote superior más largo que alcanza hasta los , evidenciando una ligera asimetría hacia valores altos. No se identificaron observaciones atípicas bajo el criterio de Tukey.\nDispersión: El rango intercuartílico () y el rango total () reflejan una baja variabilidad general en el flujo del viento a esa hora.\n\n---\n\nComo te decía, el problema que le veo es que pues simplemente la boxplot no muestra los datos en la foto del diagrama por lo que se hacen análisis más por intuición, no sé si eso haya sido un error o intencional, revisa el @Taller-01.md para validar."
+    },
+    {
+      "id": "p6",
+      "clave": "f1.analisis.resumen",
+      "titulo": "Resumen numérico",
+      "cuando": "07:25:51",
+      "params": {
+        "variable": "Temperatura",
+        "escala": "intervalo"
+      },
+      "nota": "Pregunta quinta:\n\nSí, concuerda, y es la comprobación que la pregunta busca: los cinco números del summary() son exactamente los que dibuja la caja. La mediana (30,40) queda por encima de la media (29,75) en la temperatura — la firma numérica de la asimetría negativa que se ve en el bigote largo hacia abajo — y en el viento pasa al revés (mediana 1,700 contra media 1,719), coherente con su cola derecha. Ningún dato falta: las 118 filas están completas en ambas variables.\n\n---\n\nAcá pues sí se pueden hablar cositas más técnicas e interesantes. Además, lo importante es que todo termino nuevo siempre se define, su visión \"analítica\" y también su definición \"sistémica\" o pues su uso en el gran esquema, ambos de forma breve, clara y concisa (esto siempre para evidenciar que entendemos del tema) y más que pues se complementa con las definiciones que ya traen los propios bloques, aunque para no abrumar de información si es muy tonto u obvio se resume o corta directamente."
+    },
+    {
+      "id": "p7",
+      "clave": "f1.analisis.resumen",
+      "titulo": "Resumen numérico",
+      "cuando": "07:25:51",
+      "params": {
+        "variable": "Velocidad_del_Viento",
+        "escala": "razon"
+      },
+      "nota": "Analiza según se dijo en el bloque seis (anterior)."
+    },
+    {
+      "id": "p8",
+      "clave": "f1.calidad.atipicos",
+      "titulo": "Atípicos detectados",
+      "cuando": "07:25:51",
+      "params": {
+        "columna": "Presion"
+      },
+      "nota": "Pregunta sexta:\n\nPoner esta tablita;\nVariable\tLímites de Tukey\tAtípicos\nPresión (hPa)\t[1009,65 ; 1015,65]\t1 (el valor 1015,7)\nPunto de Rocío (°C)\t[13,45 ; 30,45]\t0\n\nLa Presión presenta más atipicidades — una, y por un margen mínimo: 1015,7 contra un límite de 1015,65, apenas 0,05 hPa fuera. El Punto de Rocío no tiene ninguno pese a moverse en un rango mucho más ancho (16,5 a 29,9 °C), porque su RIC también es ancho (4,25 °C) y el criterio de Tukey es relativo a la propia dispersión de la variable, no a una escala absoluta.\n\nPresión: Presenta 1 observación atípica ().\nPunto de Rocío: Presenta 0 observaciones atípicas (numeric(0)).\nConclusión: La variable Presión presenta el mayor número de atipicidades bajo el criterio de Tukey.\n\n---\n\nAcá lo relevante por decir es que de la única atipicidad que hubo fue por un margen muy pequeño, de como 0.05 si mal no recuerdo."
+    },
+    {
+      "id": "p9",
+      "clave": "f1.calidad.atipicos",
+      "titulo": "Atípicos detectados",
+      "cuando": "07:25:51",
+      "params": {
+        "columna": "Punto_de_Rocio"
+      },
+      "nota": "Complementar para que se compagine bien con el anterior bloque y quede bien estructurado."
+    },
+    {
+      "id": "p10",
+      "clave": "f1.analisis.dispersion",
+      "titulo": "Diagrama de dispersión",
+      "cuando": "07:25:51",
+      "params": {
+        "x": "Temperatura",
+        "y": "Velocidad_del_Viento",
+        "marginales": true
+      },
+      "nota": "Pregunta octava:\n\nLa nube no tiene estructura: para cualquier temperatura aparecen vientos de todo el rango, y la banda de puntos no sube ni baja. Los marginales cuentan lo suyo aparte —temperatura apilada arriba con cola a la izquierda, viento con su moda cerca de 1 mph y cola a la derecha—, y esa es la razón de verlos juntos: dos variables pueden ser muy asimétricas cada una y aun así no tener ninguna relación entre sí. No parecen correlacionarse. Asociación: No parecen correlacionarse. Los valores de la velocidad del viento se reparten de manera uniforme a lo largo del rango de temperaturas, sin evidencia de relación lineal ni monótona.\n---\nHay cosas que no entendí, de forma que esas cosas raras poner la explicación o sinónimo breve entre paréntesis por ejemplo `monótona (siempre creciente)` por decir algo (sé que estoy mal, no sé que es eso, perdón)..\n\nPregunta séptima:\n\nAcá prácticamente no sé cómo obtendríamos una tabla con dichos datos o simplemente es complementar lo que ya se tenía antes, que sería un poco en el aire, no?"
+    },
+    {
+      "id": "p12",
+      "clave": "f1.analisis.qq_normal_datos",
+      "titulo": "Q-Q normal de la variable",
+      "cuando": "07:25:51",
+      "params": {
+        "variable": "Temperatura"
+      },
+      "nota": "Pregunta novena:\nMultivariados. Sobre cada unidad estadística —una medición en un municipio a las 12:00— se registran 18 variables simultáneas, y las 118 observaciones comparten esa estructura. Que en las preguntas 4 a 6 se mire una variable por vez (análisis univariado) y en las 7 y 8 se miren dos (análisis bivariado) no cambia la naturaleza de los datos: describe qué corte se está haciendo sobre ellos. Los datos son multivariados; el análisis es lo que va cambiando de dimensión.\n---\n\nAcá realmente no debería haber un análisis de q-q plot porque eso se vió mucho más adelante, es sólo hablar lo que se dijo antes y ya, como tal mencionar que claro, que los datos presenten normalidad de forma multivariada implica que son normales univariadamente, pero si univariadamente son normales no implica que siguen siendo normales de forma multivariada, mirar cómo compenetrar esa cita del profe en clase."
+    },
+    {
+      "id": "p11",
+      "clave": "f1.analisis.histograma",
+      "titulo": "Histograma",
+      "cuando": "07:25:51",
+      "params": {
+        "variable": "Temperatura",
+        "densidad": true
+      },
+      "nota": "Pregunta décima:\n\nEl pie trae covarianza, pearson, spearman y n.\n\nRespuesta.\n\nMedida\tValor\tUnidades\nCovarianza\t0,0472\t°C · mph — el producto de las unidades de las dos variables\nPearson (r)\t0,0263\tninguna — es adimensional, siempre en [−1, 1]\nNo parecen correlacionarse: r = 0,026 es prácticamente cero (p = 0,78, o sea que ni siquiera se distingue del azar con 118 datos), y Spearman da −0,011, así que tampoco hay relación monótona no lineal escondida.\n\nLa pregunta de las unidades es la importante: la correlación es la covarianza estandarizada, $r = cov(x,y) / (s_x · s_y)$. Al dividir por las dos desviaciones, las unidades se cancelan. Por eso la covarianza sola no se puede interpretar —su 0,0472 °C·mph no dice si es mucho o poco, y cambiaría de valor si midiéramos el viento en km/h— mientras que r es comparable entre cualquier par de variables.\n```texto-de-intento-de-mejor-organización\nCovarianza muestral:\nCoeficiente de correlación de Pearson:\nInterpretación: Dado que , existe una correlación lineal prácticamente nula (independencia lineal) entre ambas variables.\nUnidades de medida:\nCovarianza: Se expresa en el producto de las unidades originales: .\nCorrelación de Pearson: Es una medida adimensional o estandarizada (no tiene unidades).\n```\n\n---\nAcá el mayor problema que veo viene que habla de Spearman y no tengo idea quién es ese."
+    },
+    {
+      "id": "p13",
+      "clave": "f1.analisis.histograma",
+      "titulo": "Histograma",
+      "cuando": "07:25:51",
+      "params": {
+        "variable": "Presion",
+        "densidad": true
+      },
+      "nota": "Pregunta undécima:\n\nSimetría: No es simétrica.\nExplicación: La densidad estimada de la presión atmosférica en Colombia presenta agrupamientos y colas asimétricas debido al relieve y la topografía. La presencia de municipios a distintas altitudes genera conglomerados separados de presión y la existencia de valores atípicos (como el detectado en ) extiende la distribución hacia un extremo, rompiendo la forma de campana simétrica.\n---\nNo es simétrica: tiene asimetría positiva (a la derecha).\n\nCoeficiente de asimetría +0,838, de signo opuesto al de la temperatura.\nMedia 1012,78 hPa por encima de la mediana 1012,50: la regla de bolsillo de la cola derecha. Los cuartiles lo confirman — de Q1 a la mediana hay 0,6 hPa, de la mediana a Q3 hay 0,9.\nLa KDE (h = 0,385) sube rápido desde 1010,9, hace su moda cerca de 1012 y baja despacio hasta el 1015,7 que la P6 marcó como atípico. Ese único valor extremo es el que estira la cola.\nShapiro-Wilk: W = 0,927, p = 7,2 × 10⁻⁶, tampoco normal.\n\n\nNo. Las tres vistas coinciden:\n\nEl histograma y la KDE (h = 0,636) muestran una distribución asimétrica a la izquierda (asimetría −1,391), con la masa apilada entre 29 y 32 °C y una cola larga hacia los 22 °C. Una normal es simétrica.\n((Análisis de la densidad de Temperatura: La curva de estimación kernel (KDE) y el histograma muestran una forma claramente no normal. Se observa una estructura multimodal / bimodal, con una concentración principal centrada alrededor de los y un segundo agrupamiento menor hacia los , además de un sesgo negativo.\nConclusión: No se puede afirmar que los datos provengan de una distribución normal, debido a la falta de unimodalidad y a la marcada asimetría hacia la izquierda provocada por los registros en municipios de mayor altitud o clima frío.))\n---\nAcá lo que me parece relevante es que el análisis está hecho sobre [histograma de la densidad y la estimación kernel de la densidad], no explicar sobre diagramas que el docente no ha solicitado, supongo que es lo mejor por hacer.\n\nAdemás, me parece relevante el poder decir por qué se pusieron los valores que se tienen en el `h` y por qué no otros, todo siempre ien justificado"
+    },
+    {
+      "id": "p14",
+      "clave": "f1.analisis.densidad",
+      "titulo": "Densidad kernel",
+      "cuando": "07:25:51",
+      "params": {
+        "variable": "Velocidad_del_Viento",
+        "normal": true
+      },
+      "nota": "El modelo normal ajustado es N(1,719 ; 0,789), y se aproxima sólo de lejos: acierta el centro y el ancho general, pero falla en la forma por tres motivos visibles en el gráfico.\n\nLa KDE es asimétrica (+0,485) y multimodal en la zona de 1 a 2 mph, con más de una joroba; la normal es una sola campana simétrica.\nLa normal pone masa donde no puede haber datos. Con media 1,719 y desvío 0,789, la normal asigna un 1,5 % de probabilidad a viento negativo. La velocidad del viento es una magnitud de razón acotada por 0: eso es imposible. Es el defecto conceptual del ajuste, no un detalle de la muestra.\nShapiro-Wilk: W = 0,962, p = 0,0019. Se rechaza la normalidad, aunque el rechazo es mucho menos rotundo que el de la temperatura — coherente con que aquí las dos curvas al menos se parecen.\n---\nComparación KDE vs. Normal teórica:\nLa curva de densidad empírica kernel (azul) presenta dos cúspides o mesetas locales (alrededor de y ) y un decaimiento más pronunciado en valores intermedios, mientras que la función de densidad normal teórica (roja punteada) asume una forma unimodal con su pico en la media ().\nConclusión: La aproximación normal no se ajusta de manera adecuada a la densidad empírica, ya que no logra capturar la bimodalidad local ni la sobredispersión en la cola superior de la velocidad del viento.\n\n---\n---\nEn resúmen, también haz todo más como una narrativa, tampoco que suene un informe súper horrible de técnico."
+    }
+  ]
+}

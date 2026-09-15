@@ -1,0 +1,18 @@
+% !TEX root = ../../main-es.tex
+% appendix/es/B-gramatica.tex
+\chapter{Gramática de \dsl{.os} y tabla de kinds}
+\label{app:gramatica}
+
+\porque{Referencia formal.}{%
+  Gramática EBNF del fragmento formalizado + tabla de kinds de expresión. Fuente:
+  \texttt{context/features/dsl.md} y specs 14/17/18 del repo \OASys. Lo que está fuera
+  del fragmento se lista como ``no cubierto''.}
+
+\section{Sintaxis concreta}
+\begin{lstlisting}[caption={Ejemplo: CALL fork-join (spec 18)}]
+CALL[Main, Last] Next
+  // Next = {Main: retA, Last: retB}  (orden de lista)
+\end{lstlisting}
+
+\section{Tabla de kinds de expresión}
+\porque{Marcador.}{Llenar desde \texttt{context/features/dsl.md}: literal / formula / bif / call / ret / ask / ai / map / filter / reduce / foreach / fork-join.}

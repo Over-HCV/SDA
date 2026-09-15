@@ -1,0 +1,47 @@
+% common/frontmatter-taller.tex — portada + resumen + índice para TALLERES
+% Portada a medida (estilo universidad colombiana): sin comité, jurados,
+% abstract de tesis ni declaración. Reutiliza logo, tipografía y acentos
+% definidos en common/preamble.tex.
+% Requiere (definidos antes): \tallertitulo, \tallersubtitulo, \tallerfecha,
+% \tallerresumen, \tallerpalabras (plantilla pandoc) y common/meta-taller-es.
+
+\pdfbookmark[0]{Portada}{portada}
+\begin{titlepage}
+  \centering
+  \thispagestyle{empty}
+  \urlogo[3.2cm]\par
+  \vspace{1.4em}
+  {\textls[60]{\MakeUppercase{\talleruniversidad}}}\par
+  \vspace{0.6em}
+  {\color{accent}\tallerescuela\par}
+  \vspace{0.25em}
+  \tallerprograma\par
+  \vspace{3.2em}
+  {\huge\bfseries \tallertitulo\par}
+  \vspace{1.1em}
+  {\Large \tallersubtitulo\par}
+  \vspace{3.6em}
+  {\itshape Integrantes\par}
+  \vspace{0.7em}
+  {\large \tallerautores\par}
+  \vspace{2.8em}
+  {\itshape Profesor\par}
+  \vspace{0.4em}
+  \tallerprofesor\par
+  \vfill
+  \tallerfecha\par
+\end{titlepage}
+
+% --- Resumen ---
+\chapter*{Resumen}
+\addcontentsline{toc}{chapter}{Resumen}
+\markboth{Resumen}{Resumen}
+\tallerresumen\par
+\medskip
+\noindent\textbf{Palabras clave:}\enspace\tallerpalabras
+
+% --- Índice general ---
+\clearpage
+\URactivatefooterlogo
+\pdfbookmark[0]{Índice}{indice}
+\tableofcontents

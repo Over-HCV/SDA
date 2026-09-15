@@ -1,0 +1,36 @@
+% !TEX root = ../../main-es.tex
+% chapters/es/02-estado-del-arte.tex
+\chapter{Estado del arte}
+\criterio{repr}{15}
+\label{cap:estado-del-arte}
+
+\porque{Representación del problema (EICT 15\%).}{%
+  Tres bloques: orquestación de agentes / ACT para procesos / qué es nuevo en \OASys.
+  Fallo típico: afirmar novedad sin haber leído el prior art. El repo \emph{hoy} tiene
+  cero papers de orquestación en \texttt{library/papers/} — cualquier claim de
+  novedad debe citar la fila exacta de LangGraph/AutoGen/DSPy/LMQL/Voyager que lo acota.}
+
+\section{Orquestación de agentes}
+\porque{Prior art industrial.}{%
+  LangGraph (grafos stateful), AutoGen (multi-agente conversacional), DSPy (compilación
+  declarativa de prompts), LMQL (lenguaje de consulta restringido), n8n (workflow visual),
+  Voyager (librería de habilidades autoescrita), línea ``LLM-as-OS''. Para cada uno:
+  ¿cuál es su semántica de composición? (respuesta esperada: implícita en el runtime).}
+
+\section{Teoría de categorías aplicada a procesos}
+\porque{Prior art formal.}{%
+  Categorías monoidales simétricas y string diagrams (Selinger; Coecke \& Kissinger;
+  Fong \& Spivak); categorías premonoidales / de Freyd y efectos (Power \& Robinson;
+  Moggi); arrows (Hughes); DisCoPy como librería operativa.}
+
+\section{Qué es nuevo en \OASys{}}
+\porque{Claim acotado.}{%
+  Diferencia de tipo, no de grado: separación explícita plano de control / efecto
+  (ADR-003) con dos operadores de composición de leyes distintas (CALL secuencial vs
+  fork-join aislado). Tabla comparativa contra los orquestadores de §2.1.}
+
+\section{Evidencia de motivación: estructura $>$ escala}
+\porque{Anclaje, no contribución.}{%
+  AlphaFold (IPA, triangle update, recycling) y DeepSeek-V4 (mHC, CSA/HCA) como prueba
+  de que las restricciones estructurales ganan empíricamente. Citados como motivación
+  del §\ref{cap:introduccion}, no como aporte de esta tesis.}

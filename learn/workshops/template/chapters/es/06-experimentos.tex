@@ -1,0 +1,150 @@
+% !TEX root = ../../main-es.tex
+% chapters/es/06-experimentos.tex
+\chapter{Diseño experimental y resultados}
+\criterio{analisis}{20}
+\label{cap:experimentos}
+
+\porque{Análisis crítico y pruebas estadísticas (EICT 20\%).}{%
+  El peso científico de la tesis. Fallo típico: ``pesca de resultados'' — por eso la
+  taxonomía y el test estadístico se declaran en este capítulo \emph{antes} de correr.}
+
+\section{Tres brazos}
+\porque{Diseño controlado.}{(A) \OASys{} verificado; (B) ablación (mismo motor, verificador apagado); (C) baseline externo: LangGraph (justificado en §2.1). Mismos modelos MLX, mismas seeds.}
+
+\section{Tareas compuestas}
+\porque{Métrica primaria M1.}{Éxito vs.\ profundidad $n$, con $n \in \{1,\dots,12\}$. Tareas encadenadas donde el fallo documentado es la degradación con la profundidad.}
+
+\section{Protocolo estadístico (pre-declarado)}
+\label{sec:protocolo}
+\porque{Anti sesgo de confirmación.}{%
+  Todo lo de esta sección se fija \emph{antes} de la primera corrida. El diseño es de
+  medidas repetidas cruzadas: la misma tarea y la misma seed se ejecutan en los tres
+  brazos (apéndice \ref{app:reproducibilidad}), así que las observaciones no son
+  independientes y una regresión logística plana subestima los errores estándar
+  justo en el término que se quiere contrastar.}
+
+\subsection{Modelo primario}
+Sea $y_{tsa} \in \{0,1\}$ el éxito de la tarea $t$ bajo la seed $s$ en el brazo
+$a \in \{A,B,C\}$, a profundidad $n$. El modelo pre-declarado es un modelo lineal
+generalizado mixto (GLMM) binomial:
+\[
+  \mathrm{logit}\,\Pr(y_{tsa}=1)
+  \;=\; \beta_0 + \beta_n\, n
+      + \sum_{a} \alpha_a \mathbf{1}[\mathrm{brazo}=a]
+      + \sum_{a} \gamma_a\, n \cdot \mathbf{1}[\mathrm{brazo}=a]
+      + u_t + v_s,
+\]
+con efectos aleatorios $u_t \sim \mathcal{N}(0,\sigma_t^2)$ por tarea y
+$v_s \sim \mathcal{N}(0,\sigma_s^2)$ por seed.
+
+\textbf{Contraste pre-declarado:} los coeficientes de interacción $\gamma_a$ —es decir,
+si la degradación con la profundidad difiere entre brazos. Corrección de \textbf{Holm}
+para las 3 comparaciones por parejas. Se reporta tamaño de efecto (OR) e IC 95\,\%.
+\porque{Por qué mixto y no logística plana.}{%
+  Los efectos aleatorios absorben la correlación intra-tarea e intra-seed que la
+  logística plana ignora; $\sigma_t^2$ se reutiliza en el cap.~\ref{cap:discusion} como
+  medida de cuánta varianza viene del tipo de tarea y no del brazo. El modelo se
+  especifica aquí de forma independiente de la herramienta: la implementación concreta
+  (lenguaje, librerías, versiones) se pinnea en el apéndice
+  \ref{app:reproducibilidad}.}
+
+\subsection{Robustez: inferencia por permutación}
+\porque{Validez con $k$ pequeño.}{%
+  Con $k$ del orden de $5$--$10$ seeds las aproximaciones asintóticas (Wald,
+  $\chi^2$) son frágiles. Se replica el contraste principal permutando las etiquetas de
+  brazo \emph{dentro} de cada estrato (tarea, seed), lo que respeta el apareamiento del
+  diseño y produce un $p$-valor exacto sin supuestos distribucionales. El número de
+  permutaciones y la semilla del permutador se pre-declaran. Coincidencia con el GLMM
+  $\Rightarrow$ conclusión defendible; divergencia $\Rightarrow$ hallazgo que se reporta en el
+  cap.~\ref{cap:discusion}. Es también el marco para las categorías de la taxonomía de
+  §\ref{sec:taxonomia}, donde los conteos serán ralos.}
+
+\subsection{Evidencia de ausencia de efecto (caso H3 negativo)}
+\porque{H3 es falsable y el resultado negativo es publicable.}{%
+  Un $p > 0.05$ frecuentista no autoriza afirmar ausencia de efecto, sólo no-detección.
+  Se ajusta en paralelo el \emph{mismo} modelo (misma estructura de efectos fijos y
+  aleatorios) bajo enfoque bayesiano, con MCMC y distribuciones a priori débilmente
+  informativas declaradas de antemano, y se fija \emph{a priori} una
+  región de equivalencia práctica (ROPE) sobre $\gamma_a$. Si la masa posterior dentro
+  de la ROPE supera el umbral pre-declarado, se afirma equivalencia práctica con soporte
+  formal en lugar de disculparse por un nulo.}
+
+\subsection{Comparación de modelos}
+\porque{¿La interacción aporta?}{%
+  Contraste de modelos anidados: $\mathcal{M}_0$ sin interacción (sólo profundidad y
+  brazo) vs.\ $\mathcal{M}_1$ con interacción, por razón de verosimilitud y por AIC/BIC.
+  La partición tren/prueba no es viable con este $n$. Contraparte bayesiana: validación
+  cruzada leave-one-out (LOO/WAIC) sobre los ajustes del punto anterior.}
+
+\subsection{Potencia y tamaño de muestra}
+\porque{Justificación del número de seeds.}{%
+  La potencia de una interacción en un GLMM no tiene forma cerrada: se estima por
+  simulación Monte Carlo sobre el modelo primario, generando datos con los parámetros
+  de la tabla \ref{tab:exp-placeholder} y contando la proporción de réplicas en que el
+  contraste se detecta, para una malla de valores de $k$. El $k$ resultante —y no un
+  mínimo arbitrario— es el que se fija en el apéndice \ref{app:reproducibilidad},
+  reportando $\alpha$, potencia objetivo $1-\beta$ y el OR mínimo detectable.}
+
+\subsection{Desenlaces censurados}
+\porque{Criterio fijado antes de correr.}{%
+  Una corrida que excede el \emph{timeout} o cuelga el motor es un desenlace
+  \emph{censurado}, no un fallo de la tarea: contarla como fallo sesga sistemáticamente
+  al brazo con mayor latencia (previsiblemente C). Se declara aquí el umbral de timeout,
+  se reporta la tasa de censura por brazo y se hace análisis de sensibilidad con los dos
+  extremos (censura $=$ éxito / censura $=$ fallo).}
+
+\section{Taxonomía de fallos (fijada a priori)}
+\label{sec:taxonomia}
+\porque{No derivada de resultados.}{(i) referencia muerta; (ii) violación de esquema en RET; (iii) contaminación entre ramas fork; (iv) fallo de tipo en frontera de celda. Cada categoría se reporta por separado.}
+
+\section{Resultados}
+\porque{Marcador.}{Placeholder con datos sintéticos, claramente etiquetado como tal, hasta que el arnés (O5) esté instanciado.}
+
+% ====== Figura con subfigures (estilo MIT chapter1) ======
+\begin{figure}[t]
+\centering
+\begin{subfigure}[c]{0.48\textwidth}
+  \centering
+  \begin{tikzpicture}[scale=0.7]
+    \draw[->] (0,0) -- (5,0) node[right] {\small prof.};
+    \draw[->] (0,0) -- (0,3) node[above] {\small éxito};
+    \draw[accent, very thick] (0,2.7) -- (5,0.3);
+    \draw[oscrit,  very thick, dashed] (0,2.5) -- (5,1.5);
+    \node[accent, right] at (5,0.3) {\scriptsize A};
+    \node[oscrit,  right] at (5,1.5) {\scriptsize B};
+  \end{tikzpicture}
+  \subcaption{\label{fig:exp-a}Brazo A (\OASys{} verificado) vs.\ B (ablación).}
+\end{subfigure}\hfill
+\begin{subfigure}[c]{0.48\textwidth}
+  \centering
+  \begin{tikzpicture}[scale=0.7]
+    \draw[->] (0,0) -- (5,0) node[right] {\small prof.};
+    \draw[->] (0,0) -- (0,3) node[above] {\small éxito};
+    \draw[accent, very thick] (0,2.7) -- (5,0.3);
+    \draw[black!60, very thick, dotted] (0,2.0) -- (5,0.2);
+    \node[accent,   right] at (5,0.3) {\scriptsize A};
+    \node[black!60, right] at (5,0.2) {\scriptsize C};
+  \end{tikzpicture}
+  \subcaption{\label{fig:exp-b}Brazo A vs.\ C (baseline LangGraph).}
+\end{subfigure}
+\caption{Resultados sintéticos (placeholder): tasa de éxito por profundidad
+         para los tres brazos. Datos ilustrativos, no medidos.%
+         \label{fig:exp-placeholder}}
+\end{figure}
+
+% ====== Tabla con tabular* + dcolumn (estilo MIT chapter1) ======
+\begin{table}[t]
+\caption{Tasa de éxito (datos sintéticos) por brazo y profundidad. Placeholder
+         hasta instanciar el arnés O5.\label{tab:exp-placeholder}}
+\vspace{0.5em}
+\centering
+\begin{tabular*}{0.85\textwidth}{@{\extracolsep{\fill}}l d{2.2} d{2.2} d{2.2}@{}}
+\toprule
+Brazo & \multicolumn{1}{c}{$n{=}4$} & \multicolumn{1}{c}{$n{=}8$} & \multicolumn{1}{c}{$n{=}12$} \\
+\midrule
+A: \OASys{} verificado    & 0.98 & 0.91 & 0.84 \\
+B: Ablación (sin verify) & 0.92 & 0.71 & 0.43 \\
+C: LangGraph (baseline)  & 0.89 & 0.58 & 0.21 \\
+\bottomrule
+\end{tabular*}
+\end{table}

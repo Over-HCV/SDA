@@ -1,0 +1,72 @@
+% !TEX root = ../main-es.tex
+% common/meta-es.tex — metadatos en español emitidos como comandos de mitthesis.cls
+% Las strings condicionales al español se registran aquí (único sitio).
+
+% ===== Strings de la clase al español =====
+\SuppressMonthError                      % Agosto no es mes MIT válido
+\SupervisorDesignation{Director}         % default: "Thesis Supervisor"
+\ThesisReaderName{Jurado}                % default: "Thesis Reader"
+\ThesisCommitteeName{Comité de Tesis}    % default: "THESIS COMMITTEE"
+\renewcommand{\abstractname}{Resumen}
+\renewcommand{\contentsname}{Índice general}
+\renewcommand{\listfigurename}{Índice de figuras}
+\renewcommand{\listtablename}{Índice de tablas}
+\renewcommand{\refname}{Referencias}
+\renewcommand{\bibname}{Referencias}
+\renewcommand{\indexname}{Índice alfabético}
+\renewcommand{\figurename}{Figura}
+\renewcommand{\tablename}{Tabla}
+\renewcommand{\chaptername}{Capítulo}
+\renewcommand{\appendixname}{Apéndice}
+
+% ===== Datos de la tesis (comandos MIT) =====
+\title{Semántica categórica en un DSL de instrumentación agéntica\\%
+      \large Composicionalidad como garantía estructural frente a la degradación en profundidad\\\normalsize
+      % El caso de \OASys
+      }
+
+\Author{Over Haider Castrillón Valencia}{Maestría en Matemáticas Aplicadas y Ciencias de la Computación}
+
+\Degree{Maestría en Matemáticas Aplicadas y Ciencias de la Computación}%
+       {Escuela de Ingeniería, Ciencia y Tecnología}
+
+\Institution{Universidad del Rosario}
+
+% Logo institucional en la portada (parche UR en mitthesis.cls)
+\ThesisLogo{ur-logo}[3.2cm]
+
+\Supervisor{Vivian Estefanía Beltrán Parada}{Profesor del Programa}%
+            [Maestría en Matemáticas Aplicadas y Ciencias de la Computación]
+
+% Acceptor mapeado a Coordinador del Programa (figura UR equivalente)
+\Acceptor{Daniel Alfonso Bojaca Torres}{Coordinador del Programa}%
+         {Maestría en Matemáticas Aplicadas y Ciencias de la Computación}
+
+% Tres jurados (placeholders mientras se asigna el comité)
+\Reader{(Jurado 1)}{Profesor del Programa}{Maestría en MACC}
+\Reader{(Jurado 2)}{Profesor del Programa}{Maestría en MACC}
+\Reader{(Jurado 3)}{Profesor del Programa}{Maestría en MACC}
+
+\DegreeDate{August}{2026}   % mes MIT válido (SuppressMonthError silencia otros)
+\ThesisDate{Agosto de 2026}
+
+% ===== Atajos del proyecto para capítulos y apéndices =====
+% ( Conservamos \tesisresumen y \tesispalabras para uso del abstract;
+%   el resto ya vive en los comandos MIT de arriba. )
+\newcommand{\tesispalabras}{Orquestación de agentes; teoría de categorías; categorías monoidales; semántica denotacional; verificación estática; \OASys}
+\newcommand{\tesisresumen}{%
+  Este trabajo da semántica denotacional al fragmento núcleo del lenguaje \dsl{.os} de
+  \OASys{} como morfismos de una categoría de Freyd sobre una categoría monoidal simétrica.
+  La separación entre un plano de control determinista y un plano de efecto estocástico
+  (el LLM), ya realizada por el motor en ADR-003, se formaliza como una categoría de Freyd.
+  Se enuncia y demuestra un teorema de no-interferencia composicional para el sub-fragmento
+  fork-join, y se implementa un verificador estático de referencias que convierte una clase
+  de fallos de ejecución en fallos de compilación. Se mide el efecto sobre la degradación
+  por profundidad frente a un baseline externo y a una ablación del verificador sobre el
+  mismo motor.%
+}
+
+% ===== Strings del frontmatter =====
+\newcommand{\tesislabelkeyw}{Palabras clave}
+\newcommand{\tesislabeldecl}{Declaración de autonomía intelectual.}
+\newcommand{\tesisdeclcorta}{Versión corta --- el texto firmado íntegro está en el Apéndice \ref{app:declaraciones}.}

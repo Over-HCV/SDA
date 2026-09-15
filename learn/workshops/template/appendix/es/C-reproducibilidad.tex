@@ -1,0 +1,39 @@
+% !TEX root = ../../main-es.tex
+% appendix/es/C-reproducibilidad.tex
+\chapter{Protocolo de reproducibilidad}
+\label{app:reproducibilidad}
+
+\porque{Rigor analítico (EICT 20\%).}{%
+  Lo que un tercero necesita para recrear los resultados del cap. \ref{cap:experimentos}.
+  Fallo típico: omisión de versiones o seeds.}
+
+\section{Software}
+\porque{Versiones pinneadas.}{\OASys{} commit hash; versión de Rust; versión de MLX; versiones de LangGraph para el brazo C.}
+\porque{Entorno de análisis.}{%
+  El protocolo de §\ref{sec:protocolo} está enunciado de forma independiente de la
+  herramienta —cualquier entorno que ajuste un GLMM binomial con efectos aleatorios
+  cruzados sirve—; aquí se pinnea la elección concreta: lenguaje, librerías de ajuste
+  (frecuentista y MCMC), versiones exactas y semilla del generador pseudoaleatorio del
+  análisis, distinta de las seeds de ejecución del cap. \ref{cap:experimentos}.
+  Los scripts de análisis se versionan junto al arnés.}
+
+\section{Hardware}
+M4 Pro, 24\,GB. Sin cómputo externo (a confirmar con el director, ver Gate 2 paso 9).
+
+\section{Comandos}
+\porque{Marcador.}{Secuencia exacta para instanciar los $k$ seeds y los $n=1..12$ niveles por brazo.}
+
+\section{Semillas}
+$k$ seeds fijas, reportadas y compartidas por los tres brazos (diseño apareado:
+misma seed y misma tarea en A, B y C).
+\porque{$k$ no es un número arbitrario.}{%
+  El valor de $k$ sale del cálculo de potencia por simulación de §\ref{sec:protocolo}
+  sobre el GLMM primario, no de un mínimo elegido a ojo. Registrar aquí, antes de
+  correr: $\alpha$, potencia objetivo
+  $1-\beta$, el OR mínimo detectable en la interacción, y el $k$ resultante.
+  Reemplazar el marcador «$k \geq 5$» del borrador por ese valor.}
+
+\section{Timeout y censura}
+\porque{Parte del protocolo, no del análisis post-hoc.}{%
+  Umbral de timeout por corrida y política de censura declarados en §\ref{sec:protocolo}.
+  Registrar el umbral exacto en segundos y la tasa de censura observada por brazo.}

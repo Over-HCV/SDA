@@ -1,0 +1,38 @@
+% !TEX root = ../../main-es.tex
+% chapters/es/04-teorema.tex
+\chapter{No-interferencia composicional y soundness del verificador}
+\criterio{plan}{15}\criterio{analisis}{20}
+\label{cap:teorema}
+
+\porque{Rigor metodológico + análisis (EICT 15\% + 20\%).}{%
+  El corazón formal de la tesis. Fallo típico: enunciar un teorema fuerte cuya prueba es
+  trivial o, peor, falsa. La estrategia es enunciar lo \emph{mínimo} que el código garantiza
+  (no-interferencia por aislamiento de stores) y demostrar eso limpiamente.}
+
+\section{Definiciones previas}
+\porque{Setup.}{Store, snapshot, frontera de celda, el fragmento fork-join $F_{\mathrm{fj}}$.}
+
+\section{Teorema de No-Interferencia Composicional}
+\begin{teorema}[No-interferencia en $F_{\mathrm{fj}}$]\label{thm:noi}
+  Para todo $f,g,h,k$ en el fragmento fork-join con stores aislados,
+  \[
+    (f \tensor g) \seqcomp (h \tensor k) \;=\; (f \seqcomp h) \tensor (g \seqcomp k).
+  \]
+\end{teorema}
+\porque{Enunciado.}{La ley de intercambio. Caso finito del monoide simétrico.}
+
+\section{Lemas}
+\porque{Descomposición.}{Aislamiento $\Rightarrow$ escrituras de una rama no son visibles para la otra; el join preserva el orden de la lista de targets.}
+
+\section{Demostración}
+\porque{Prueba por inducción.}{Sobre la estructura de los morfismos. Casos: identidad, CALL secuencial, fork, join. Recomendación: mecanización Lean del caso finito como anexo opcional de alto valor.}
+
+\section{Corolario: inalcanzabilidad de una clase de fallos}
+\begin{corolario}\label{cor:contaminacion}
+  La clase de fallos por contaminación de contexto entre ramas fork es vacía en
+  $F_{\mathrm{fj}}$.
+\end{corolario}
+\porque{Del teorema al claim medible.}{Es la primera fila de la taxonomía de O4 que pasa a ``inalcanzable por construcción''.}
+
+\section{Soundness del verificador estático (O3)}
+\porque{Segundo claim formal.}{Si el verificador rechaza \cellref{C}{f} entonces, bajo la semántica de §\ref{sec:semantica}, toda ejecución que alcance esa referencia fallaría. Prueba por inducción en la derivación de tipado. Completitud acotada por el fragmento estáticamente resoluble.}

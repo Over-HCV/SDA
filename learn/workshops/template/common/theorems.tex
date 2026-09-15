@@ -1,0 +1,24 @@
+% !TEX root = ../main-es.tex
+% common/theorems.tex — entornos amsthm, bilingüe por \oaslang
+\theoremstyle{plain}
+\ifdefstring{\oaslang}{en}{%
+  \newtheorem{teorema}{Theorem}[chapter]
+  \newtheorem{lema}[teorema]{Lemma}
+  \newtheorem{proposicion}[teorema]{Proposition}
+  \newtheorem{corolario}[teorema]{Corollary}%
+}{%
+  \newtheorem{teorema}{Teorema}[chapter]
+  \newtheorem{lema}[teorema]{Lema}
+  \newtheorem{proposicion}[teorema]{Proposición}
+  \newtheorem{corolario}[teorema]{Corolario}%
+}
+
+\theoremstyle{definition}
+\newtheorem{definicion}[teorema]{\ifdefstring{\oaslang}{en}{Definition}{Definición}}
+\newtheorem{ejemplo}[teorema]{\ifdefstring{\oaslang}{en}{Example}{Ejemplo}}
+
+\theoremstyle{remark}
+\newtheorem*{observacion}{\ifdefstring{\oaslang}{en}{Remark}{Observación}}
+
+% Nombre del entorno proof (polyglossia ya lo traduce; refuerzo)
+\renewcommand{\proofname}{\ifdefstring{\oaslang}{en}{Proof}{Demostración}}

@@ -1,0 +1,187 @@
+% !TEX root = ../../main-es.tex
+% chapters/es/05-implementacion.tex
+\chapter{Implementación del verificador en el motor \OASys}
+\criterio{plan}{15}
+\label{cap:implementacion}
+
+\porque{Plan de acción / rigor en la ejecución (EICT 15\%).}{%
+  Mapa honesto de archivos reales del motor. Fallo típico: hablar del verificador en
+  abstracto sin decir dónde vive ni qué toca. Cada afirmación se ata a un path.}
+
+\section{El motor \OASys{}}
+\porque{Contexto.}{Rust/Axum; Device $\to$ Books $\to$ Pages $\to$ Lines $\to$ Cells. Scheduler en \texttt{backend/src/engine/scheduler/} (\texttt{control\_flow.rs}, \texttt{fork.rs}, \texttt{ask\_cell.rs}, \texttt{ret\_eval.rs}).}
+
+\section{El verificador en \texttt{surface/}}
+\porque{O3.}{Ubicación: \texttt{backend/src/surface/parser/} + un módulo nuevo de resolución de refs. Lee los esquemas de salida que \oskw{ASK} y \oskw{AI}[output:] ya publican.}
+
+\section{Integración en \texttt{POST /compile}}
+\porque{Punto de integración real.}{\texttt{backend/src/routes/compile/} (ya existe \texttt{warnings.rs}). El verificador produce un error que aborta compile cuando la ref no es habitada; produce un warning cuando cae fuera del fragmento estáticamente resoluble.}
+
+\section{Contrato de tests}
+\porque{RED-first.}{Suite sobre \texttt{backend/src/engine/tests/fixtures/}. Soundness empírica: 0 falsos positivos. Cobertura: \% de refs del corpus en el fragmento resoluble.}
+
+% =====================================================================
+% Sección de prueba de la maquinaria de figuras, tablas y referencias.
+% Existe para verificar que el índice de figuras, el de tablas y los
+% enlaces clicables funcionan de punta a punta. Borrar cuando las
+% figuras reales del capítulo la reemplacen.
+% =====================================================================
+\section{Banco de pruebas de figuras, tablas y referencias}
+\label{sec:banco-pruebas}
+
+\porque{Andamio temporal.}{%
+  Esta sección no es contenido de la tesis: ejercita \texttt{graphicx} con
+  \texttt{\textbackslash graphicspath}, el índice de figuras, el de tablas,
+  \texttt{subcaption}, \texttt{longtable} y los enlaces de \texttt{cleveref} y
+  \texttt{biblatex}. Se elimina cuando entren las figuras reales del motor.}
+
+\subsection{Figura simple}
+
+La \Cref{fig:test-simple} es una inclusión directa de \texttt{figures/test-image.png}
+resuelta por \verb|\graphicspath|, sin ruta explícita en el \verb|\includegraphics|.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.45\textwidth]{test-image}
+  \caption{Figura de prueba: inclusión simple resuelta por \texttt{\textbackslash graphicspath}.%
+           \label{fig:test-simple}}
+\end{figure}
+
+\subsection{Figura en dos columnas (subfiguras)}
+
+La \Cref{fig:test-sub} usa \texttt{subcaption} con dos paneles; sus subfiguras se
+citan por separado como \Cref{fig:test-sub-a} y \Cref{fig:test-sub-b}. Solo el
+\verb|\caption| exterior entra en el índice de figuras; los \verb|\subcaption| no.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}[b]{0.44\textwidth}
+    \centering
+    \includegraphics[width=0.72\linewidth]{test-image}
+    \subcaption{Panel izquierdo.\label{fig:test-sub-a}}
+  \end{subfigure}\hfill
+  \begin{subfigure}[b]{0.44\textwidth}
+    \centering
+    \includegraphics[width=0.72\linewidth]{test-image}
+    \subcaption{Panel derecho.\label{fig:test-sub-b}}
+  \end{subfigure}
+  \caption{Figura de prueba con dos subfiguras lado a lado.\label{fig:test-sub}}
+\end{figure}
+
+\subsection{Figura a ancho completo con título corto}
+
+La \Cref{fig:test-ancho} lleva \verb|\caption[corto]{largo}|: en el cuerpo se lee el
+título largo, pero el índice de figuras recibe únicamente el corto. Es la forma de
+evitar que un pie de tres líneas ensucie el índice.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{test-image}
+  \caption[Figura de prueba a ancho completo (título corto).]{%
+    Figura de prueba a ancho de línea completa. Este pie es deliberadamente largo
+    para comprobar que el índice de figuras recoge el título corto entre corchetes
+    y no este párrafo entero, que ocuparía varias líneas del índice sin aportar
+    nada.\label{fig:test-ancho}}
+\end{figure}
+
+\subsection{Tabla con \texttt{booktabs}}
+
+La \Cref{tab:test-booktabs} sigue el estilo de la clase: \verb|\caption| antes del
+cuerpo tabular, reglas de \texttt{booktabs} y alineación decimal con la columna
+\texttt{d} definida en el preámbulo.
+
+\begin{table}[htbp]
+  \caption{Tabla de prueba: \texttt{booktabs} con alineación decimal.%
+           \label{tab:test-booktabs}}
+  \vspace{0.5em}
+  \centering
+  \begin{tabular*}{0.8\textwidth}{@{\extracolsep{\fill}}l d{2.2} d{2.2}@{}}
+    \toprule
+    Etapa del verificador & \multicolumn{1}{c}{Refs} & \multicolumn{1}{c}{Cobertura} \\
+    \midrule
+    Parseo de \texttt{surface/}   & 128 & 1.00 \\
+    Resolución de referencias      & 121 & 0.95 \\
+    Chequeo de habitación          & 118 & 0.92 \\
+    \bottomrule
+  \end{tabular*}
+\end{table}
+
+\subsection{Tabla larga que parte página}
+
+La \Cref{tab:test-longtable} usa \texttt{longtable} con \verb|\endhead| y
+\verb|\endfoot|, de modo que el encabezado se repite en cada página y solo la
+primera aparición entra en el índice de tablas.
+
+\begin{longtable}{@{}l l l@{}}
+  \caption{Tabla de prueba larga: comprueba corte de página y encabezado repetido.%
+           \label{tab:test-longtable}}\\
+  \toprule
+  \textbf{Caso} & \textbf{Fragmento} & \textbf{Resultado esperado} \\
+  \midrule
+  \endfirsthead
+  \caption[]{(continuación)}\\
+  \toprule
+  \textbf{Caso} & \textbf{Fragmento} & \textbf{Resultado esperado} \\
+  \midrule
+  \endhead
+  \midrule
+  \multicolumn{3}{r@{}}{\footnotesize continúa en la página siguiente}\\
+  \endfoot
+  \bottomrule
+  \endlastfoot
+  T-001 & \texttt{fork-join aislado} & rechaza (ref no habitada) \\
+  T-002 & \texttt{ASK con esquema} & warning (fuera del fragmento) \\
+  T-003 & \texttt{AI con output:} & acepta \\
+  T-004 & \texttt{ret\_eval} & rechaza (ref no habitada) \\
+  T-005 & \texttt{CALL secuencial} & warning (fuera del fragmento) \\
+  T-006 & \texttt{fork-join aislado} & acepta \\
+  T-007 & \texttt{ASK con esquema} & rechaza (ref no habitada) \\
+  T-008 & \texttt{AI con output:} & warning (fuera del fragmento) \\
+  T-009 & \texttt{ret\_eval} & acepta \\
+  T-010 & \texttt{CALL secuencial} & rechaza (ref no habitada) \\
+  T-011 & \texttt{fork-join aislado} & warning (fuera del fragmento) \\
+  T-012 & \texttt{ASK con esquema} & acepta \\
+  T-013 & \texttt{AI con output:} & rechaza (ref no habitada) \\
+  T-014 & \texttt{ret\_eval} & warning (fuera del fragmento) \\
+  T-015 & \texttt{CALL secuencial} & acepta \\
+  T-016 & \texttt{fork-join aislado} & rechaza (ref no habitada) \\
+  T-017 & \texttt{ASK con esquema} & warning (fuera del fragmento) \\
+  T-018 & \texttt{AI con output:} & acepta \\
+  T-019 & \texttt{ret\_eval} & rechaza (ref no habitada) \\
+  T-020 & \texttt{CALL secuencial} & warning (fuera del fragmento) \\
+  T-021 & \texttt{fork-join aislado} & acepta \\
+  T-022 & \texttt{ASK con esquema} & rechaza (ref no habitada) \\
+  T-023 & \texttt{AI con output:} & warning (fuera del fragmento) \\
+  T-024 & \texttt{ret\_eval} & acepta \\
+  T-025 & \texttt{CALL secuencial} & rechaza (ref no habitada) \\
+  T-026 & \texttt{fork-join aislado} & warning (fuera del fragmento) \\
+  T-027 & \texttt{ASK con esquema} & acepta \\
+  T-028 & \texttt{AI con output:} & rechaza (ref no habitada) \\
+  T-029 & \texttt{ret\_eval} & warning (fuera del fragmento) \\
+  T-030 & \texttt{CALL secuencial} & acepta \\
+  T-031 & \texttt{fork-join aislado} & rechaza (ref no habitada) \\
+  T-032 & \texttt{ASK con esquema} & warning (fuera del fragmento) \\
+  T-033 & \texttt{AI con output:} & acepta \\
+  T-034 & \texttt{ret\_eval} & rechaza (ref no habitada) \\
+  T-035 & \texttt{CALL secuencial} & warning (fuera del fragmento) \\
+  T-036 & \texttt{fork-join aislado} & acepta \\
+  T-037 & \texttt{ASK con esquema} & rechaza (ref no habitada) \\
+  T-038 & \texttt{AI con output:} & warning (fuera del fragmento) \\
+  T-039 & \texttt{ret\_eval} & acepta \\
+  T-040 & \texttt{CALL secuencial} & rechaza (ref no habitada) \\
+\end{longtable}
+
+\subsection{Referencias cruzadas y citas}
+
+Todo lo anterior se enlaza entre sí: \Cref{fig:test-simple}, \Cref{fig:test-sub},
+\Cref{fig:test-ancho}, \Cref{tab:test-booktabs} y \Cref{tab:test-longtable}, además
+de una referencia cruzada fuera de este capítulo hacia \Cref{fig:exp-placeholder} y
+\Cref{tab:exp-placeholder} del \Cref{cap:experimentos}. Cada una es un enlace
+clicable que salta al objeto correspondiente.
+
+Las citas también deben ser clicables en dos saltos: del texto a la entrada de la
+bibliografía, y de ahí al artículo. El marco categórico se apoya en
+\textcite{fongSpivak2019} y \textcite{selinger2010}; la separación control/efecto
+viene de \textcite{moggi1991} y \textcite{powerRobinson1997}; y la evidencia de que
+la estructura gana a la escala está en \parencite{alphaFold,deepseekV4}. Las
+herramientas contra las que se compara son \parencite{langGraph,autoGen,dspy}.

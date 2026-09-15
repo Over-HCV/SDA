@@ -1,0 +1,53 @@
+% !TEX root = ../../main-es.tex
+% chapters/es/01-introduccion.tex
+\chapter{Introducción}
+\criterio{repr}{15}
+\label{cap:introduccion}
+
+\porque{Representación del problema (EICT 15\%).}{%
+  Abrir tesis en una frase: LLM es unidad de ejecución, no un cerebro; la
+  inteligencia del sistema vive en la arquitectura de control. 
+  % Cita la intuición original de \texttt{docs/decisiones/sketches/2026-08-09-orquestacion.md}. Cierre del fallo que hunde esta sección: plantear el problema como ``otra librería de agentes'' o como ``usar CT por moda'' — debe quedar claro que el problema es la \emph{ausencia de semántica composicional} en los runtimes actuales y que OASys ya la implementa sin nombrarla.
+}
+
+\section{El LLM como unidad de ejecución}
+\porque{Motivación técnica.}{%
+  Analogía LLM-como-ALU: una unidad de ejecución no determinista que produce contenido;
+  el control determinista vive fuera. Referir ADR-003 de \OASys{} como realización concreta.}
+
+\section{La inteligencia vive en la arquitectura de control}
+\porque{Claim central.}{%
+  Distribuir el proceso a través de espacio-tiempo (composición) vence a escalar energía
+  (parámetros). AlphaFold y DeepSeek-V4 entran aquí como \emph{evidencia} de que
+  estructura $>$ escala, no como aporte propio.}
+
+\section{Problema}
+\porque{Gap, no ignorancia.}{%
+  Ningún orquestador difundido (LangGraph, AutoGen, DSPy, LMQL, n8n, Voyager) expone
+  semántica composicional formal de su plano de control. \OASys{} tiene la estructura
+  (ADR-003 + spec 18) pero no la explota: \cellref{Reply}{campo} inexistente mata el run.}
+
+\section{Pregunta e hipótesis}
+\label{sec:hipotesis}
+\porque{Falsabilidad (Gate 2).}{%
+  Pregunta de \texttt{docs/decisiones/planes/2026-08-10-oasys.md} Gate 1. Hipótesis H1 (composicionalidad),
+  H2 (no-interferencia), H3 (prevención, falsable). H3 es la afirmación arriesgada:
+  resultado negativo publicable.}
+
+\section{Objetivos}
+\porque{O1--O5 del plan.}{
+  %  Listar la tabla de objetivos con sus criterios de éxito, incluida la soundness de O3 y lataxonomía a priori de O4.
+  }
+
+\section{Contribuciones}
+\porque{Claims delimitados.}{%
+  (i) Semántica denotacional del fragmento \dsl{.os}; (ii) teorema de no-interferencia;
+  (iii) verificador estático integrado en \texttt{POST /compile}; (iv) medición controlada
+  con ablación. Lo que NO se afirma: auto-modificación (ver §\ref{sec:reflexion}).}
+
+\section{Dirección original: la reflexión}
+\label{sec:reflexion}
+\porque{Honestidad de alcance.}{%
+  Lo genuinamente novedoso de \OASys{} — un programa cuyo fuente es leído y reescrito por
+  los propios agentes en runtime — queda como dirección futura (M3). Esta tesis formaliza
+  el fragmento composicional, prerequisite de aquello. Decisión consciente, no omisión.}

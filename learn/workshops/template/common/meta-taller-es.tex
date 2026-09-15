@@ -1,0 +1,24 @@
+% common/meta-taller-es.tex — datos del CURSO, compartidos por todos los talleres
+% Lo específico de cada taller (título, resumen, palabras clave, fecha) llega
+% desde el YAML del .qmd vía las macros \taller* que define la plantilla pandoc
+% (taller-qmd-template.tex), ANTES de \begin{document}.
+
+% ===== Datos institucionales y del curso =====
+\newcommand{\talleruniversidad}{Universidad del Rosario}
+\newcommand{\tallerescuela}{Escuela de Ingeniería, Ciencia y Tecnología}
+\newcommand{\tallerprograma}{Maestría en Matemáticas Aplicadas y Ciencias de la Computación}
+\newcommand{\tallerprofesor}{Andrés Nicolás López López}
+
+% ===== Integrantes (una línea por autor) =====
+\newcommand{\tallerautores}{Anyelo Leonardy Alvarez Baquero\\%
+Daniel Arias Mutis\\%
+Tania Fernanda Mora Cubillos\\%
+Over Haider Castrillón Valencia}
+
+% ===== Metadatos del PDF =====
+\hypersetup{
+  pdftitle={\tallertitulo},
+  pdfauthor={Anyelo L. Alvarez Baquero, Daniel Arias Mutis, Tania F. Mora Cubillos, Over H. Castrillón Valencia},
+  pdfsubject={Análisis Estadístico de Datos — Universidad del Rosario},
+  pdfkeywords={\tallerpalabras},
+}
