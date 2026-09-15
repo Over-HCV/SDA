@@ -7,15 +7,20 @@ description: Captura el estilo, tono y forma de redactar propios del usuario (re
 
 Este skill describe cómo escribe el usuario para que Claude pueda generar o
 completar texto que suene genuinamente escrito por él/ella, en cualquier
-dominio (no solo ciberseguridad). Se basa en una muestra real: un taller de
-ciberseguridad en LaTeX sobre el caso Ashley Madison.
+dominio (no solo ciberseguridad). Se basa en muestras reales: un taller de
+ciberseguridad en LaTeX sobre el caso Ashley Madison y un taller de
+Aprendizaje Automático (KNN y métricas de clasificación) corregido por el
+propio usuario, que es la referencia más fiel de su forma final.
 
 ## Rasgos centrales de la voz
 
-1. **Oraciones largas, encadenadas por comas.** El usuario prefiere una sola
-   oración extensa con varias cláusulas subordinadas antes que varias
-   oraciones cortas. Las cláusulas se conectan con "de forma que", "así
-   como", "con el objetivo de", "apoyados de", en vez de puntos seguidos.
+1. **Oraciones largas, compuestas con conectores lógicos (no con comas).** El
+   usuario prefiere una oración extensa con varias cláusulas antes que varias
+   oraciones cortas, pero las compone con conectores ("de forma que", "por lo
+   que", "lo cual", "puesto que", "así como", "con el objetivo de") y no
+   encadenando comas, porque las comas en serie cortan la narrativa. Nunca se
+   pone coma antes de "y" (la conjunción ya es separador). Si una oración
+   acumula más de tres comas, se reescribe con conectores o se parte en dos.
    - Ejemplo real: *"Progresivamente y en silencio se iban recopilando los
      datos, esto apoyados de un proxy que permitía aparentar una dirección
      IP que ubicaron en Toronto (Canadá) para tener un acceso prolongado."*
@@ -52,10 +57,45 @@ ciberseguridad en LaTeX sobre el caso Ashley Madison.
    verificar, en vez de fingir certeza. Al redactar por él, replicar este
    hábito: si algo no está confirmado con una fuente, decirlo explícitamente
    en vez de inventar con seguridad.
+8. **Mayúscula después de dos puntos y punto y coma.** Regla fija del
+   usuario, sin excepción: la palabra que sigue a `:` o `;` empieza en
+   mayúscula, tanto en prosa como en títulos, pies de figura, nodos de
+   diagramas y listas de palabras clave.
+   - *"esto tiene una explicación directa: En la escala original la segunda
+     variable dominaba..."*
+   - *"Pregunta 1: Unidades estadísticas"*, *"Palabras clave: Estadística
+     descriptiva; Diagrama de caja; Covarianza"*
+   - No aplica dentro de código, matemáticas, horas (`12:00`) ni rangos
+     numéricos.
+9. **Respuesta directa primero, pregunta en negrita.** En talleres y
+   ejercicios cada inciso abre con la pregunta o el concepto en negrita
+   terminado en punto o signo de interrogación, seguido de la respuesta
+   directa ("Sí,", "No, pues", "El Modelo B,") y después la justificación
+   encadenada en una sola oración larga.
+   - *"**¿Cambió el desempeño tras estandarizar?** Sí, de forma sustancial en
+     su capacidad de detectar la clase positiva: El Accuracy apenas se
+     mueve..."*
+   - *"**Por qué k impar evita empates.** Un empate ocurre cuando..."*
+   - Los incisos enumerativos van con letras (a., b., c.) y el patrón
+     "**Término.** Oración completa".
+10. **Conectores y matices preferidos.** "pues", "de forma que", "de modo
+    que", "es decir", "mientras que", "ya que", "dicho esto", "esto sucede
+    porque", "resulta claro que", "quedando así demostrado". Para matizar sin
+    perder firmeza: "vale la pena matizar", "vale la pena anotarlo con
+    honestidad", "no es del todo una confirmación independiente". Se evita
+    abusar de "Primeramente/Progresivamente" en textos técnicos cortos; "Primero
+    se calcula... Luego..." es suficiente.
+11. **Formato numérico.** Decimales con punto (0.9326) y miles con punto
+    (150.000, 4.543), igual que en sus trabajos corregidos; los resultados de
+    software se citan con el mismo número que imprime la salida.
+12. **Pies de figura explicativos.** Un pie de figura describe qué se ve y,
+    tras dos puntos, qué se debe concluir: *"Trayecto directo frente al
+    trayecto en escalera entre A y B: La escalera nunca puede ser más corta
+    que la línea recta."*
 ## Checklist antes de entregar un texto "en su estilo"
  
-- [ ] ¿Las oraciones largas están conectadas con comas/conectores en vez de
-      cortadas en oraciones cortas de manual?
+- [ ] ¿Las oraciones largas están compuestas con conectores lógicos (y no con
+      cadenas de comas), sin coma antes de "y"?
 - [ ] ¿Se usó voz impersonal con "se" en vez de "yo hice" / "nosotros
       hicimos"?
 - [ ] ¿Los procesos narrativos usan marcadores secuenciales en prosa en vez
@@ -68,6 +108,11 @@ ciberseguridad en LaTeX sobre el caso Ashley Madison.
       algún conector coloquial ocasional?
 - [ ] Si hay algo no verificable con la fuente disponible, ¿se dejó una nota
       explícita de incertidumbre en vez de inventar?
+- [ ] ¿Toda palabra después de `:` o `;` empieza en mayúscula (también en
+      títulos, pies de figura, diagramas y palabras clave)?
+- [ ] ¿Cada inciso abre con la pregunta/concepto en negrita y la respuesta
+      directa (Sí/No/valor) antes de la justificación?
+- [ ] ¿Decimales con punto y miles con punto?
 ## Cómo adaptar a otros dominios (no solo ciberseguridad)
 
 La arquitectura de la voz (oraciones largas con "se", marcadores

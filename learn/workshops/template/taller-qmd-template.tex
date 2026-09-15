@@ -23,6 +23,15 @@ $highlighting-macros$
 \providecommand{\pandocbounded}[1]{#1}
 % pandoc marca las tablas sin caption con \def\LTcaptype{none}: necesita el contador
 \makeatletter\@ifundefined{c@none}{\newcounter{none}}{}\makeatother
+% Código y resultado lado a lado (salidas cortas): \begin{codres} código \codressep resultado \end{codres}
+\newenvironment{codres}%
+  {\par\smallskip\noindent\begin{minipage}[t]{0.57\linewidth}\vspace{0pt}}%
+  {\end{minipage}\par\medskip}
+\newcommand{\codressep}{\end{minipage}\hfill\begin{minipage}[t]{0.40\linewidth}\vspace{0pt}}
+% Bibliografía: \imprimirbibliografia la ubica donde se llame (p. ej. antes de
+% \appendix); si el taller no la llama, se imprime al final como siempre.
+\newif\ifbibimpresa
+\newcommand{\imprimirbibliografia}{\printbibliography[heading=bibintoc]\global\bibimpresatrue}
 
 % --- Resolución de recursos hacia la plantilla (layout taller-XX junto a template/) ---
 \graphicspath{{assets/pics/}{figures/}{../template/assets/pics/}{../template/figures/}}
@@ -43,5 +52,5 @@ $body$
 
 % --- Referencias mínimas (fuente de datos + software usado) ---
 \nocite{ideam-datos, r-core, ggplot2, ggextra}
-\printbibliography[heading=bibintoc]
+\ifbibimpresa\else\printbibliography[heading=bibintoc]\fi
 \end{document}

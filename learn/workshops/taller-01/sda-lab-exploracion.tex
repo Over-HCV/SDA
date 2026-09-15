@@ -62,6 +62,15 @@
 \providecommand{\pandocbounded}[1]{#1}
 % pandoc marca las tablas sin caption con \def\LTcaptype{none}: necesita el contador
 \makeatletter\@ifundefined{c@none}{\newcounter{none}}{}\makeatother
+% Código y resultado lado a lado (salidas cortas): \begin{codres} código \codressep resultado \end{codres}
+\newenvironment{codres}%
+  {\par\smallskip\noindent\begin{minipage}[t]{0.57\linewidth}\vspace{0pt}}%
+  {\end{minipage}\par\medskip}
+\newcommand{\codressep}{\end{minipage}\hfill\begin{minipage}[t]{0.40\linewidth}\vspace{0pt}}
+% Bibliografía: \imprimirbibliografia la ubica donde se llame (p. ej. antes de
+% \appendix); si el taller no la llama, se imprime al final como siempre.
+\newif\ifbibimpresa
+\newcommand{\imprimirbibliografia}{\printbibliography[heading=bibintoc]\global\bibimpresatrue}
 
 % --- Resolución de recursos hacia la plantilla (layout taller-XX junto a template/) ---
 \graphicspath{{assets/pics/}{figures/}{../template/assets/pics/}{../template/figures/}}
@@ -71,22 +80,21 @@
 \newcommand{\tallertitulo}{Taller 1 --- Exploración de datos
 meteorológicos (ORI)}
 \newcommand{\tallersubtitulo}{Análisis Estadístico de Datos}
-\newcommand{\tallerfecha}{Bogotá D.C., septiembre de 2026}
+\newcommand{\tallerfecha}{Bogotá D.C., 15 de septiembre de 2026}
 \newcommand{\tallerresumen}{Se explora de forma descriptiva la base
-meteorológica ORI del IDEAM (región Orinoquía), la cual cuenta con 4543
-registros y 18 variables, de los que se toman los 118 medidos a medio
-día para desarrollar el resto del taller. Primeramente se identifican
-las unidades estadísticas, las frecuencias del pronóstico y la escala y
-clase de las variables, progresivamente se resumen la temperatura y la
-velocidad del viento de forma gráfica y numérica, se detectan atípicos
-por el criterio de Tukey en la presión y el punto de rocío y se estudia
-la asociación entre temperatura y viento mediante covarianza y
-correlación de Pearson, para finalmente estimar densidades por
-histograma y por kernel y compararlas con el modelo normal, encontrando
-que un pequeño grupo de municipios de piedemonte explica buena parte de
-las colas observadas.}
-\newcommand{\tallerpalabras}{estadística descriptiva; diagrama de caja;
-atípicos de Tukey; covarianza; correlación de Pearson; densidad kernel;
+meteorológica ORI del IDEAM (región Orinoquía), la cual cuenta con 4.543
+registros y 18 variables de los que se toman los 118 medidos a medio día
+para desarrollar el resto del taller. Primero se identifican las
+unidades estadísticas, las frecuencias del pronóstico y la escala y
+clase de las variables, para luego resumir la temperatura y la velocidad
+del viento de forma gráfica y numérica, detectar atípicos por el
+criterio de Tukey en la presión y el punto de rocío y estudiar la
+asociación entre temperatura y viento mediante covarianza y correlación
+de Pearson. Finalmente se estiman densidades por histograma y por kernel
+que se comparan con el modelo normal, encontrando que un pequeño grupo
+de cuatro municipios explica buena parte de las colas observadas.}
+\newcommand{\tallerpalabras}{Estadística descriptiva; Diagrama de caja;
+Atípicos de Tukey; Covarianza; Correlación de Pearson; Densidad kernel;
 IDEAM}
 \input{common/meta-taller-es}
 
@@ -96,14 +104,20 @@ IDEAM}
 \chapter{Los datos}\label{datos}
 
 La base \texttt{ORI.csv} contiene mediciones meteorológicas de
-municipios de la región Orinoquía (IDEAM), donde cada observación
-corresponde a la medición de un municipio a una hora concreta de un día
-dado, y las unidades se toman del enunciado del taller (temperatura y
-punto de rocío en °C, velocidad del viento en mph, es decir, millas por
-hora, y presión en hPa). La base se descarga de Kaggle y, en caso de no
-haber conexión, se busca una copia local, detectando la codificación del
-archivo en vez de suponerla (suponerla es lo que rompe las tildes de los
-municipios).
+municipios de la región Orinoquía \parencite{ideam-datos} donde cada
+observación corresponde a la medición de un municipio a una hora
+concreta de un día dado. Las unidades se toman del enunciado del taller,
+es decir, temperatura y punto de rocío en °C, velocidad del viento en
+mph (millas por hora) y presión en hPa. Todo el análisis se realiza en R
+\parencite{r-core} con gráficos elaborados en \texttt{ggplot2}
+\parencite{ggplot2} e histogramas marginales en \texttt{ggExtra}
+\parencite{ggextra}, mientras que la documentación de cada función
+utilizada se reúne en el Apéndice \ref{documentacion-r}.
+
+La base se descarga de Kaggle o, en caso de no haber conexión, se busca
+una copia local detectando la codificación del archivo en vez de
+suponerla, pues suponerla es justamente lo que rompe las tildes de los
+municipios.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -130,7 +144,9 @@ municipios).
 
 \chapter{Parte 1. Fundamentos estadísticos}\label{parte1}
 
-\section{Pregunta 1: unidades estadísticas y variables}\label{p1}
+\section{Pregunta 1 --- Unidades estadísticas y variables}\label{p1}
+
+\begin{codres}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -138,9 +154,15 @@ municipios).
 \end{Highlighting}
 \end{Shaded}
 
+\codressep
+
 \begin{verbatim}
 [1] 4543   18
 \end{verbatim}
+
+\end{codres}
+
+\begin{codres}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -148,9 +170,15 @@ municipios).
 \end{Highlighting}
 \end{Shaded}
 
+\codressep
+
 \begin{verbatim}
 [1] 118
 \end{verbatim}
+
+\end{codres}
+
+\begin{codres}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -158,32 +186,39 @@ municipios).
 \end{Highlighting}
 \end{Shaded}
 
+\codressep
+
 \begin{verbatim}
 
 26/08/2022 27/08/2022 
         59         59 
 \end{verbatim}
 
-La tabla cuenta con \textbf{4543 filas y 18 columnas}, de forma que
-existen 4543 unidades estadísticas (UE), entendidas como la entidad
-sobre la que se registra una medición completa, que en este caso es una
-medición meteorológica efectuada en un municipio a una hora y fecha
-específicas, así como 18 variables asociadas a cada una de ellas. De
-estos registros, \textbf{118 fueron recolectados a medio día}
-(\texttt{Hora\ =\ "12:00"}), lo que corresponde a los 59 municipios de
-la base medidos en cada una de las 2 fechas (26 y 27 de agosto de 2022),
-y es sobre este subconjunto que se desarrolla el resto del taller.
+\end{codres}
 
-Cabe mencionar que no se imprime la tabla original porque sus 18
-columnas no caben en el ancho de la página, y que no todas las columnas
-varían de igual forma, pues \texttt{Region} toma un único valor
-(\texttt{ORI}) en toda la base y \texttt{Hora}, aunque en la base
-completa tiene 24 valores, queda constante una vez se filtra el medio
-día. Técnicamente una columna constante no aporta variación, pero se
-cuentan igualmente como variables porque forman parte del diseño de la
-medición (en otra región u hora sí cambiarían el resultado).
+\textbf{¿Cuántas UE, variables, filas y columnas tiene la base?} La
+tabla cuenta con 4.543 filas y 18 columnas, lo que significa que existen
+4.543 unidades estadísticas (UE) y 18 variables asociadas a cada una de
+ellas. Una unidad estadística es la entidad sobre la que se registra una
+medición completa, que en este caso corresponde a una medición
+meteorológica efectuada en un municipio a una hora y fecha específicas.
 
-\section{Pregunta 2: pronóstico más y menos frecuente}\label{p2}
+\textbf{¿Cuántos registros se recolectaron a medio día?} Se recolectaron
+118 registros con \texttt{Hora\ =\ "12:00"}, que corresponden
+exactamente a los 59 municipios de la base medidos en cada una de las 2
+fechas (26 y 27 de agosto de 2022). Es sobre este subconjunto que se
+desarrolla el resto del taller.
+
+Vale la pena anotar que no se imprime la tabla original porque sus 18
+columnas no caben en el ancho de la página. Además no todas las columnas
+varían de igual forma, ya que \texttt{Region} toma un único valor
+(\texttt{ORI}) en toda la base y \texttt{Hora} queda constante una vez
+se filtra el medio día aunque en la base completa tiene 24 valores.
+Técnicamente una columna constante no aporta variación, pero se cuentan
+igualmente como variables porque forman parte del diseño de la medición
+y en otra región u hora sí cambiarían el resultado.
+
+\section{Pregunta 2 --- Pronóstico más y menos frecuente}\label{p2}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -222,7 +257,7 @@ Parcialmente Nublado - Tormenta Ligera & 2 & 1.69 \\
 \begin{Highlighting}[]
 \FunctionTok{par}\NormalTok{(}\AttributeTok{mar =} \FunctionTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{17}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{))}
 \FunctionTok{barplot}\NormalTok{(}\FunctionTok{rev}\NormalTok{(tabla), }\AttributeTok{horiz =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{las =} \DecValTok{1}\NormalTok{, }\AttributeTok{cex.names =} \FloatTok{0.75}\NormalTok{,}
-        \AttributeTok{col =} \StringTok{"steelblue"}\NormalTok{, }\AttributeTok{xlab =} \StringTok{"Frecuencia"}\NormalTok{)}
+        \AttributeTok{col =} \StringTok{"\#a6192e"}\NormalTok{, }\AttributeTok{xlab =} \StringTok{"Frecuencia"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -236,24 +271,27 @@ Parcialmente Nublado - Tormenta Ligera & 2 & 1.69 \\
 
 \end{figure}%
 
-De las 8 categorías de pronóstico presentes a medio día (de las 11 que
-tiene la base completa), el \textbf{más frecuente es Parcialmente
-Nublado}, con 63 registros (53,39 \% de los casos), mientras que el
-\textbf{menos frecuente es Parcialmente Nublado - Tormenta Ligera}, con
-apenas 2 registros (1,69 \%). La masa se concentra entonces en estados
-de cielo parcial o totalmente nublado (el 80 \% entre ambos), con los
-eventos de lluvia y tormenta como casos poco frecuentes.
+\textbf{Más frecuente.} Parcialmente Nublado, con 63 de los 118
+registros (53.39 \%).
 
-\section{Pregunta 3: escala y clase de las variables}\label{p3}
+\textbf{Menos frecuente.} Parcialmente Nublado - Tormenta Ligera, con
+apenas 2 registros (1.69 \%).
+
+De las 11 categorías que tiene la base completa solo 8 aparecen a medio
+día. La masa se concentra en estados de cielo parcial o totalmente
+nublado (cerca del 80 \% entre ambos), por lo que los eventos de lluvia
+y tormenta quedan como casos poco frecuentes.
+
+\section{Pregunta 3 --- Escala y clase de las variables}\label{p3}
 
 La escala de medición indica qué operaciones tienen sentido sobre una
 variable (igualdad, orden, diferencias o cocientes), mientras que la
-clase describe su recorrido (categorías, valores contables o cualquier
-valor de un intervalo real), y ambos son ejes independientes, de forma
-que cada variable recibe una escala y una clase. Ninguno de los dos se
-puede deducir del tipo de dato en R, pues un código postal es numérico y
-sin embargo nominal, y los grados centígrados son numéricos pero de
-intervalo, no de razón.
+clase describe su recorrido según sean categorías, valores contables o
+cualquier valor de un intervalo real. Ambos son ejes independientes de
+modo que cada variable recibe una escala y una clase. Ninguno de los dos
+se puede deducir del tipo de dato en R, pues un código postal es
+numérico y sin embargo nominal así como los grados centígrados son
+numéricos pero de intervalo y no de razón.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -310,65 +348,67 @@ Temperatura (°C) & numeric & Intervalo & Cuantitativa continua \\
 Velocidad del viento (mph) & numeric & Razón & Cuantitativa continua \\
 \end{longtable}
 
-\begin{itemize}
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
 \tightlist
 \item
-  \textbf{Pronóstico}: Es nominal y cualitativa politómica (más de dos
-  categorías), con el pequeño detalle que pudo haber sido ordinal, pues
+  \textbf{Pronóstico.} Es nominal y cualitativa politómica (más de dos
+  categorías), con el pequeño detalle que pudo haber sido ordinal porque
   la nubosidad sí tiene orden (Despejado, Parcialmente Nublado, Nublado)
-  y la precipitación también (Llovizna, Lluvia, Lluvia Fuerte), pero al
-  combinarse ambas dimensiones en una misma etiqueta no existe un orden
-  total, ya que no hay forma de decidir si ``Nublado - Llovizna'' está
-  por encima o por debajo de ``Parcialmente Nublado - Lluvia Fuerte''.
+  al igual que la precipitación (Llovizna, Lluvia, Lluvia Fuerte). Sin
+  embargo, al combinarse ambas dimensiones en una misma etiqueta deja de
+  existir un orden total, ya que no hay forma de decidir si ``Nublado -
+  Llovizna'' está por encima o por debajo de ``Parcialmente Nublado -
+  Lluvia Fuerte''.
 \item
-  \textbf{Municipio}: Es nominal y cualitativa politómica, puesto que es
-  una etiqueta geográfica sobre la que solo tiene sentido preguntar si
-  dos registros son del mismo municipio o no.
+  \textbf{Municipio.} Es nominal y cualitativa politómica, puesto que se
+  trata de una etiqueta geográfica sobre la que solo tiene sentido
+  preguntar si dos registros son del mismo municipio o no.
 \item
-  \textbf{Temperatura}: Es de intervalo y cuantitativa continua, dado
-  que las diferencias son equidistantes pero su cero es relativo (0 °C
-  no es ausencia de temperatura), por lo que 30 °C no es el doble de
-  calor que 15 °C, y cabe aclarar que R la carga como \texttt{numeric}
-  sin distinguir esto, así que la escala la declara quien analiza y no
-  la detección automática.
+  \textbf{Temperatura.} Es de intervalo y cuantitativa continua dado que
+  sus diferencias son equidistantes pero su cero es relativo (0 °C no es
+  ausencia de temperatura), por lo que 30 °C no es el doble de calor que
+  15 °C. Cabe aclarar que R la carga como \texttt{numeric} sin
+  distinguir nada de esto, así que la escala la declara quien analiza y
+  no la detección automática.
 \item
-  \textbf{Velocidad del viento}: Es de razón y cuantitativa continua, ya
-  que su cero es absoluto (0 mph sí es ausencia de viento), de forma que
-  los cocientes tienen sentido y 2 mph es efectivamente el doble que 1
-  mph.
-\end{itemize}
+  \textbf{Velocidad del viento.} Es de razón y cuantitativa continua ya
+  que su cero es absoluto (0 mph sí es ausencia de viento), lo cual hace
+  que los cocientes tengan sentido y que 2 mph sea efectivamente el
+  doble que 1 mph.
+\end{enumerate}
 
-Las figuras siguientes resumen ambos ejes por separado, leyéndose cada
-una de arriba hacia abajo hasta llegar a los ejemplos de la base.
+Las figuras siguientes resumen ambos ejes por separado y se leen de
+arriba hacia abajo hasta llegar a los ejemplos de la base.
 
 \includegraphics[width=5.2in,height=2.53in]{sda-lab-exploracion_files/figure-latex/mermaid-figure-1.png}
 
-Eje 1, escala de medición: cada nivel hereda las operaciones del
+Eje 1, escala de medición: Cada nivel hereda las operaciones del
 anterior.
 
 \includegraphics[width=5.2in,height=2.55in]{sda-lab-exploracion_files/figure-latex/mermaid-figure-2.png}
 
-Eje 2, clase según el recorrido: es independiente de la escala.
+Eje 2, clase según el recorrido: Es independiente de la escala.
 
-\section{Pregunta 4: diagramas de caja de temperatura y
+\section{Pregunta 4 --- Diagramas de caja de temperatura y
 viento}\label{p4}
 
-El diagrama de caja resume una variable en cinco posiciones, donde la
-caja va del primer cuartil (\(Q_1\)) al tercero (\(Q_3\)) y encierra el
-50 \% central de los datos, la línea interior es la mediana y los
-bigotes llegan hasta la observación más lejana que todavía cae dentro de
-las cercas de Tukey,
+El diagrama de caja \parencite{tukey1977} resume una variable en cinco
+posiciones. La caja va del primer cuartil (\(Q_1\)) al tercero (\(Q_3\))
+de modo que encierra el 50 \% central de los datos, la línea interior
+marca la mediana y los bigotes llegan hasta la observación más lejana
+que todavía cae dentro de las cercas de Tukey
 
 \[
-\text{cerca inferior} = Q_1 - 1{,}5 \cdot \text{RIC}
+\text{cerca inferior} = Q_1 - 1.5 \cdot \text{RIC}
 \qquad
-\text{cerca superior} = Q_3 + 1{,}5 \cdot \text{RIC},
+\text{cerca superior} = Q_3 + 1.5 \cdot \text{RIC},
 \qquad \text{RIC} = Q_3 - Q_1,
 \]
 
-dibujándose punto por punto lo que queda por fuera. Para no leer las
-posiciones a ojo, se anotan sobre cada caja los valores de \(Q_1\),
-mediana y \(Q_3\).
+mientras que lo que queda por fuera se dibuja punto por punto. Para no
+leer las posiciones a ojo se anotan sobre cada caja los valores de
+\(Q_1\), mediana y \(Q_3\).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -397,8 +437,8 @@ mediana y \(Q_3\).
 
 }
 
-\caption{Diagrama de caja de la temperatura a medio día, con Q1, mediana
-y Q3 anotados.}
+\caption{Diagrama de caja de la temperatura a medio día: Se anotan Q1,
+mediana y Q3.}
 
 \end{figure}%
 
@@ -414,46 +454,46 @@ y Q3 anotados.}
 
 }
 
-\caption{Diagrama de caja de la velocidad del viento a medio día, con
-Q1, mediana y Q3 anotados.}
+\caption{Diagrama de caja de la velocidad del viento a medio día: Se
+anotan Q1, mediana y Q3.}
 
 \end{figure}%
 
-\textbf{Temperatura.} El centro se ubica alrededor de los 30,4 °C y la
-caja es estrecha (aproximadamente entre 28,8 y 31,3 °C), de forma que la
-mitad de los municipios registra a medio día temperaturas muy parecidas,
-con el pequeño detalle que la mediana está corrida hacia el borde
-derecho de la caja y el bigote superior es corto (llega a 32,7 °C),
-mientras que el inferior se extiende hasta los 26,5 °C y por debajo
-aparecen 8 puntos atípicos entre 22 y 25 °C. Todo esto indica que la
-localización es alta y concentrada, y que la dispersión no es simétrica,
-pues unos pocos registros frescos estiran la distribución hacia la
-izquierda (asimetría negativa).
+\textbf{Temperatura.} El centro se ubica alrededor de los 30.4 °C y la
+caja es estrecha (aproximadamente entre 28.8 y 31.3 °C), lo que indica
+que la mitad de los municipios registra a medio día temperaturas muy
+parecidas. La mediana está corrida hacia el borde derecho de la caja y
+el bigote superior es corto porque solo llega a 32.7 °C, mientras que el
+inferior se extiende hasta los 26.5 °C y por debajo de él aparecen 8
+puntos atípicos entre 22 y 25 °C. En conjunto la localización es alta y
+concentrada pero la dispersión no es simétrica, puesto que unos pocos
+registros frescos estiran la distribución hacia la izquierda (asimetría
+negativa).
 
-\textbf{Velocidad del viento.} El centro está cerca de 1,7 mph y la caja
-va aproximadamente de 1,0 a 2,2 mph, así que en términos relativos la
-dispersión es mucho mayor que la de la temperatura, pues la caja ocupa
-buena parte del recorrido total (de 0,4 a 3,7 mph). Los bigotes son
-relativamente balanceados, aunque el superior es algo más largo, lo que
-sugiere una leve asimetría hacia valores altos, coherente con una
-variable que tiene piso físico en cero y solo puede estirarse hacia
-arriba, y no se observan atípicos.
+\textbf{Velocidad del viento.} El centro está cerca de 1.7 mph y la caja
+va aproximadamente de 1.0 a 2.2 mph, así que en términos relativos su
+dispersión es mucho mayor que la de la temperatura dado que la caja
+ocupa buena parte del recorrido total (de 0.4 a 3.7 mph). Los bigotes
+son relativamente balanceados aunque el superior es algo más largo, lo
+cual sugiere una leve asimetría hacia valores altos que resulta
+coherente con una variable cuyo piso físico es cero y que solo puede
+estirarse hacia arriba. En esta variable no se observan atípicos.
 
-\section{Pregunta 5: resumen numérico}\label{p5}
+\section{Pregunta 5 --- Resumen numérico}\label{p5}
 
-Además de los cuartiles, se calculan la desviación estándar (\(s\),
-dispersión promedio alrededor de la media, sensible a extremos), el
-rango intercuartílico (RIC, dispersión del 50 \% central, robusta a
-extremos) y el coeficiente de asimetría \(g_1\), cuyo signo indica hacia
-dónde va la cola,
+Además de los cuartiles se calculan la desviación estándar (\(s\)), que
+mide la dispersión promedio alrededor de la media y es sensible a los
+extremos, el rango intercuartílico (RIC), que mide la dispersión del 50
+\% central y es robusto a ellos, así como el coeficiente de asimetría
 
 \[
 g_1 = \frac{\frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^3}
            {\left(\frac{1}{n}\sum_{i=1}^{n}(x_i - \bar{x})^2\right)^{3/2}},
 \]
 
-que vale cero para una distribución simétrica, es negativo con cola a la
-izquierda y positivo con cola a la derecha.
+cuyo signo indica hacia dónde va la cola, pues vale cero para una
+distribución simétrica, es negativo con cola a la izquierda y positivo
+con cola a la derecha.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -513,62 +553,77 @@ g1 & -1.391 & 0.485 \\
 faltantes & 0.000 & 0.000 \\
 \end{longtable}
 
-La descripción numérica \textbf{concuerda con los diagramas de caja},
-pues los cinco números de \texttt{summary()} son exactamente los que
-dibuja cada caja (mínimo, \(Q_1\), mediana, \(Q_3\) y máximo), y agregan
-lo que el gráfico solo sugería:
+\textbf{¿Concuerda la descripción numérica con los diagramas de caja?}
+Sí, pues los cinco números de \texttt{summary()} son exactamente los que
+dibuja cada caja (mínimo, \(Q_1\), mediana, \(Q_3\) y máximo) y además
+agregan lo que el gráfico solo sugería:
 
-\begin{itemize}
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
 \tightlist
 \item
-  \textbf{Temperatura}: La media (29,75 °C) queda por debajo de la
-  mediana (30,40 °C), que es la firma numérica de la asimetría negativa
-  que se veía en el bigote inferior largo, y el coeficiente
-  \(g_1 = -1{,}39\) lo confirma, al tiempo que la desviación estándar
-  (2,28 °C) es casi igual al RIC (2,48 °C) a pesar de que el RIC deja
-  por fuera los extremos, lo que muestra que los 8 registros frescos
-  están inflando \(s\).
+  \textbf{Temperatura.} La media (29.75 °C) queda por debajo de la
+  mediana (30.40 °C), que es la firma numérica de la asimetría negativa
+  vista en el bigote inferior largo y que el coeficiente \(g_1 = -1.39\)
+  confirma. Por otro lado la desviación estándar (2.28 °C) resulta casi
+  igual al RIC (2.48 °C) a pesar de que el RIC deja por fuera los
+  extremos, lo que muestra que los 8 registros frescos están inflando
+  \(s\).
 \item
-  \textbf{Velocidad del viento}: La media (1,719 mph) y la mediana
-  (1,700 mph) casi coinciden, con la media apenas por encima, y
-  \(g_1 = 0{,}49\) confirma una asimetría positiva leve, coherente con
-  el bigote superior más largo, así como un coeficiente de variación
-  (\(s/\bar{x}\)) de 46 \% que expresa la mayor dispersión relativa
-  (este cociente solo tiene sentido para el viento, por ser de razón, y
-  no para la temperatura, que es de intervalo).
-\end{itemize}
+  \textbf{Velocidad del viento.} La media (1.719 mph) y la mediana
+  (1.700 mph) casi coinciden con la media apenas por encima, mientras
+  que \(g_1 = 0.49\) confirma una asimetría positiva leve coherente con
+  el bigote superior más largo. Su coeficiente de variación
+  (\(s/\bar{x}\)) de 46 \% expresa la mayor dispersión relativa,
+  cociente que solo tiene sentido para el viento por ser de razón y no
+  para la temperatura por ser de intervalo.
+\end{enumerate}
 
-Finalmente, no hay datos faltantes, pues las 118 filas están completas
-en ambas variables.
+Finalmente no hay datos faltantes, pues las 118 filas están completas en
+ambas variables.
 
-\section{Pregunta 6: atípicos de Tukey en presión y punto de
+\section{Pregunta 6 --- Atípicos de Tukey en presión y punto de
 rocío}\label{p6}
 
-Siguiendo la ayuda del enunciado, se usa
+Siguiendo la ayuda del enunciado se usa
 \texttt{boxplot(x,\ plot\ =\ FALSE)\$out}, que calcula las cercas a
-partir de las bisagras de Tukey (muy cercanas a los cuartiles, pero no
-idénticas a las de \texttt{summary()}, lo que explica diferencias de
-centésimas en los límites).
+partir de las bisagras de Tukey. Estas son muy cercanas a los cuartiles
+de \texttt{summary()} pero no idénticas, lo que explica diferencias de
+centésimas en los límites.
+
+\begin{codres}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{boxplot}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Presion, }\AttributeTok{plot =} \ConstantTok{FALSE}\NormalTok{)}\SpecialCharTok{$}\NormalTok{out}
+\FunctionTok{boxplot}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Presion,}
+        \AttributeTok{plot =} \ConstantTok{FALSE}\NormalTok{)}\SpecialCharTok{$}\NormalTok{out}
 \end{Highlighting}
 \end{Shaded}
+
+\codressep
 
 \begin{verbatim}
 [1] 1015.7
 \end{verbatim}
 
+\end{codres}
+
+\begin{codres}
+
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{boxplot}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Punto\_de\_Rocio, }\AttributeTok{plot =} \ConstantTok{FALSE}\NormalTok{)}\SpecialCharTok{$}\NormalTok{out}
+\FunctionTok{boxplot}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Punto\_de\_Rocio,}
+        \AttributeTok{plot =} \ConstantTok{FALSE}\NormalTok{)}\SpecialCharTok{$}\NormalTok{out}
 \end{Highlighting}
 \end{Shaded}
+
+\codressep
 
 \begin{verbatim}
 numeric(0)
 \end{verbatim}
+
+\end{codres}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -611,9 +666,9 @@ atípicos & 1 & 0 \\
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{), }\AttributeTok{mar =} \FunctionTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{1}\NormalTok{))}
-\FunctionTok{boxplot}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Presion, }\AttributeTok{horizontal =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{col =} \StringTok{"orange"}\NormalTok{,}
+\FunctionTok{boxplot}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Presion, }\AttributeTok{horizontal =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{col =} \StringTok{"\#f08a3c"}\NormalTok{,}
         \AttributeTok{main =} \StringTok{"Presión (hPa)"}\NormalTok{)}
-\FunctionTok{boxplot}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Punto\_de\_Rocio, }\AttributeTok{horizontal =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{col =} \StringTok{"lightblue"}\NormalTok{,}
+\FunctionTok{boxplot}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Punto\_de\_Rocio, }\AttributeTok{horizontal =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{col =} \StringTok{"\#fdecc0"}\NormalTok{,}
         \AttributeTok{main =} \StringTok{"Punto de rocío (°C)"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -629,21 +684,24 @@ a medio día.}
 
 \end{figure}%
 
-La \textbf{presión presenta el mayor número de atipicidades}, aunque se
-trata de una sola y por un margen mínimo, pues el valor 1015,7 hPa
-(Chámeza, 26 de agosto) supera la cerca superior de 1015,65 hPa por
-apenas 0,05 hPa, mientras que el \textbf{punto de rocío no presenta
-ninguna} (\texttt{numeric(0)}) a pesar de moverse en un rango mucho más
-ancho (de 16,5 a 29,9 °C). Esto se debe a que el criterio de Tukey es
-relativo a la dispersión de cada variable y no a una escala absoluta, de
-forma que el RIC del punto de rocío (4,3 °C) genera cercas amplias
-({[}13,35 ; 30,55{]}) mientras que el de la presión (1,5 hPa) las deja
-estrechas ({[}1009,65 ; 1015,65{]}). Cabe mencionar que atípico no es
-sinónimo de error, pues el criterio es geométrico y no sabe nada del
-fenómeno, y de hecho, como se verá en la Pregunta 11, este registro
-pertenece a un grupo de municipios con comportamiento propio.
+\textbf{¿Existen observaciones atípicas?} Sí en la presión, que presenta
+una única observación atípica (1015.7 hPa en Chámeza el 26 de agosto),
+pero no en el punto de rocío cuya salida es \texttt{numeric(0)}.
 
-\section{Pregunta 7: dispersión entre temperatura y viento}\label{p7}
+\textbf{¿Cuál variable presenta mayor número de atipicidades?} La
+presión, aunque vale la pena matizarlo porque se trata de un solo valor
+que supera la cerca superior de 1015.65 hPa por apenas 0.05 hPa. El
+punto de rocío en cambio no tiene ninguno a pesar de moverse en un rango
+mucho más ancho (de 16.5 a 29.9 °C), lo cual se debe a que el criterio
+de Tukey es relativo a la dispersión de cada variable y no a una escala
+absoluta. Así el RIC del punto de rocío (4.3 °C) genera cercas amplias
+({[}13.35, 30.55{]}) mientras que el de la presión (1.5 hPa) las deja
+estrechas ({[}1009.65, 1015.65{]}). Cabe mencionar además que atípico no
+es sinónimo de error, puesto que el criterio es geométrico y no sabe
+nada del fenómeno. De hecho, como se verá en la Pregunta 11, este
+registro pertenece a un grupo de municipios con comportamiento propio.
+
+\section{Pregunta 7 --- Dispersión entre temperatura y viento}\label{p7}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -673,34 +731,36 @@ pertenece a un grupo de municipios con comportamiento propio.
 
 }
 
-\caption{Diagrama de dispersión de temperatura y velocidad del viento a
-medio día, con recta de mínimos cuadrados, banda de confianza del 95 \%
-e histogramas marginales.}
+\caption{Dispersión de temperatura y velocidad del viento a medio día:
+Se incluyen la recta de mínimos cuadrados, su banda de confianza del 95
+\% y los histogramas marginales.}
 
 \end{figure}%
 
-La nube de puntos no presenta estructura, pues para cualquier
-temperatura aparecen vientos de todo el recorrido, tanto en los
-registros cálidos (entre 29 y 32 °C, donde se concentra la mayoría) como
-en los pocos registros frescos de la izquierda, y la banda de puntos no
-sube ni baja al avanzar en el eje horizontal, así que \textbf{las dos
-variables no parecen correlacionarse}. La recta de mínimos cuadrados lo
-confirma, pues es prácticamente plana (el viento sube apenas 0,009 mph
-por cada grado de temperatura, con \(R^2 = 0{,}001\), es decir, la
-temperatura explica el 0,1 \% de la variación del viento), y su banda de
+\textbf{¿Parecen correlacionarse las dos variables?} No, pues la nube de
+puntos no presenta estructura alguna. Para cualquier temperatura
+aparecen vientos de todo el recorrido, tanto en los registros cálidos
+entre 29 y 32 °C donde se concentra la mayoría como en los pocos
+registros frescos de la izquierda, sin que la banda de puntos suba o
+baje al avanzar en el eje horizontal. La recta de mínimos cuadrados lo
+confirma al ser prácticamente plana, ya que el viento sube apenas 0.009
+mph por cada grado de temperatura con \(R^2 = 0.001\), es decir que la
+temperatura explica el 0.1 \% de la variación del viento. Su banda de
 confianza se abre hacia la izquierda porque en esa zona solo están los 8
-registros frescos, de forma que ahí la recta está mucho peor
-determinada. Los histogramas marginales describen cada variable por
-separado (la temperatura apilada a la derecha con cola a la izquierda, y
-el viento con su masa entre 1 y 2 mph con cola a la derecha), y la razón
-de verlos junto a la nube es que dos variables pueden ser asimétricas
-cada una y aun así no tener ninguna relación entre sí.
+registros frescos, de modo que ahí la recta está mucho peor determinada.
 
-\section{Pregunta 8: covarianza y correlación de Pearson}\label{p8}
+Los histogramas marginales por su parte describen cada variable por
+separado, con la temperatura apilada a la derecha y cola a la izquierda
+frente al viento con su masa entre 1 y 2 mph y cola a la derecha. La
+razón de verlos junto a la nube es que dos variables pueden ser
+asimétricas cada una y aun así no tener ninguna relación entre sí.
+
+\section{Pregunta 8 --- Covarianza y correlación de Pearson}\label{p8}
 
 La covarianza muestral mide si dos variables se desvían de sus medias en
-la misma dirección, y el coeficiente de correlación de Pearson es esa
-misma covarianza estandarizada por ambas desviaciones,
+la misma dirección, mientras que el coeficiente de correlación de
+Pearson \parencite{pearson1895} es esa misma covarianza estandarizada
+por ambas desviaciones
 
 \[
 s_{xy} = \frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y}),
@@ -708,28 +768,42 @@ s_{xy} = \frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y}),
 r = \frac{s_{xy}}{s_x \, s_y} \in [-1, 1],
 \]
 
-de forma que \(r\) mide la fuerza de la relación \textbf{lineal}, siendo
+por lo que \(r\) mide la fuerza de la relación \textbf{lineal} siendo
 \(\pm 1\) una recta perfecta y \(0\) la ausencia de relación lineal.
+
+\begin{codres}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{cov}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura, datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento)}
+\FunctionTok{cov}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura,}
+\NormalTok{    datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento)}
 \end{Highlighting}
 \end{Shaded}
+
+\codressep
 
 \begin{verbatim}
 [1] 0.04718528
 \end{verbatim}
 
+\end{codres}
+
+\begin{codres}
+
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{cor}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura, datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento)}
+\FunctionTok{cor}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura,}
+\NormalTok{    datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento)}
 \end{Highlighting}
 \end{Shaded}
+
+\codressep
 
 \begin{verbatim}
 [1] 0.02627245
 \end{verbatim}
+
+\end{codres}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -751,78 +825,82 @@ sample estimates:
 0.02627245 
 \end{verbatim}
 
-La covarianza es \(s_{xy} = 0{,}0472\) y la correlación es
-\(r = 0{,}026\), lo que indica que \textbf{las variables no parecen
-correlacionarse}, pues \(r\) es prácticamente cero y la prueba asociada
-no lo distingue del azar con 118 datos (\(p = 0{,}78\), con intervalo de
-confianza del 95 \% entre \(-0{,}16\) y \(0{,}21\), que contiene al
-cero), confirmando lo que se veía en la nube de la Pregunta 7. Como
-verificación adicional se calculó la correlación de Spearman (que en vez
-de los valores usa sus rangos, es decir, sus posiciones de menor a
-mayor, y detecta relaciones monótonas, aquellas en las que al crecer una
-variable la otra tiende a crecer o a decrecer aunque no sea en línea
-recta), obteniendo \(-0{,}011\), así que tampoco hay una relación curva
-escondida.
+\textbf{¿Parecen correlacionarse las dos variables?} No, pues la
+covarianza es \(s_{xy} = 0.0472\) y la correlación \(r = 0.026\) es
+prácticamente cero. La prueba asociada tampoco la distingue del azar con
+118 datos (\(p = 0.78\)), dado que su intervalo de confianza del 95 \%
+va de \(-0.16\) a \(0.21\) y contiene al cero, lo cual confirma lo que
+ya se veía en la nube de la Pregunta 7. Como verificación adicional se
+calculó la correlación de Spearman \parencite{spearman1904}, que en vez
+de los valores usa sus rangos (sus posiciones de menor a mayor) y por
+ello detecta relaciones monótonas, es decir, aquellas en las que al
+crecer una variable la otra tiende a crecer o a decrecer aunque no sea
+en línea recta. Esta dio \(-0.011\), así que tampoco hay una relación
+curva escondida.
 
-En cuanto a las unidades:
+\textbf{¿En qué unidades se encuentra cada medida?}
 
-\begin{itemize}
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
 \tightlist
 \item
-  \textbf{Covarianza}: Se expresa en el producto de las unidades de las
+  \textbf{Covarianza.} Se expresa en el producto de las unidades de las
   dos variables, en este caso °C·mph, por lo que su valor por sí solo no
-  dice si la relación es fuerte o débil, y además cambiaría si se
-  midiera el viento en km/h (pasaría a 0,0759 °C·km/h sin que la
-  relación haya cambiado).
+  dice si la relación es fuerte o débil. Además cambiaría si se midiera
+  el viento en km/h y pasaría a 0.0759 °C·km/h sin que la relación haya
+  cambiado en lo más mínimo.
 \item
-  \textbf{Correlación de Pearson}: Es adimensional, pues al dividir por
-  \(s_x\) (°C) y \(s_y\) (mph) las unidades se cancelan, y por esto
+  \textbf{Correlación de Pearson.} Es adimensional, pues al dividir por
+  \(s_x\) (°C) y \(s_y\) (mph) las unidades se cancelan. Por esto
   siempre queda en \([-1, 1]\) y es comparable entre cualquier par de
   variables.
-\end{itemize}
+\end{enumerate}
 
-\section{Pregunta 9: dimensión de los datos}\label{p9}
+\section{Pregunta 9 --- Dimensión de los datos}\label{p9}
 
-Los datos son \textbf{multivariados}, ya que sobre cada unidad
-estadística (una medición en un municipio a las 12:00) se registran
-simultáneamente 18 variables, y las 118 observaciones comparten esa
-estructura. Que en las preguntas 4 a 6 se haya mirado una variable a la
-vez (análisis univariado) y en las preguntas 7 y 8 dos variables
-(análisis bivariado) no cambia la naturaleza de los datos, sino que
-describe el corte que se hace sobre ellos, de forma que los datos son
-multivariados y es el análisis el que va cambiando de dimensión.
+\textbf{¿Son estos datos univariados, bivariados o multivariados?}
+Multivariados, ya que sobre cada unidad estadística (una medición en un
+municipio a las 12:00) se registran simultáneamente 18 variables que
+comparten las 118 observaciones. Que en las preguntas 4 a 6 se haya
+mirado una variable a la vez (análisis univariado) y en las preguntas 7
+y 8 dos variables (análisis bivariado) no cambia la naturaleza de los
+datos, sino que describe el corte que se hace sobre ellos. Los datos son
+entonces multivariados y es el análisis el que va cambiando de
+dimensión.
 
 Esta distinción no es solo de nombre, pues como se mencionó en clase, si
 un conjunto de variables sigue una distribución normal multivariada
 entonces cada variable por separado es normal, pero que cada variable
 sea normal univariadamente no garantiza que el conjunto sea normal
-multivariado, así que las conclusiones obtenidas mirando variable por
+multivariado. Por ello las conclusiones obtenidas mirando variable por
 variable no se pueden extender sin más al comportamiento conjunto.
 
 \chapter{Parte 2. Estimación de la densidad}\label{parte2}
 
 Para las tres preguntas siguientes se usan dos estimadores de la
 densidad. El \textbf{histograma de densidad} divide el recorrido en
-clases y divide cada conteo por \(n\) y por el ancho de la clase, de
-forma que el área total vale 1, y el número de clases se toma con la
-regla de Sturges, \(k = \lceil \log_2 n \rceil
-+ 1 = 8\) para \(n = 118\) (la regla por defecto de \texttt{hist()} en
-R, pensada para muestras moderadas y que evita tanto una campana
-artificial por pocas clases como un dentado ruidoso por demasiadas). La
-\textbf{estimación kernel} (KDE), por su parte, pone una pequeña campana
-(el núcleo \(K\), gaussiano) sobre cada observación y las suma,
+clases y cada conteo entre \(n\) y el ancho de la clase para que el área
+total valga 1, tomando el número de clases con la regla de Sturges
+\parencite{sturges1926}, que para \(n = 118\) da
+\(k = \lceil \log_2 n \rceil + 1 = 8\). Esta es la regla por defecto de
+\texttt{hist()} en R y está pensada para muestras moderadas, evitando
+tanto una campana artificial por pocas clases como un dentado ruidoso
+por demasiadas. La \textbf{estimación kernel} (KDE) en cambio pone una
+pequeña campana sobre cada observación (el núcleo \(K\), en este caso
+gaussiano) y las suma
 
 \[
 \hat{f}(x) = \frac{1}{n h} \sum_{i=1}^{n} K\!\left( \frac{x - x_i}{h} \right),
 \qquad
-h = 0{,}9 \cdot \min\!\left(s, \frac{\text{RIC}}{1{,}34}\right) \cdot n^{-1/5},
+h = 0.9 \cdot \min\!\left(s, \frac{\text{RIC}}{1.34}\right) \cdot n^{-1/5},
 \]
 
-donde el ancho de banda \(h\) se toma con la regla de Silverman (el
-valor por defecto de \texttt{density()} y \texttt{geom\_density()}), que
-es óptima si los datos fueran normales y usa el mínimo entre \(s\) y
-\(\text{RIC}/1{,}34\) para no suavizar de más cuando hay extremos. Un
-\(h\) pequeño inventa modas y uno grande las borra, así que como
+donde el ancho de banda \(h\) se toma con la regla de Silverman
+\parencite{silverman1986}, que es el valor por defecto de
+\texttt{density()} y de \texttt{geom\_density()}. Esta regla es óptima
+si los datos fueran normales y usa el mínimo entre \(s\) y
+\(\text{RIC}/1.34\) para no suavizar de más cuando hay extremos. Como un
+\(h\) pequeño inventa modas y uno grande las borra, a manera de
 verificación se recalcula la KDE con \(2h\) y se reportan solo las modas
 que sobreviven.
 
@@ -846,7 +924,7 @@ que sobreviven.
 \end{Highlighting}
 \end{Shaded}
 
-\section{Pregunta 10: densidad de la temperatura}\label{p10}
+\section{Pregunta 10 --- Densidad de la temperatura}\label{p10}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -865,20 +943,27 @@ a medio día.}
 
 \end{figure}%
 
+\begin{codres}
+
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Temperatura}
-\FunctionTok{c}\NormalTok{(}\AttributeTok{h =} \FunctionTok{bw.nrd0}\NormalTok{(x), }\AttributeTok{g1 =} \FunctionTok{g1}\NormalTok{(x))}
+\FunctionTok{c}\NormalTok{(}\AttributeTok{h =} \FunctionTok{bw.nrd0}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura),}
+  \AttributeTok{g1 =} \FunctionTok{g1}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Temperatura))}
 \end{Highlighting}
 \end{Shaded}
+
+\codressep
 
 \begin{verbatim}
          h         g1 
  0.6402307 -1.3912340 
 \end{verbatim}
 
+\end{codres}
+
 \begin{Shaded}
 \begin{Highlighting}[]
+\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Temperatura}
 \FunctionTok{list}\NormalTok{(}\AttributeTok{modas\_h =} \FunctionTok{modas}\NormalTok{(x), }\AttributeTok{modas\_2h =} \FunctionTok{modas}\NormalTok{(x, }\DecValTok{2}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
@@ -930,21 +1015,32 @@ W = 0.85961, p-value = 3.403e-09
 \end{longtable}
 }
 
-\textbf{No se podría afirmar que los datos provienen de una distribución
-normal}, pues ambas estimaciones (\(h = 0{,}640\) °C) muestran una forma
-que una campana no puede producir. Primeramente, la masa se apila entre
-29 y 32 °C con una moda cerca de 31,1 °C y una cola larga hacia la
-izquierda (\(g_1 = -1{,}39\)), cuando una normal es simétrica.
-Progresivamente, en esa cola aparece una segunda moda pequeña cerca de
-23,5 °C, que sobrevive al duplicar el ancho de banda y por tanto no es
-ruido del suavizado, formada por los 8 registros frescos que ya se
-habían marcado como atípicos en la Pregunta 4, y que corresponden a solo
-cuatro municipios medidos en ambas fechas (Chámeza y Recetor en
-Casanare, Pajarito y Paya en Boyacá), es decir, a una subpoblación de
-municipios más frescos y no a mediciones aisladas. Finalmente, la prueba
-de Shapiro-Wilk (cuya hipótesis nula es que los datos son normales) la
-rechaza con contundencia (\(W = 0{,}860\), \(p < 0{,}001\)), aunque la
-decisión se sostiene principalmente en la forma del gráfico.
+\textbf{¿Se podría afirmar que los datos provienen de una distribución
+normal?} No, pues ambas estimaciones (\(h = 0.640\) °C) muestran una
+forma que una campana no puede producir, lo cual se sostiene por tres
+vías:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Asimetría.} La masa se apila entre 29 y 32 °C con una moda
+  cerca de 31.1 °C y una cola larga hacia la izquierda
+  (\(g_1 = -1.39\)), cuando una normal es simétrica.
+\item
+  \textbf{Segunda moda.} En esa cola aparece una moda pequeña cerca de
+  23.5 °C que sobrevive al duplicar el ancho de banda y que por tanto no
+  es ruido del suavizado. La forman los 8 registros frescos ya marcados
+  como atípicos en la Pregunta 4, los cuales corresponden a solo cuatro
+  municipios medidos en ambas fechas (Chámeza y Recetor en Casanare,
+  Pajarito y Paya en Boyacá), es decir, a una subpoblación de municipios
+  más frescos y no a mediciones aisladas.
+\item
+  \textbf{Prueba de normalidad.} La prueba de Shapiro-Wilk
+  \parencite{shapiro1965}, cuya hipótesis nula es que los datos son
+  normales, la rechaza con contundencia (\(W = 0.860\), \(p < 0.001\))
+  aunque la decisión se sostiene principalmente en la forma del gráfico.
+\end{enumerate}
 
 \begin{quote}
 \textbf{Nota.} Se atribuye el grupo fresco a que son municipios de
@@ -953,11 +1049,11 @@ altitud, así que esta explicación geográfica no se verificó con los
 datos.
 \end{quote}
 
-\section{Pregunta 11: densidad de la presión}\label{p11}
+\section{Pregunta 11 --- Densidad de la presión}\label{p11}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{densidad}\NormalTok{(}\StringTok{"Presion"}\NormalTok{, }\StringTok{"Presión (hPa)"}\NormalTok{, }\StringTok{"orange"}\NormalTok{)}
+\FunctionTok{densidad}\NormalTok{(}\StringTok{"Presion"}\NormalTok{, }\StringTok{"Presión (hPa)"}\NormalTok{, }\StringTok{"\#f08a3c"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -972,21 +1068,46 @@ medio día.}
 
 \end{figure}%
 
+\begin{codres}
+
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{x }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Presion}
-\FunctionTok{c}\NormalTok{(}\AttributeTok{h =} \FunctionTok{bw.nrd0}\NormalTok{(x), }\AttributeTok{g1 =} \FunctionTok{g1}\NormalTok{(x), }\AttributeTok{media =} \FunctionTok{mean}\NormalTok{(x), }\AttributeTok{mediana =} \FunctionTok{median}\NormalTok{(x))}
+\FunctionTok{c}\NormalTok{(}\AttributeTok{h =} \FunctionTok{bw.nrd0}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Presion),}
+  \AttributeTok{g1 =} \FunctionTok{g1}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Presion))}
 \end{Highlighting}
 \end{Shaded}
 
+\codressep
+
 \begin{verbatim}
-           h           g1        media      mediana 
-   0.3844894    0.8384434 1012.7762712 1012.5000000 
+        h        g1 
+0.3844894 0.8384434 
 \end{verbatim}
+
+\end{codres}
+
+\begin{codres}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{list}\NormalTok{(}\AttributeTok{modas\_h =} \FunctionTok{modas}\NormalTok{(x), }\AttributeTok{modas\_2h =} \FunctionTok{modas}\NormalTok{(x, }\DecValTok{2}\NormalTok{))}
+\FunctionTok{c}\NormalTok{(}\AttributeTok{media =} \FunctionTok{mean}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Presion),}
+  \AttributeTok{mediana =} \FunctionTok{median}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Presion))}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+   media  mediana 
+1012.776 1012.500 
+\end{verbatim}
+
+\end{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{list}\NormalTok{(}\AttributeTok{modas\_h =} \FunctionTok{modas}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Presion),}
+     \AttributeTok{modas\_2h =} \FunctionTok{modas}\NormalTok{(datos}\SpecialCharTok{$}\NormalTok{Presion, }\DecValTok{2}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -998,52 +1119,54 @@ $modas_2h
 [1] 1012.28
 \end{verbatim}
 
-\textbf{La distribución estimada no es simétrica, sino que presenta
-asimetría positiva} (cola a la derecha), lo cual se sostiene por varias
-vías que coinciden:
+\textbf{¿Es la distribución estimada simétrica?} No, presenta asimetría
+positiva (cola a la derecha) que se sostiene por varias vías que
+coinciden:
 
-\begin{itemize}
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
 \tightlist
 \item
-  \textbf{Coeficiente de asimetría}: Vale \(g_1 = +0{,}84\), de signo
+  \textbf{Coeficiente de asimetría.} Vale \(g_1 = +0.84\), con signo
   opuesto al de la temperatura.
 \item
-  \textbf{Media contra mediana}: La media (1012,78 hPa) queda por encima
-  de la mediana (1012,50 hPa), y los cuartiles lo confirman, pues de
-  \(Q_1\) a la mediana hay 0,6 hPa mientras que de la mediana a \(Q_3\)
-  hay 0,9 hPa.
+  \textbf{Media contra mediana.} La media (1012.78 hPa) queda por encima
+  de la mediana (1012.50 hPa) y los cuartiles lo confirman, pues de
+  \(Q_1\) a la mediana hay 0.6 hPa mientras que de la mediana a \(Q_3\)
+  hay 0.9 hPa.
 \item
-  \textbf{Forma de la KDE}: Con \(h = 0{,}384\) hPa la curva sube rápido
-  desde 1010,9 hPa, hace su moda cerca de 1012 hPa y baja despacio con
-  una pequeña joroba alrededor de 1015,5 hPa, hasta el valor 1015,7 hPa
-  que la Pregunta 6 marcó como atípico.
-\end{itemize}
+  \textbf{Forma de la KDE.} Con \(h = 0.384\) hPa la curva sube rápido
+  desde 1010.9 hPa hasta su moda cerca de 1012 hPa y luego baja
+  despacio, formando una pequeña joroba alrededor de 1015.5 hPa que
+  termina en el valor 1015.7 hPa que la Pregunta 6 marcó como atípico.
+\end{enumerate}
 
 Cabe mencionar que esa joroba la forman los mismos cuatro municipios de
 la cola fresca de la temperatura (Chámeza, Recetor, Pajarito y Paya), de
-forma que un único grupo de municipios estira a la vez la cola izquierda
+modo que un único grupo de municipios estira a la vez la cola izquierda
 de una variable y la derecha de la otra. A diferencia de la moda
-secundaria de la temperatura, esta joroba desaparece al duplicar el
-ancho de banda, así que no se afirma una bimodalidad, pero la asimetría
+secundaria de la temperatura esta joroba desaparece al duplicar el ancho
+de banda, por lo que no se afirma una bimodalidad aunque la asimetría
 positiva sí se mantiene con cualquier \(h\) razonable.
 
 \begin{quote}
 \textbf{Nota.} Que municipios presumiblemente más altos registren más
 presión resulta extraño si fuera presión de estación, lo que sugiere que
-el IDEAM reporta presión reducida al nivel del mar, sin embargo esto no
+el IDEAM reporta presión reducida al nivel del mar. Sin embargo esto no
 se confirmó en la documentación de la fuente.
 \end{quote}
 
-\section{Pregunta 12: densidad del viento frente a la normal}\label{p12}
+\section{Pregunta 12 --- Densidad del viento frente a la
+normal}\label{p12}
 
 La densidad normal teórica se construye con la media y la desviación
-estándar observadas, \(\bar{x} = 1{,}719\) mph y \(s = 0{,}789\) mph,
+estándar observadas (\(\bar{x} = 1.719\) mph y \(s = 0.789\) mph)
 
 \[
 f(x) = \frac{1}{s\sqrt{2\pi}} \exp\!\left( -\frac{(x - \bar{x})^2}{2 s^2} \right),
 \]
 
-y se superpone sobre la KDE de la velocidad del viento.
+para luego superponerse sobre la KDE de la velocidad del viento.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1067,11 +1190,26 @@ y se superpone sobre la KDE de la velocidad del viento.
 
 }
 
-\caption{Estimación kernel de la densidad de la velocidad del viento
-(azul) frente a la normal con media y desviación observadas (rojo
-punteado).}
+\caption{KDE de la velocidad del viento (azul) frente a la normal con
+media y desviación observadas (rojo punteado).}
 
 \end{figure}%
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{pnorm}\NormalTok{(}\DecValTok{0}\NormalTok{, media\_v, sd\_v)}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+[1] 0.01471799
+\end{verbatim}
+
+\end{codres}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1090,17 +1228,6 @@ $modas_2h
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{c}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{P(X \textless{} 0) normal}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{pnorm}\NormalTok{(}\DecValTok{0}\NormalTok{, media\_v, sd\_v))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-P(X < 0) normal 
-     0.01471799 
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \FunctionTok{shapiro.test}\NormalTok{(x)}
 \end{Highlighting}
 \end{Shaded}
@@ -1113,38 +1240,128 @@ data:  x
 W = 0.96155, p-value = 0.001885
 \end{verbatim}
 
-El modelo normal \(N(1{,}719;\ 0{,}789)\) \textbf{se aproxima solo de
-lejos} a la densidad estimada, pues acierta el centro y el ancho general
-de la distribución, pero falla en la forma por tres motivos:
+\textbf{¿Se aproxima el modelo normal estimado a la densidad
+encontrada?} Solo de lejos, pues \(N(1.719,\ 0.789)\) acierta el centro
+y el ancho general de la distribución pero falla en la forma por tres
+motivos:
 
-\begin{itemize}
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
 \tightlist
 \item
-  \textbf{Asimetría y jorobas}: La KDE (\(h = 0{,}274\) mph) tiene su
-  masa entre 1 y 2 mph con jorobas locales cerca de 1,0, 1,9 y 3,3 mph y
-  una cola derecha más pesada (\(g_1 = +0{,}49\)), mientras que la
-  normal es una sola campana simétrica, con el pequeño detalle que esas
-  jorobas se funden en una sola moda al duplicar \(h\), así que lo
-  robusto es la asimetría y no la multimodalidad.
+  \textbf{Asimetría y jorobas.} La KDE (\(h = 0.274\) mph) concentra su
+  masa entre 1 y 2 mph con jorobas locales cerca de 1.0, 1.9 y 3.3 mph y
+  una cola derecha más pesada (\(g_1 = +0.49\)), mientras que la normal
+  es una sola campana simétrica. Vale la pena matizar que esas jorobas
+  se funden en una sola moda al duplicar \(h\), por lo que lo robusto es
+  la asimetría y no la multimodalidad.
 \item
-  \textbf{Masa imposible}: Con esa media y desviación, la normal le
-  asigna un 1,5 \% de probabilidad a velocidades negativas, lo cual es
-  imposible para una variable de razón acotada por cero, siendo este el
-  defecto conceptual del ajuste y no un detalle de la muestra (la KDE
-  también derrama algo de masa bajo cero, pero por la cola infinita de
-  su núcleo gaussiano).
+  \textbf{Masa imposible.} Con esa media y desviación la normal le
+  asigna un 1.5 \% de probabilidad a velocidades negativas, lo cual es
+  imposible para una variable de razón acotada por cero. Este es el
+  defecto conceptual del ajuste y no un detalle de la muestra, dado que
+  la KDE también derrama algo de masa bajo cero pero únicamente por la
+  cola infinita de su núcleo gaussiano.
 \item
-  \textbf{Prueba de normalidad}: Shapiro-Wilk rechaza la normalidad
-  (\(W = 0{,}962\), \(p = 0{,}002\)), aunque de forma mucho menos
-  rotunda que en la temperatura, coherente con que aquí las dos curvas
-  al menos se parecen.
-\end{itemize}
+  \textbf{Prueba de normalidad.} Shapiro-Wilk rechaza la normalidad
+  (\(W = 0.962\), \(p = 0.002\)) aunque de forma mucho menos rotunda que
+  en la temperatura, algo coherente con que aquí las dos curvas al menos
+  se parecen.
+\end{enumerate}
 
 En resumen, la normal sirve como aproximación gruesa del centro y la
-dispersión del viento a medio día, pero no como modelo de su forma, y en
-particular no describe bien la cola derecha ni el piso físico en cero.
+dispersión del viento a medio día pero no como modelo de su forma,
+puesto que en particular no describe bien ni la cola derecha ni el piso
+físico en cero.
+
+\imprimirbibliografia
+\appendix
+
+\chapter{Documentación de R}\label{documentacion-r}
+
+Se listan las funciones utilizadas en el taller junto con el paquete que
+las provee y la pregunta donde se usan, cada una enlazada a su página de
+ayuda oficial (la misma que se obtiene en R con \texttt{?función}). El
+documento se generó con R 4.6.1, \texttt{ggplot2} 4.0.3,
+\texttt{ggExtra} 0.11.0 y \texttt{knitr} 1.51.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4043}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2128}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3830}}@{}}
+\caption{Funciones de R utilizadas y enlace a su
+documentación.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Función
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Paquete
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Uso
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Función
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Paquete
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Uso
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\href{https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html}{\texttt{read.csv()}}
+& utils & Carga de la base \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/base/html/table.html}{\texttt{table()}}
+& base & P1, P2 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/base/html/summary.html}{\texttt{summary()}}
+& base & P5 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html}{\texttt{quantile()}}
+& stats & P4 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/sd.html}{\texttt{sd()}}
+& stats & P5 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/IQR.html}{\texttt{IQR()}}
+& stats & P5 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/graphics/html/boxplot.html}{\texttt{boxplot()}}
+& graphics & P6 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/graphics/html/barplot.html}{\texttt{barplot()}}
+& graphics & P2 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/cor.html}{\texttt{cov()}}
+& stats & P8 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/cor.test.html}{\texttt{cor.test()}}
+& stats & P8 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html}{\texttt{lm()}}
+& stats & P7 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/density.html}{\texttt{density()}}
+& stats & P10 a P12 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/bandwidth.html}{\texttt{bw.nrd0()}}
+& stats & P10 a P12 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/grDevices/html/nclass.html}{\texttt{nclass.Sturges()}}
+& grDevices & P10, P11 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/shapiro.test.html}{\texttt{shapiro.test()}}
+& stats & P10, P12 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/Normal.html}{\texttt{dnorm()}}
+& stats & P12 \\
+\href{https://ggplot2.tidyverse.org/reference/ggplot.html}{\texttt{ggplot()}}
+& ggplot2 & P4, P7, P10 a P12 \\
+\href{https://ggplot2.tidyverse.org/reference/geom_boxplot.html}{\texttt{geom\_boxplot()}}
+& ggplot2 & P4 \\
+\href{https://ggplot2.tidyverse.org/reference/geom_smooth.html}{\texttt{geom\_smooth()}}
+& ggplot2 & P7 \\
+\href{https://ggplot2.tidyverse.org/reference/geom_histogram.html}{\texttt{geom\_histogram()}}
+& ggplot2 & P10, P11 \\
+\href{https://ggplot2.tidyverse.org/reference/geom_density.html}{\texttt{geom\_density()}}
+& ggplot2 & P10 a P12 \\
+\href{https://ggplot2.tidyverse.org/reference/geom_function.html}{\texttt{stat\_function()}}
+& ggplot2 & P12 \\
+\href{https://rdrr.io/cran/ggExtra/man/ggMarginal.html}{\texttt{ggMarginal()}}
+& ggExtra & P7 \\
+\end{longtable}
 
 % --- Referencias mínimas (fuente de datos + software usado) ---
 \nocite{ideam-datos, r-core, ggplot2, ggextra}
-\printbibliography[heading=bibintoc]
+\ifbibimpresa\else\printbibliography[heading=bibintoc]\fi
 \end{document}
