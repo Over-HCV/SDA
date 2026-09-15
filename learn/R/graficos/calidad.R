@@ -82,10 +82,28 @@ graficar_atipicos <- function(tabla, columna = "valor") {
 
   grafico +
     ggplot2::labs(x = "fila", y = paste(eje_y, "de", columna), color = NULL,
-                  subtitle = sprintf("metodo %s · %d atipicos de %d", metodo,
+                  subtitle = sprintf("%s · %d atipicos de %d",
+                                     describir_criterio_atipicos(tabla),
                                      attr(tabla, "n_atipicos") %||% 0L,
                                      nrow(tabla))) +
     tema_ggplot()
+}
+
+#' El criterio con su umbral, en palabras: "IQR 1.5 x RIC · cercas 25.11 / 33.41".
+#'
+#' Sin el umbral a la vista, pasar de IQR a z con el mismo slider parecía no
+#' cambiar nada, y volver a z con 3 parecía que los datos habían cambiado.
+describir_criterio_atipicos <- function(tabla) {
+  metodo <- attr(tabla, "metodo") %||% "iqr"
+  umbral <- attr(tabla, "umbral")
+  corte <- attr(tabla, "corte")
+  switch(metodo,
+    iqr = sprintf("IQR %s x RIC · cercas %s / %s", format(umbral %||% 1.5),
+                  format(round(corte[1], 2)), format(round(corte[2], 2))),
+    z = sprintf("z > %s desvios", format(umbral %||% corte)),
+    mahalanobis = sprintf("Mahalanobis al %s · corte chi2 %s",
+                          format(umbral %||% 0.975), format(round(corte, 2))),
+    metodo)
 }
 
 #' Frecuencias por clase, antes y después de balancear.

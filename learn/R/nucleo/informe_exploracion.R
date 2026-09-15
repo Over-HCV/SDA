@@ -17,7 +17,8 @@
 # el cuaderno: codigo_artefacto() debe tener un generador para cada una de
 # estas claves, y test_informe.R lo comprueba.
 CASILLAS_INFORME <- c(
-  "f1.fuente.vista_previa", "f1.diccionario.tabla", "f1.calidad.atipicos",
+  "f1.fuente.vista_previa", "f1.filtro.filas", "f1.diccionario.tabla",
+  "f1.calidad.atipicos",
   "f1.balanceo.frecuencias",
   "f1.analisis.histograma", "f1.analisis.densidad", "f1.analisis.boxplot",
   "f1.analisis.resumen",
@@ -140,6 +141,7 @@ armar_informe_exploracion <- function(seleccion, dataset = NULL,
     'datos <- read.csv(ruta, sep = ";", dec = ".", fileEncoding = codificacion,',
     '                  stringsAsFactors = FALSE)',
     'names(datos) <- trimws(names(datos))   # el encabezado trae "Pronostico "',
+    'filas_al_cargar <- nrow(datos)         # antes de filtrar: lo usa el panel del filtro',
     'cat("Al cargar:", nrow(datos), "filas x", ncol(datos), "columnas\\n")',
     "```", ""))
   c("# Los datos", "", meta, "",
@@ -147,6 +149,9 @@ armar_informe_exploracion <- function(seleccion, dataset = NULL,
     '# Bajá "Datos actuales (CSV)" de la pestaña Informe y ponelo al lado de',
     '# este cuaderno: trae la preparación ya aplicada.',
     'datos <- read.csv("datos-sda-lab.csv", stringsAsFactors = FALSE)',
+    '# Este CSV ya viene filtrado: las filas del archivo original se anotan',
+    '# tal como estaban al exportar.',
+    sprintf('filas_al_cargar <- %dL', as.integer(dataset$n_crudo %||% dataset$n)),
     'cat("Al cargar:", nrow(datos), "filas x", ncol(datos), "columnas\\n")',
     "```", "")
 }

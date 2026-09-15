@@ -48,6 +48,8 @@ params_de_artefacto <- function(clave, input, ds) {
   switch(
     clave,
     "f1.fuente.vista_previa" = list(filas = ds$n, columnas = ds$p),
+    "f1.filtro.filas" = list(al_cargar = ds$n_crudo %||% ds$n, ahora = ds$n,
+                             filtros = .describir_filtros(ds)),
     "f1.diccionario.tabla" = list(columnas = ds$p),
     "f1.analisis.histograma" = list(
       variable = input$variable_uni, clases = input$clases,
@@ -109,6 +111,7 @@ tabla_de_artefacto <- function(clave, input, ds) {
   switch(
     clave,
     "f1.fuente.vista_previa" = utils::head(ds$df, 10),
+    "f1.filtro.filas" = tabla_filtro(ds$n_crudo %||% ds$n, ds$n),
     "f1.diccionario.tabla" = ds$diccionario[, c("columna", "escala", "clase",
                                                 "rol")],
     "f1.balanceo.frecuencias" = resumir_balance(ds$df, input$clase_bal),

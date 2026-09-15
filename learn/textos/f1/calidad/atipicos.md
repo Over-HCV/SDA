@@ -40,6 +40,12 @@ estudios el atípico es el caso que motivó la investigación.
 con los atípicos adentro, así que un valor extremo infla `s` y termina pareciendo
 razonable. Con un solo extremo muy grande, ningún punto supera 3 desvíos.
 
+**El mismo número no es el mismo umbral.** 1,5 en IQR es una cerca amplia;
+1,5 en z marca todo lo que se aleje un desvío y medio. Por eso el slider vuelve
+a 1,5 o a 3 al cambiar de criterio. Con la temperatura de las 12:00 del ORI,
+IQR 1,5 marca 8 atípicos y z 3 marca uno solo (22,4 °C): los datos son los
+mismos, cambió la regla.
+
 **El 1,5 de Tukey es una convención, no un umbral óptimo.** Nada se rompe si lo
 movés; solo cambia cuántos puntos se pintan.
 

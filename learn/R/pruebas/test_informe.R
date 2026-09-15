@@ -60,6 +60,26 @@ probar("la recta de regresion viaja al codigo del cuaderno", {
   any(grepl('method = "lm"', codigo, fixed = TRUE)) &&
     any(grepl("lm(Velocidad_del_Viento ~ Temperatura", codigo, fixed = TRUE))
 })
+probar("el panel del filtro rehace la tabla al cargar / ahora / fuera", {
+  entorno <- new.env(parent = globalenv())
+  crudos <- data.frame(Hora = rep(c("00:00", "12:00"), c(4425L, 118L)))
+  assign("filas_al_cargar", nrow(crudos), envir = entorno)
+  assign("datos", crudos[crudos$Hora == "12:00", , drop = FALSE], envir = entorno)
+  codigo <- codigo_artefacto("f1.filtro.filas",
+                             list(filtros = "Hora en [12:00]"))
+  tabla <- eval(parse(text = paste(codigo, collapse = "\n")), envir = entorno)
+  identical(as.numeric(tabla$cantidad), c(4543, 118, 4425)) &&
+    any(grepl("Hora en [12:00]", codigo, fixed = TRUE))
+})
+probar("el cuaderno anota las filas al cargar antes de preparar",
+       any(grepl("filas_al_cargar <- nrow(datos)", cuaderno, fixed = TRUE)))
+probar("el umbral de IQR elegido viaja al cuaderno, no un 1.5 fijo", {
+  codigo <- codigo_artefacto("f1.calidad.atipicos",
+                             list(columna = "Temperatura", metodo = "iqr",
+                                  umbral = 3))
+  any(grepl("range = 3", codigo, fixed = TRUE)) &&
+    !any(grepl("1.5 * ric", codigo, fixed = TRUE))
+})
 probar("la codificacion se detecta en vez de suponerse", {
   # Hardcodear latin1 rompia las tildes de los municipios sobre la copia UTF-8
   # del repo, y el cuaderno salia con ACACÃAS donde el panel decia ACACÍAS.
@@ -253,6 +273,8 @@ probar("el codigo de cada panel CORRE sobre los datos, no solo parsea", {
   rotas <- Filter(function(clave) {
     entorno <- new.env(parent = globalenv())
     assign("datos", ds_cli$df, envir = entorno)
+    # Lo define el chunk de carga del cuaderno; el panel del filtro lo lee.
+    assign("filas_al_cargar", ds_cli$n_crudo %||% nrow(ds_cli$df), envir = entorno)
     params <- c(plausibles, if (clave %in% names(metodo_de))
       list(metodo = metodo_de[[clave]]) else NULL)
     codigo <- codigo_artefacto(clave, params,

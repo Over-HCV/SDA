@@ -77,6 +77,7 @@ codigo_artefacto <- function(clave, params, tabla = NULL) {
     "f1.calidad.atipicos" = .codigo_atipicos(params),
     "f1.balanceo.frecuencias" = .codigo_frecuencias(params),
     "f1.fuente.vista_previa" = .codigo_vista_previa(params),
+    "f1.filtro.filas" = .codigo_filtro(params),
     "f1.diccionario.tabla" = .codigo_diccionario(params, tabla),
     .codigo_generico(clave, params))
   # La clave viaja como comentario: es el puente entre el cuaderno y el lab.
@@ -257,19 +258,20 @@ codigo_artefacto <- function(clave, params, tabla = NULL) {
   # `boxplot(x, plot = FALSE)$out` y no quantile(): son las BISAGRAS de Tukey,
   # que con n par no coinciden con los cuartiles tipo 7 de quantile(). Es el
   # criterio que dibuja la caja, y el que pide el enunciado del taller.
+  u <- p$umbral %||% 1.5
   c(sprintf("x <- datos$%s", columna),
     "# Ojo: boxplot() corta por bisagras y el panel del lab por cuartiles",
     "# (tipo 7, que es con lo que ggplot2 dibuja la caja). Las cercas pueden",
     "# diferir en décimas; el conteo de atípicos casi nunca cambia.",
-    "caja <- boxplot(x, plot = FALSE)",
+    sprintf("caja <- boxplot(x, range = %s, plot = FALSE)", u),
     "atipicos <- caja$out",
     "ric <- diff(caja$stats[c(2, 4)])",
-    "cercas <- c(caja$stats[2] - 1.5 * ric, caja$stats[4] + 1.5 * ric)",
+    sprintf("cercas <- c(caja$stats[2] - %s * ric, caja$stats[4] + %s * ric)", u, u),
     'cat("At\u00edpicos por el criterio de Tukey:", length(atipicos),',
     '    "de", length(x), "\\n")',
     'cat("Cercas:", round(cercas, 2), "\\n")',
     "print(atipicos)",
-    sprintf('boxplot(x, horizontal = TRUE, main = "%s")', columna))
+    sprintf('boxplot(x, range = %s, horizontal = TRUE, main = "%s")', u, columna))
 }
 
 .codigo_frecuencias <- function(p)
@@ -330,6 +332,17 @@ codigo_artefacto <- function(clave, params, tabla = NULL) {
   }
   c(lineas, paste0(actual, ")", final))
 }
+
+#' Filas antes y después de la preparación. `filas_al_cargar` lo define el
+#' chunk de carga, antes de la sección Preparación; acá `datos` ya está filtrado.
+.codigo_filtro <- function(p)
+  c('filtro <- data.frame(',
+    '  estado = c("filas al cargar", "filas ahora", "filas fuera"),',
+    '  cantidad = c(filas_al_cargar, nrow(datos), filas_al_cargar - nrow(datos)))',
+    if (length(p$filtros) && !identical(p$filtros, "ninguno"))
+      sprintf("# Filtros aplicados: %s", paste(p$filtros, collapse = "; "))
+    else NULL,
+    'filtro')
 
 .codigo_vista_previa <- function(p)
   c('cat("Unidades estad\u00edsticas (filas):", nrow(datos), "\\n")',

@@ -52,7 +52,8 @@ salida_filtro <- function(ns) {
       shiny::tableOutput(ns("resumen_filtro")),
       shiny::tags$h6(class = "mt-3", "Pila aplicada, en orden"),
       salida_tabla(ns, "pila_filtro")),
-    contexto = salida_contexto(ns, "contexto_filtro"))
+    contexto = salida_contexto(ns, "contexto_filtro"),
+    encabezado_extra = casilla_informe(ns, "f1.filtro.filas"))
 }
 
 servidor_filtro <- function(input, output, session, datos_base, dataset) {
@@ -131,10 +132,7 @@ servidor_filtro <- function(input, output, session, datos_base, dataset) {
     ds <- dataset()
     crudos <- datos_base()
     shiny::req(ds, crudos)
-    data.frame(
-      estado = c("filas al cargar", "filas ahora", "filas fuera"),
-      cantidad = c(nrow(crudos), ds$n, nrow(crudos) - ds$n),
-      stringsAsFactors = FALSE)
+    tabla_filtro(nrow(crudos), ds$n)
   })
 
   dibujar_tabla(output, "pila_filtro", shiny::reactive({
@@ -151,16 +149,26 @@ servidor_filtro <- function(input, output, session, datos_base, dataset) {
                      ds <- dataset()
                      crudos <- datos_base()
                      if (is.null(ds) || is.null(crudos)) return(NULL)
-                     filtros <- vapply(
-                       ds$transformaciones[is_tipos_pila(ds$transformaciones,
-                                                         "filtro")],
-                       function(entrada) sprintf(
-                         "%s en [%s]", entrada$columnas[1],
-                         paste(entrada$params$valores, collapse = ", ")), "")
                      list(antes = nrow(crudos), ahora = ds$n,
-                          filtros = if (length(filtros)) filtros else "ninguno")
+                          filtros = .describir_filtros(ds))
                    }), sufijo = "contexto_filtro")
 }
+
+#' Los filtros de la pila, en una línea cada uno: "Hora en [12:00]".
+#' Lo usan el contexto del panel y lo que viaja al cuaderno.
+.describir_filtros <- function(ds) {
+  pila <- ds$transformaciones
+  filtros <- vapply(pila[is_tipos_pila(pila, "filtro")], function(entrada)
+    sprintf("%s en [%s]", entrada$columnas[1],
+            paste(entrada$params$valores, collapse = ", ")), "")
+  if (length(filtros)) filtros else "ninguno"
+}
+
+#' La tabla del panel: cuántas filas trajo el archivo y cuántas quedan.
+tabla_filtro <- function(al_cargar, ahora)
+  data.frame(estado = c("filas al cargar", "filas ahora", "filas fuera"),
+             cantidad = c(al_cargar, ahora, al_cargar - ahora),
+             stringsAsFactors = FALSE)
 
 #' ¿Cuáles entradas de la pila son de un tipo dado? Para el contexto del
 #' panel: qué filtros exactos dejó aplicados el usuario.

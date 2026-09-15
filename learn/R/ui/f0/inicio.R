@@ -61,20 +61,35 @@ mod_inicio_server <- function(id, almacen) {
       )
     })
 
+    # Antes era una lista escrita a mano del Hito 1 ("54 métodos", "las fases
+    # todavía no calculan") y quedó mintiendo en cuanto la fase 1 y los primeros
+    # métodos corrieron. Las cuentas y los nombres salen del registro.
     output$ruta <- shiny::renderUI({
+      catalogo <- metodos_df()
+      activos <- catalogo[catalogo$estado == "activo", , drop = FALSE]
+      bloqueados <- catalogo$clave[catalogo$estado == "bloqueado"]
+      nombres_activos <- if (nrow(activos))
+        paste(activos$nombre, collapse = " y ") else "ninguno todavía"
       shiny::tags$ol(
         class = "mb-0 ps-3",
-        shiny::tags$li(shiny::tags$strong("Modelado → Catálogo"),
-                       ": mirá los 54 métodos y abrí una ficha."),
-        shiny::tags$li("Probá el filtro ", shiny::tags$em("Solo los que corren",
-                       " en este modo"), " para ver qué cambia entre navegador",
-                       " y servidor."),
-        shiny::tags$li("Abrí la ficha de ", shiny::tags$code("mlp"),
-                       " (bloqueado) y leé el puente: conecta un método",
-                       " inalcanzable con uno que sí corre acá."),
-        shiny::tags$li("Fases 1, 3 y 4 navegables, todavía no",
-                       " calculan. Avance está en ",
-                       shiny::tags$code("learn/PLAN.md"), ".")
+        shiny::tags$li(shiny::tags$strong("① Datos"),
+                       ": cargá una fuente (", shiny::tags$code("ori"),
+                       " es la del Taller 01), filtrá, declará el diccionario",
+                       " y mirá ▣ Análisis."),
+        shiny::tags$li("Marcá ", shiny::tags$strong("Añadir"),
+                       " en los paneles que quieras entregar y bajalos desde ",
+                       shiny::tags$strong("Informe"),
+                       " como un cuaderno .Rmd que corre solo."),
+        shiny::tags$li(shiny::tags$strong("② Modelado → Catálogo"),
+                       sprintf(": %d métodos registrados, %d corren hoy (%s).",
+                               nrow(catalogo), nrow(activos), nombres_activos)),
+        if (nrow(activos)) shiny::tags$li(
+          shiny::tags$strong("③ Ajuste"), " y ", shiny::tags$strong("④ Evaluación"),
+          ": corré uno de esos métodos sobre tu dataset y mirá sus diagnósticos."),
+        if (length(bloqueados)) shiny::tags$li(
+          "Abrí la ficha de ", shiny::tags$code(bloqueados[1]),
+          " (bloqueado) y leé el puente: conecta un método inalcanzable con",
+          " uno que sí corre acá.")
       )
     })
 

@@ -179,6 +179,15 @@ probar("los pesos de clase suman n / clases",
 # ---------------------------------------------------------------------------
 cat("\n[fase 1 · fuente ORI y filtro de filas]\n")
 
+probar("temperatura a las 12:00: IQR 1.5 marca 8 y z 3 marca uno solo", {
+  # El caso que parecia un cambio en los datos: era un cambio de criterio.
+  medio_dia <- cargar_ori(ruta_ori())
+  medio_dia <- medio_dia[medio_dia$Hora == "12:00", ]
+  iqr <- detectar_atipicos(medio_dia, "Temperatura", "iqr", 1.5)
+  z <- detectar_atipicos(medio_dia, "Temperatura", "z", 3)
+  nrow(medio_dia) == 118L && attr(iqr, "n_atipicos") == 8L &&
+    attr(z, "n_atipicos") == 1L && attr(z, "umbral") == 3
+})
 probar("ORI se lee con su separador y su codificacion", {
   crudo <- cargar_ori()
   ncol(crudo) == 18L && nrow(crudo) > 4000L &&
@@ -300,6 +309,11 @@ probar("Q-Q de Mahalanobis",
        dibuja(graficar_qq_mahalanobis(
          mahalanobis_cuadrado(sintetico[, c("valor", "observacion")]), 2L)))
 probar("matriz de nulidad", dibuja(graficar_nulidad(patron_faltantes(con_huecos))))
+probar("el subtitulo de atipicos dice el criterio y su umbral", {
+  tabla <- detectar_atipicos(sintetico, "valor", "z", 2.5)
+  grafico <- graficar_atipicos(tabla, "valor")
+  grepl("z > 2.5", grafico$labels$subtitle, fixed = TRUE)
+})
 probar("atipicos marcados",
        dibuja(graficar_atipicos(detectar_atipicos(sintetico, "valor", "z"),
                                 "valor")))

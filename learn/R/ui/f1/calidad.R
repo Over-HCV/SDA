@@ -14,7 +14,9 @@ controles_calidad <- function(ns) {
                                     "z (desvios)" = "z",
                                     "Mahalanobis (multivariado)" = "mahalanobis"),
                         selected = "iqr"),
-    shiny::sliderInput(ns("umbral_atipicos"), "Umbral", 1, 5, 1.5, step = 0.1),
+    shiny::sliderInput(ns("umbral_atipicos"),
+                       "Umbral (no aplica a Mahalanobis)", 1, 5, 1.5,
+                       step = 0.1),
     shiny::tags$hr(),
     shiny::selectInput(ns("metodo_imputar"), "Imputar faltantes con",
                        choices = c("mediana", "media", "moda")),
@@ -70,6 +72,15 @@ servidor_calidad <- function(input, output, session, dataset, muestreo) {
     tryCatch(detectar_atipicos(entrada, input$columna_cal, metodo, umbral),
              error = function(e) NULL)
   })
+
+  # Un mismo número no significa lo mismo en los dos criterios: 1.5 RIC es una
+  # cerca amplia y 1.5 desvíos marca casi todo. Al cambiar de criterio el
+  # slider vuelve al valor convencional de ese criterio.
+  shiny::observeEvent(input$metodo_atipicos, {
+    defecto <- switch(input$metodo_atipicos, iqr = 1.5, z = 3, NULL)
+    if (!is.null(defecto))
+      shiny::updateSliderInput(session, "umbral_atipicos", value = defecto)
+  }, ignoreInit = TRUE)
 
   output$nulidad <- shiny::renderPlot(graficar_nulidad(faltantes()))
   output$faltantes_columna <- shiny::renderPlot(

@@ -54,7 +54,8 @@ detectar_atipicos <- function(datos, columna = NULL, metodo = "iqr",
     numericas <- sum(vapply(datos, is.numeric, logical(1)))
     corte <- stats::qchisq(nivel, df = max(1L, numericas))
     return(.tabla_atipicos(seq_len(nrow(datos)), rep(NA_real_, nrow(datos)),
-                           distancias, distancias > corte, corte, metodo))
+                           distancias, distancias > corte, corte, metodo,
+                           nivel))
   }
 
   valores <- as.numeric(datos[[columna]])
@@ -65,7 +66,7 @@ detectar_atipicos <- function(datos, columna = NULL, metodo = "iqr",
     distancias <- if (!is.finite(desviacion) || desviacion == 0)
       rep(0, length(valores)) else abs(valores - centro) / desviacion
     return(.tabla_atipicos(seq_along(valores), valores, distancias,
-                           distancias > corte, corte, metodo))
+                           distancias > corte, corte, metodo, corte))
   }
 
   corte <- umbral %||% 1.5
@@ -74,15 +75,20 @@ detectar_atipicos <- function(datos, columna = NULL, metodo = "iqr",
   limites <- c(cuartiles[1] - corte * rango, cuartiles[2] + corte * rango)
   distancias <- pmax(limites[1] - valores, valores - limites[2], 0)
   .tabla_atipicos(seq_along(valores), valores, distancias,
-                  valores < limites[1] | valores > limites[2], limites, metodo)
+                  valores < limites[1] | valores > limites[2], limites, metodo,
+                  corte)
 }
 
-.tabla_atipicos <- function(filas, valores, distancias, marca, corte, metodo) {
+# `umbral` es lo que eligió el usuario (1.5 RIC, 3 desvíos, nivel 0.975);
+# `corte` es donde cae en la escala de los datos. El subtítulo necesita los dos.
+.tabla_atipicos <- function(filas, valores, distancias, marca, corte, metodo,
+                            umbral = NULL) {
   marca[is.na(marca)] <- FALSE
   tabla <- data.frame(fila = filas, valor = valores, distancia = distancias,
                       atipico = marca, stringsAsFactors = FALSE)
   attr(tabla, "corte") <- corte
   attr(tabla, "metodo") <- metodo
+  attr(tabla, "umbral") <- umbral
   attr(tabla, "n_atipicos") <- sum(marca)
   tabla
 }
