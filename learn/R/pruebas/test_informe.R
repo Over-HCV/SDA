@@ -45,8 +45,9 @@ seleccion_cuaderno <- list(
        tabla = NULL))
 cuaderno <- armar_informe_exploracion(seleccion_cuaderno, ds_cuaderno)
 
-probar("el cuaderno abre con el YAML de R Markdown",
-       cuaderno[1] == "---" && any(grepl("output:", cuaderno, fixed = TRUE)))
+probar("el cuaderno abre con el YAML de la plantilla del taller",
+       cuaderno[1] == "---" &&
+         any(grepl("taller-qmd-template.tex", cuaderno, fixed = TRUE)))
 probar("la fuente ori se recarga desde el CSV original, no desde el exportado",
        any(grepl('c("ORI.csv", "data/ORI.csv",', cuaderno, fixed = TRUE)) &&
          !any(grepl("datos-sda-lab.csv", cuaderno, fixed = TRUE)))
@@ -111,18 +112,10 @@ probar("el texto de un panel repetido no se copia dos veces", {
          cuando = "12:00:00", params = list(variable = "Temperatura")),
     list(clave = "f1.analisis.densidad", titulo = "Densidad kernel",
          cuando = "12:01:00", params = list(variable = "Presion")))
-  lineas <- armar_informe_exploracion(dos_densidades, ds_cuaderno)
+  lineas <- armar_informe_exploracion(dos_densidades, ds_cuaderno,
+                                      texto = "completo")
   sum(grepl("^### Qué muestra", lineas)) == 1L &&
     any(grepl("está en la primera sección", lineas, fixed = TRUE))
-})
-probar("el texto se puede pedir breve o no pedirlo", {
-  breve <- armar_informe_exploracion(seleccion_cuaderno, ds_cuaderno,
-                                     texto = "breve")
-  pelado <- armar_informe_exploracion(seleccion_cuaderno, ds_cuaderno,
-                                      texto = "ninguno")
-  !any(grepl("^### Para qué sirve", breve)) &&
-    any(grepl("^### Cuándo engaña", breve)) &&
-    length(pelado) < length(breve)
 })
 probar("la lectura escrita en la app reemplaza al recordatorio", {
   con_nota <- seleccion_cuaderno
@@ -134,8 +127,12 @@ probar("la lectura escrita en la app reemplaza al recordatorio", {
 probar("hay una seccion por panel marcado, con su clave",
        sum(grepl("^## ", cuaderno)) == 2L &&
          any(grepl("# f1.analisis.dispersion", cuaderno, fixed = TRUE)))
-probar("el pie dice cuantos paneles y en que modo se genero",
-       any(grepl("2 paneles", cuaderno, fixed = TRUE)))
+probar("el pie dice cuantos paneles y en que modo se genero", {
+  con_marco <- armar_informe_exploracion(
+    seleccion_cuaderno, ds_cuaderno,
+    opciones = c(opciones_cuaderno(), "marco"))
+  any(grepl("2 paneles", con_marco, fixed = TRUE))
+})
 probar("un cuaderno sin dataset no falla, lo dice", {
   vacio <- armar_informe_exploracion(list(), NULL)
   any(grepl("sin dataset cargado", vacio, fixed = TRUE))

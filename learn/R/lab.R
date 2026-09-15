@@ -36,9 +36,10 @@
 # misma configuración sirve por consola y abriendo la app con
 # `?sesion=...`: se guarda una vez y se reusa.
 #
-# `--texto completo|breve|ninguno` gradúa cuánto texto explicativo entra al
-# cuaderno. El taller puntúa la concisión, así que es una decisión de quien
-# entrega y no una constante.
+# `--incluir` y `--excluir` prenden y apagan piezas del cuaderno (texto del
+# panel, procedencia, tablas de estado, YAML de la plantilla: ver
+# informe/opciones.R), sobre las de fábrica o las de la sesión. `--texto
+# completo|breve|ninguno` es el atajo viejo para las dos piezas de texto.
 #
 # En `cuaderno`, lo que va tras los dos puntos son los parámetros del panel:
 # columnas separadas por `+`, y opciones con nombre como `normal=TRUE`. Son los
@@ -255,7 +256,8 @@ COMANDOS <- list(
   cuaderno = function(ds, args, opciones = list()) {
     seleccion <- seleccion_de_args(ds, args, opciones)
     armar_informe_exploracion(seleccion, ds,
-                              texto = opciones$texto %||% .texto_de_sesion(opciones))
+                              opciones = .piezas_pedidas(opciones),
+                              texto = opciones$texto)
   },
 
   #' La sesión guardada: lo mismo que descarga ⚙ Objetos, desde la consola.
@@ -263,7 +265,9 @@ COMANDOS <- list(
   #' después con `--sesion` o con `?sesion=` en la app.
   sesion = function(ds, args, opciones = list()) {
     seleccion <- seleccion_de_args(ds, args, opciones)
-    sesion_actual(NULL, ds, seleccion, opciones$texto %||% "completo")
+    sesion_actual(NULL, ds, seleccion,
+                  opciones_cuaderno(.piezas_pedidas(opciones),
+                                    opciones$texto))
   }
 )
 
@@ -282,9 +286,20 @@ seleccion_de_args <- function(ds, args, opciones) {
   seleccion_con_tablas(guardada, ds)
 }
 
-.texto_de_sesion <- function(opciones) {
-  if (is.null(opciones$sesion)) return("completo")
-  leer_sesion_cli(opciones$sesion)$fase1$texto %||% "completo"
+#' Las piezas del cuaderno pedidas en la línea de comandos.
+#'
+#' Se parte de las de la sesión (si se pasó una) o de las de fábrica, y encima
+#' se aplican `--incluir` y `--excluir`, que son listas separadas por comas.
+.piezas_pedidas <- function(opciones) {
+  base <- if (is.null(opciones$sesion)) opciones_cuaderno() else
+    opciones_cuaderno(leer_sesion_cli(opciones$sesion)$fase1$cuaderno)
+  piezas <- union(base, .lista_de_opcion(opciones$incluir))
+  opciones_cuaderno(setdiff(piezas, .lista_de_opcion(opciones$excluir)))
+}
+
+.lista_de_opcion <- function(valor) {
+  if (is.null(valor) || !nzchar(valor)) return(character(0))
+  trimws(strsplit(valor, ",", fixed = TRUE)[[1]])
 }
 
 #' Un `clave:token+token` a la entrada de selección que espera el cuaderno.
@@ -400,7 +415,9 @@ correr_lab <- function(argumentos = commandArgs(trailingOnly = TRUE)) {
     cat("comandos:", paste(names(COMANDOS), collapse = " · "), "\n")
     cat("opciones: --fuente <clave> · --filtro Columna=valor (repetible)",
         "· --sesion archivo.json · --texto completo|breve|ninguno",
-        "· --salida archivo\n")
+        "· --incluir pieza,pieza · --excluir pieza · --salida archivo\n")
+    cat("piezas del cuaderno:", paste(names(PIEZAS_CUADERNO), collapse = " · "),
+        "\n")
     return(invisible(FALSE))
   }
   # `fuentes` y `casillas` son catálogos: preguntan qué hay, no miran datos.

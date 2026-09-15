@@ -2,7 +2,7 @@
 #
 # Responsabilidad: probar que una sesión guardada vuelve con todo lo que se
 # hizo en ① Datos —fuente, pila, diccionario, balanceo, partición, paneles
-# marcados, lecturas y nivel de texto— sin Shiny.
+# marcados, lecturas y piezas del cuaderno— sin Shiny.
 #
 # Uso:  Rscript learn/R/pruebas/test_sesion.R
 #
@@ -61,7 +61,23 @@ probar("lo declarado en el diccionario sobrevive al viaje", {
     importar_sesion_json(archivo_sesion)$fase1)$dataset$diccionario
   identical(dicc$escala[dicc$columna == "Temperatura"], "intervalo")
 })
-probar("balanceo, particion, lecturas y nivel de texto vuelven con la sesion", {
+#' Una sesion tal como la escribia la version 1: `texto` en vez de `cuaderno`,
+#' sin balanceo ni particion. Se escribe a JSON y se vuelve a leer para que el
+#' camino probado sea el de un archivo de verdad.
+sesion_version_1 <- function() {
+  archivo <- tempfile(fileext = ".json")
+  exportar_json(list(
+    proyecto = "sda-lab", tipo = "sesion", version = 1L,
+    exportado = "2026-09-12 07:25:00", modo = "servidor",
+    fase1 = list(
+      fuente = "ori", nombre = "ori", semilla = 42L, n_crudo = 4543L,
+      transformaciones = list(list(tipo = "filtro", columnas = "Hora",
+                                   params = list(valores = "12:00"))),
+      seleccion = list(), texto = "breve")), archivo)
+  importar_sesion_json(archivo)$fase1
+}
+
+probar("balanceo, particion, lecturas y piezas vuelven con la sesion", {
   # Lo que antes se perdia al recargar: la receta del balanceo y de la
   # particion se guardan (no las filas) y se rehacen igual con su semilla.
   ds_rec <- dataset_de_sesion(importar_sesion_json(archivo_sesion)$fase1)$dataset
@@ -73,22 +89,24 @@ probar("balanceo, particion, lecturas y nivel de texto vuelven con la sesion", {
   ds_rec$particion <- particionar(ds_rec$df, "holdout", 0.7,
                                   estratificar = "Pronostico", semilla = 9L)
   archivo <- tempfile(fileext = ".json")
-  exportar_sesion_json(sesion_actual(nuevo_almacen(), ds_rec, seleccion_sesion,
-                                     texto = "breve"), archivo)
+  exportar_sesion_json(
+    sesion_actual(nuevo_almacen(), ds_rec, seleccion_sesion,
+                  cuaderno = c("notas", "procedencia")), archivo)
   leida <- importar_sesion_json(archivo)$fase1
   vuelta <- dataset_de_sesion(leida)$dataset
-  identical(leida$texto, "breve") &&
+  setequal(leida$cuaderno, c("procedencia", "notas")) &&
     identical(vuelta$df, ds_rec$df) &&
     identical(vuelta$balanceo$metodo, "sobremuestreo") &&
     identical(vuelta$particion$asignacion, ds_rec$particion$asignacion) &&
     is.null(importar_sesion_json(archivo)$fase1$particion$asignacion)
 })
 probar("una sesion vieja (sin balanceo ni particion) abre igual", {
-  # La del Taller 01 ya no viaja con la app (no se reparte resuelto); vive con
-  # el taller y sirve de archivo anterior a estos campos.
-  vieja <- dataset_de_sesion(importar_sesion_json(
-    ruta_app("workshops", "taller-01", "sesion-taller-01.json"))$fase1)$dataset
-  vieja$n == 118L && is.null(vieja$balanceo) && is.null(vieja$particion)
+  # Una sesion de la version 1: sin balanceo ni particion, y con el nivel de
+  # texto donde hoy van las piezas del cuaderno. Se arma aca y no se lee de un
+  # taller: el archivo de un taller lo borra quien limpia su carpeta.
+  vieja <- sesion_version_1()
+  ds <- dataset_de_sesion(vieja)$dataset
+  ds$n == 118L && is.null(ds$balanceo) && is.null(ds$particion)
 })
 probar("la sesion de ejemplo que trae la app es la del Taller 0", {
   ejemplos <- basename(list.files(ruta_app("sesiones")))

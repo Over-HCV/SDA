@@ -799,9 +799,12 @@ learn/
 │  │   ├─ contratos.R           validar_compatibilidad()
 │  │   ├─ textos.R              texto() y ficha(), tolerantes a .md ausente
 │  │   ├─ exportar.R            JSON · CSV · PNG · RDS · Rmd · MD
-│  │   ├─ informe.R             armado del cuaderno .Rmd (corridas, f2-f4)
-│  │   ├─ informe_exploracion.R cuaderno de la fase 1 + CASILLAS_INFORME
-│  │   ├─ informe_codigos.R     un artefacto -> R autónomo para el cuaderno
+│  │   ├─ informe/              el cuaderno exportable
+│  │   │   ├─ corridas.R        armado del cuaderno .Rmd (corridas, f2-f4)
+│  │   │   ├─ exploracion.R     cuaderno de la fase 1 + CASILLAS_INFORME
+│  │   │   ├─ encabezado.R      el YAML: estudio (.Rmd) o taller (.qmd)
+│  │   │   ├─ opciones.R        PIEZAS_CUADERNO: qué entra y qué no
+│  │   │   └─ codigos.R         un artefacto -> R autónomo para el cuaderno
 │  │   ├─ sesion.R             fase 1 guardada: fuente + pila + diccionario
 │  │   │                       declarado + paneles marcados, y su vuelta
 │  │   ├─ modo.R                wasm vs servidor

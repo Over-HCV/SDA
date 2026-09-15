@@ -30,14 +30,18 @@ mod_informe_ui <- function(id) {
                             "como una sección del cuaderno: su texto, sus",
                             "parámetros y el código R que lo redibuja, en el",
                             "orden de la lista: las flechas lo cambian.")),
-        shiny::radioButtons(
-          ns("texto"), "Texto explicativo de cada panel",
-          choices = c("completo", "breve", "ninguno"), selected = "completo"),
+        shiny::checkboxGroupInput(
+          ns("piezas"), "Qué lleva el cuaderno",
+          choiceNames = unname(PIEZAS_CUADERNO),
+          choiceValues = names(PIEZAS_CUADERNO),
+          selected = PIEZAS_POR_DEFECTO),
         shiny::tags$p(class = "small text-muted",
-                      paste("El taller puntúa la concisión. `breve` deja solo",
-                            "qué muestra y cuándo engaña; el texto de un panel",
-                            "repetido no se copia dos veces.")),
-        shiny::downloadButton(ns("bajar_rmd"), "Cuaderno .Rmd",
+                      paste("Marcado sale el cuaderno del taller: sin texto",
+                            "del lab ni procedencia, y con el YAML de la",
+                            "plantilla. Para estudiar, prendé el texto del",
+                            "panel; el de un panel repetido no se copia dos",
+                            "veces.")),
+        shiny::downloadButton(ns("bajar_rmd"), "Cuaderno",
                               class = "btn-primary btn-sm w-100 mb-2"),
         shiny::downloadButton(ns("bajar_csv"), "Datos actuales (CSV)",
                               class = "btn-outline-primary btn-sm w-100 mb-2"),
@@ -75,18 +79,24 @@ mod_informe_ui <- function(id) {
     shiny::icon(if (subir) "arrow-up" else "arrow-down"))
 }
 
-#' @param texto reactiveVal del nivel de texto (app.R): viaja con la sesión
-mod_informe_server <- function(id, seleccion, dataset, texto = NULL) {
+#' @param cuaderno reactiveVal de las piezas marcadas (app.R): viaja con la
+#'   sesión
+mod_informe_server <- function(id, seleccion, dataset, cuaderno = NULL) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # El nivel de texto es parte de la sesión: sube al reactiveVal al elegirlo
-    # y baja al radio cuando una sesión abierta trae otro.
-    if (!is.null(texto)) {
-      shiny::observeEvent(input$texto, texto(input$texto), ignoreInit = TRUE)
-      shiny::observeEvent(texto(), {
-        if (!identical(input$texto, texto()))
-          shiny::updateRadioButtons(session, "texto", selected = texto())
+    # Las piezas del cuaderno son parte de la sesión: suben al reactiveVal al
+    # marcarlas y bajan a las casillas cuando una sesión abierta trae otras.
+    # ignoreNULL = FALSE porque desmarcar todo es una elección válida y
+    # checkboxGroupInput manda NULL en ese caso.
+    if (!is.null(cuaderno)) {
+      shiny::observeEvent(input$piezas,
+                          cuaderno(opciones_cuaderno(input$piezas)),
+                          ignoreInit = TRUE, ignoreNULL = FALSE)
+      shiny::observeEvent(cuaderno(), {
+        if (!setequal(input$piezas %||% character(0), cuaderno()))
+          shiny::updateCheckboxGroupInput(session, "piezas",
+                                          selected = cuaderno())
       })
     }
 
@@ -204,14 +214,20 @@ mod_informe_server <- function(id, seleccion, dataset, texto = NULL) {
                               duration = 3)
     })
 
+    # La extensión la manda la plantilla: quarto solo dibuja los diagramas
+    # mermaid en .qmd, y el cuaderno de estudio sigue siendo .Rmd.
     output$bajar_rmd <- shiny::downloadHandler(
-      filename = "sda-lab-exploracion.Rmd",
+      filename = function() sprintf(
+        "sda-lab-exploracion.%s",
+        if (incluye(opciones_cuaderno(input$piezas), "plantilla_taller"))
+          "qmd" else "Rmd"),
       content = function(archivo) {
         shiny::validate(shiny::need(
           length(seleccion()) > 0L, "Marcá al menos una casilla Añadir."))
         writeLines(armar_informe_exploracion(
           .con_lecturas(seleccion(), input), dataset(),
-          texto = input$texto %||% "completo"), archivo, useBytes = TRUE)
+          opciones = opciones_cuaderno(input$piezas)), archivo,
+          useBytes = TRUE)
       })
 
     # La lectura que viaja al cuaderno: la del cuadro de texto y, si ese

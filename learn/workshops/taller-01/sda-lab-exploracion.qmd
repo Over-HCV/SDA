@@ -34,24 +34,9 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 # install.packages(c("ggplot2", "ggExtra"))
 library(ggplot2)
 library(ggExtra)
-
-# Presentación: código a la izquierda y resultado a la derecha, solo para
-# instrucciones cuya salida es uno o dos números (entorno codres de la
-# plantilla). Cada instrucción se evalúa en el entorno del documento.
-dos_col <- function(...) {
-  for (codigo in c(...)) {
-    salida <- capture.output({
-      v <- withVisible(eval(parse(text = codigo),
-                            envir = knitr::knit_global()))
-      if (v$visible) print(v$value)
-    })
-    cat("\n```{=latex}\n\\begin{codres}\n```\n\n",
-        "```r\n", codigo, "\n```\n\n",
-        "```{=latex}\n\\codressep\n```\n\n",
-        "```\n", paste(salida, collapse = "\n"), "\n```\n\n",
-        "```{=latex}\n\\end{codres}\n```\n\n", sep = "")
-  }
-}
+# Helpers compartidos por todos los talleres: dos_columnas(), caja(), densidad(),
+# modas(), g1() y tabla_documentacion(). Ver template/R/taller.R.
+source("../template/R/taller.R")
 ```
 
 # Los datos {#datos}
@@ -60,7 +45,7 @@ La base `ORI.csv` contiene mediciones meteorológicas de municipios de la regió
 Orinoquía \parencite{ideam-datos} donde cada observación corresponde a la
 medición de un municipio a una hora concreta de un día dado. Las unidades se
 toman del enunciado del taller, es decir, temperatura y punto de rocío en °C,
-velocidad del viento en mph (millas por hora) y presión en hPa. Todo el
+velocidad del viento en m/h y presión en hPa. Todo el
 análisis se realiza en R \parencite{r-core} con gráficos elaborados en
 `ggplot2` \parencite{ggplot2} e histogramas marginales en `ggExtra`
 \parencite{ggextra}, mientras que la documentación de cada función utilizada se
@@ -96,7 +81,7 @@ datos <- base[base$Hora == "12:00", ] # registros de medio día
 ## Pregunta 1 --- Unidades estadísticas y variables {#p1}
 
 ```{r p1, echo=FALSE, results="asis"}
-dos_col("dim(base)", "nrow(datos)", "table(datos$Fecha)")
+dos_columnas("dim(base)", "nrow(datos)", "table(datos$Fecha)")
 ```
 
 **¿Cuántas UE, variables, filas y columnas tiene la base?** La tabla cuenta con
@@ -162,7 +147,7 @@ grados centígrados son numéricos pero de intervalo y no de razón.
 ```{r p3}
 knitr::kable(data.frame(
   Variable = c("Pronóstico", "Municipio", "Temperatura (°C)",
-               "Velocidad del viento (mph)"),
+               "Velocidad del viento (m/h)"),
   `Tipo en R` = sapply(datos[c("Pronostico", "Municipio",
                                "Temperatura",
                                "Velocidad_del_Viento")], class),
@@ -189,8 +174,8 @@ c. **Temperatura.** Es de intervalo y cuantitativa continua dado que sus
    aclarar que R la carga como `numeric` sin distinguir nada de esto, así que
    la escala la declara quien analiza y no la detección automática.
 d. **Velocidad del viento.** Es de razón y cuantitativa continua ya que su cero
-   es absoluto (0 mph sí es ausencia de viento), lo cual hace que los cocientes
-   tengan sentido y que 2 mph sea efectivamente el doble que 1 mph.
+   es absoluto (0 m/h sí es ausencia de viento), lo cual hace que los cocientes
+   tengan sentido y que 2 m/h sea efectivamente el doble que 1 m/h.
 
 Las figuras siguientes resumen ambos ejes por separado y se leen de arriba hacia
 abajo hasta llegar a los ejemplos de la base.
@@ -278,19 +263,6 @@ mientras que lo que queda por fuera se dibuja punto por punto. Para no leer las
 posiciones a ojo se anotan sobre cada caja los valores de $Q_1$, mediana y
 $Q_3$.
 
-```{r p4}
-caja <- function(variable, etiqueta) {
-  x <- datos[[variable]]
-  q <- quantile(x, c(0.25, 0.5, 0.75))
-  ggplot(data.frame(x), aes(x = x, y = "")) +
-    geom_boxplot(fill = "steelblue", alpha = 0.5,
-                 outlier.colour = "firebrick") +
-    annotate("text", x = q, y = 1.5, label = format(round(q, 2)),
-             size = 3, check_overlap = TRUE) +
-    labs(x = etiqueta, y = NULL) + theme_minimal()
-}
-```
-
 ```{r p4-temperatura}
 #| fig-cap: "Diagrama de caja de la temperatura a medio día: Se anotan Q1, mediana y Q3."
 #| fig-height: 2.1
@@ -300,7 +272,7 @@ caja("Temperatura", "Temperatura (°C)")
 ```{r p4-viento}
 #| fig-cap: "Diagrama de caja de la velocidad del viento a medio día: Se anotan Q1, mediana y Q3."
 #| fig-height: 2.1
-caja("Velocidad_del_Viento", "Velocidad del viento (mph)")
+caja("Velocidad_del_Viento", "Velocidad del viento (m/h)")
 ```
 
 **Temperatura.** El centro se ubica alrededor de los 30.4 °C y la caja es
@@ -313,10 +285,10 @@ localización es alta y concentrada pero la dispersión no es simétrica, puesto
 que unos pocos registros frescos estiran la distribución hacia la izquierda
 (asimetría negativa).
 
-**Velocidad del viento.** El centro está cerca de 1.7 mph y la caja va
-aproximadamente de 1.0 a 2.2 mph, así que en términos relativos su dispersión es
+**Velocidad del viento.** El centro está cerca de 1.7 m/h y la caja va
+aproximadamente de 1.0 a 2.2 m/h, así que en términos relativos su dispersión es
 mucho mayor que la de la temperatura dado que la caja ocupa buena parte del
-recorrido total (de 0.4 a 3.7 mph). Los bigotes son relativamente balanceados
+recorrido total (de 0.4 a 3.7 m/h). Los bigotes son relativamente balanceados
 aunque el superior es algo más largo, lo cual sugiere una leve asimetría hacia
 valores altos que resulta coherente con una variable cuyo piso físico es cero y
 que solo puede estirarse hacia arriba. En esta variable no se observan atípicos.
@@ -339,10 +311,6 @@ simétrica, es negativo con cola a la izquierda y positivo con cola a la derecha
 ```{r p5}
 summary(datos$Temperatura)
 summary(datos$Velocidad_del_Viento)
-g1 <- function(x) {
-  d <- x - mean(x)
-  mean(d^3) / mean(d^2)^(3/2)
-}
 variables <- datos[c("Temperatura", "Velocidad_del_Viento")]
 resumen <- sapply(variables, function(x)
   c(media = mean(x), mediana = median(x), s = sd(x), RIC = IQR(x),
@@ -363,7 +331,7 @@ a. **Temperatura.** La media (29.75 °C) queda por debajo de la mediana
    lado la desviación estándar (2.28 °C) resulta casi igual al RIC (2.48 °C) a
    pesar de que el RIC deja por fuera los extremos, lo que muestra que los 8
    registros frescos están inflando $s$.
-b. **Velocidad del viento.** La media (1.719 mph) y la mediana (1.700 mph) casi
+b. **Velocidad del viento.** La media (1.719 m/h) y la mediana (1.700 m/h) casi
    coinciden con la media apenas por encima, mientras que $g_1 = 0.49$ confirma
    una asimetría positiva leve coherente con el bigote superior más largo. Su
    coeficiente de variación ($s/\bar{x}$) de 46 % expresa la mayor dispersión
@@ -381,7 +349,7 @@ los cuartiles de `summary()` pero no idénticas, lo que explica diferencias de
 centésimas en los límites.
 
 ```{r p6, echo=FALSE, results="asis"}
-dos_col("boxplot(datos$Presion,\n        plot = FALSE)$out",
+dos_columnas("boxplot(datos$Presion,\n        plot = FALSE)$out",
         "boxplot(datos$Punto_de_Rocio,\n        plot = FALSE)$out")
 ```
 
@@ -445,7 +413,7 @@ grafico <- ggplot(datos,
   geom_point(alpha = 0.6, colour = "#3572a8") +
   geom_smooth(method = "lm", formula = y ~ x, colour = "#d2601a",
               fill = "grey70", linewidth = 0.9) +
-  labs(x = "Temperatura (°C)", y = "Velocidad del viento (mph)",
+  labs(x = "Temperatura (°C)", y = "Velocidad del viento (m/h)",
        subtitle = subtitulo) +
   theme_minimal()
 ggMarginal(grafico, type = "histogram", fill = "#3572a8",
@@ -458,14 +426,14 @@ el recorrido, tanto en los registros cálidos entre 29 y 32 °C donde se concent
 la mayoría como en los pocos registros frescos de la izquierda, sin que la banda
 de puntos suba o baje al avanzar en el eje horizontal. La recta de mínimos
 cuadrados lo confirma al ser prácticamente plana, ya que el viento sube apenas
-0.009 mph por cada grado de temperatura con $R^2 = 0.001$, es decir que la
+0.009 m/h por cada grado de temperatura con $R^2 = 0.001$, es decir que la
 temperatura explica el 0.1 % de la variación del viento. Su banda de confianza
 se abre hacia la izquierda porque en esa zona solo están los 8 registros
 frescos, de modo que ahí la recta está mucho peor determinada.
 
 Los histogramas marginales por su parte describen cada variable por separado,
 con la temperatura apilada a la derecha y cola a la izquierda frente al viento
-con su masa entre 1 y 2 mph y cola a la derecha. La razón de verlos junto a la
+con su masa entre 1 y 2 m/h y cola a la derecha. La razón de verlos junto a la
 nube es que dos variables pueden ser asimétricas cada una y aun así no tener
 ninguna relación entre sí.
 
@@ -486,7 +454,7 @@ por lo que $r$ mide la fuerza de la relación **lineal** siendo $\pm 1$ una rect
 perfecta y $0$ la ausencia de relación lineal.
 
 ```{r p8, echo=FALSE, results="asis"}
-dos_col("cov(datos$Temperatura,\n    datos$Velocidad_del_Viento)",
+dos_columnas("cov(datos$Temperatura,\n    datos$Velocidad_del_Viento)",
         "cor(datos$Temperatura,\n    datos$Velocidad_del_Viento)")
 ```
 
@@ -508,12 +476,12 @@ dio $-0.011$, así que tampoco hay una relación curva escondida.
 **¿En qué unidades se encuentra cada medida?**
 
 a. **Covarianza.** Se expresa en el producto de las unidades de las dos
-   variables, en este caso °C·mph, por lo que su valor por sí solo no dice si la
-   relación es fuerte o débil. Además cambiaría si se midiera el viento en km/h
-   y pasaría a 0.0759 °C·km/h sin que la relación haya cambiado en lo más
-   mínimo.
+   variables, en este caso °C·m/h, por lo que su valor por sí solo no dice si
+   la relación es fuerte o débil. Además cambiaría si se midiera el viento en
+   km/h y pasaría a 0.0000472 °C·km/h sin que la relación haya cambiado en lo
+   más mínimo.
 b. **Correlación de Pearson.** Es adimensional, pues al dividir por $s_x$ (°C)
-   y $s_y$ (mph) las unidades se cancelan. Por esto siempre queda en $[-1, 1]$
+   y $s_y$ (m/h) las unidades se cancelan. Por esto siempre queda en $[-1, 1]$
    y es comparable entre cualquier par de variables.
 
 ## Pregunta 9 --- Dimensión de los datos {#p9}
@@ -560,23 +528,6 @@ extremos. Como un $h$ pequeño inventa modas y uno grande las borra, a manera de
 verificación se recalcula la KDE con $2h$ y se reportan solo las modas que
 sobreviven.
 
-```{r densidad-funciones}
-modas <- function(x, ajuste = 1) {
-  k <- density(x, adjust = ajuste)
-  round(k$x[which(diff(sign(diff(k$y))) == -2) + 1], 2)
-}
-densidad <- function(variable, etiqueta, color) {
-  x <- datos[[variable]]
-  ggplot(datos, aes(x = .data[[variable]])) +
-    geom_histogram(aes(y = after_stat(density)),
-                   bins = nclass.Sturges(x), fill = color,
-                   colour = "black", alpha = 0.5) +
-    geom_density(colour = "black", linewidth = 1) +
-    labs(x = etiqueta, y = "Densidad",
-         subtitle = sprintf("h (Silverman) = %.3f", bw.nrd0(x))) +
-    theme_minimal()
-}
-```
 
 ## Pregunta 10 --- Densidad de la temperatura {#p10}
 
@@ -586,7 +537,7 @@ densidad("Temperatura", "Temperatura (°C)", "lightblue")
 ```
 
 ```{r p10-hg1, echo=FALSE, results="asis"}
-dos_col("c(h = bw.nrd0(datos$Temperatura),\n  g1 = g1(datos$Temperatura))")
+dos_columnas("c(h = bw.nrd0(datos$Temperatura),\n  g1 = g1(datos$Temperatura))")
 ```
 
 ```{r p10-numeros}
@@ -628,7 +579,7 @@ densidad("Presion", "Presión (hPa)", "#f08a3c")
 ```
 
 ```{r p11-numeros, echo=FALSE, results="asis"}
-dos_col("c(h = bw.nrd0(datos$Presion),\n  g1 = g1(datos$Presion))",
+dos_columnas("c(h = bw.nrd0(datos$Presion),\n  g1 = g1(datos$Presion))",
         "c(media = mean(datos$Presion),\n  mediana = median(datos$Presion))")
 ```
 
@@ -666,7 +617,7 @@ razonable.
 ## Pregunta 12 --- Densidad del viento frente a la normal {#p12}
 
 La densidad normal teórica se construye con la media y la desviación estándar
-observadas ($\bar{x} = 1.719$ mph y $s = 0.789$ mph)
+observadas ($\bar{x} = 1.719$ m/h y $s = 0.789$ m/h)
 
 $$
 f(x) = \frac{1}{s\sqrt{2\pi}} \exp\!\left( -\frac{(x - \bar{x})^2}{2 s^2} \right),
@@ -685,12 +636,12 @@ ggplot(datos, aes(x = Velocidad_del_Viento)) +
                 colour = "firebrick", linetype = "dashed",
                 linewidth = 1) +
   xlim(-0.5, 4.5) +
-  labs(x = "Velocidad del viento (mph)", y = "Densidad") +
+  labs(x = "Velocidad del viento (m/h)", y = "Densidad") +
   theme_minimal()
 ```
 
 ```{r p12-pnorm, echo=FALSE, results="asis"}
-dos_col("pnorm(0, media_v, sd_v)")
+dos_columnas("pnorm(0, media_v, sd_v)")
 ```
 
 ```{r p12-numeros}
@@ -703,8 +654,8 @@ shapiro.test(x)
 lejos, pues $N(1.719,\ 0.789)$ acierta el centro y el ancho general de la
 distribución pero falla en la forma por tres motivos:
 
-a. **Asimetría y jorobas.** La KDE ($h = 0.274$ mph) concentra su masa entre 1
-   y 2 mph con jorobas locales cerca de 1.0, 1.9 y 3.3 mph y una cola derecha
+a. **Asimetría y jorobas.** La KDE ($h = 0.274$ m/h) concentra su masa entre 1
+   y 2 m/h con jorobas locales cerca de 1.0, 1.9 y 3.3 m/h y una cola derecha
    más pesada ($g_1 = +0.49$), mientras que la normal es una sola campana
    simétrica. Vale la pena matizar que esas jorobas se funden en una sola moda
    al duplicar $h$, por lo que lo robusto es la asimetría y no la
@@ -736,11 +687,7 @@ con R `r getRversion()`, `ggplot2` `r packageVersion("ggplot2")`, `ggExtra`
 `r packageVersion("ggExtra")` y `knitr` `r packageVersion("knitr")`.
 
 ```{r documentacion, echo=FALSE}
-r_doc <- function(paquete, tema) {
-  sprintf("https://stat.ethz.ch/R-manual/R-devel/library/%s/html/%s.html",
-          paquete, tema)
-}
-funciones <- data.frame(
+tabla_documentacion(data.frame(
   f = c("read.csv", "table", "summary", "quantile", "sd", "IQR",
         "boxplot", "barplot", "cov", "cor.test", "lm", "density",
         "bw.nrd0", "nclass.Sturges", "shapiro.test", "dnorm",
@@ -758,16 +705,5 @@ funciones <- data.frame(
   uso = c("Carga de la base", "P1, P2", "P5", "P4", "P5", "P5",
           "P6", "P2", "P8", "P8", "P7", "P10 a P12", "P10 a P12",
           "P10, P11", "P10, P12", "P12", "P4, P7, P10 a P12", "P4",
-          "P7", "P10, P11", "P10 a P12", "P12", "P7"))
-url <- ifelse(funciones$paquete == "ggplot2",
-              paste0("https://ggplot2.tidyverse.org/reference/",
-                     funciones$tema, ".html"),
-              ifelse(funciones$paquete == "ggExtra",
-                     "https://rdrr.io/cran/ggExtra/man/ggMarginal.html",
-                     r_doc(funciones$paquete, funciones$tema)))
-knitr::kable(data.frame(
-  Función = sprintf("[`%s()`](%s)", funciones$f, url),
-  Paquete = funciones$paquete,
-  Uso = funciones$uso),
-  caption = "Funciones de R utilizadas y enlace a su documentación.")
+          "P7", "P10, P11", "P10 a P12", "P12", "P7")))
 ```

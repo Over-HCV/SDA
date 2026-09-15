@@ -75,18 +75,18 @@ nuevo_estado_guardado <- function() {
   estado
 }
 
-.huella_sesion <- function(almacen, dataset, seleccion, texto) {
-  sesion <- sesion_actual(almacen, dataset, seleccion, texto)
+.huella_sesion <- function(almacen, dataset, seleccion, cuaderno) {
+  sesion <- sesion_actual(almacen, dataset, seleccion, cuaderno)
   sesion$exportado <- NULL
   sesion
 }
 
 #' Engancha la huella a los reactiveVal de app.R y le avisa al navegador si
 #' tiene que preguntar antes de salir. Se llama una vez, en app.R.
-vigilar_cambios <- function(session, almacen, dataset, seleccion, texto,
+vigilar_cambios <- function(session, almacen, dataset, seleccion, cuaderno,
                             guardado) {
   guardado$actual <- function()
-    .huella_sesion(almacen(), dataset(), seleccion(), texto())
+    .huella_sesion(almacen(), dataset(), seleccion(), cuaderno())
   pendiente <- shiny::reactive({
     objetos <- sum(vapply(TIPOS_OBJETO, function(tipo)
       almacen_contar(almacen(), tipo), integer(1)))
@@ -112,7 +112,7 @@ vigilar_cambios <- function(session, almacen, dataset, seleccion, texto,
 #'
 #' @return el mensaje para quien abrió, o NULL si falló (ya se notificó)
 abrir_sesion_en <- function(ruta, nombre, almacen, dataset, seleccion,
-                            texto = NULL, guardado = NULL) {
+                            cuaderno = NULL, guardado = NULL) {
   recuperado <- tryCatch({
     if (grepl("[.]rds$", nombre, ignore.case = TRUE))
       importar_sesion_rds(ruta) else importar_sesion_json(ruta)
@@ -126,21 +126,22 @@ abrir_sesion_en <- function(ruta, nombre, almacen, dataset, seleccion,
   # Una sesión sin objetos guardados trae el almacén vacío ({} en el JSON):
   # ponerlo tal cual dejaba un almacén sin contadores ni colecciones.
   if (length(recuperado$almacen$contadores)) almacen(recuperado$almacen)
-  mensaje <- restaurar_fase1_en(recuperado$fase1, dataset, seleccion, texto)
+  mensaje <- restaurar_fase1_en(recuperado$fase1, dataset, seleccion,
+                                cuaderno)
   .marcar_guardada(guardado)
   shiny::showNotification(mensaje, type = "message", duration = 6)
   invisible(mensaje)
 }
 
-#' @param almacen,dataset,seleccion,texto los reactiveVal de app.R
+#' @param almacen,dataset,seleccion,cuaderno los reactiveVal de app.R
 #' @param guardado nuevo_estado_guardado(), o NULL
 servidor_sesion <- function(input, output, session, almacen, dataset,
-                            seleccion, texto = NULL, guardado = NULL) {
+                            seleccion, cuaderno = NULL, guardado = NULL) {
   .sesion <- function() sesion_actual(
     almacen(),
     if (is.null(dataset)) NULL else dataset(),
     if (is.null(seleccion)) list() else seleccion(),
-    texto = if (is.null(texto)) "completo" else texto())
+    cuaderno = if (is.null(cuaderno)) NULL else cuaderno())
 
   output$bajar_json <- shiny::downloadHandler(
     filename = function() nombre_descarga("sesion", "json"),
@@ -158,14 +159,15 @@ servidor_sesion <- function(input, output, session, almacen, dataset,
 
   shiny::observeEvent(input$subir, {
     abrir_sesion_en(input$subir$datapath, input$subir$name, almacen, dataset,
-                    seleccion, texto, guardado)
+                    seleccion, cuaderno, guardado)
   })
 
   shiny::observeEvent(input$abrir_ejemplo, {
     ejemplos <- sesiones_de_ejemplo()
     ruta <- ejemplos[[input$ejemplo]]
     shiny::req(ruta)
-    abrir_sesion_en(ruta, basename(ruta), almacen, dataset, seleccion, texto,
+    abrir_sesion_en(ruta, basename(ruta), almacen, dataset, seleccion,
+                    cuaderno,
                     guardado)
   })
 

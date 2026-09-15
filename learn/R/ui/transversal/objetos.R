@@ -53,14 +53,15 @@ mod_objetos_ui <- function(id) {
 
 #' @param dataset reactiveVal del dataset vivo de la fase 1 (puede ser NULL)
 #' @param seleccion reactiveVal de los paneles marcados (puede ser NULL)
-#' @param texto,guardado reactiveVal del nivel de texto y estado de guardado
+#' @param cuaderno,guardado reactiveVal de las piezas del cuaderno y del
+#'   estado de guardado
 mod_objetos_server <- function(id, almacen, dataset = NULL, seleccion = NULL,
-                               texto = NULL, guardado = NULL) {
+                               cuaderno = NULL, guardado = NULL) {
   shiny::moduleServer(id, function(input, output, session) {
 
     # Guardar y abrir: el mismo componente que Inicio (transversal/sesion.R).
     servidor_sesion(input, output, session, almacen, dataset, seleccion,
-                    texto, guardado)
+                    cuaderno, guardado)
 
     for (tipo in TIPOS_OBJETO) {
       local({
@@ -98,9 +99,9 @@ mod_objetos_server <- function(id, almacen, dataset = NULL, seleccion = NULL,
 #' ⚙ Objetos y abrir la app con una sesión ya puesta (`?sesion=`).
 #'
 #' @param dataset,seleccion los reactiveVal de app.R
-#' @param texto reactiveVal del nivel de texto del cuaderno, o NULL
+#' @param cuaderno reactiveVal de las piezas del cuaderno, o NULL
 #' @return el mensaje que se le muestra a quien importó
-restaurar_fase1_en <- function(fase1, dataset, seleccion, texto = NULL) {
+restaurar_fase1_en <- function(fase1, dataset, seleccion, cuaderno = NULL) {
   if (is.null(fase1)) return("Sesión importada (sin estado de ① Datos).")
   if (is.null(dataset) || is.null(seleccion))
     return("Sesión importada; los objetos, sí; el estado de ① Datos no.")
@@ -110,7 +111,8 @@ restaurar_fase1_en <- function(fase1, dataset, seleccion, texto = NULL) {
     return(paste("Sesión importada, pero el dataset no se pudo recrear:",
                  reconstruido$avisos[[1]]$mensaje))
   dataset(reconstruido$dataset)
-  if (!is.null(texto) && !is.null(fase1$texto)) texto(fase1$texto)
+  if (!is.null(cuaderno) && !is.null(fase1$cuaderno))
+    cuaderno(opciones_cuaderno(fase1$cuaderno))
   marcados <- seleccion_con_tablas(seleccion_de_sesion(fase1),
                                    reconstruido$dataset)
   seleccion(marcados)

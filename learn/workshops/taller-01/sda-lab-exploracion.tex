@@ -108,7 +108,7 @@ municipios de la región Orinoquía \parencite{ideam-datos} donde cada
 observación corresponde a la medición de un municipio a una hora
 concreta de un día dado. Las unidades se toman del enunciado del taller,
 es decir, temperatura y punto de rocío en °C, velocidad del viento en
-mph (millas por hora) y presión en hPa. Todo el análisis se realiza en R
+m/h y presión en hPa. Todo el análisis se realiza en R
 \parencite{r-core} con gráficos elaborados en \texttt{ggplot2}
 \parencite{ggplot2} e histogramas marginales en \texttt{ggExtra}
 \parencite{ggextra}, mientras que la documentación de cada función
@@ -297,7 +297,7 @@ numéricos pero de intervalo y no de razón.
 \begin{Highlighting}[]
 \NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}
   \AttributeTok{Variable =} \FunctionTok{c}\NormalTok{(}\StringTok{"Pronóstico"}\NormalTok{, }\StringTok{"Municipio"}\NormalTok{, }\StringTok{"Temperatura (°C)"}\NormalTok{,}
-               \StringTok{"Velocidad del viento (mph)"}\NormalTok{),}
+               \StringTok{"Velocidad del viento (m/h)"}\NormalTok{),}
   \StringTok{\textasciigrave{}}\AttributeTok{Tipo en R}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{sapply}\NormalTok{(datos[}\FunctionTok{c}\NormalTok{(}\StringTok{"Pronostico"}\NormalTok{, }\StringTok{"Municipio"}\NormalTok{,}
                                \StringTok{"Temperatura"}\NormalTok{,}
                                \StringTok{"Velocidad\_del\_Viento"}\NormalTok{)], class),}
@@ -345,7 +345,7 @@ Clase
 Pronóstico & character & Nominal & Cualitativa politómica \\
 Municipio & character & Nominal & Cualitativa politómica \\
 Temperatura (°C) & numeric & Intervalo & Cuantitativa continua \\
-Velocidad del viento (mph) & numeric & Razón & Cuantitativa continua \\
+Velocidad del viento (m/h) & numeric & Razón & Cuantitativa continua \\
 \end{longtable}
 
 \begin{enumerate}
@@ -373,9 +373,9 @@ Velocidad del viento (mph) & numeric & Razón & Cuantitativa continua \\
   no la detección automática.
 \item
   \textbf{Velocidad del viento.} Es de razón y cuantitativa continua ya
-  que su cero es absoluto (0 mph sí es ausencia de viento), lo cual hace
-  que los cocientes tengan sentido y que 2 mph sea efectivamente el
-  doble que 1 mph.
+  que su cero es absoluto (0 m/h sí es ausencia de viento), lo cual hace
+  que los cocientes tengan sentido y que 2 m/h sea efectivamente el
+  doble que 1 m/h.
 \end{enumerate}
 
 Las figuras siguientes resumen ambos ejes por separado y se leen de
@@ -412,21 +412,6 @@ leer las posiciones a ojo se anotan sobre cada caja los valores de
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{caja }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(variable, etiqueta) \{}
-\NormalTok{  x }\OtherTok{\textless{}{-}}\NormalTok{ datos[[variable]]}
-\NormalTok{  q }\OtherTok{\textless{}{-}} \FunctionTok{quantile}\NormalTok{(x, }\FunctionTok{c}\NormalTok{(}\FloatTok{0.25}\NormalTok{, }\FloatTok{0.5}\NormalTok{, }\FloatTok{0.75}\NormalTok{))}
-  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(x), }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{y =} \StringTok{""}\NormalTok{)) }\SpecialCharTok{+}
-    \FunctionTok{geom\_boxplot}\NormalTok{(}\AttributeTok{fill =} \StringTok{"steelblue"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{,}
-                 \AttributeTok{outlier.colour =} \StringTok{"firebrick"}\NormalTok{) }\SpecialCharTok{+}
-    \FunctionTok{annotate}\NormalTok{(}\StringTok{"text"}\NormalTok{, }\AttributeTok{x =}\NormalTok{ q, }\AttributeTok{y =} \FloatTok{1.5}\NormalTok{, }\AttributeTok{label =} \FunctionTok{format}\NormalTok{(}\FunctionTok{round}\NormalTok{(q, }\DecValTok{2}\NormalTok{)),}
-             \AttributeTok{size =} \DecValTok{3}\NormalTok{, }\AttributeTok{check\_overlap =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
-    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =}\NormalTok{ etiqueta, }\AttributeTok{y =} \ConstantTok{NULL}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
-\NormalTok{\}}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \FunctionTok{caja}\NormalTok{(}\StringTok{"Temperatura"}\NormalTok{, }\StringTok{"Temperatura (°C)"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -444,7 +429,7 @@ mediana y Q3.}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{caja}\NormalTok{(}\StringTok{"Velocidad\_del\_Viento"}\NormalTok{, }\StringTok{"Velocidad del viento (mph)"}\NormalTok{)}
+\FunctionTok{caja}\NormalTok{(}\StringTok{"Velocidad\_del\_Viento"}\NormalTok{, }\StringTok{"Velocidad del viento (m/h)"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -470,10 +455,10 @@ concentrada pero la dispersión no es simétrica, puesto que unos pocos
 registros frescos estiran la distribución hacia la izquierda (asimetría
 negativa).
 
-\textbf{Velocidad del viento.} El centro está cerca de 1.7 mph y la caja
-va aproximadamente de 1.0 a 2.2 mph, así que en términos relativos su
+\textbf{Velocidad del viento.} El centro está cerca de 1.7 m/h y la caja
+va aproximadamente de 1.0 a 2.2 m/h, así que en términos relativos su
 dispersión es mucho mayor que la de la temperatura dado que la caja
-ocupa buena parte del recorrido total (de 0.4 a 3.7 mph). Los bigotes
+ocupa buena parte del recorrido total (de 0.4 a 3.7 m/h). Los bigotes
 son relativamente balanceados aunque el superior es algo más largo, lo
 cual sugiere una leve asimetría hacia valores altos que resulta
 coherente con una variable cuyo piso físico es cero y que solo puede
@@ -519,10 +504,6 @@ con cola a la derecha.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{g1 }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x) \{}
-\NormalTok{  d }\OtherTok{\textless{}{-}}\NormalTok{ x }\SpecialCharTok{{-}} \FunctionTok{mean}\NormalTok{(x)}
-  \FunctionTok{mean}\NormalTok{(d}\SpecialCharTok{\^{}}\DecValTok{3}\NormalTok{) }\SpecialCharTok{/} \FunctionTok{mean}\NormalTok{(d}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}\SpecialCharTok{\^{}}\NormalTok{(}\DecValTok{3}\SpecialCharTok{/}\DecValTok{2}\NormalTok{)}
-\NormalTok{\}}
 \NormalTok{variables }\OtherTok{\textless{}{-}}\NormalTok{ datos[}\FunctionTok{c}\NormalTok{(}\StringTok{"Temperatura"}\NormalTok{, }\StringTok{"Velocidad\_del\_Viento"}\NormalTok{)]}
 \NormalTok{resumen }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(variables, }\ControlFlowTok{function}\NormalTok{(x)}
   \FunctionTok{c}\NormalTok{(}\AttributeTok{media =} \FunctionTok{mean}\NormalTok{(x), }\AttributeTok{mediana =} \FunctionTok{median}\NormalTok{(x), }\AttributeTok{s =} \FunctionTok{sd}\NormalTok{(x), }\AttributeTok{RIC =} \FunctionTok{IQR}\NormalTok{(x),}
@@ -570,8 +551,8 @@ agregan lo que el gráfico solo sugería:
   extremos, lo que muestra que los 8 registros frescos están inflando
   \(s\).
 \item
-  \textbf{Velocidad del viento.} La media (1.719 mph) y la mediana
-  (1.700 mph) casi coinciden con la media apenas por encima, mientras
+  \textbf{Velocidad del viento.} La media (1.719 m/h) y la mediana
+  (1.700 m/h) casi coinciden con la media apenas por encima, mientras
   que \(g_1 = 0.49\) confirma una asimetría positiva leve coherente con
   el bigote superior más largo. Su coeficiente de variación
   (\(s/\bar{x}\)) de 46 \% expresa la mayor dispersión relativa,
@@ -717,7 +698,7 @@ registro pertenece a un grupo de municipios con comportamiento propio.
   \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.6}\NormalTok{, }\AttributeTok{colour =} \StringTok{"\#3572a8"}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =} \StringTok{"lm"}\NormalTok{, }\AttributeTok{formula =}\NormalTok{ y }\SpecialCharTok{\textasciitilde{}}\NormalTok{ x, }\AttributeTok{colour =} \StringTok{"\#d2601a"}\NormalTok{,}
               \AttributeTok{fill =} \StringTok{"grey70"}\NormalTok{, }\AttributeTok{linewidth =} \FloatTok{0.9}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Temperatura (°C)"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Velocidad del viento (mph)"}\NormalTok{,}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Temperatura (°C)"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Velocidad del viento (m/h)"}\NormalTok{,}
        \AttributeTok{subtitle =}\NormalTok{ subtitulo) }\SpecialCharTok{+}
   \FunctionTok{theme\_minimal}\NormalTok{()}
 \FunctionTok{ggMarginal}\NormalTok{(grafico, }\AttributeTok{type =} \StringTok{"histogram"}\NormalTok{, }\AttributeTok{fill =} \StringTok{"\#3572a8"}\NormalTok{,}
@@ -744,14 +725,14 @@ entre 29 y 32 °C donde se concentra la mayoría como en los pocos
 registros frescos de la izquierda, sin que la banda de puntos suba o
 baje al avanzar en el eje horizontal. La recta de mínimos cuadrados lo
 confirma al ser prácticamente plana, ya que el viento sube apenas 0.009
-mph por cada grado de temperatura con \(R^2 = 0.001\), es decir que la
+m/h por cada grado de temperatura con \(R^2 = 0.001\), es decir que la
 temperatura explica el 0.1 \% de la variación del viento. Su banda de
 confianza se abre hacia la izquierda porque en esa zona solo están los 8
 registros frescos, de modo que ahí la recta está mucho peor determinada.
 
 Los histogramas marginales por su parte describen cada variable por
 separado, con la temperatura apilada a la derecha y cola a la izquierda
-frente al viento con su masa entre 1 y 2 mph y cola a la derecha. La
+frente al viento con su masa entre 1 y 2 m/h y cola a la derecha. La
 razón de verlos junto a la nube es que dos variables pueden ser
 asimétricas cada una y aun así no tener ninguna relación entre sí.
 
@@ -845,13 +826,13 @@ curva escondida.
 \tightlist
 \item
   \textbf{Covarianza.} Se expresa en el producto de las unidades de las
-  dos variables, en este caso °C·mph, por lo que su valor por sí solo no
+  dos variables, en este caso °C·m/h, por lo que su valor por sí solo no
   dice si la relación es fuerte o débil. Además cambiaría si se midiera
-  el viento en km/h y pasaría a 0.0759 °C·km/h sin que la relación haya
-  cambiado en lo más mínimo.
+  el viento en km/h y pasaría a 0.0000472 °C·km/h sin que la relación
+  haya cambiado en lo más mínimo.
 \item
   \textbf{Correlación de Pearson.} Es adimensional, pues al dividir por
-  \(s_x\) (°C) y \(s_y\) (mph) las unidades se cancelan. Por esto
+  \(s_x\) (°C) y \(s_y\) (m/h) las unidades se cancelan. Por esto
   siempre queda en \([-1, 1]\) y es comparable entre cualquier par de
   variables.
 \end{enumerate}
@@ -903,26 +884,6 @@ si los datos fueran normales y usa el mínimo entre \(s\) y
 \(h\) pequeño inventa modas y uno grande las borra, a manera de
 verificación se recalcula la KDE con \(2h\) y se reportan solo las modas
 que sobreviven.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{modas }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x, }\AttributeTok{ajuste =} \DecValTok{1}\NormalTok{) \{}
-\NormalTok{  k }\OtherTok{\textless{}{-}} \FunctionTok{density}\NormalTok{(x, }\AttributeTok{adjust =}\NormalTok{ ajuste)}
-  \FunctionTok{round}\NormalTok{(k}\SpecialCharTok{$}\NormalTok{x[}\FunctionTok{which}\NormalTok{(}\FunctionTok{diff}\NormalTok{(}\FunctionTok{sign}\NormalTok{(}\FunctionTok{diff}\NormalTok{(k}\SpecialCharTok{$}\NormalTok{y))) }\SpecialCharTok{==} \SpecialCharTok{{-}}\DecValTok{2}\NormalTok{) }\SpecialCharTok{+} \DecValTok{1}\NormalTok{], }\DecValTok{2}\NormalTok{)}
-\NormalTok{\}}
-\NormalTok{densidad }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(variable, etiqueta, color) \{}
-\NormalTok{  x }\OtherTok{\textless{}{-}}\NormalTok{ datos[[variable]]}
-  \FunctionTok{ggplot}\NormalTok{(datos, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ .data[[variable]])) }\SpecialCharTok{+}
-    \FunctionTok{geom\_histogram}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{y =} \FunctionTok{after\_stat}\NormalTok{(density)),}
-                   \AttributeTok{bins =} \FunctionTok{nclass.Sturges}\NormalTok{(x), }\AttributeTok{fill =}\NormalTok{ color,}
-                   \AttributeTok{colour =} \StringTok{"black"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\SpecialCharTok{+}
-    \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{colour =} \StringTok{"black"}\NormalTok{, }\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
-    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =}\NormalTok{ etiqueta, }\AttributeTok{y =} \StringTok{"Densidad"}\NormalTok{,}
-         \AttributeTok{subtitle =} \FunctionTok{sprintf}\NormalTok{(}\StringTok{"h (Silverman) = \%.3f"}\NormalTok{, }\FunctionTok{bw.nrd0}\NormalTok{(x))) }\SpecialCharTok{+}
-    \FunctionTok{theme\_minimal}\NormalTok{()}
-\NormalTok{\}}
-\end{Highlighting}
-\end{Shaded}
 
 \section{Pregunta 10 --- Densidad de la temperatura}\label{p10}
 
@@ -1160,7 +1121,7 @@ se confirmó en la documentación de la fuente.
 normal}\label{p12}
 
 La densidad normal teórica se construye con la media y la desviación
-estándar observadas (\(\bar{x} = 1.719\) mph y \(s = 0.789\) mph)
+estándar observadas (\(\bar{x} = 1.719\) m/h y \(s = 0.789\) m/h)
 
 \[
 f(x) = \frac{1}{s\sqrt{2\pi}} \exp\!\left( -\frac{(x - \bar{x})^2}{2 s^2} \right),
@@ -1179,7 +1140,7 @@ para luego superponerse sobre la KDE de la velocidad del viento.
                 \AttributeTok{colour =} \StringTok{"firebrick"}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{,}
                 \AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{xlim}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{, }\FloatTok{4.5}\NormalTok{) }\SpecialCharTok{+}
-  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Velocidad del viento (mph)"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Densidad"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Velocidad del viento (m/h)"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Densidad"}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{theme\_minimal}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
@@ -1249,8 +1210,8 @@ motivos:
 \def\labelenumi{\alph{enumi}.}
 \tightlist
 \item
-  \textbf{Asimetría y jorobas.} La KDE (\(h = 0.274\) mph) concentra su
-  masa entre 1 y 2 mph con jorobas locales cerca de 1.0, 1.9 y 3.3 mph y
+  \textbf{Asimetría y jorobas.} La KDE (\(h = 0.274\) m/h) concentra su
+  masa entre 1 y 2 m/h con jorobas locales cerca de 1.0, 1.9 y 3.3 m/h y
   una cola derecha más pesada (\(g_1 = +0.49\)), mientras que la normal
   es una sola campana simétrica. Vale la pena matizar que esas jorobas
   se funden en una sola moda al duplicar \(h\), por lo que lo robusto es

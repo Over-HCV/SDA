@@ -87,22 +87,22 @@ server <- function(input, output, session) {
   # (que los exporta) compartan el mismo estado toda la sesión.
   seleccion <- shiny::reactiveVal(list())
 
-  # Nivel de texto del cuaderno y cambios sin guardar: los dos viajan con la
-  # sesión y los leen varias pestañas (Inicio, Objetos, Informe).
-  texto <- shiny::reactiveVal("completo")
+  # Piezas del cuaderno y cambios sin guardar: los dos viajan con la sesión y
+  # los leen varias pestañas (Inicio, Objetos, Informe).
+  cuaderno <- shiny::reactiveVal(opciones_cuaderno())
   guardado <- nuevo_estado_guardado()
 
   estado_datos <- mod_datos_server("datos", almacen, seleccion)
-  mod_inicio_server("inicio", almacen, estado_datos$dataset, seleccion, texto,
-                    guardado)
+  mod_inicio_server("inicio", almacen, estado_datos$dataset, seleccion,
+                    cuaderno, guardado)
   mod_modelado_server("modelado", almacen)
   mod_ajuste_server("ajuste", almacen)
   mod_evaluacion_server("evaluacion", almacen)
   mod_objetos_server("objetos", almacen, estado_datos$dataset, seleccion,
-                     texto, guardado)
+                     cuaderno, guardado)
   mod_referencia_server("referencia")
-  mod_informe_server("informe", seleccion, estado_datos$dataset, texto)
-  vigilar_cambios(session, almacen, estado_datos$dataset, seleccion, texto,
+  mod_informe_server("informe", seleccion, estado_datos$dataset, cuaderno)
+  vigilar_cambios(session, almacen, estado_datos$dataset, seleccion, cuaderno,
                   guardado)
 
   # Arrancar con una sesión puesta: el caso de uso es entrar al lab y que el
@@ -123,7 +123,8 @@ server <- function(input, output, session) {
     if (is.null(bruto)) return(invisible(NULL))
     if (length(bruto$almacen$contadores)) almacen(bruto$almacen)
     shiny::showNotification(
-      restaurar_fase1_en(bruto$fase1, estado_datos$dataset, seleccion, texto),
+      restaurar_fase1_en(bruto$fase1, estado_datos$dataset, seleccion,
+                         cuaderno),
       type = "message", duration = 6)
     .marcar_guardada(guardado)
   }, once = TRUE, ignoreNULL = FALSE)

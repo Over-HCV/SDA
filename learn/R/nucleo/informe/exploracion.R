@@ -1,9 +1,9 @@
-# learn/R/nucleo/informe_exploracion.R
+# learn/R/nucleo/informe/exploracion.R
 #
 # Responsabilidad: convertir la selección de paneles de la fase 1 en un cuaderno
-# .Rmd reproducible y autónomo.
+# reproducible y autónomo.
 #
-# A diferencia de armar_informe() (informe.R, corridas de las fases 2-4), acá lo
+# A diferencia de armar_informe() (corridas.R, fases 2-4), acá lo
 # que se exporta es la EXPLORACIÓN: qué gráficos se marcaron con la casilla
 # "Añadir", con qué parámetros, sobre qué datos y con qué preparación. Cada
 # panel entra como una sección con su texto explicativo, su chunk y el renglón
@@ -28,11 +28,8 @@ CASILLAS_INFORME <- c(
   "f1.analisis.heatmap_correlacion", "f1.analisis.coordenadas_paralelas",
   "f1.analisis.elipsoide", "f1.analisis.qq_mahalanobis")
 
-# Cuánto texto explicativo del lab viaja al cuaderno. El taller pide ser
-# conciso y lo puntúa, así que esto es una decisión de quien entrega, no una
-# constante: `completo` es el material de estudio, `breve` deja solo qué
-# muestra y cuándo engaña, `ninguno` entrega el cuaderno pelado.
-NIVELES_TEXTO <- c("completo", "breve", "ninguno")
+# Qué lleva el cuaderno (texto del panel, procedencia, tablas de estado, YAML)
+# lo decide quien entrega, pieza por pieza: ver informe/opciones.R.
 
 # Las secciones del texto de un panel que sobreviven en modo `breve`.
 SECCIONES_BREVES <- c("Qué muestra", "Cuándo engaña")
@@ -58,11 +55,14 @@ mover_entrada <- function(entradas, id, direccion) {
 #'   reordenan)
 #' @param dataset el dataset vivo al exportar (nombre, fuente, n, p, n_crudo,
 #'   transformaciones), o NULL si se exportó sin datos cargados
-#' @param texto uno de NIVELES_TEXTO
+#' @param opciones piezas marcadas (ver informe/opciones.R)
+#' @param texto atajo al preset viejo (completo|breve|ninguno), que suma sus
+#'   piezas de texto a `opciones`
 #' @return character() de líneas listas para writeLines()
 armar_informe_exploracion <- function(seleccion, dataset = NULL,
-                                      texto = "completo") {
-  texto <- match.arg(texto, NIVELES_TEXTO)
+                                      opciones = NULL, texto = NULL) {
+  opciones <- opciones_cuaderno(opciones, texto)
+  nivel <- nivel_de_texto(opciones)
   # El texto de un panel se escribe UNA vez: un cuaderno del Taller 01 trae
   # tres densidades kernel, y repetir sus cuarenta renglones tres veces es
   # justo lo que el enunciado castiga.
@@ -70,36 +70,21 @@ armar_informe_exploracion <- function(seleccion, dataset = NULL,
   secciones <- unlist(lapply(seleccion, function(entrada) {
     repetida <- entrada$clave %in% explicadas
     explicadas <<- c(explicadas, entrada$clave)
-    .seccion_artefacto(entrada, if (repetida) "repetido" else texto)
+    .seccion_artefacto(entrada, opciones,
+                       if (repetida) "repetido" else nivel)
   }), use.names = FALSE)
 
   c(
-    .encabezado_exploracion(dataset),
+    .encabezado_exploracion(dataset, opciones),
     .seccion_configuracion(seleccion),
-    .seccion_datos_exploracion(dataset),
+    .seccion_datos_exploracion(dataset, opciones),
     .seccion_preparacion(dataset),
     if (length(seleccion)) c("# Análisis", "") else NULL,
     secciones,
-    .pie_exploracion(dataset, length(seleccion))
+    if (incluye(opciones, "marco"))
+      .pie_exploracion(dataset, length(seleccion)) else NULL
   )
 }
-
-.encabezado_exploracion <- function(dataset) .bloque(
-  "---",
-  'title: "Exploración de datos · SDA Lab"',
-  sprintf('subtitle: "%s"',
-          if (is.null(dataset)) "sin dataset" else dataset$nombre),
-  sprintf('date: "%s"', format(Sys.time(), "%Y-%m-%d %H:%M")),
-  "output:",
-  "  html_document:",
-  "    toc: true",
-  "    toc_float: true",
-  "    number_sections: true",
-  "---",
-  "",
-  "Cuaderno generado desde SDA Lab. Cada sección corresponde a un panel marcado",
-  "con la casilla **Añadir**: trae su texto explicativo, los parámetros con que",
-  "se produjo y el código R que lo redibuja sobre `datos`.")
 
 #' El chunk de arranque, con las librerías que el cuaderno de verdad usa.
 #'
@@ -128,10 +113,11 @@ armar_informe_exploracion <- function(seleccion, dataset = NULL,
 #' original (reproducible de punta a punta); cualquier otra fuente se trae del
 #' CSV que el usuario baja de la misma pestaña Informe, con la preparación ya
 #' aplicada.
-.seccion_datos_exploracion <- function(dataset) {
+.seccion_datos_exploracion <- function(dataset, opciones) {
   if (is.null(dataset)) return(c("# Los datos", "",
     "El cuaderno se exportó sin dataset cargado.", ""))
-  meta <- .meta_dataset(dataset)
+  meta <- if (incluye(opciones, "ficha_datos"))
+    .meta_dataset(dataset) else character(0)
   if (identical(dataset$fuente, "ori")) return(c("# Los datos", "", meta, "",
     '```{r cargar-datos}',
     '# ORI.csv es la base del Taller 01 (IDEAM), publicada en Kaggle como',
@@ -252,18 +238,20 @@ codigo_de_transformacion <- function(entrada) {
             columna, columna, columna))
 
 #' Una sección por panel marcado: título, texto, parámetros y chunk.
-.seccion_artefacto <- function(entrada, texto = "completo") {
+.seccion_artefacto <- function(entrada, opciones, texto = "completo") {
   c(sprintf("## %s", .titulo_con_variables(entrada)),
-    sprintf("Panel `%s` · marcado a las %s", entrada$clave, entrada$cuando),
-    "",
+    if (incluye(opciones, "procedencia"))
+      c(sprintf("Panel `%s` · marcado a las %s", entrada$clave,
+                entrada$cuando), "") else NULL,
     .texto_de_artefacto(entrada$clave, texto, entrada$titulo),
-    if (.lleva_tabla(entrada)) c("", "Estado al marcarlo:", "",
-                                 .tabla_df_md(entrada$tabla)) else NULL,
-    if (length(entrada$params %||% list())) c("", "Parámetros:", "",
-                                              .lista_a_tabla(entrada$params)) else NULL,
+    if (incluye(opciones, "estado") && .lleva_tabla(entrada))
+      c("", "Estado al marcarlo:", "", .tabla_df_md(entrada$tabla)) else NULL,
+    if (incluye(opciones, "parametros") &&
+        length(entrada$params %||% list()))
+      c("", "Parámetros:", "", .lista_a_tabla(entrada$params)) else NULL,
     "", "```{r}",
     codigo_artefacto(entrada$clave, entrada$params, entrada$tabla), "```", "",
-    .lectura(entrada))
+    if (incluye(opciones, "notas")) .lectura(entrada) else NULL)
 }
 
 #' El diccionario viaja DENTRO del chunk (lo imprime el código, que lo declara

@@ -23,16 +23,16 @@
 # El archivo es PURO: nada de Shiny acá. La pestaña ⚙ Objetos lo descarga y lo
 # sube; lab.R lo lee con `--sesion`; las pruebas lo recorren sin navegador.
 
-VERSION_SESION <- 1L
+VERSION_SESION <- 2L
 
 #' La sesión lista para serializar.
 #'
 #' @param almacen el almacén de objetos guardados
 #' @param dataset el dataset vivo de la fase 1, o NULL
 #' @param seleccion los paneles marcados, o list()
-#' @param texto nivel de texto elegido para el cuaderno
+#' @param cuaderno piezas marcadas para el cuaderno (informe/opciones.R)
 sesion_actual <- function(almacen = NULL, dataset = NULL, seleccion = list(),
-                          texto = "completo") {
+                          cuaderno = NULL) {
   list(
     proyecto = "sda-lab", tipo = "sesion", version = VERSION_SESION,
     exportado = format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
@@ -53,7 +53,7 @@ sesion_actual <- function(almacen = NULL, dataset = NULL, seleccion = list(),
         entrada$tabla <- NULL
         entrada
       }),
-      texto = texto),
+      cuaderno = as.list(opciones_cuaderno(cuaderno))),
     almacen = almacen)
 }
 
@@ -85,7 +85,13 @@ sesion_normalizada <- function(bruto) {
   if (is.null(fase1)) return(NULL)
   fase1$fuente <- .valor_unico(fase1$fuente)
   fase1$nombre <- .valor_unico(fase1$nombre)
-  fase1$texto <- .valor_unico(fase1$texto) %||% "completo"
+  # Las sesiones de la versión 1 traen el preset de texto en vez de las
+  # piezas: se traduce al leerlas para que una sesión vieja abra con las
+  # casillas puestas donde corresponde.
+  fase1$cuaderno <- opciones_cuaderno(
+    fase1$cuaderno, texto = if (is.null(fase1$cuaderno))
+      .valor_unico(fase1$texto) %||% "completo" else NULL)
+  fase1$texto <- NULL
   fase1$semilla <- as.integer(.valor_unico(fase1$semilla) %||% 42L)
   if (is.list(fase1$diccionario) && !is.data.frame(fase1$diccionario))
     fase1$diccionario <- .filas_a_df(fase1$diccionario)

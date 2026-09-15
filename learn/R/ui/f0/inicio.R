@@ -83,16 +83,16 @@ mod_inicio_ui <- function(id) {
   dic$columna[!is.na(fila) & cambio]
 }
 
-#' @param dataset,seleccion,texto reactiveVal de app.R (pueden ser NULL)
+#' @param dataset,seleccion,cuaderno reactiveVal de app.R (pueden ser NULL)
 #' @param guardado nuevo_estado_guardado(), o NULL
 mod_inicio_server <- function(id, almacen, dataset = NULL, seleccion = NULL,
-                              texto = NULL, guardado = NULL) {
+                              cuaderno = NULL, guardado = NULL) {
   shiny::moduleServer(id, function(input, output, session) {
     ds_vivo <- function() if (is.null(dataset)) NULL else dataset()
     marcados <- function() if (is.null(seleccion)) list() else seleccion()
 
     servidor_sesion(input, output, session, almacen, dataset, seleccion,
-                    texto, guardado)
+                    cuaderno, guardado)
 
     output$estado <- shiny::renderUI({
       ds <- ds_vivo()
@@ -144,7 +144,8 @@ mod_inicio_server <- function(id, almacen, dataset = NULL, seleccion = NULL,
         datos,
         .renglon("Informe", sprintf("%d paneles marcados · %d con lectura",
                                     length(entradas), con_lectura),
-                 if (!is.null(texto)) sprintf(" · texto %s", texto())),
+                 if (!is.null(cuaderno))
+                   sprintf(" · cuaderno: %d piezas", length(cuaderno()))),
         franja_estado(list(
           "datasets" = almacen_contar(cuentas, "dataset"),
           "modelos"  = almacen_contar(cuentas, "modelo"),

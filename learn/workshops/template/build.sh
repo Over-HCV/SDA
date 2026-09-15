@@ -1,21 +1,35 @@
 #!/usr/bin/env bash
 # build.sh — pipeline de talleres AED: .qmd -> .tex (editable) -> .pdf (plantilla UR)
 #
-# Uso, desde la carpeta del taller (learn/workshops/taller-XX):
-#   ../template/build.sh              render (si falta) + pdf
-#   ../template/build.sh render       solo genera <nombre>.tex desde el .qmd
-#   ../template/build.sh pdf          solo compila el .tex existente (latexmk/xelatex)
-#   ../template/build.sh render --force   regenera aunque exista (¡pisa ediciones manuales!)
+# Uso:
+#   ../template/build.sh                    render (si falta) + pdf, en esta carpeta
+#   ../template/build.sh render             solo genera <nombre>.tex desde el .qmd
+#   ../template/build.sh pdf                solo compila el .tex (latexmk/xelatex)
+#   ../template/build.sh render --force     regenera aunque exista (¡pisa ediciones manuales!)
+#   template/build.sh all taller-02         desde workshops/: la carpeta del taller
+#   template/build.sh all taller-02/x.qmd   un archivo concreto (si hay varios)
+#
+# El cuaderno se busca en la carpeta del taller: si solo hay un .Rmd (lo que
+# entrega SDA Lab cuando no se marca la plantilla) se copia a .qmd, porque
+# quarto únicamente dibuja los diagramas mermaid desde .qmd. Con más de un
+# candidato no se adivina: se listan y se pide elegir.
 #
 # El .tex generado queda en la raíz del taller y es editable a mano: pdf no lo
 # toca, así que podés pulir texto LaTeX y recompilar sin perder cambios.
 
 set -euo pipefail
 
-STAGE="${1:-all}"
-shift || true
+STAGE="all"
+DESTINO=""
 FORCE=0
-for a in "$@"; do [ "$a" = "--force" ] && FORCE=1; done
+for a in "$@"; do
+  case "$a" in
+    all|render|pdf) STAGE="$a" ;;
+    --force)        FORCE=1 ;;
+    -*)             echo "✗ opción desconocida: $a"; exit 1 ;;
+    *)              DESTINO="$a" ;;
+  esac
+done
 
 TEMPLATE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export R_LIBS_USER="$TEMPLATE_DIR/../../../renv/library/macos/R-4.6/aarch64-apple-darwin23"
@@ -25,10 +39,38 @@ export TEXINPUTS=".:$TEMPLATE_DIR:$TEMPLATE_DIR/common:$TEMPLATE_DIR/fontsets:"
 export BIBINPUTS="$TEMPLATE_DIR:$TEMPLATE_DIR/bib:"
 export BSTINPUTS="$BIBINPUTS"
 
-# El qmd del taller: se excluyen los scratch *-qmd.qmd que deja quarto al
-# renderizar un .Rmd con el mismo stem.
-QMD="$(ls -1 *.qmd 2>/dev/null | grep -v -- '-qmd\.qmd$' | head -1 || true)"
-[ -n "$QMD" ] || { echo "✗ No hay ningún .qmd en $(pwd)"; exit 1; }
+# --- Dónde trabajar y con qué cuaderno ---------------------------------------
+QMD=""
+if [ -n "$DESTINO" ] && [ -f "$DESTINO" ]; then
+  cd "$(dirname "$DESTINO")"
+  QMD="$(basename "$DESTINO")"
+elif [ -n "$DESTINO" ]; then
+  [ -d "$DESTINO" ] || { echo "✗ no existe: $DESTINO"; exit 1; }
+  cd "$DESTINO"
+fi
+
+# Se excluyen los scratch *-qmd.qmd que deja quarto al renderizar un .Rmd con
+# el mismo stem.
+buscar() { ls -1 *."$1" 2>/dev/null | grep -v -- '-qmd\.qmd$' || true; }
+
+if [ -z "$QMD" ]; then
+  CANDIDATOS="$(buscar qmd)"
+  if [ -z "$CANDIDATOS" ]; then
+    RMD="$(buscar Rmd)"
+    [ -n "$RMD" ] || { echo "✗ No hay ningún .qmd ni .Rmd en $(pwd)"; exit 1; }
+    [ "$(echo "$RMD" | wc -l)" -eq 1 ] || {
+      echo "✗ Hay varios .Rmd; elegí uno:"; echo "$RMD" | sed 's/^/    /'; exit 1; }
+    QMD="${RMD%.Rmd}.qmd"
+    cp "$RMD" "$QMD"
+    echo "→ $RMD copiado a $QMD (quarto solo dibuja mermaid desde .qmd)"
+  else
+    [ "$(echo "$CANDIDATOS" | wc -l)" -eq 1 ] || {
+      echo "✗ Hay varios .qmd en $(pwd); pasá cuál:"
+      echo "$CANDIDATOS" | sed 's/^/    /'; exit 1; }
+    QMD="$CANDIDATOS"
+  fi
+fi
+
 NAME="${QMD%.qmd}"
 TEX="$NAME.tex"
 PDF="build/$NAME.pdf"
@@ -61,5 +103,4 @@ case "$STAGE" in
   render) render ;;
   pdf)    pdf ;;
   all)    [ -f "$TEX" ] || render; pdf ;;
-  *) echo "uso: $0 [all|render|pdf] [--force]  (desde la carpeta del taller)"; exit 1 ;;
 esac

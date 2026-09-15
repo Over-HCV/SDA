@@ -40,7 +40,7 @@ dibuja solo desde el registro, el tema cambia, y está viva en GitHub Pages.
 - [x] `R/nucleo/artefactos/` — 71 artefactos en 2 archivos por fase
 - [x] `R/nucleo/textos.R` — `texto(clave)`; si falta el `.md`, aviso discreto (C6)
 - [x] `R/nucleo/exportar.R` — JSON · CSV · PNG · RDS · Rmd · MD
-- [x] `R/nucleo/informe.R` — armado del cuaderno `.Rmd`
+- [x] `R/nucleo/informe/corridas.R` — armado del cuaderno `.Rmd`
 - [x] `R/mapa.R` + `MAPA.md` generado
 - [x] `R/pruebas/verificar_mapa.R` — huérfanos + `MAPA.md` al día + deuda
 - [x] `R/pruebas/test_headless.R` — 46 pruebas, sin Shiny
@@ -501,13 +501,16 @@ tres huecos que ningún dataset de juguete había destapado.
 - [x] Casilla «Añadir» en el encabezado de 17 paneles (`casilla_informe()`), con
       la selección viviendo en un `reactiveVal` de `app.R`: ① Datos la llena y
       la pestaña Informe la exporta, en la misma sesión Shiny
-- [x] `nucleo/informe_exploracion.R` — la selección a cuaderno `.Rmd`: los datos,
-      la pila de preparación traducida a R, y una sección por panel con su texto
+- [x] `nucleo/informe/exploracion.R` — la selección a cuaderno: los datos, la
+      pila de preparación traducida a R, y una sección por panel con su texto
       y sus parámetros congelados AL MARCAR, no al exportar
-- [x] `nucleo/informe_codigos.R` — un artefacto a R autónomo (base + ggplot2):
+- [x] `nucleo/informe/codigos.R` — un artefacto a R autónomo (base + ggplot2):
       el cuaderno se abre en cualquier R, sin nada del lab instalado
-- [x] `R/ui/transversal/informe.R` — la pestaña: `.Rmd`, CSV de los datos
-      actuales y JSON de la selección
+- [x] `nucleo/informe/opciones.R` + `encabezado.R` — qué piezas lleva el
+      cuaderno (texto del panel, procedencia, tablas, YAML) casilla por
+      casilla, con el entregable del taller como valor de fábrica
+- [x] `R/ui/transversal/informe.R` — la pestaña: cuaderno (`.qmd` o `.Rmd`),
+      CSV de los datos actuales y JSON de la selección
 
 ### E30 · Que los datos del taller lleguen al despliegue
 
