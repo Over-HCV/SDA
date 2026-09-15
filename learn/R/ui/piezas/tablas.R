@@ -63,9 +63,10 @@ recortar_para_tabla <- function(df, maximo = 2000L) {
 pie_tabla <- function(n_mostradas, n_totales) {
   texto_pie <- if (n_mostradas < n_totales) {
     sprintf("Mostrando %s de %s filas · el resto no viajó al navegador",
-            format(n_mostradas, big.mark = "."), format(n_totales, big.mark = "."))
+            format(n_mostradas, big.mark = ".", decimal.mark = ","),
+            format(n_totales, big.mark = ".", decimal.mark = ","))
   } else {
-    sprintf("%s filas", format(n_totales, big.mark = "."))
+    sprintf("%s filas", format(n_totales, big.mark = ".", decimal.mark = ","))
   }
   shiny::tags$div(class = "text-muted small mt-1", texto_pie)
 }

@@ -49,7 +49,7 @@ aviso_de_peso <- function(clave) {
   if (!nrow(fila) || !fila$diferida || !es_wasm()) return(NULL)
   sprintf(paste("%s trae unas %s filas y en el navegador tarda en abrir.",
                 "Las metricas van sobre el total; los graficos usan muestra."),
-          fila$nombre, format(fila$filas_aprox, big.mark = "."))
+          fila$nombre, format(fila$filas_aprox, big.mark = ".", decimal.mark = ","))
 }
 
 #' Carga una fuente del catálogo.

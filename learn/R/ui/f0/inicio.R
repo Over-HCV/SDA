@@ -119,8 +119,8 @@ mod_inicio_server <- function(id, almacen, dataset = NULL, seleccion = NULL,
         shiny::tagList(
           .renglon("Dataset", shiny::tags$strong(ds$nombre %||% ds$fuente),
                    sprintf(" · %s de %s filas · %d columnas",
-                           format(ds$n, big.mark = "."),
-                           format(n_crudo, big.mark = "."), ds$p)),
+                           format(ds$n, big.mark = ".", decimal.mark = ","),
+                           format(n_crudo, big.mark = ".", decimal.mark = ","), ds$p)),
           .renglon("Preparación",
                    if (length(c(pila, extra)))
                      shiny::tags$ul(class = "mb-0 ps-3 small",

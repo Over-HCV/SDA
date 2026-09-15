@@ -16,7 +16,15 @@ local({
   # 1. CRAN mirror + opciones de Shiny
   options(
     repos = c(CRAN = "https://cloud.r-project.org"),
-    browserNLdisabled = TRUE,
+    browserNLdisabled = TRUE
+  )
+  # autoreload y reactlog son de desarrollo. Posit Connect Cloud también lee
+  # este .Rprofile al clonar el repo: allá el autoreload vigilaba archivos que
+  # nunca cambian y el reactlog guardaba cada evento reactivo en memoria
+  # mientras la app viva.
+  en_connect <- identical(Sys.getenv("RSTUDIO_PRODUCT"), "CONNECT") ||
+    startsWith(getwd(), "/cloud/project")
+  if (!en_connect) options(
     shiny.autoreload = TRUE,
     # Grafo reactivo. No cuesta nada mientras no lo inspecciones; para verlo,
     # Ctrl+F3 con la app corriendo, o shiny::reactlogShow() despues de cerrarla.

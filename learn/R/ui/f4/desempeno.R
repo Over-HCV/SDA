@@ -120,7 +120,7 @@ servidor_desempeno <- function(input, output, session, corrida) {
   if (is.null(valor) || !length(valor)) return("-")
   tipo <- (FORMATO_METRICA[[nombre]] %||% list(NULL, "decimal"))[[2]]
   switch(tipo,
-         entero = format(valor, big.mark = "."),
+         entero = format(valor, big.mark = ".", decimal.mark = ","),
          porcentaje = sprintf("%.1f %%", 100 * valor),
          decimal = sprintf("%.3f", valor),
          as.character(valor))

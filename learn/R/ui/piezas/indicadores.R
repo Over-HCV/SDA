@@ -33,8 +33,8 @@ badge_muestreo <- function(n_total, n_muestra, semilla, id_boton = NULL) {
     class = "badge bg-warning text-dark d-inline-flex align-items-center gap-1",
     bsicons::bs_icon("funnel"),
     sprintf("graficando %s de %s · semilla %s",
-            format(n_muestra, big.mark = "."),
-            format(n_total, big.mark = "."), semilla),
+            format(n_muestra, big.mark = ".", decimal.mark = ","),
+            format(n_total, big.mark = ".", decimal.mark = ","), semilla),
     if (!is.null(id_boton))
       shiny::actionLink(id_boton, "usar todo", class = "link-dark ms-1")
   )

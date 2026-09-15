@@ -26,7 +26,9 @@ graficar_nulidad <- function(patron, maximo_filas = 500L) {
 
   ggplot2::ggplot(largo, ggplot2::aes(x = .data$columna, y = .data$fila,
                                       fill = .data$falta)) +
-    ggplot2::geom_raster() +
+    # geom_tile y no geom_raster: con columnas discretas el raster avisaba
+    # "pixels placed at uneven horizontal intervals" en cada dibujo.
+    ggplot2::geom_tile() +
     ggplot2::scale_fill_manual(values = c(`FALSE` = "grey88",
                                           `TRUE` = "#D55E00"),
                                labels = c("presente", "faltante")) +
