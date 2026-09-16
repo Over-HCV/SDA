@@ -83,7 +83,8 @@ graficar_densidad <- function(datos, columna, ancho = NULL, relleno = TRUE,
 
 #' Caja y bigotes de una variable. Los bigotes llegan hasta 1,5 veces el rango
 #' intercuartílico: los puntos de más allá son los atípicos de Tukey.
-graficar_boxplot <- function(datos, columna, mostrar_atipicos = TRUE) {
+graficar_boxplot <- function(datos, columna, mostrar_atipicos = TRUE,
+                             anotar = TRUE) {
   valores <- as.numeric(datos[[columna]])
   marco <- data.frame(valor = valores[!is.na(valores)])
   ggplot2::ggplot(marco, ggplot2::aes(y = .data$valor, x = "")) +
@@ -91,9 +92,22 @@ graficar_boxplot <- function(datos, columna, mostrar_atipicos = TRUE) {
       fill = paleta_cat(1), alpha = 0.3, width = 0.35,
       outlier.shape = if (mostrar_atipicos) 21 else NA,
       outlier.color = paleta_cat(6)[6]) +
+    (if (anotar) capa_cuartiles(marco$valor) else NULL) +
     ggplot2::coord_flip() +
     ggplot2::labs(y = columna, x = NULL) +
     tema_ggplot()
+}
+
+#' Q1, mediana y Q3 escritos sobre la caja.
+#'
+#' Sin los números, describir la caja es leerla contra el eje a ojo y termina
+#' siendo intuición; con ellos el valor que se cita en el informe está en la
+#' figura. Son los cuartiles tipo 7, los mismos con los que ggplot2 la dibuja.
+capa_cuartiles <- function(valores, posicion = 1.28) {
+  cuartiles <- stats::quantile(valores, c(0.25, 0.5, 0.75), na.rm = TRUE)
+  ggplot2::annotate("text", x = posicion, y = cuartiles,
+                    label = format(round(cuartiles, 2), trim = TRUE),
+                    size = 3, color = "grey25", check_overlap = TRUE)
 }
 
 #' Cajas comparadas por grupo, con violín opcional.
@@ -101,7 +115,7 @@ graficar_boxplot <- function(datos, columna, mostrar_atipicos = TRUE) {
 #' El violín muestra la forma que la caja resume; con grupos bimodales la caja
 #' sola miente y el violín lo delata.
 graficar_boxplot_grupos <- function(datos, columna, grupo, violin = FALSE,
-                                    puntos = FALSE) {
+                                    puntos = FALSE, anotar = TRUE) {
   marco <- data.frame(valor = as.numeric(datos[[columna]]),
                       grupo = as.character(datos[[grupo]]),
                       stringsAsFactors = FALSE)
@@ -119,6 +133,14 @@ graficar_boxplot_grupos <- function(datos, columna, grupo, violin = FALSE,
   if (puntos)
     grafico <- grafico + ggplot2::geom_jitter(width = 0.12, alpha = 0.3,
                                               size = 0.8)
+  # Por grupo solo se escribe la mediana: los tres cuartiles de cada caja, con
+  # seis grupos, tapan el gráfico que vienen a explicar.
+  if (anotar)
+    grafico <- grafico + ggplot2::stat_summary(
+      fun = stats::median, geom = "text", vjust = -0.6, size = 3,
+      color = "grey25",
+      ggplot2::aes(label = format(round(ggplot2::after_stat(.data$y), 2),
+                                  trim = TRUE)))
   grafico +
     scale_fill_cat(n_grupos) +
     ggplot2::labs(x = grupo, y = columna, fill = grupo) +

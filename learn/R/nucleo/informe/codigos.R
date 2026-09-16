@@ -148,15 +148,23 @@ codigo_artefacto <- function(clave, params, tabla = NULL) {
   isTRUE((p$escala %||% "") %in% c("nominal", "ordinal")) ||
     isTRUE((p$clase %||% "") == "cualitativa")
 
+# Los cuartiles anotados no son adorno: son los números que el informe cita al
+# describir la caja, y el panel del lab los dibuja igual (graficos/univariado.R).
 .codigo_boxplot <- function(p)
-  c(sprintf("ggplot(datos, aes(x = \"\", y = %s)) +", p$variable),
+  c(sprintf("cuartiles <- quantile(datos$%s, c(0.25, 0.5, 0.75))", p$variable),
+    sprintf("ggplot(datos, aes(x = \"\", y = %s)) +", p$variable),
     '  geom_boxplot(fill = "steelblue", alpha = 0.5) +',
+    "  annotate(\"text\", x = 1.28, y = cuartiles, size = 3,",
+    "           label = format(round(cuartiles, 2), trim = TRUE)) +",
     "  coord_flip() + labs(x = NULL)")
 
 .codigo_boxplot_grupos <- function(p)
   c(sprintf("ggplot(datos, aes(x = %s, y = %s, fill = %s)) +",
             p$grupo, p$variable, p$grupo),
     "  geom_boxplot(alpha = 0.6, show.legend = FALSE) +",
+    "  stat_summary(fun = median, geom = \"text\", vjust = -0.6, size = 3,",
+    "               aes(label = format(round(after_stat(y), 2),",
+    "                                  trim = TRUE))) +",
     '  theme(axis.text.x = element_text(angle = 30, hjust = 1))')
 
 .codigo_qq <- function(p)
@@ -271,7 +279,11 @@ codigo_artefacto <- function(clave, params, tabla = NULL) {
     '    "de", length(x), "\\n")',
     'cat("Cercas:", round(cercas, 2), "\\n")',
     "print(atipicos)",
-    sprintf('boxplot(x, range = %s, horizontal = TRUE, main = "%s")', u, columna))
+    sprintf('boxplot(x, range = %s, horizontal = TRUE, main = "%s")', u, columna),
+    "# Las cercas, escritas donde se leen: decir si un punto quedó afuera",
+    "# mirando solo el eje es justo lo que se presta a equivocarse.",
+    'abline(v = cercas, lty = 2, col = "grey50")',
+    'text(cercas, 1.38, labels = round(cercas, 2), cex = 0.8, col = "grey30")')
 }
 
 .codigo_frecuencias <- function(p)

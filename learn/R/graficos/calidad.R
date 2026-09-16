@@ -76,11 +76,9 @@ graficar_atipicos <- function(tabla, columna = "valor") {
                                            `TRUE` = "#D55E00"),
                                 labels = c("dentro", "atipico"))
   if (identical(metodo, "iqr") && length(corte) == 2L)
-    grafico <- grafico + ggplot2::geom_hline(yintercept = corte, linetype = "dashed",
-                                             color = "grey50", linewidth = 0.5)
+    grafico <- grafico + .capa_corte(corte, marco$fila)
   if (identical(metodo, "mahalanobis") && length(corte) == 1L)
-    grafico <- grafico + ggplot2::geom_hline(yintercept = corte, linetype = "dashed",
-                                             color = "grey50", linewidth = 0.5)
+    grafico <- grafico + .capa_corte(corte, marco$fila)
 
   grafico +
     ggplot2::labs(x = "fila", y = paste(eje_y, "de", columna), color = NULL,
@@ -90,6 +88,17 @@ graficar_atipicos <- function(tabla, columna = "valor") {
                                      nrow(tabla))) +
     tema_ggplot()
 }
+
+#' La línea de corte con su valor escrito encima.
+#'
+#' El subtítulo ya dice dónde caen las cercas, pero leer si un punto queda
+#' adentro o afuera se hace contra la línea, y ahí el número tiene que estar.
+.capa_corte <- function(corte, filas) list(
+  ggplot2::geom_hline(yintercept = corte, linetype = "dashed",
+                      color = "grey50", linewidth = 0.5),
+  ggplot2::annotate("text", x = max(filas, na.rm = TRUE), y = corte,
+                    label = format(round(corte, 2), trim = TRUE),
+                    hjust = 1, vjust = -0.4, size = 3, color = "grey35"))
 
 #' El criterio con su umbral, en palabras: "IQR 1.5 x RIC · cercas 25.11 / 33.41".
 #'

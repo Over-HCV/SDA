@@ -74,14 +74,32 @@ g1 <- function(x) {
 #'
 #' Sin las anotaciones, la lectura de la caja se hace a ojo y termina siendo
 #' intuición; con ellas el número que se cita en el texto está en la figura.
-caja <- function(variable, etiqueta, datos = get("datos", knitr::knit_global())) {
+#'
+#' @param cercas TRUE dibuja además las cercas de Tukey con su valor, que es lo
+#'   que hay que mirar cuando la pregunta es si hay atípicos. Se calculan sobre
+#'   las bisagras, igual que `boxplot()`, y por eso pueden diferir en décimas de
+#'   los cuartiles anotados.
+#' @param relleno color de la caja
+caja <- function(variable, etiqueta, cercas = FALSE, relleno = "steelblue",
+                 datos = get("datos", knitr::knit_global())) {
   x <- datos[[variable]]
   q <- quantile(x, c(0.25, 0.5, 0.75))
-  ggplot(data.frame(x), aes(x = x, y = "")) +
-    geom_boxplot(fill = "steelblue", alpha = 0.5,
-                 outlier.colour = "firebrick") +
+  grafico <- ggplot(data.frame(x), aes(x = x, y = "")) +
+    geom_boxplot(fill = relleno, alpha = 0.5, outlier.colour = "firebrick") +
     annotate("text", x = q, y = 1.5, label = format(round(q, 2)),
-             size = 3, check_overlap = TRUE) +
+             size = 3, check_overlap = TRUE)
+  if (cercas) {
+    b <- boxplot.stats(x)$stats
+    limites <- c(b[2] - 1.5 * (b[4] - b[2]), b[4] + 1.5 * (b[4] - b[2]))
+    grafico <- grafico +
+      geom_vline(xintercept = limites, linetype = "dashed",
+                 colour = "grey45", linewidth = 0.4) +
+      annotate("text", x = limites, y = 0.62,
+               label = format(round(limites, 2), trim = TRUE),
+               size = 3, colour = "grey30")
+  }
+  # Las cercas caen en el borde del panel: sin aire, su rótulo se sale.
+  grafico + scale_x_continuous(expand = expansion(mult = 0.08)) +
     labs(x = etiqueta, y = NULL) + theme_minimal()
 }
 

@@ -370,14 +370,17 @@ knitr::kable(format(tukey, nsmall = 2, drop0trailing = TRUE),
              caption = "Cercas de Tukey y conteo de atípicos.")
 ```
 
-```{r p6-cajas}
-#| fig-cap: "Diagramas de caja de Tukey para la presión y el punto de rocío a medio día."
-#| fig-height: 2.6
-par(mfrow = c(1, 2), mar = c(4, 2, 2, 1))
-boxplot(datos$Presion, horizontal = TRUE, col = "#f08a3c",
-        main = "Presión (hPa)")
-boxplot(datos$Punto_de_Rocio, horizontal = TRUE, col = "#fdecc0",
-        main = "Punto de rocío (°C)")
+```{r p6-presion}
+#| fig-cap: "Diagrama de caja de la presión: Las líneas punteadas son las cercas de Tukey y el punto rojo, el único atípico."
+#| fig-height: 2.1
+caja("Presion", "Presión (hPa)", cercas = TRUE, relleno = "#f08a3c")
+```
+
+```{r p6-rocio}
+#| fig-cap: "Diagrama de caja del punto de rocío: Ningún valor alcanza las cercas."
+#| fig-height: 2.1
+caja("Punto_de_Rocio", "Punto de rocío (°C)", cercas = TRUE,
+     relleno = "#fdecc0")
 ```
 
 **¿Existen observaciones atípicas?** Sí en la presión, que presenta una única
