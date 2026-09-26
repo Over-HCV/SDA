@@ -101,11 +101,17 @@ Rscript learn/R/pruebas/verificar_mapa.R
 # Logic + contracts, no GUI
 Rscript learn/R/pruebas/test_headless.R
 
-# Phase 1 logic and plots, no GUI
+# Phase 1 logic, no GUI
 Rscript learn/R/pruebas/test_fase1.R
 
-# The exportable notebook and the console CLI, no GUI
+# Phase 1 plots, no GUI
+Rscript learn/R/pruebas/test_fase1_graficos.R
+
+# The exportable notebook, no GUI
 Rscript learn/R/pruebas/test_informe.R
+
+# The console CLI (lab.R), no GUI
+Rscript learn/R/pruebas/test_lab.R
 
 # Saved sessions round-trip (pile, dictionary, balance, partition, notes), no GUI
 Rscript learn/R/pruebas/test_sesion.R
@@ -118,12 +124,13 @@ Rscript learn/R/pruebas/test_kmeans.R
 Rscript learn/R/pruebas/test_contrato.R
 
 # UI + browser console (mandatory, spec S2b). One driver per file:
-#   test_app.R         shell + phase 1
-#   test_app_piezas.R  the chrome every card shares: seal, formulas, sidebar
-#   test_app_metodo.R  ACP walked through phases 2 -> 3 -> 4
-#   test_app_kmeans.R  k-means, same walk, different family
+#   test_app.R           shell + phase 1
+#   test_app_piezas.R    the chrome every card shares: seal, formulas, sidebar
+#   test_app_metodo.R    ACP walked through phases 2 -> 3 -> 4
+#   test_app_kmeans.R    k-means, same walk, different family
 #   test_app_traspaso.R  dataset handoff ① -> ② (auto-save) + "Ver en ① Datos"
-#   test_app_sesion.R  open a session, edit, save from Inicio, reopen elsewhere
+#   test_app_taller01.R  Taller 01 end to end: ORI, noon filter, notebook
+#   test_app_sesion.R    open a session, edit, save from Inicio, reopen elsewhere
 Rscript learn/R/pruebas/test_app.R
 Rscript learn/R/pruebas/test_app_piezas.R
 Rscript learn/R/pruebas/test_app_metodo.R

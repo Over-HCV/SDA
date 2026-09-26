@@ -60,13 +60,21 @@ errores_de_consola <- function(app) {
                   mensajes, ignore.case = TRUE)]
 }
 
+# La sesión de partida no la escribe ninguna prueba: es material del taller que
+# vive versionado. Sin ella la app arranca vacía y las primeras comprobaciones
+# fallan por una razón que no es la que se está probando, así que se corta aquí.
+.SESION <- "workshops/taller-01/sesion-taller-01.json"
+if (!file.exists(file.path("learn", .SESION)))
+  stop("falta la sesión de partida: learn/", .SESION,
+       " (material del taller, debe estar versionado)")
+
 # ---------------------------------------------------------------------------
 cat("\n[sesión guardada · arrancar con todo puesto]\n")
 # La app abierta con SDA_SESION: el caso de uso es entrar al lab y encontrar el
 # filtro aplicado, el diccionario declarado y los paneles del taller marcados,
 # en vez de rehacer los clics cada vez.
 app2 <- local({
-  Sys.setenv(SDA_SESION = "workshops/taller-01/sesion-taller-01.json")
+  Sys.setenv(SDA_SESION = .SESION)
   on.exit(Sys.unsetenv("SDA_SESION"), add = TRUE)
   AppDriver$new(app_dir = "learn/R", name = "sda-lab-sesion",
                 load_timeout = 60000, timeout = 20000, seed = 42,
