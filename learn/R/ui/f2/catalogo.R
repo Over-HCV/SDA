@@ -73,8 +73,13 @@ resumen_filtros <- function(visibles, totales) {
 
 #' Cablea el catálogo dentro del server de la fase 2.
 #'
-#' @param al_elegir función(clave) que se llama al pulsar "Elegir"
-servidor_catalogo <- function(input, output, session, al_elegir = NULL) {
+#' @param al_elegir   función(clave) que se llama al pulsar "Elegir"
+#' @param al_explorar función(claves) que se llama al pulsar "Ver en ① Datos";
+#'                   recibe las claves de artefacto que el registro declaró en
+#'                   `explora`. La navegación vive en app.R, que es quien ve
+#'                   el navbar y las pestañas de la fase 1.
+servidor_catalogo <- function(input, output, session, al_elegir = NULL,
+                              al_explorar = NULL) {
   ns <- session$ns
 
   output$resumen_filtros <- shiny::renderUI(
@@ -103,6 +108,10 @@ servidor_catalogo <- function(input, output, session, al_elegir = NULL) {
           sprintf("Método elegido: %s", metodo(esta_clave)$nombre),
           type = "message", duration = 3)
       }, ignoreInit = TRUE)
+      if (length(metodo(esta_clave)$explora))
+        shiny::observeEvent(input[[paste0("ver_", esta_clave)]], {
+          if (!is.null(al_explorar)) al_explorar(metodo(esta_clave)$explora)
+        }, ignoreInit = TRUE)
     })
   }
   invisible(TRUE)

@@ -93,25 +93,16 @@ propio usuario, que es la referencia más fiel de su forma final.
     trayecto en escalera entre A y B: La escalera nunca puede ser más corta
     que la línea recta."*
 ## Checklist antes de entregar un texto "en su estilo"
- 
-- [ ] ¿Las oraciones largas están compuestas con conectores lógicos (y no con
-      cadenas de comas), sin coma antes de "y"?
-- [ ] ¿Se usó voz impersonal con "se" en vez de "yo hice" / "nosotros
-      hicimos"?
-- [ ] ¿Los procesos narrativos usan marcadores secuenciales en prosa en vez
-      de listas numeradas?
-- [ ] ¿Las siglas o detalles de contexto van entre paréntesis pegados al
-      término?
-- [ ] ¿Las listas (si las hay) tienen el patrón "Término: oración
-      explicativa completa"?
-- [ ] ¿El vocabulario es técnico del dominio correspondiente, sin perder
-      algún conector coloquial ocasional?
-- [ ] Si hay algo no verificable con la fuente disponible, ¿se dejó una nota
-      explícita de incertidumbre en vez de inventar?
-- [ ] ¿Toda palabra después de `:` o `;` empieza en mayúscula (también en
-      títulos, pies de figura, diagramas y palabras clave)?
-- [ ] ¿Cada inciso abre con la pregunta/concepto en negrita y la respuesta
-      directa (Sí/No/valor) antes de la justificación?
+`
+- [ ] ¿Las oraciones largas están compuestas con conectores lógicos (y no con cadenas de comas), sin llenar de comas ni antes de "y"?
+- [ ] ¿Se usó voz impersonal con "se" en vez de "yo hice" / "nosotros hicimos"?
+- [ ] ¿Los procesos narrativos usan marcadores secuenciales en prosa en vez de listas numeradas?
+- [ ] ¿Las siglas o detalles de contexto van entre paréntesis pegados al término?
+- [ ] ¿Las listas (si las hay) tienen el patrón "Término: oración explicativa completa"?
+- [ ] ¿El vocabulario es técnico del dominio correspondiente, sin perder algún conector coloquial ocasional?
+- [ ] Si hay algo no verificable con la fuente disponible, ¿se dejó una nota explícita de incertidumbre en vez de inventar?
+- [ ] ¿Toda palabra después de `:` o `;` empieza en mayúscula (también en títulos, pies de figura, diagramas y palabras clave)?
+- [ ] ¿Cada inciso abre con la pregunta/concepto en negrita y la respuesta directa (Sí/No/valor) antes de la justificación?
 - [ ] ¿Decimales con punto y miles con punto?
 ## Cómo adaptar a otros dominios (no solo ciberseguridad)
 

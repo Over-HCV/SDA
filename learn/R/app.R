@@ -95,7 +95,12 @@ server <- function(input, output, session) {
   estado_datos <- mod_datos_server("datos", almacen, seleccion)
   mod_inicio_server("inicio", almacen, estado_datos$dataset, seleccion,
                     cuaderno, guardado)
-  mod_modelado_server("modelado", almacen)
+  mod_modelado_server("modelado", almacen, dataset_f1 = estado_datos$dataset,
+                      entrar = shiny::reactive(
+                        identical(input$seccion, "② Modelado")),
+                      al_explorar = function(claves) {
+                        .ir_a_exploracion(session, claves[1])
+                      })
   mod_ajuste_server("ajuste", almacen)
   mod_evaluacion_server("evaluacion", almacen)
   mod_objetos_server("objetos", almacen, estado_datos$dataset, seleccion,
@@ -138,6 +143,21 @@ server <- function(input, output, session) {
     shiny::observeEvent(input[[id]], cambiar_tema_seguro(session, nombre),
                         ignoreInit = TRUE)
   })
+}
+
+#' "Ver en ① Datos": llevar al panel donde un pendiente con `explora` corre.
+#'
+#' Se pide desde la sesión RAÍZ a propósito: el navbar es global y la pestaña
+#' pertenece al módulo `datos`, así que los ids van completos, sin el ns() de
+#' ningún módulo de por medio.
+.ir_a_exploracion <- function(session, clave_artefacto) {
+  pestana <- switch(artefacto(clave_artefacto)$subseccion,
+                    analisis = ETIQUETA_ANALISIS,
+                    calidad = "Calidad",
+                    transformacion = "Transformación",
+                    stop("sin pestaña de ① Datos para: ", clave_artefacto))
+  shiny::updateNavbarPage(session, "seccion", selected = "① Datos")
+  shiny::updateTabsetPanel(session, "datos-pestana", selected = pestana)
 }
 
 #' La sesión con que arrancar, si la hay: primero `?sesion=` de la URL (el

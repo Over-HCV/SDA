@@ -9,9 +9,10 @@
 #
 # De dónde sale el dataset: del almacén, no de la fase 1 directamente. Las
 # fases no se hablan entre sí; se hablan a través de los Objetos, que es lo que
-# permite componer un dataset viejo con un modelo nuevo en la fase 4. El precio
-# es que hay que pulsar "Guardar en Objetos" en la fase 1 antes de venir acá, y
-# el aviso lo dice cuando la lista está vacía.
+# permite componer un dataset viejo con un modelo nuevo en la fase 4. Y para
+# que llegar acá no exija saber eso, `.asegurar_dataset()` hace el primer
+# "Guardar en Objetos" solo: si el almacén está vacío y la fase 1 tiene un
+# dataset vivo, lo guarda y lo deja seleccionado.
 #
 # Lo que produce esta fase es un Modelo: método + columnas + hiperparámetros.
 
@@ -71,8 +72,36 @@ mod_modelado_ui <- function(id) {
                   "La fase 4 compone Dataset x Modelo x Receta."))
 }
 
-mod_modelado_server <- function(id, almacen = NULL) {
+#' @param almacen    reactiveVal del almacén de la sesión
+#' @param dataset_f1 reactiveVal del dataset vivo de la fase 1 (puede ser NULL)
+#' @param entrar     reactivo TRUE mientras la sección activa es ② Modelado
+#' @param al_explorar función(claves de artefacto) que lleva a ① Datos, al
+#'                   panel donde un pendiente con `explora` ya corre
+mod_modelado_server <- function(id, almacen = NULL, dataset_f1 = NULL,
+                                entrar = NULL, al_explorar = NULL) {
   shiny::moduleServer(id, function(input, output, session) {
+
+    # El traspaso ① → ② sin fricción. Hace una sola vez lo que antes pedíamos
+    # descubrir a mano: si no hay NINGÚN dataset guardado y la fase 1 tiene
+    # uno vivo, ejecuta el mismo "Guardar en Objetos" del botón de ① (incluida
+    # la actualización del reactiveVal de la fase 1 a la copia con id). El
+    # selector de abajo sigue ahí para elegir ENTRE versiones guardadas.
+    .asegurar_dataset <- function() {
+      if (is.null(almacen) || is.null(dataset_f1)) return(invisible(NULL))
+      if (length(almacen_ids(almacen(), "dataset"))) return(invisible(NULL))
+      ds <- tryCatch(dataset_f1(), error = function(e) NULL)
+      if (is.null(ds)) return(invisible(NULL))
+      guardado <- almacen_agregar(almacen(), ds)
+      almacen(guardado)
+      dataset_f1(almacen_obtener(guardado, "dataset",
+                                 attr(guardado, "id_nuevo")))
+      shiny::showNotification(
+        sprintf("Dataset de ① Datos guardado como %s",
+                attr(guardado, "id_nuevo")),
+        type = "message", duration = 5)
+      invisible(NULL)
+    }
+
     dataset <- shiny::reactive({
       shiny::req(!is.null(almacen), nzchar(input$dataset %||% ""))
       almacen_obtener(almacen(), "dataset", input$dataset)
@@ -115,10 +144,19 @@ mod_modelado_server <- function(id, almacen = NULL) {
                                                     clave_metodo(), columnas(),
                                                     hiper()))
 
+    # Dos caminos llegan al mismo requisito: "Elegir" en el catálogo y entrar
+    # a la sección por el navbar. El observador de `entrar` se dispara también
+    # al IRSE de ② (el reactivo pasa a FALSE), por eso el guardia.
+    if (!is.null(entrar))
+      shiny::observeEvent(entrar(), {
+        if (isTRUE(entrar())) .asegurar_dataset()
+      }, ignoreInit = TRUE)
+
     servidor_catalogo(input, output, session, al_elegir = function(clave) {
+      .asegurar_dataset()
       shiny::updateSelectInput(session, "metodo", selected = clave)
       shiny::updateTabsetPanel(session, "pestana", selected = "Especificación")
-    })
+    }, al_explorar = al_explorar)
     servidor_especificacion(input, output, session, dataset, columnas)
     servidor_supuestos(input, output, session, dataset, clave_metodo, columnas)
     servidor_hiperparametros(input, output, session, dataset, clave_metodo,
@@ -150,7 +188,7 @@ dataset_o_nulo <- function(dataset) {
   if (is.null(ds))
     return(franja_estado(list(
       "dataset" = "sin elegir",
-      "que hacer" = "guardá uno en la fase 1 con 'Guardar en Objetos'")))
+      "que hacer" = "cargá uno en ① Datos y volvé")))
   m <- metodo(clave)
   franja_estado(c(
     list("dataset" = ds$id, "n" = ds$n, "variables X" = length(columnas),

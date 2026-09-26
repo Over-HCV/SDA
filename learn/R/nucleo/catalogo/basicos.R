@@ -11,6 +11,7 @@ poblar_catalogo_basicos <- function() {
     nodo = "020-descriptiva/050-numerico",
     entrada = list(min_p = 1L),
     artefactos = c("f1.analisis.histograma", "f1.analisis.boxplot"),
+    explora = "f1.analisis.resumen",
     supuestos = character(0))
 
   registrar_metodo(
@@ -25,6 +26,7 @@ poblar_catalogo_basicos <- function() {
                                                   "rectangular"),
                     def = "gaussian", etiqueta = "Función núcleo")),
     artefactos = "f1.analisis.densidad",
+    explora = "f1.analisis.densidad",
     supuestos = c("sin_faltantes"))
 
   registrar_metodo(
@@ -38,6 +40,7 @@ poblar_catalogo_basicos <- function() {
                     opciones = c("shapiro", "anderson-darling", "ks"),
                     def = "shapiro", etiqueta = "Prueba")),
     artefactos = c("f4.diagnostico.qq_normal"),
+    explora = "f1.analisis.qq_normal_datos",
     supuestos = c("muestra_aleatoria"))
 
   registrar_metodo(
@@ -54,6 +57,7 @@ poblar_catalogo_basicos <- function() {
     optimizador = list(metodos = "perfil de verosimilitud", traza = TRUE,
                        paso_a_paso = FALSE),
     artefactos = "f3.analisis.perfil_verosimilitud",
+    explora = "f1.transformacion.perfil_boxcox",
     supuestos = c("respuesta_positiva"))
 
   registrar_metodo(
@@ -79,6 +83,7 @@ poblar_catalogo_basicos <- function() {
                     opciones = c("media", "mediana", "knn", "mice"),
                     def = "mediana", etiqueta = "Método de imputación")),
     artefactos = "f1.calidad.matriz_nulidad",
+    explora = "f1.calidad.matriz_nulidad",
     supuestos = character(0))
 
   registrar_metodo(

@@ -42,6 +42,9 @@ SUPERVISION <- c("supervisado", "no_supervisado", "ninguna")
 #' @param ajustar     función PURA de ajuste, o NULL mientras no exista
 #' @param motivo      por qué está bloqueado; obligatorio si estado == "bloqueado"
 #' @param puente      frase que conecta un método bloqueado con uno ejecutable
+#' @param explora     clave(s) de artefacto de ① donde el método ya corre como
+#'                   exploración aunque todavía no tenga `ajustar`. Solo tiene
+#'                   sentido en un pendiente: el día que pasa a activo, se quita.
 registrar_metodo <- function(clave, nombre, objetivo, supervision = "ninguna",
                              sesion = NA_integer_, nodo = NA_character_,
                              estado = "pendiente", wasm = TRUE,
@@ -49,7 +52,7 @@ registrar_metodo <- function(clave, nombre, objetivo, supervision = "ninguna",
                              hiper = list(), optimizador = NULL,
                              supuestos = character(0), artefactos = character(0),
                              ajustar = NULL, motivo = NA_character_,
-                             puente = NA_character_) {
+                             puente = NA_character_, explora = NULL) {
 
   if (!grepl("^[a-z0-9_]+$", clave))
     stop("clave inválida (solo a-z, 0-9, _): ", clave)
@@ -62,6 +65,15 @@ registrar_metodo <- function(clave, nombre, objetivo, supervision = "ninguna",
     stop("un método bloqueado necesita `motivo`: ", clave)
   if (estado == "activo" && is.null(ajustar))
     stop("un método activo necesita `ajustar`: ", clave)
+  if (!is.null(explora)) {
+    if (estado != "pendiente")
+      stop("`explora` es para pendientes; un ", estado, " no lo necesita: ", clave)
+    invalidas <- explora[!explora %in% claves_artefactos() |
+                           !startsWith(explora, "f1.")]
+    if (length(invalidas))
+      stop("`explora` debe ser artefactos f1.* existentes: ",
+           paste(invalidas, collapse = ", "))
+  }
 
   .REGISTRO[[clave]] <- list(
     clave = clave, nombre = nombre, objetivo = objetivo,
@@ -70,6 +82,7 @@ registrar_metodo <- function(clave, nombre, objetivo, supervision = "ninguna",
     hiper = hiper, optimizador = optimizador, supuestos = supuestos,
     artefactos = artefactos, ajustar = ajustar,
     motivo = motivo, puente = puente,
+    explora = as.character(explora %||% character(0)),
     ficha = file.path("fichas", paste0(clave, ".md"))
   )
   invisible(clave)
@@ -160,6 +173,7 @@ metodos_df <- function() {
     wasm = m$wasm, deps = paste(m$deps, collapse = " "),
     nodo = ifelse(is.na(m$nodo), "", m$nodo),
     artefactos = length(m$artefactos),
+    explora = paste(m$explora, collapse = " "),
     stringsAsFactors = FALSE))
   if (!length(filas)) return(data.frame())
   df <- do.call(rbind, filas)

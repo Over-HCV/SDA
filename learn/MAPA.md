@@ -12,6 +12,7 @@ Todas las rutas son relativas a `learn/`.
 ## Resumen
 
 - **Métodos**: 54 registrados — 2 activos, 46 pendientes, 6 bloqueados
+- **Explorables en ①**: 7 pendientes ya corren como análisis de datos
 - **Artefactos**: 86 registrados
 - **Textos escritos**: 43 de 86
 - **Fichas escritas**: 3 de 54
@@ -112,62 +113,62 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 
 ## Métodos
 
-| Clave | Método | Sesión | Objetivo | Estado | wasm | Ficha | Nodo teórico |
-|---|---|---|---|---|---|---|---|
-| `faltantes` | Diagnóstico de datos faltantes | 1 | describir | pendiente | sí | `fichas/faltantes.md` | `020-descriptiva/030-estructura-datos/010-faltantes` |
-| `densidad_kernel` | Estimación de densidad kernel | 1 | describir | pendiente | sí | `fichas/densidad_kernel.md` | `040-variables-aleatorias/060-estimacion-densidad/020-kernel` |
-| `resumen_univariado` | Resumen univariado | 1 | describir | pendiente | sí | `fichas/resumen_univariado.md` | `020-descriptiva/050-numerico` |
-| `potencia` | Análisis de potencia | 2 | contrastar | pendiente | sí | `fichas/potencia.md` | `060-inferencia/050-pruebas-hipotesis/040-potencia` |
-| `bootstrap` | Bootstrap | 2 | contrastar | pendiente | sí | `fichas/bootstrap.md` | `060-inferencia/060-remuestreo/010-bootstrap` |
-| `permutacion` | Prueba de permutación | 2 | contrastar | pendiente | sí | `fichas/permutacion.md` | `060-inferencia/060-remuestreo/020-permutacion` |
-| `normalidad` | Verificación de normalidad | 2 | contrastar | pendiente | sí | `fichas/normalidad.md` | `040-variables-aleatorias/050-normal-detalle/030-verificacion-normalidad` |
-| `box_cox` | Transformación de Box-Cox | 2 | describir | pendiente | sí | `fichas/box_cox.md` | `120-regresion/040-multiple/090-transformaciones` |
-| `gmm` | Mezclas gaussianas (EM) | 3 | agrupar | pendiente | no | `fichas/gmm.md` | `100-agrupamiento/040-otros-enfoques/020-mezclas-gaussianas` |
-| `qda` | Análisis discriminante cuadrático | 3 | clasificar | pendiente | sí | `fichas/qda.md` | `110-clasificacion/020-basados-distribucion/030-qda` |
-| `lda` | Análisis discriminante lineal | 3 | clasificar | pendiente | sí | `fichas/lda.md` | `110-clasificacion/020-basados-distribucion/020-lda` |
-| `hotelling` | T² de Hotelling | 3 | contrastar | pendiente | sí | `fichas/hotelling.md` | `080-normal-multivariada/060-inferencia-mu/010-hotelling-una-muestra` |
-| `copula` | Cópulas | 3 | describir | pendiente | no | `fichas/copula.md` | `050-bivariado/020-conjunta/010-conjunta` |
-| `mahalanobis` | Distancia de Mahalanobis | 3 | describir | pendiente | sí | `fichas/mahalanobis.md` | `070-multivariado/050-distancias/030-mahalanobis` |
-| `normal_multivariada` | Normal multivariada | 3 | describir | pendiente | sí | `fichas/normal_multivariada.md` | `080-normal-multivariada/020-modelo` |
-| `cca` | Correlación canónica | 3 | reducir | pendiente | no | `fichas/cca.md` | `090-reduccion/030-emparentados/030-correlacion-canonica` |
-| `acp_faltantes` | ACP con datos faltantes | 4 | reducir | pendiente | no | `fichas/acp_faltantes.md` | `090-reduccion/020-acp` |
-| `fpca` | ACP funcional | 4 | reducir | pendiente | no | `fichas/fpca.md` | `150-extensiones/070-datos-funcionales` |
-| `acp_robusto` | ACP robusto | 4 | reducir | pendiente | no | `fichas/acp_robusto.md` | `090-reduccion/020-acp/050-decisiones/020-outliers` |
-| `acp` | Análisis de componentes principales | 4 | reducir | activo | sí | `fichas/acp.md` | `090-reduccion/020-acp` |
-| `efa` | Análisis factorial exploratorio | 4 | reducir | pendiente | no | `fichas/efa.md` | `090-reduccion/030-emparentados/010-analisis-factorial` |
-| `mds` | Escalamiento multidimensional | 4 | reducir | pendiente | sí | `fichas/mds.md` | `090-reduccion/030-emparentados/020-mds` |
-| `kernel_pca` | Kernel PCA | 4 | reducir | pendiente | no | `fichas/kernel_pca.md` | `090-reduccion/030-emparentados/040-no-lineal` |
-| `tsne` | t-SNE | 4 | reducir | pendiente | no | `fichas/tsne.md` | `090-reduccion/030-emparentados/040-no-lineal` |
-| `umap` | UMAP | 4 | reducir | pendiente | no | `fichas/umap.md` | `090-reduccion/030-emparentados/040-no-lineal` |
-| `dtw` | Agrupamiento de series con DTW | 5 | agrupar | pendiente | no | `fichas/dtw.md` | `150-extensiones/030-series-tiempo` |
-| `espectral` | Agrupamiento espectral | 5 | agrupar | pendiente | no | `fichas/espectral.md` | `100-agrupamiento/040-otros-enfoques` |
-| `jerarquico` | Agrupamiento jerárquico | 5 | agrupar | pendiente | sí | `fichas/jerarquico.md` | `100-agrupamiento/030-jerarquico` |
-| `biclustering` | Biclustering | 5 | agrupar | pendiente | no | `fichas/biclustering.md` | `100-agrupamiento/040-otros-enfoques` |
-| `dbscan` | DBSCAN | 5 | agrupar | pendiente | sí | `fichas/dbscan.md` | `100-agrupamiento/040-otros-enfoques/010-dbscan` |
-| `comunidades` | Detección de comunidades | 5 | agrupar | pendiente | no | `fichas/comunidades.md` | `150-extensiones/090-no-estructurados` |
-| `kmeans` | K-medias | 5 | agrupar | activo | sí | `fichas/kmeans.md` | `100-agrupamiento/020-kmeans` |
-| `validacion_grupos` | Validación de grupos | 5 | agrupar | pendiente | sí | `fichas/validacion_grupos.md` | `100-agrupamiento/050-validacion` |
-| `regresion_multiple` | Regresión lineal múltiple | 6 | predecir | pendiente | sí | `fichas/regresion_multiple.md` | `120-regresion/040-multiple` |
-| `regresion_simple` | Regresión lineal simple | 6 | predecir | pendiente | sí | `fichas/regresion_simple.md` | `120-regresion/030-simple` |
-| `knn` | K vecinos más cercanos | 7 | clasificar | pendiente | sí | `fichas/knn.md` | `110-clasificacion/040-no-parametricos/010-knn` |
-| `logistica` | Regresión logística | 7 | clasificar | pendiente | sí | `fichas/logistica.md` | `110-clasificacion/030-basados-regresion/010-logistica` |
-| `cuantilica` | Regresión cuantílica | 7 | predecir | pendiente | no | `fichas/cuantilica.md` | `120-regresion/070-extensiones/040-robusta` |
-| `lasso` | Regresión regularizada (LASSO / Ridge) | 7 | predecir | pendiente | sí | `fichas/lasso.md` | `120-regresion/070-extensiones/010-regularizacion` |
-| `step_aic` | Selección paso a paso (AIC / BIC) | 7 | predecir | pendiente | sí | `fichas/step_aic.md` | `120-regresion/060-seleccion/020-stepwise` |
-| `anova_una_via` | ANOVA a una vía | 8 | contrastar | pendiente | sí | `fichas/anova_una_via.md` | `130-anova/030-una-via` |
-| `rm_anova` | ANOVA de medidas repetidas | 8 | contrastar | pendiente | no | `fichas/rm_anova.md` | `130-anova/060-disenos/050-medidas-repetidas` |
-| `tukey` | Comparaciones múltiples (Tukey HSD) | 8 | contrastar | pendiente | sí | `fichas/tukey.md` | `130-anova/050-comparaciones-multiples/020-tukey` |
-| `chi_cuadrado` | Ji-cuadrado de independencia | 8 | contrastar | pendiente | sí | `fichas/chi_cuadrado.md` | `140-contingencia/020-independencia/010-chi-cuadrado` |
-| `manova` | MANOVA | 8 | contrastar | pendiente | sí | `fichas/manova.md` | `130-anova/070-manova` |
-| `tamano_efecto` | Tamaño del efecto (η², ω²) | 8 | contrastar | pendiente | no | `fichas/tamano_efecto.md` | `130-anova/030-una-via/060-tamano-efecto` |
-| `welch` | Welch y Brown-Forsythe | 8 | contrastar | pendiente | sí | `fichas/welch.md` | `130-anova/040-supuestos/030-no-parametricas` |
-| `lmer` | Modelos mixtos (efectos aleatorios) | 8 | predecir | pendiente | no | `fichas/lmer.md` | `130-anova/060-disenos/040-efectos-aleatorios` |
-| `mlp` | Perceptrón multicapa | — | clasificar | bloqueado | no | `fichas/mlp.md` | `150-extensiones/080-aprendizaje-estadistico` |
-| `cnn` | Red convolucional | — | clasificar | bloqueado | no | `fichas/cnn.md` | `150-extensiones/090-no-estructurados` |
-| `fundacional` | Modelos fundacionales | — | predecir | bloqueado | no | `fichas/fundacional.md` | `150-extensiones/090-no-estructurados` |
-| `bayes_brms` | Regresión bayesiana (MCMC) | — | predecir | bloqueado | no | `fichas/bayes_brms.md` | `150-extensiones/010-bayesiana` |
-| `espacial` | Regresión espacial (SAR / SEM) | — | predecir | bloqueado | no | `fichas/espacial.md` | `100-agrupamiento/060-correlacion-espacial` |
-| `transformer` | Transformer | — | predecir | bloqueado | no | `fichas/transformer.md` | `150-extensiones/090-no-estructurados` |
+| Clave | Método | Sesión | Objetivo | Estado | Explora en ① | wasm | Ficha | Nodo teórico |
+|---|---|---|---|---|---|---|---|---|
+| `faltantes` | Diagnóstico de datos faltantes | 1 | describir | pendiente | f1.calidad.matriz_nulidad | sí | `fichas/faltantes.md` | `020-descriptiva/030-estructura-datos/010-faltantes` |
+| `densidad_kernel` | Estimación de densidad kernel | 1 | describir | pendiente | f1.analisis.densidad | sí | `fichas/densidad_kernel.md` | `040-variables-aleatorias/060-estimacion-densidad/020-kernel` |
+| `resumen_univariado` | Resumen univariado | 1 | describir | pendiente | f1.analisis.resumen | sí | `fichas/resumen_univariado.md` | `020-descriptiva/050-numerico` |
+| `potencia` | Análisis de potencia | 2 | contrastar | pendiente | — | sí | `fichas/potencia.md` | `060-inferencia/050-pruebas-hipotesis/040-potencia` |
+| `bootstrap` | Bootstrap | 2 | contrastar | pendiente | — | sí | `fichas/bootstrap.md` | `060-inferencia/060-remuestreo/010-bootstrap` |
+| `permutacion` | Prueba de permutación | 2 | contrastar | pendiente | — | sí | `fichas/permutacion.md` | `060-inferencia/060-remuestreo/020-permutacion` |
+| `normalidad` | Verificación de normalidad | 2 | contrastar | pendiente | f1.analisis.qq_normal_datos | sí | `fichas/normalidad.md` | `040-variables-aleatorias/050-normal-detalle/030-verificacion-normalidad` |
+| `box_cox` | Transformación de Box-Cox | 2 | describir | pendiente | f1.transformacion.perfil_boxcox | sí | `fichas/box_cox.md` | `120-regresion/040-multiple/090-transformaciones` |
+| `gmm` | Mezclas gaussianas (EM) | 3 | agrupar | pendiente | — | no | `fichas/gmm.md` | `100-agrupamiento/040-otros-enfoques/020-mezclas-gaussianas` |
+| `qda` | Análisis discriminante cuadrático | 3 | clasificar | pendiente | — | sí | `fichas/qda.md` | `110-clasificacion/020-basados-distribucion/030-qda` |
+| `lda` | Análisis discriminante lineal | 3 | clasificar | pendiente | — | sí | `fichas/lda.md` | `110-clasificacion/020-basados-distribucion/020-lda` |
+| `hotelling` | T² de Hotelling | 3 | contrastar | pendiente | — | sí | `fichas/hotelling.md` | `080-normal-multivariada/060-inferencia-mu/010-hotelling-una-muestra` |
+| `copula` | Cópulas | 3 | describir | pendiente | — | no | `fichas/copula.md` | `050-bivariado/020-conjunta/010-conjunta` |
+| `mahalanobis` | Distancia de Mahalanobis | 3 | describir | pendiente | f1.analisis.qq_mahalanobis | sí | `fichas/mahalanobis.md` | `070-multivariado/050-distancias/030-mahalanobis` |
+| `normal_multivariada` | Normal multivariada | 3 | describir | pendiente | f1.analisis.elipsoide | sí | `fichas/normal_multivariada.md` | `080-normal-multivariada/020-modelo` |
+| `cca` | Correlación canónica | 3 | reducir | pendiente | — | no | `fichas/cca.md` | `090-reduccion/030-emparentados/030-correlacion-canonica` |
+| `acp_faltantes` | ACP con datos faltantes | 4 | reducir | pendiente | — | no | `fichas/acp_faltantes.md` | `090-reduccion/020-acp` |
+| `fpca` | ACP funcional | 4 | reducir | pendiente | — | no | `fichas/fpca.md` | `150-extensiones/070-datos-funcionales` |
+| `acp_robusto` | ACP robusto | 4 | reducir | pendiente | — | no | `fichas/acp_robusto.md` | `090-reduccion/020-acp/050-decisiones/020-outliers` |
+| `acp` | Análisis de componentes principales | 4 | reducir | activo | — | sí | `fichas/acp.md` | `090-reduccion/020-acp` |
+| `efa` | Análisis factorial exploratorio | 4 | reducir | pendiente | — | no | `fichas/efa.md` | `090-reduccion/030-emparentados/010-analisis-factorial` |
+| `mds` | Escalamiento multidimensional | 4 | reducir | pendiente | — | sí | `fichas/mds.md` | `090-reduccion/030-emparentados/020-mds` |
+| `kernel_pca` | Kernel PCA | 4 | reducir | pendiente | — | no | `fichas/kernel_pca.md` | `090-reduccion/030-emparentados/040-no-lineal` |
+| `tsne` | t-SNE | 4 | reducir | pendiente | — | no | `fichas/tsne.md` | `090-reduccion/030-emparentados/040-no-lineal` |
+| `umap` | UMAP | 4 | reducir | pendiente | — | no | `fichas/umap.md` | `090-reduccion/030-emparentados/040-no-lineal` |
+| `dtw` | Agrupamiento de series con DTW | 5 | agrupar | pendiente | — | no | `fichas/dtw.md` | `150-extensiones/030-series-tiempo` |
+| `espectral` | Agrupamiento espectral | 5 | agrupar | pendiente | — | no | `fichas/espectral.md` | `100-agrupamiento/040-otros-enfoques` |
+| `jerarquico` | Agrupamiento jerárquico | 5 | agrupar | pendiente | — | sí | `fichas/jerarquico.md` | `100-agrupamiento/030-jerarquico` |
+| `biclustering` | Biclustering | 5 | agrupar | pendiente | — | no | `fichas/biclustering.md` | `100-agrupamiento/040-otros-enfoques` |
+| `dbscan` | DBSCAN | 5 | agrupar | pendiente | — | sí | `fichas/dbscan.md` | `100-agrupamiento/040-otros-enfoques/010-dbscan` |
+| `comunidades` | Detección de comunidades | 5 | agrupar | pendiente | — | no | `fichas/comunidades.md` | `150-extensiones/090-no-estructurados` |
+| `kmeans` | K-medias | 5 | agrupar | activo | — | sí | `fichas/kmeans.md` | `100-agrupamiento/020-kmeans` |
+| `validacion_grupos` | Validación de grupos | 5 | agrupar | pendiente | — | sí | `fichas/validacion_grupos.md` | `100-agrupamiento/050-validacion` |
+| `regresion_multiple` | Regresión lineal múltiple | 6 | predecir | pendiente | — | sí | `fichas/regresion_multiple.md` | `120-regresion/040-multiple` |
+| `regresion_simple` | Regresión lineal simple | 6 | predecir | pendiente | — | sí | `fichas/regresion_simple.md` | `120-regresion/030-simple` |
+| `knn` | K vecinos más cercanos | 7 | clasificar | pendiente | — | sí | `fichas/knn.md` | `110-clasificacion/040-no-parametricos/010-knn` |
+| `logistica` | Regresión logística | 7 | clasificar | pendiente | — | sí | `fichas/logistica.md` | `110-clasificacion/030-basados-regresion/010-logistica` |
+| `cuantilica` | Regresión cuantílica | 7 | predecir | pendiente | — | no | `fichas/cuantilica.md` | `120-regresion/070-extensiones/040-robusta` |
+| `lasso` | Regresión regularizada (LASSO / Ridge) | 7 | predecir | pendiente | — | sí | `fichas/lasso.md` | `120-regresion/070-extensiones/010-regularizacion` |
+| `step_aic` | Selección paso a paso (AIC / BIC) | 7 | predecir | pendiente | — | sí | `fichas/step_aic.md` | `120-regresion/060-seleccion/020-stepwise` |
+| `anova_una_via` | ANOVA a una vía | 8 | contrastar | pendiente | — | sí | `fichas/anova_una_via.md` | `130-anova/030-una-via` |
+| `rm_anova` | ANOVA de medidas repetidas | 8 | contrastar | pendiente | — | no | `fichas/rm_anova.md` | `130-anova/060-disenos/050-medidas-repetidas` |
+| `tukey` | Comparaciones múltiples (Tukey HSD) | 8 | contrastar | pendiente | — | sí | `fichas/tukey.md` | `130-anova/050-comparaciones-multiples/020-tukey` |
+| `chi_cuadrado` | Ji-cuadrado de independencia | 8 | contrastar | pendiente | — | sí | `fichas/chi_cuadrado.md` | `140-contingencia/020-independencia/010-chi-cuadrado` |
+| `manova` | MANOVA | 8 | contrastar | pendiente | — | sí | `fichas/manova.md` | `130-anova/070-manova` |
+| `tamano_efecto` | Tamaño del efecto (η², ω²) | 8 | contrastar | pendiente | — | no | `fichas/tamano_efecto.md` | `130-anova/030-una-via/060-tamano-efecto` |
+| `welch` | Welch y Brown-Forsythe | 8 | contrastar | pendiente | — | sí | `fichas/welch.md` | `130-anova/040-supuestos/030-no-parametricas` |
+| `lmer` | Modelos mixtos (efectos aleatorios) | 8 | predecir | pendiente | — | no | `fichas/lmer.md` | `130-anova/060-disenos/040-efectos-aleatorios` |
+| `mlp` | Perceptrón multicapa | — | clasificar | bloqueado | — | no | `fichas/mlp.md` | `150-extensiones/080-aprendizaje-estadistico` |
+| `cnn` | Red convolucional | — | clasificar | bloqueado | — | no | `fichas/cnn.md` | `150-extensiones/090-no-estructurados` |
+| `fundacional` | Modelos fundacionales | — | predecir | bloqueado | — | no | `fichas/fundacional.md` | `150-extensiones/090-no-estructurados` |
+| `bayes_brms` | Regresión bayesiana (MCMC) | — | predecir | bloqueado | — | no | `fichas/bayes_brms.md` | `150-extensiones/010-bayesiana` |
+| `espacial` | Regresión espacial (SAR / SEM) | — | predecir | bloqueado | — | no | `fichas/espacial.md` | `100-agrupamiento/060-correlacion-espacial` |
+| `transformer` | Transformer | — | predecir | bloqueado | — | no | `fichas/transformer.md` | `150-extensiones/090-no-estructurados` |
 
 ## Métodos bloqueados
 

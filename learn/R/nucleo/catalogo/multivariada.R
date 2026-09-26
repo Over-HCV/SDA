@@ -11,6 +11,7 @@ poblar_catalogo_multivariada <- function() {
     nodo = "080-normal-multivariada/020-modelo",
     entrada = list(tipo = "matriz_numerica", min_p = 2L, faltantes = FALSE),
     artefactos = c("f1.analisis.elipsoide", "f1.analisis.densidad_conjunta"),
+    explora = "f1.analisis.elipsoide",
     supuestos = c("normalidad_multivariada"))
 
   registrar_metodo(
@@ -23,6 +24,7 @@ poblar_catalogo_multivariada <- function() {
       corte = list(tipo = "real", min = 0.90, max = 0.999, def = 0.975,
                    paso = 0.005, etiqueta = "Cuantil de corte para atípicos")),
     artefactos = c("f1.analisis.qq_mahalanobis", "f1.calidad.atipicos"),
+    explora = "f1.analisis.qq_mahalanobis",
     supuestos = c("normalidad_multivariada", "covarianza_invertible"))
 
   registrar_metodo(

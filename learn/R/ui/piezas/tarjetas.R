@@ -67,17 +67,29 @@ tarjeta_metodo <- function(clave, ns = shiny::NS(NULL)) {
 #' sería mentir: un método `pendiente` está en el temario pero todavía no se
 #' puede correr, y un `bloqueado` no se va a poder nunca. Un botón que no hace
 #' nada al pulsarlo enseña desconfianza en el resto de la interfaz.
+#'
+#' El pendiente con `explora` es el caso honesto del medio: no corre como
+#' método todavía, pero su lógica ya se ve andando en ① Datos, y el botón
+#' lleva ahí en vez de decir "sin implementar" de algo que existe.
 .boton_elegir <- function(clave, m, ns) {
   if (m$estado == "activo")
     return(shiny::actionLink(ns(paste0("elegir_", clave)), "Elegir",
                              class = "btn btn-sm btn-primary"))
 
-  if (m$estado == "pendiente")
+  if (m$estado == "pendiente") {
+    if (length(m$explora))
+      return(bslib::tooltip(
+        shiny::actionLink(ns(paste0("ver_", clave)), "Ver en ① Datos",
+                          class = "btn btn-sm btn-outline-primary",
+                          icon = bsicons::bs_icon("box-arrow-up-right")),
+        paste("Todavía no corre como método en ② Modelado, pero su análisis",
+              "ya está andando en ① Datos; el botón te lleva al panel.")))
     return(bslib::tooltip(
       shiny::tags$span(class = "btn btn-sm btn-outline-secondary disabled",
                        bsicons::bs_icon("hourglass"), " Sin implementar"),
       paste("Está en el temario y su ficha ya explica qué hace, pero todavía",
             "no tiene función de ajuste. Ver learn/PLAN.md.")))
+  }
 
   bslib::tooltip(
     shiny::tags$span(class = "btn btn-sm btn-outline-dark disabled",

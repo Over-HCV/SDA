@@ -46,6 +46,17 @@ probar("un método activo exige función de ajuste",
 probar("un método bloqueado exige motivo",
        falla(registrar_metodo("prueba_sin_motivo", "X", "reducir",
                               estado = "bloqueado")))
+probar("`explora` rechaza artefactos que no son de ①",
+       falla(registrar_metodo("prueba_explora_mala", "X", "describir",
+                              explora = "f4.desempeno.roc")))
+probar("los pendientes con explora apuntan a paneles reales de ①", {
+  con_explora <- Filter(function(k) length(metodo(k)$explora), claves_metodos())
+  length(con_explora) > 0 &&
+    all(vapply(con_explora, function(k) {
+      metodo(k)$estado == "pendiente" && all(metodo(k)$explora %in%
+                                               claves_artefactos())
+    }, logical(1)))
+})
 probar("todos los bloqueados tienen puente", {
   claves <- filtrar_metodos(estado = "bloqueado")
   length(claves) > 0 &&

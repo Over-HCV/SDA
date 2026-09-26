@@ -468,7 +468,7 @@ Las tarjetas 🔒 **también abren su ficha** — con las secciones QUÉ ES / PO
 
 | Subsección | Acciones | Feedback en vivo |
 |---|---|---|
-| **Catálogo** | filtrar por objetivo / sesión / supervisión / ejecutable · buscar · abrir ficha · elegir método | contador "N métodos visibles" + resaltado de los compatibles con el dataset actual |
+| **Catálogo** | filtrar por objetivo / sesión / supervisión / ejecutable · buscar · abrir ficha · elegir método · saltar a ① Datos desde los pendientes que ya corren como análisis | contador "N métodos visibles" + resaltado de los compatibles con el dataset actual |
 | **Especificación** | constructor de fórmula (`y ~ x₁ + x₂ + x₁:x₂`) con arrastre de columnas · o selección de bloques X / Y · vista del texto de la fórmula generada | matriz de diseño resultante: dimensiones, rango, nombres de dummies creadas |
 | **Supuestos** | checklist específico del método, evaluado **sobre el dataset actual antes de ajustar** | semáforo por supuesto (normalidad, homocedasticidad, colinealidad VIF, tamaño mínimo, escalas) con el gráfico que lo prueba al lado |
 | **Hiperparámetros** | solo los del *modelo*, no los del ajuste: `k`, nº de componentes, `α`, tipo de enlace, `ε`/`minPts`, kernel… | previsualización del efecto donde sea barato (ej.: `k` mueve el corte del dendrograma sin recalcular) |

@@ -16,12 +16,12 @@
 
 .tabla_metodos <- function() {
   df <- metodos_df()
-  c("| Clave | Método | Sesión | Objetivo | Estado | wasm | Ficha | Nodo teórico |",
-    "|---|---|---|---|---|---|---|---|",
-    sprintf("| `%s` | %s | %s | %s | %s | %s | `fichas/%s.md` | `%s` |",
+  c("| Clave | Método | Sesión | Objetivo | Estado | Explora en ① | wasm | Ficha | Nodo teórico |",
+    "|---|---|---|---|---|---|---|---|---|",
+    sprintf("| `%s` | %s | %s | %s | %s | %s | %s | `fichas/%s.md` | `%s` |",
             df$clave, df$nombre, .si_vacio(as.character(df$sesion)),
-            df$objetivo, df$estado, .marca(df$wasm), df$clave,
-            .si_vacio(df$nodo)),
+            df$objetivo, df$estado, .si_vacio(df$explora),
+            .marca(df$wasm), df$clave, .si_vacio(df$nodo)),
     "")
 }
 
@@ -53,10 +53,13 @@
 .resumen <- function() {
   estados <- resumen_catalogo()
   cobertura <- cobertura_textos()
+  df <- metodos_df()
   c("## Resumen", "",
     sprintf("- **Métodos**: %d registrados — %d activos, %d pendientes, %d bloqueados",
             length(claves_metodos()), estados[["activo"]],
             estados[["pendiente"]], estados[["bloqueado"]]),
+    sprintf("- **Explorables en ①**: %d pendientes ya corren como análisis de datos",
+            sum(nzchar(df$explora))),
     sprintf("- **Artefactos**: %d registrados", length(claves_artefactos())),
     sprintf("- **Textos escritos**: %d de %d", cobertura$textos_escritos,
             cobertura$textos_esperados),

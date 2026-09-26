@@ -122,6 +122,7 @@ Rscript learn/R/pruebas/test_contrato.R
 #   test_app_piezas.R  the chrome every card shares: seal, formulas, sidebar
 #   test_app_metodo.R  ACP walked through phases 2 -> 3 -> 4
 #   test_app_kmeans.R  k-means, same walk, different family
+#   test_app_traspaso.R  dataset handoff ① -> ② (auto-save) + "Ver en ① Datos"
 #   test_app_sesion.R  open a session, edit, save from Inicio, reopen elsewhere
 Rscript learn/R/pruebas/test_app.R
 Rscript learn/R/pruebas/test_app_piezas.R
