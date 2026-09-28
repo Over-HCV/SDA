@@ -1,15 +1,15 @@
 # learn/R/ui/f4/explicabilidad.R
 #
-# Responsabilidad: subsección Explicabilidad — qué dice el ajuste.
+# Responsabilidad: subsección Explicabilidad — dónde cayeron las observaciones.
 #
-# Vistas de la misma cosa: cargas (qué variables forman cada eje), círculo
-# (cómo se correlacionan con él), mapa 2D (dónde cayeron las observaciones),
-# biplot (las dos juntas) y el perfil de los grupos cuando el método parte en
-# vez de proyectar.
+# El mapa 2D, el biplot y el perfil de los grupos: las vistas que hablan de
+# individuos. Lo que habla de variables (cargas, círculo, contribución, calidad)
+# vive en f4/aportes.R y se dibuja en esta misma subsección: son cards de la
+# misma pestaña, partidas por lo que cuentan y no por el techo de líneas.
 #
-# Cuál se dibuja lo dice el registro: cada card aparece si el método declara su
-# clave. El par de ejes es un control compartido por los paneles que lo usan:
-# mirarlos con ejes distintos sería comparar cosas que no se comparan.
+# Los controles de acá los leen las dos mitades: el par de ejes es compartido a
+# propósito, porque mirar las cargas de un plano y los puntos de otro sería
+# comparar cosas que no se comparan.
 
 controles_explicabilidad <- function(ns) {
   shiny::tagList(
@@ -23,7 +23,18 @@ controles_explicabilidad <- function(ns) {
                        min = 0.1, max = 1, value = 0.7, step = 0.05),
     shiny::tags$p(class = "text-muted small mb-0",
                   paste("El color no participó del ajuste: si los grupos se",
-                        "separan, es un hallazgo.")))
+                        "separan, es un hallazgo.")),
+    bslib::accordion(
+      open = FALSE,
+      bslib::accordion_panel(
+        "Suplementarios",
+        shiny::selectInput(ns("suplementario"), "Individuos de otro dataset",
+                           choices = c("ninguno" = "")),
+        shiny::selectInput(ns("variable_sup"), "Variable que no entró",
+                           choices = c("ninguna" = "")),
+        shiny::tags$p(class = "text-muted small mb-0",
+                      paste("Se proyectan con las cargas del ajuste y no lo",
+                            "movieron: dicen dónde caerían, no qué eje hay.")))))
 }
 
 #' Los ejes disponibles los declara la familia del ajuste: las componentes
@@ -31,22 +42,64 @@ controles_explicabilidad <- function(ns) {
 #' del usuario, es una opción que no debería existir— y los dos del plano en
 #' una partición.
 actualizar_explicabilidad <- function(session, corrida, dataset,
-                                      previos = list()) {
+                                      previos = list(), almacen = NULL) {
   if (is.null(corrida)) return(invisible(FALSE))
-  nombres <- etiquetas_ejes(corrida$ajuste)
+  ajuste <- corrida$ajuste
+  nombres <- etiquetas_ejes(ajuste)
   opciones <- stats::setNames(as.character(seq_along(nombres)), nombres)
   .rellenar_selector(session, "eje_x", opciones, previos$eje_x %||% "1")
   .rellenar_selector(session, "eje_y", opciones,
                      previos$eje_y %||% as.character(min(2L, length(nombres))))
 
-  candidatas <- if (is.null(dataset)) character(0) else
-    c(columnas_con_rol(dataset, "grupo"),
-      names(dataset$df)[vapply(dataset$df, function(x)
-        is.character(x) || is.factor(x), logical(1))])
   shiny::updateSelectInput(session, "color",
-                           choices = c("sin color" = "", unique(candidatas)),
+                           choices = .opciones_color(dataset),
                            selected = previos$color %||% "")
+  shiny::updateSelectInput(session, "suplementario",
+                           choices = .opciones_suplementarias(ajuste, almacen,
+                                                              dataset),
+                           selected = previos$suplementario %||% "")
+  shiny::updateSelectInput(session, "variable_sup",
+                           choices = .opciones_variable_sup(ajuste, dataset),
+                           selected = previos$variable_sup %||% "")
   invisible(TRUE)
+}
+
+# Una cualitativa colorea por grupo; una cuantitativa, en degradado. Las dos
+# sirven y dicen cosas distintas, así que se ofrecen las dos, separadas para que
+# se vea que la elección tiene consecuencias.
+.opciones_color <- function(dataset) {
+  if (is.null(dataset)) return(c("sin color" = ""))
+  cualitativas <- unique(c(columnas_con_rol(dataset, "grupo"),
+                           columnas_cualitativas(dataset)))
+  cuantitativas <- columnas_numericas(dataset)
+  opciones <- list("sin color" = "")
+  if (length(cualitativas)) opciones[["por grupo"]] <- cualitativas
+  if (length(cuantitativas)) opciones[["en degradado"]] <- cuantitativas
+  opciones
+}
+
+# Solo los datasets que de verdad se pueden proyectar: uno al que le falta una
+# columna del ajuste no entra al selector, en vez de entrar y fallar al dibujar.
+.opciones_suplementarias <- function(ajuste, almacen, dataset) {
+  if (is.null(almacen) || is.null(ajuste$centro)) return(c("ninguno" = ""))
+  lista <- almacen()
+  ids <- setdiff(almacen_ids(lista, "dataset"), dataset$id %||% "")
+  sirven <- Filter(function(id) {
+    ds <- almacen_obtener(lista, "dataset", id)
+    isTRUE(sirve_como_suplementario(ajuste, ds$df))
+  }, ids)
+  if (!length(sirven)) return(c("ninguno" = ""))
+  etiquetas <- vapply(sirven, function(id)
+    sprintf("%s · %s", id, almacen_obtener(lista, "dataset", id)$nombre), "")
+  c(stats::setNames("", "ninguno"), stats::setNames(sirven, etiquetas))
+}
+
+# Una variable suplementaria es, por definición, una que NO entró al ajuste.
+.opciones_variable_sup <- function(ajuste, dataset) {
+  if (is.null(dataset)) return(c("ninguna" = ""))
+  fuera <- setdiff(columnas_numericas(dataset), ajuste$columnas)
+  if (!length(fuera)) return(c("ninguna" = ""))
+  c(stats::setNames("", "ninguna"), stats::setNames(fuera, fuera))
 }
 
 salida_explicabilidad <- function(ns) {
@@ -57,95 +110,52 @@ salida_explicabilidad <- function(ns) {
     panel_si_declara(ns, "f4.explicabilidad.centroides",
                      shiny::plotOutput(ns("centroides"), height = "400px"),
                      contexto = salida_contexto(ns, "contexto_centroides")),
-    panel_si_declara(ns, "f4.explicabilidad.cargas",
-                     shiny::plotOutput(ns("cargas"), height = "300px"),
-                     contexto = salida_contexto(ns, "contexto_cargas")),
-    panel_si_declara(ns, "f4.explicabilidad.circulo_correlaciones",
-                     shiny::plotOutput(ns("circulo"), height = "380px"),
-                     contexto = salida_contexto(ns, "contexto_circulo")),
     panel_si_declara(ns, "f4.explicabilidad.biplot",
                      shiny::plotOutput(ns("biplot"), height = "420px"),
-                     contexto = salida_contexto(ns, "contexto_biplot")))
+                     contexto = salida_contexto(ns, "contexto_biplot")),
+    salida_aportes(ns))
 }
 
-servidor_explicabilidad <- function(input, output, session, corrida, dataset) {
-  ajuste <- shiny::reactive({
-    c <- corrida()
-    shiny::validate(shiny::need(
-      !is.null(c), "Corré una composición en Composición para ver el modelo."))
-    c$ajuste
-  })
+servidor_explicabilidad <- function(input, output, session, corrida, dataset,
+                                    almacen = NULL) {
+  contexto <- contexto_plano(input, output, session, corrida, dataset)
+  ajuste <- contexto$ajuste
+  ejes <- contexto$ejes
+  etiquetas <- contexto$etiquetas
 
-  ejes <- shiny::reactive({
-    c(as.integer(input$eje_x %||% "1"), as.integer(input$eje_y %||% "2"))
-  })
-
-  etiquetas <- shiny::reactive({
-    nombres <- etiquetas_ejes(ajuste())
-    nombres[pmin(ejes(), length(nombres))]
-  })
-
-  # El color se recorta a las filas que de verdad entraron al ajuste: las que
-  # tenían un faltante se descartaron y desalinear el vector pintaría cada
-  # punto del grupo equivocado, sin fallar.
-  grupo <- shiny::reactive({
-    ds <- tryCatch(dataset(), error = function(e) NULL)
-    columna <- input$color %||% ""
-    if (is.null(ds) || !nzchar(columna)) return(NULL)
-    a <- ajuste()
-    completas <- stats::complete.cases(ds$df[, a$columnas, drop = FALSE])
-    ds$df[[columna]][completas]
-  })
-
-  .exigir_ejes <- function() {
-    shiny::validate(shiny::need(
-      ejes()[1] != ejes()[2],
-      "Elegí dos componentes distintas: una contra sí misma es una diagonal."))
-  }
-
-  output$cargas <- shiny::renderPlot({
-    graficar_cargas(cargas(ajuste(), componentes = unique(ejes())))
-  })
-
-  output$circulo <- shiny::renderPlot({
-    .exigir_ejes()
-    a <- ajuste()
-    graficar_circulo(correlaciones_componentes(a, ejes()), etiquetas(),
-                     sobre_correlacion = identical(a$matriz, "correlacion"))
+  suplementarios <- shiny::reactive({
+    id <- input$suplementario %||% ""
+    if (!nzchar(id) || is.null(almacen)) return(NULL)
+    ds <- almacen_obtener(almacen(), "dataset", id)
+    .o_aviso(proyectar_individuos(ajuste(), ds$df, ejes()))
   })
 
   output$mapa <- shiny::renderPlot({
-    .exigir_ejes()
-    graficar_mapa_2d(coordenadas_2d(ajuste(), ejes(), grupo()), etiquetas(),
-                     alfa = input$alfa %||% 0.7)
+    contexto$exigir_ejes()
+    graficar_mapa_2d(coordenadas_2d(ajuste(), ejes(), contexto$grupo()),
+                     etiquetas(), alfa = input$alfa %||% 0.7,
+                     color_nombre = contexto$nombre_color(),
+                     suplementarios = suplementarios())
   })
 
   output$centroides <- shiny::renderPlot(
     graficar_centroides(centroides_tabla(ajuste())))
 
   output$biplot <- shiny::renderPlot({
-    .exigir_ejes()
-    graficar_biplot(coordenadas_biplot(ajuste(), ejes(), grupo()), etiquetas(),
-                    alfa = input$alfa %||% 0.7)
+    contexto$exigir_ejes()
+    graficar_biplot(coordenadas_biplot(ajuste(), ejes(), contexto$grupo()),
+                    etiquetas(), alfa = input$alfa %||% 0.6,
+                    color_nombre = contexto$nombre_color(),
+                    suplementarios = suplementarios())
   })
 
-  parametros <- shiny::reactive({
-    c <- corrida()
-    if (is.null(c)) return(NULL)
-    c(c$params, list(ejes = paste(etiquetas(), collapse = " x "),
-                     color = if (nzchar(input$color %||% "")) input$color
-                             else "sin color"))
-  })
-  metricas <- shiny::reactive({
-    c <- corrida()
-    if (is.null(c)) NULL else c$metricas
-  })
-  for (par in list(c("f4.explicabilidad.cargas", "contexto_cargas"),
-                   c("f4.explicabilidad.circulo_correlaciones", "contexto_circulo"),
-                   c("f4.explicabilidad.mapa_2d", "contexto_mapa"),
+  servidor_aportes(input, output, session, contexto)
+
+  for (par in list(c("f4.explicabilidad.mapa_2d", "contexto_mapa"),
                    c("f4.explicabilidad.centroides", "contexto_centroides"),
                    c("f4.explicabilidad.biplot", "contexto_biplot")))
-    dibujar_contexto(output, par[1], params = parametros, metricas = metricas,
-                     corrida = shiny::reactive(corrida()), sufijo = par[2])
+    dibujar_contexto(output, par[1], params = contexto$parametros,
+                     metricas = contexto$metricas, corrida = contexto$corrida,
+                     sufijo = par[2])
   invisible(TRUE)
 }

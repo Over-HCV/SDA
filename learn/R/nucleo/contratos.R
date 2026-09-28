@@ -75,13 +75,18 @@ validar_compatibilidad <- function(dataset = NULL, modelo = NULL, receta = NULL)
   agregar <- function(...) avisos[[length(avisos) + 1L]] <<- .aviso(...)
   requisitos <- m$entrada
 
-  numericas <- columnas_numericas(dataset)
-  if (length(columnas)) numericas <- intersect(columnas, numericas)
+  # Qué cuenta como variable usable lo dice el método, no esta función: el ACM
+  # necesita cualitativas y contarle las numéricas lo declaraba imposible.
+  cualitativo <- identical(requisitos$tipo, "matriz_cualitativa")
+  usables <- columnas_admisibles(dataset, requisitos$tipo %||% "matriz_numerica")
+  if (length(columnas)) usables <- intersect(columnas, usables)
   min_p <- requisitos$min_p %||% 0L
-  if (length(numericas) < min_p) {
+  if (length(usables) < min_p) {
     agregar("error", "min_p",
-            sprintf("%s necesita al menos %d variables numéricas; el dataset tiene %d.",
-                    m$nombre, min_p, length(numericas)),
+            sprintf("%s necesita al menos %d variables %s; el dataset tiene %d.",
+                    m$nombre, min_p,
+                    if (cualitativo) "cualitativas" else "numéricas",
+                    length(usables)),
             "Revisá la clase de cada columna en el Diccionario de la fase 1.")
   }
 
@@ -93,7 +98,7 @@ validar_compatibilidad <- function(dataset = NULL, modelo = NULL, receta = NULL)
   }
 
   if (identical(requisitos$faltantes, FALSE)) {
-    columnas <- if (length(numericas)) numericas else names(dataset$df)
+    columnas <- if (length(usables)) usables else names(dataset$df)
     con_na <- vapply(dataset$df[columnas], function(x) any(is.na(x)), logical(1))
     if (any(con_na)) {
       agregar("error", "faltantes",

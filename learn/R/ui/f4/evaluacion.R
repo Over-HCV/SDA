@@ -17,9 +17,12 @@ SUBSECCIONES_EVALUACION <- c("Composición", "Desempeño", "Diagnóstico",
 # Todo lo que la fase 4 sabe dibujar. Cada card se muestra si el método de la
 # corrida la declara en `artefactos` (SCHEMA.md §4).
 CLAVES_EVALUACION <- c("f4.desempeno.grupos",
-                       "f4.diagnostico.scree", "f4.diagnostico.codo",
-                       "f4.diagnostico.silueta",
+                       "f4.diagnostico.scree", "f4.diagnostico.reglas_k",
+                       "f4.diagnostico.ortogonalidad",
+                       "f4.diagnostico.codo", "f4.diagnostico.silueta",
                        "f4.explicabilidad.cargas",
+                       "f4.explicabilidad.contribuciones",
+                       "f4.explicabilidad.calidad",
                        "f4.explicabilidad.circulo_correlaciones",
                        "f4.explicabilidad.mapa_2d",
                        "f4.explicabilidad.biplot",
@@ -113,7 +116,8 @@ mod_evaluacion_server <- function(id, almacen = NULL) {
 
     shiny::observeEvent(corrida(), {
       actualizar_explicabilidad(session, corrida(), dataset(),
-                                shiny::isolate(shiny::reactiveValuesToList(input)))
+                                shiny::isolate(shiny::reactiveValuesToList(input)),
+                                almacen = almacen)
     })
 
     output$estado <- shiny::renderUI(.franja_corrida(corrida(), piezas()))
@@ -124,10 +128,12 @@ mod_evaluacion_server <- function(id, almacen = NULL) {
     # reemplazaría en silencio.
     declarar_artefactos(output, CLAVES_EVALUACION, clave_metodo)
 
-    servidor_composicion(input, output, session, piezas, corrida)
+    servidor_composicion(input, output, session, piezas, corrida,
+                         almacen = almacen)
     servidor_desempeno(input, output, session, corrida)
     servidor_diagnostico(input, output, session, corrida)
-    servidor_explicabilidad(input, output, session, corrida, dataset)
+    servidor_explicabilidad(input, output, session, corrida, dataset,
+                            almacen = almacen)
     servidor_analisis_evaluacion(input, output, session, piezas, corrida)
 
     shiny::observeEvent(input$guardar, {

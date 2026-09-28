@@ -34,7 +34,8 @@
 #' @param semilla        gobierna el vector inicial de la iteración (C13)
 #' @param registrar_traza FALSE ahorra memoria en barridos grandes
 #' @return list con cargas, puntuaciones, valores_propios, varianza_explicada,
-#'   error_reconstruccion, traza, convergio y los parámetros con que se ajustó
+#'   norma2_filas, error_reconstruccion, traza, convergio y los parámetros con
+#'   que se ajustó
 ajustar_acp <- function(datos, columnas = NULL, n_componentes = 2L,
                         matriz = "correlacion", optimizador = "potencia",
                         tol = 1e-8, maxit = 500L, semilla = 42L,
@@ -74,6 +75,12 @@ ajustar_acp <- function(datos, columnas = NULL, n_componentes = 2L,
   structure(list(
     cargas = cargas,
     puntuaciones = puntuaciones[, seq_len(k), drop = FALSE],
+    # La distancia al cuadrado de cada fila al centroide, sobre TODAS las
+    # componentes. Es constante para una fila: reparte lo mismo entre las
+    # componentes que se retienen y las que se descartan, y por eso maximizar
+    # la proyeccion es minimizar el residuo. Se guarda porque `puntuaciones`
+    # viene truncada a k y la calidad de representacion necesita el total.
+    norma2_filas = as.numeric(rowSums(z^2)),
     valores_propios = valores,
     varianza_explicada = valores / varianza_total,
     varianza_total = varianza_total,
@@ -96,8 +103,10 @@ ajustar_acp <- function(datos, columnas = NULL, n_componentes = 2L,
     convergio_por_componente = resultado$convergio_por_componente,
     traza = resultado$traza),
     # La clase es lo que hace que la fase 4 sepa qué preguntas puede hacerle a
-    # este ajuste sin conocer el método. Ver R/logica/metricas.R.
-    class = c("ajuste_acp", "ajuste_sda"))
+    # este ajuste sin conocer el método. Ver R/logica/metricas.R. La del medio
+    # es la de la FAMILIA: todo lo que devuelve cargas, puntuaciones y valores
+    # propios contesta igual, y el ACM entra sin tocar una vista.
+    class = c("ajuste_acp", "ajuste_reduccion", "ajuste_sda"))
 }
 
 # ---------------------------------------------------------------------------

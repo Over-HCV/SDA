@@ -63,10 +63,17 @@ cada resultado que dibuja sabe de dónde salió.
   CSV propio), se declara qué es cada columna, se limpia, se transforma, se
   parte y se balancea. La subsección **▣ Análisis** trae trece gráficos en
   univariado, bivariado y multivariado.
-- **Fase 2 · Modelado**: el catálogo real, con 54 métodos filtrables y su ficha.
+- **Fase 2 · Modelado**: el catálogo real, con 56 métodos filtrables y su ficha.
   Los seis que no se pueden ejecutar aquí siguen visibles, con el motivo y el
-  puente hacia el método equivalente que sí corre.
-- **Fases 3 y 4**: navegables, todavía sin contenido.
+  puente hacia el método equivalente que sí corre. Qué columnas se ofrecen lo
+  decide el método: un ACP pide cuantitativas, un ACM pide categorías.
+- **Fase 3 · Ajuste**: el optimizador de los métodos activos, con su traza y su
+  reproducción paso a paso.
+- **Fase 4 · Evaluación**: la composición Dataset × Modelo × Receta, el
+  diagnóstico (scree, las tres reglas para elegir k, ortogonalidad de las
+  componentes) y la explicabilidad (cargas, círculo, contribución, calidad de
+  representación, mapa factorial, biplot, suplementarios). Comparar varias
+  corridas sigue pendiente.
 
 <!-- CAPTURA · fase 1 de punta a punta
 <table>
@@ -110,7 +117,7 @@ una mentira cómoda.
 Cada panel lleva un sello ⓘ con la clave del artefacto y las rutas del código
 que lo produjo, y un bloque de contexto pegable en un chat para preguntar por
 qué salió ese número. El índice completo está en [`learn/MAPA.md`](learn/MAPA.md):
-79 artefactos, cada uno con su gráfico, su lógica y su texto.
+90 artefactos, cada uno con su gráfico, su lógica y su texto.
 
 ### Correrlo en local
 
@@ -226,10 +233,14 @@ El laboratorio se construye por hitos, con las casillas en
 
 | Hito | Qué entrega | Estado |
 |---|---|---|
-| 1 | Núcleo sin Shiny, catálogo de 54 métodos, bundle wasm | hecho |
+| 1 | Núcleo sin Shiny, catálogo de métodos, bundle wasm | hecho |
 | 2 | Fase 1 completa: las 6 subsecciones y ▣ Análisis | hecho |
-| 3 | ACP de punta a punta por las cuatro fases | siguiente |
-| 4–7 | k-medias, LASSO, evaluación completa, resto del catálogo | pendiente |
+| 3 | ACP de punta a punta por las cuatro fases | hecho |
+| 4 | k-medias, y con él el despacho por familia de métricas | hecho |
+| 4b | El Taller 01 entero dentro del lab, y el exportador a `.Rmd` | hecho |
+| 5 | LASSO: barrido de hiperparámetros y ruta de regularización | pendiente |
+| 6 | Evaluación completa. La explicabilidad de la reducción ya entró: contribución, calidad de representación, las tres reglas para elegir k, suplementarios y el ACM. Falta comparar corridas | en curso |
+| 7 | Poblar el catálogo, un método por vez | pendiente |
 
 ---
 

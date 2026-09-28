@@ -137,9 +137,10 @@ probar("marcar columnas cambia la matriz de diseño",
 # devuelve antes de que el output haya corrido.
 html_sup <- ir_a_pestana(app, "modelado-pestana", "Supuestos",
                          "Escalado previo")
-probar("el semáforo evalúa los tres supuestos declarados", {
+probar("el semáforo evalúa los cuatro supuestos declarados", {
   faltan <- Filter(function(p) !grepl(p, html_sup, fixed = TRUE),
-                   c("Escalado previo", "Estructura lineal", "Atipicos"))
+                   c("Variables cuantitativas", "Escalado previo",
+                     "Estructura lineal", "Atipicos"))
   length(faltan) == 0
 })
 probar("el semáforo cuenta cuántos se cumplen",
@@ -157,7 +158,7 @@ probar("el formulario de hiperparámetros sale del registro (C11)",
 
 # El control existe en el registro y en la función pura; moverlo prueba la
 # tercera pata de C11: que además esté enlazado en el navegador.
-html_k <- mover(app, `modelado-hiper_n_componentes` = 3)
+html_k <- mover(app, `modelado-hiper_acp_n_componentes` = 3)
 probar("mover el número de componentes mueve el presupuesto",
        grepl("parametros a estimar", html_k, fixed = TRUE) ||
          grepl("presupuesto", html_k, fixed = TRUE))
@@ -274,15 +275,37 @@ html_diag <- ir_a_pestana(app, "evaluacion-pestana", "Diagnóstico",
                           "Gráfico de sedimentación")
 probar("el scree se dibuja con su corte",
        grepl("Gráfico de sedimentación", html_diag, fixed = TRUE))
+# La tabla de reglas se rinde despues de que el titulo de la card ya esta en el
+# DOM, asi que hay que esperar por su contenido y no por el rotulo.
+html_reglas <- esperar_html(app, "Kaiser")
+probar("las tres reglas para elegir k se leen juntas", {
+  faltan <- Filter(function(p) !grepl(p, html_reglas, fixed = TRUE),
+                   c("Reglas para elegir k", "Kaiser", "codo",
+                     "umbral acumulado"))
+  length(faltan) == 0
+})
+probar("la ortogonalidad de las componentes se dibuja",
+       grepl("Ortogonalidad de las componentes", html_reglas, fixed = TRUE))
 
 html_expl <- ir_a_pestana(app, "evaluacion-pestana", "Explicabilidad",
                           "Componente horizontal")
-probar("las cuatro vistas que el ACP declara están", {
+probar("las seis vistas que el ACP declara están", {
   faltan <- Filter(function(p) !grepl(p, html_expl, fixed = TRUE),
                    c("Cargas", "Círculo de correlaciones", "Biplot",
-                     "Mapa en dos dimensiones"))
+                     "Mapa en dos dimensiones", "Contribución al eje",
+                     "Calidad de representación"))
   length(faltan) == 0
 })
+probar("y los suplementarios se ofrecen sin estorbar",
+       grepl("Suplementarios", html_expl, fixed = TRUE) &&
+         grepl("Variable que no entró", html_expl, fixed = TRUE))
+
+# El degradado es la prueba de que el eje 1 ES esa variable. Antes el selector
+# solo admitía columnas de grupo y esto no se podía ni intentar.
+html_color <- mover(app, `evaluacion-color` = "AGE")
+probar("colorear el plano por una variable continua no rompe el mapa",
+       grepl("observaciones", html_color, fixed = TRUE))
+invisible(mover(app, `evaluacion-color` = ""))
 # Las cards que el método no declara siguen en el DOM, ocultas por
 # conditionalPanel: el HTML no distingue. Lo que se asevera es la bandera que
 # gobierna la visibilidad, que es el mecanismo de verdad.
@@ -305,6 +328,15 @@ probar("y enciende las que sí", {
 html_ejes <- mover(app, `evaluacion-eje_y` = "3")
 probar("cambiar el par de ejes responde",
        grepl("Biplot", html_ejes, fixed = TRUE))
+
+# Cierra el círculo: las componentes vuelven al almacén como variables nuevas.
+invisible(ir_a_pestana(app, "evaluacion-pestana", "Composición",
+                       "Compatibilidad"))
+app$click("evaluacion-guardar_puntuaciones")
+app$wait_for_idle(duration = 800, timeout = 30000)
+probar("las puntuaciones se pueden guardar como dataset",
+       grepl("Puntuaciones guardadas",
+             esperar_html(app, "Puntuaciones guardadas"), fixed = TRUE))
 
 html_informe <- ir_a_pestana(app, "evaluacion-pestana", "▣ Análisis",
                              "Cuaderno .Rmd")

@@ -183,7 +183,11 @@ else.
 
 1. Add a row in `learn/R/nucleo/catalogo/<macro-tema>.R` via
    `registrar_metodo()`, with `estado = "activo"` and `ajustar = <fn>`.
-   Declare only the optimisers you actually implemented.
+   Declare only the optimisers you actually implemented, and `optimizador =
+   NULL` when the method has none (`acm`). `entrada$tipo` decides which columns
+   phase 2 offers and which ones `validar_compatibilidad()` counts:
+   `matriz_numerica` or `matriz_cualitativa`, resolved by
+   `columnas_admisibles()`.
 2. Write the pure fit function in `learn/metodos/<clave>.R` — no `input`,
    no `reactive`, no `session`. It is sourced **last** by `cargar.R`, so the
    registration call must stay in `catalogo/`, never in `metodos/`.
@@ -280,7 +284,18 @@ Every one of these was hit while building Hito 1. They cost real time.
   catalogue's state filter and the phase's status bar. Shiny prints
   "HTML id values are not unique" and keeps going at half speed, with
   `input$estado` returning whatever. Grep the module's `ns(...)` calls before
-  adding an output named like a common input.
+  adding an output named like a common input. Same trap from the other end:
+  `f2/hiperparametros.R` builds the form of **every** active method at once, so
+  two methods with a hyperparameter of the same name (`n_componentes` in `acp`
+  and in `acm`) collided. Ids go through `id_hiper(clave, nombre)` now — a
+  hyperparameter input is `hiper_<clave>_<nombre>`, and the browser tests set
+  it by that name.
+- **A `.`-prefixed helper is still global.** `source()` has no namespaces:
+  `.numericas_de(dataset, columnas)` added to `logica/supuestos.R` was silently
+  overwritten by `.numericas_de(ds)` from `ui/f1/analisis/analisis.R`, which is
+  sourced later. The symptom was "unused argument (columnas)" raised ten files
+  away, only with `con_ui = TRUE`. Grep the whole tree for the name before
+  writing a private helper, and prefer a name that says what it takes.
 - **`names(list())` is NULL, not `character(0)`.** `almacen_ids()` returned it
   straight, and a selector filled with `setNames(NULL, ...)` threw "attempt to
   set an attribute on NULL" inside an observer — on startup, with an empty

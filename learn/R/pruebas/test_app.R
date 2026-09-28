@@ -18,6 +18,15 @@
 
 suppressPackageStartupMessages(library(shinytest2))
 
+# El catálogo se cuenta desde el registro, no desde un número escrito a mano:
+# cada método nuevo rompía tres aserciones que no hablaban de él. Cargar el
+# núcleo acá es barato y es lo que la app va a contar en el navegador.
+suppressMessages(source("learn/R/cargar.R"))
+cargar_sda(con_ui = FALSE)
+TOTAL_METODOS <- length(claves_metodos())
+AGRUPAR <- length(filtrar_metodos(objetivo = "agrupar"))
+cuenta <- function(n) sprintf("%d de %d métodos", n, TOTAL_METODOS)
+
 # AppDriver$new() llama a skip_on_cran() por dentro. Fuera de un contexto de
 # testthat eso aborta con "Reason: On CRAN" antes de arrancar el navegador.
 Sys.setenv(NOT_CRAN = "true")
@@ -104,10 +113,10 @@ probar("el panel de corridas explica que todavía no hay ninguna",
        grepl("Todavía no hay corridas", html_inicio, fixed = TRUE))
 
 cat("\n[fase 2 · catálogo]\n")
-html_catalogo <- ir_a(app, "② Modelado", "de 54 métodos")
+html_catalogo <- ir_a(app, "② Modelado", cuenta(TOTAL_METODOS))
 
 probar("el catálogo se dibuja desde el registro",
-       grepl("de 54 métodos", html_catalogo, fixed = TRUE))
+       grepl(cuenta(TOTAL_METODOS), html_catalogo, fixed = TRUE))
 probar("aparecen los seis objetivos como encabezados de grupo", {
   faltan <- Filter(function(o) !grepl(o, html_catalogo, fixed = TRUE),
                    c("Describir", "Reducir", "Agrupar", "Clasificar",
@@ -123,23 +132,23 @@ probar("un método bloqueado lleva su candado",
 
 cat("\n[filtros]\n")
 app$set_inputs(`modelado-objetivo` = "agrupar")
-html_filtrado <- esperar_html(app, "8 de 54 métodos")
+html_filtrado <- esperar_html(app, cuenta(AGRUPAR))
 probar("filtrar por 'agrupar' deja k-medias",
        grepl("K-medias", html_filtrado, fixed = TRUE))
 probar("filtrar por 'agrupar' saca la regresión simple",
        !grepl("Regresión lineal simple", html_filtrado, fixed = TRUE))
 probar("el contador refleja el filtro",
-       grepl("de 54 métodos", html_filtrado, fixed = TRUE) &&
-         !grepl("54 de 54", html_filtrado, fixed = TRUE))
+       grepl(cuenta(AGRUPAR), html_filtrado, fixed = TRUE) &&
+         !grepl(cuenta(TOTAL_METODOS), html_filtrado, fixed = TRUE))
 
 app$set_inputs(`modelado-objetivo` = character(0), `modelado-busqueda` = "lasso")
 probar("la búsqueda encuentra LASSO",
-       grepl("regularizada", esperar_html(app, "1 de 54 métodos"), fixed = TRUE))
+       grepl("regularizada", esperar_html(app, cuenta(1)), fixed = TRUE))
 
 app$click("modelado-limpiar")
-probar("limpiar filtros devuelve los 54",
-       grepl("54 de 54 métodos", esperar_html(app, "54 de 54 métodos"),
-             fixed = TRUE))
+probar("limpiar filtros devuelve el catalogo entero",
+       grepl(cuenta(TOTAL_METODOS),
+             esperar_html(app, cuenta(TOTAL_METODOS)), fixed = TRUE))
 
 cat("\n[ficha]\n")
 app$click("modelado-ficha_mlp")

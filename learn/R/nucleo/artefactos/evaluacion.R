@@ -102,6 +102,15 @@ poblar_artefactos_evaluacion <- function() {
     logica  = "R/logica/metricas_reduccion.R::varianza_explicada",
     descripcion = "Autovalores ordenados; el codo sugiere cuántas componentes.")
 
+  registrar_artefacto("f4.diagnostico.reglas_k", "Reglas para elegir k",
+    logica  = "R/logica/metricas_reduccion.R::reglas_k",
+    descripcion = "Las tres heurísticas juntas: umbral acumulado, Kaiser y codo.")
+
+  registrar_artefacto("f4.diagnostico.ortogonalidad", "Ortogonalidad de las componentes",
+    grafico = "R/graficos/multivariado.R::graficar_heatmap_correlacion",
+    logica  = "R/logica/reduccion/calidad.R::correlacion_puntuaciones",
+    descripcion = "La identidad: las componentes no comparten información.")
+
   registrar_artefacto("f4.diagnostico.silueta", "Silueta",
     grafico = "R/graficos/diagnostico.R::graficar_silueta",
     logica  = "R/logica/metricas_grupos.R::silueta",
@@ -177,6 +186,16 @@ poblar_artefactos_evaluacion <- function() {
     grafico = "R/graficos/explicabilidad.R::graficar_cargas",
     logica  = "R/logica/metricas_reduccion.R::cargas",
     descripcion = "Cuánto pesa cada variable original en cada componente.")
+
+  registrar_artefacto("f4.explicabilidad.contribuciones", "Contribución al eje",
+    grafico = "R/graficos/explicabilidad.R::graficar_contribuciones",
+    logica  = "R/logica/reduccion/calidad.R::contribuciones",
+    descripcion = "Quién puso la varianza de cada componente, en porcentaje.")
+
+  registrar_artefacto("f4.explicabilidad.calidad", "Calidad de representación",
+    grafico = "R/graficos/explicabilidad.R::graficar_calidad",
+    logica  = "R/logica/reduccion/calidad.R::calidad_variables",
+    descripcion = "Cuánto de cada variable muestra de verdad este plano (cos²).")
 
   registrar_artefacto("f4.explicabilidad.biplot", "Biplot",
     grafico = "R/graficos/explicabilidad.R::graficar_biplot",

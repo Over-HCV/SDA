@@ -27,10 +27,52 @@ poblar_catalogo_reduccion <- function() {
                    "f2.analisis.espacio_hipotesis", "f2.analisis.modelo_manual",
                    "f2.analisis.presupuesto_parametros",
                    "f3.analisis.convergencia", "f3.analisis.trayectoria",
-                   "f4.diagnostico.scree", "f4.explicabilidad.cargas",
+                   "f4.diagnostico.scree", "f4.diagnostico.reglas_k",
+                   "f4.diagnostico.ortogonalidad",
+                   "f4.explicabilidad.cargas", "f4.explicabilidad.contribuciones",
+                   "f4.explicabilidad.calidad",
                    "f4.explicabilidad.circulo_correlaciones",
                    "f4.explicabilidad.biplot", "f4.explicabilidad.mapa_2d"),
-    supuestos = c("escalado_previo", "estructura_lineal", "sin_atipicos"))
+    supuestos = c("solo_cuantitativas", "escalado_previo", "estructura_lineal",
+                  "sin_atipicos"))
+
+  # El ACM es el ACP de las cualitativas, y por eso vive acá y no en un macro
+  # tema propio: la pregunta es la misma (resumir la asociación en pocos ejes) y
+  # la fase 4 lo dibuja con las mismas vistas. Lo que cambia es qué se
+  # descompone: la matriz de Burt en vez de la de varianzas y covarianzas.
+  #
+  # No declara el círculo de correlaciones ni las contribuciones: las
+  # coordenadas de una categoría no son correlaciones acotadas por 1, y la
+  # contribución correcta pesa por la masa de la categoría, cuenta que esta
+  # familia todavía no hace. Dibujar las dos con la fórmula del ACP daría
+  # números creíbles y equivocados.
+  registrar_metodo(
+    clave = "acm", nombre = "Análisis de correspondencias múltiples",
+    objetivo = "reducir", supervision = "no_supervisado", sesion = 4,
+    nodo = "090-reduccion/030-emparentados/050-correspondencias",
+    estado = "activo", ajustar = ajustar_acm,
+    entrada = list(tipo = "matriz_cualitativa", min_p = 2L, min_n = 10L,
+                   faltantes = FALSE),
+    hiper = list(
+      n_componentes = list(tipo = "entero", min = 1, max = 20, def = 2, paso = 1,
+                           etiqueta = "Dimensiones a retener")),
+    artefactos = c("f2.especificacion.matriz_diseno", "f2.supuestos.semaforo",
+                   "f4.diagnostico.scree", "f4.diagnostico.reglas_k",
+                   "f4.diagnostico.ortogonalidad",
+                   "f4.explicabilidad.cargas", "f4.explicabilidad.mapa_2d"),
+    supuestos = c("categorias_suficientes"))
+
+  registrar_metodo(
+    clave = "acs", nombre = "Análisis de correspondencias simples",
+    objetivo = "reducir", supervision = "no_supervisado", sesion = 4,
+    nodo = "090-reduccion/030-emparentados/050-correspondencias",
+    entrada = list(tipo = "matriz_cualitativa", min_p = 2L, min_n = 10L),
+    hiper = list(
+      n_componentes = list(tipo = "entero", min = 1, max = 5, def = 2, paso = 1,
+                           etiqueta = "Dimensiones a retener")),
+    explora = "f1.analisis.mosaico",
+    artefactos = c("f4.diagnostico.scree", "f4.explicabilidad.mapa_2d"),
+    supuestos = c("categorias_suficientes"))
 
   registrar_metodo(
     clave = "efa", nombre = "Análisis factorial exploratorio",

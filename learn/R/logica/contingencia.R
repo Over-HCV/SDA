@@ -49,3 +49,61 @@ contingencia_larga <- function(cruce) {
   largo$proporcion <- largo$n / sum(largo$n)
   largo
 }
+
+# ---------------------------------------------------------------------------
+# De varias cualitativas a una matriz: lo que el ACM descompone
+# ---------------------------------------------------------------------------
+
+#' Matriz indicadora: una columna 0/1 por cada categoría de cada variable.
+#'
+#' Es la generalización de la tabla de contingencia a más de dos variables. Cada
+#' fila tiene exactamente un 1 por variable, así que la suma de la fila es Q (el
+#' número de variables) y la de una columna es la frecuencia de esa categoría.
+#'
+#' Las filas con faltantes se descartan: imputar una categoría es inventar una
+#' respuesta que nadie dio.
+#'
+#' @return matriz n x J con nombres "variable=categoria", con atributo
+#'   "variables" (a qué variable pertenece cada columna)
+matriz_indicadora <- function(datos, columnas) {
+  columnas <- intersect(columnas, names(datos))
+  if (length(columnas) < 2L)
+    stop("hacen falta al menos dos variables cualitativas")
+
+  marco <- datos[, columnas, drop = FALSE]
+  completas <- stats::complete.cases(marco)
+  marco <- marco[completas, , drop = FALSE]
+  if (!nrow(marco)) stop("ninguna fila esta completa en esas columnas")
+
+  # Una columna con mas categorias que la mitad de las filas no es una variable
+  # cualitativa, es un identificador: cada categoria tendria una o dos personas y
+  # el ACM describiria filas, no asociaciones. Se mira aca y no por el tipo en
+  # memoria, porque un codigo postal es numerico y es nominal.
+  niveles <- vapply(marco, function(x) length(unique(x)), integer(1))
+  demasiados <- niveles > max(2L, nrow(marco) %/% 2L)
+  if (any(demasiados))
+    stop(sprintf("estas columnas tienen casi una categoria por fila: %s",
+                 paste(columnas[demasiados], collapse = ", ")))
+
+  bloques <- lapply(columnas, function(columna) {
+    valores <- factor(as.character(marco[[columna]]))
+    bloque <- stats::model.matrix(~ valores - 1)
+    colnames(bloque) <- paste0(columna, "=", levels(valores))
+    bloque
+  })
+
+  indicadora <- do.call(cbind, bloques)
+  rownames(indicadora) <- rownames(marco)
+  attr(indicadora, "variables") <- rep(columnas,
+                                       vapply(bloques, ncol, integer(1)))
+  attr(indicadora, "filas_descartadas") <- sum(!completas)
+  indicadora
+}
+
+#' Matriz de Burt: todos los cruces de las variables entre sí, en bloques.
+#'
+#' `t(Z) %*% Z` y nada más. En la diagonal quedan las frecuencias de cada
+#' variable consigo misma; fuera de ella, las tablas de contingencia dos a dos.
+#' Es el equivalente cualitativo de la matriz de varianzas y covarianzas: resume
+#' la estructura de asociación sin guardar una sola fila de datos.
+matriz_burt <- function(indicadora) crossprod(indicadora)

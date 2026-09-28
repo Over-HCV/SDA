@@ -15,7 +15,10 @@
 #' @param tabla salida de varianza_explicada()
 #' @param k     componentes retenidas, para marcar el corte
 #' @param umbral línea de referencia del acumulado (0.8 por convención)
-graficar_scree <- function(tabla, k = NULL, umbral = 0.8) {
+#' @param reglas salida de reglas_k(), o NULL. Las tres heurísticas dibujadas
+#'   juntas: cuando coinciden, la decisión es fácil y se ve de una; cuando no
+#'   coinciden, la discrepancia es el resultado y esconderla no la resuelve.
+graficar_scree <- function(tabla, k = NULL, umbral = 0.8, reglas = NULL) {
   if (!nrow(tabla)) return(.grafico_vacio("todavia no hay ajuste que mirar"))
 
   grafico <- ggplot2::ggplot(tabla, ggplot2::aes(x = .data$componente)) +
@@ -37,7 +40,25 @@ graficar_scree <- function(tabla, k = NULL, umbral = 0.8) {
     grafico <- grafico +
       ggplot2::geom_vline(xintercept = k + 0.5, linetype = "dotted",
                           color = "grey20")
-  grafico
+  .capa_reglas(grafico, reglas)
+}
+
+# Las reglas se escalonan en vertical a propósito: casi siempre dan el mismo k y
+# sus rótulos quedarían uno encima del otro justo en el caso más común.
+.capa_reglas <- function(grafico, reglas) {
+  if (is.null(reglas) || !nrow(reglas)) return(grafico)
+  reglas$corta <- sub(" .*", "", reglas$regla)
+  reglas$altura <- seq(0.96, 0.60, length.out = nrow(reglas))
+
+  grafico +
+    ggplot2::geom_vline(data = reglas, ggplot2::aes(xintercept = .data$k),
+                        color = "grey55", linewidth = 0.4) +
+    ggplot2::geom_label(data = reglas,
+                        ggplot2::aes(x = .data$k, y = .data$altura,
+                                     label = sprintf("%s: %d", .data$corta,
+                                                     .data$k)),
+                        size = 2.9, color = "grey30", fill = "white",
+                        linewidth = 0, hjust = -0.05)
 }
 
 .subtitulo_scree <- function(tabla, k, umbral) {

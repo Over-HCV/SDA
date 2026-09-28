@@ -132,11 +132,20 @@ mod_modelado_server <- function(id, almacen = NULL, dataset_f1 = NULL,
                          stats::setNames(ids, etiquetas), input$dataset)
     }, ignoreNULL = FALSE)
 
-    shiny::observeEvent(dataset(), {
+    # El tipo de entrada del método decide qué columnas se ofrecen, así que el
+    # selector se rellena también al CAMBIAR de método: con un ACM elegido, las
+    # numéricas ya no son candidatas y seguir mostrándolas invita al error.
+    tipo_entrada <- shiny::reactive({
+      clave <- clave_metodo()
+      if (is.null(clave) || !nzchar(clave)) return("matriz_numerica")
+      metodo(clave)$entrada$tipo %||% "matriz_numerica"
+    })
+
+    shiny::observeEvent(list(dataset(), tipo_entrada()), {
       ds <- dataset()
       shiny::req(ds)
       previos <- shiny::isolate(shiny::reactiveValuesToList(input))
-      actualizar_especificacion(session, ds, previos)
+      actualizar_especificacion(session, ds, previos, tipo_entrada())
       actualizar_analisis_modelado(session, ds, previos)
     })
 
@@ -157,7 +166,8 @@ mod_modelado_server <- function(id, almacen = NULL, dataset_f1 = NULL,
       shiny::updateSelectInput(session, "metodo", selected = clave)
       shiny::updateTabsetPanel(session, "pestana", selected = "Especificación")
     }, al_explorar = al_explorar)
-    servidor_especificacion(input, output, session, dataset, columnas)
+    servidor_especificacion(input, output, session, dataset, columnas,
+                            tipo = tipo_entrada)
     servidor_supuestos(input, output, session, dataset, clave_metodo, columnas)
     servidor_hiperparametros(input, output, session, dataset, clave_metodo,
                              columnas, hiper)

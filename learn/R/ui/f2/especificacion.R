@@ -23,13 +23,18 @@ controles_especificacion <- function(ns) {
     shiny::uiOutput(ns("nota_columnas")))
 }
 
-#' Solo las numéricas declaradas: la escala del diccionario manda también acá.
-#' Una nominal codificada con números no es una variable numérica, y el ACP
-#' sobre códigos de país no significa nada.
-actualizar_especificacion <- function(session, ds, previos = list()) {
-  numericas <- columnas_numericas(ds)
-  elegidas <- intersect(previos$columnas %||% numericas, numericas)
-  shiny::updateCheckboxGroupInput(session, "columnas", choices = numericas,
+#' Solo las columnas que el método admite: la escala del diccionario manda
+#' también acá. Una nominal codificada con números no es una variable numérica,
+#' y el ACP sobre códigos de país no significa nada — pero un ACM sobre esas
+#' mismas columnas sí, y por eso quién se ofrece lo decide `entrada$tipo` del
+#' método y no esta vista.
+#'
+#' @param tipo el `entrada$tipo` del método elegido
+actualizar_especificacion <- function(session, ds, previos = list(),
+                                      tipo = "matriz_numerica") {
+  admisibles <- columnas_admisibles(ds, tipo)
+  elegidas <- intersect(previos$columnas %||% admisibles, admisibles)
+  shiny::updateCheckboxGroupInput(session, "columnas", choices = admisibles,
                                   selected = elegidas)
 }
 
@@ -42,11 +47,17 @@ salida_especificacion <- function(ns) {
     contexto = salida_contexto(ns, "contexto_especificacion"))
 }
 
-servidor_especificacion <- function(input, output, session, dataset, columnas) {
+#' @param tipo reactivo con el `entrada$tipo` del método elegido
+servidor_especificacion <- function(input, output, session, dataset, columnas,
+                                    tipo = NULL) {
+  tipo_actual <- function() {
+    if (is.null(tipo)) "matriz_numerica" else tipo() %||% "matriz_numerica"
+  }
+
   output$nota_columnas <- shiny::renderUI({
     ds <- dataset()
     if (is.null(ds)) return(NULL)
-    fuera <- setdiff(names(ds$df), columnas_numericas(ds))
+    fuera <- setdiff(names(ds$df), columnas_admisibles(ds, tipo_actual()))
     if (!length(fuera)) return(NULL)
     shiny::tags$p(
       class = "text-muted small mt-2 mb-0",
@@ -56,8 +67,8 @@ servidor_especificacion <- function(input, output, session, dataset, columnas) {
 
   shiny::observeEvent(input$todas_columnas, {
     ds <- dataset(); shiny::req(ds)
-    shiny::updateCheckboxGroupInput(session, "columnas",
-                                    selected = columnas_numericas(ds))
+    shiny::updateCheckboxGroupInput(
+      session, "columnas", selected = columnas_admisibles(ds, tipo_actual()))
   })
   shiny::observeEvent(input$ninguna_columna, {
     shiny::updateCheckboxGroupInput(session, "columnas",

@@ -42,6 +42,12 @@ salida_diagnostico <- function(ns) {
     panel_si_declara(ns, "f4.diagnostico.scree",
                      shiny::plotOutput(ns("scree"), height = "360px"),
                      contexto = salida_contexto(ns, "contexto_scree")),
+    panel_si_declara(ns, "f4.diagnostico.reglas_k",
+                     shiny::tableOutput(ns("reglas_k")),
+                     contexto = salida_contexto(ns, "contexto_reglas_k")),
+    panel_si_declara(ns, "f4.diagnostico.ortogonalidad",
+                     shiny::plotOutput(ns("ortogonalidad"), height = "340px"),
+                     contexto = salida_contexto(ns, "contexto_ortogonalidad")),
     panel_si_declara(ns, "f4.diagnostico.codo",
                      shiny::plotOutput(ns("codo"), height = "340px"),
                      contexto = salida_contexto(ns, "contexto_codo")),
@@ -59,11 +65,24 @@ servidor_diagnostico <- function(input, output, session, corrida) {
     c$ajuste
   })
 
+  umbral <- shiny::reactive(input$umbral_scree %||% 0.8)
+
   output$scree <- shiny::renderPlot({
     a <- ajuste()
-    graficar_scree(varianza_explicada(a), k = a$k,
-                   umbral = input$umbral_scree %||% 0.8)
+    graficar_scree(varianza_explicada(a), k = a$k, umbral = umbral(),
+                   reglas = reglas_k(a, umbral()))
   })
+
+  # Las tres reglas como tabla y no como frase: se leen comparándolas, y el
+  # número que importa cuando discrepan es cuánto discrepan.
+  output$reglas_k <- shiny::renderTable(reglas_k(ajuste(), umbral()),
+                                        striped = TRUE, width = "100%")
+
+  # La identidad dibujada. Es la única card de Diagnóstico que no juzga el
+  # ajuste contra un umbral: comprueba una propiedad que tiene que cumplirse, y
+  # si no se cumple el problema no es de interpretación.
+  output$ortogonalidad <- shiny::renderPlot(
+    graficar_heatmap_correlacion(correlacion_puntuaciones(ajuste())))
 
   # La curva del codo reajusta el método para cada k: es cara y por eso vive en
   # su propio reactivo, que Shiny cachea hasta que cambie k_max o la corrida.
@@ -81,6 +100,8 @@ servidor_diagnostico <- function(input, output, session, corrida) {
     c <- corrida(); if (is.null(c)) NULL else c$metricas
   })
   for (par in list(c("f4.diagnostico.scree", "contexto_scree"),
+                   c("f4.diagnostico.reglas_k", "contexto_reglas_k"),
+                   c("f4.diagnostico.ortogonalidad", "contexto_ortogonalidad"),
                    c("f4.diagnostico.codo", "contexto_codo"),
                    c("f4.diagnostico.silueta", "contexto_silueta")))
     dibujar_contexto(output, par[1], corrida = shiny::reactive(corrida()),

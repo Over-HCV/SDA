@@ -17,7 +17,21 @@ controles_composicion <- function(ns) {
                         icon = shiny::icon("play")),
     shiny::tags$p(class = "text-muted small mt-2 mb-0",
                   paste("Sin receta se usa el control por defecto del método,",
-                        "y la composición lo avisa.")))
+                        "y la composición lo avisa.")),
+    # Una reducción no termina en un dibujo: sus puntuaciones son variables
+    # nuevas, pocas y no correlacionadas, y ese es su uso industrial. El botón
+    # cierra el círculo — las devuelve al almacén y vuelven a entrar por ①.
+    shiny::conditionalPanel(
+      condition = sprintf("output.%s",
+                          bandera_artefacto("f4.diagnostico.scree")), ns = ns,
+      shiny::tags$hr(),
+      shiny::actionButton(ns("guardar_puntuaciones"),
+                          "Guardar puntuaciones como dataset",
+                          class = "btn-outline-secondary w-100",
+                          icon = shiny::icon("table")),
+      shiny::tags$p(class = "text-muted small mt-2 mb-0",
+                    paste("Quedan en Objetos: sirven de entrada a una",
+                          "regresión sin la colinealidad de las originales."))))
 }
 
 salida_composicion <- function(ns) {
@@ -29,7 +43,8 @@ salida_composicion <- function(ns) {
       shiny::uiOutput(ns("compatibilidad"))))
 }
 
-servidor_composicion <- function(input, output, session, piezas, corrida) {
+servidor_composicion <- function(input, output, session, piezas, corrida,
+                                 almacen = NULL) {
   avisos <- shiny::reactive({
     p <- piezas()
     validar_compatibilidad(p$dataset, p$modelo, p$receta)
@@ -47,6 +62,28 @@ servidor_composicion <- function(input, output, session, piezas, corrida) {
   })
 
   output$compatibilidad <- shiny::renderUI(lista_avisos(avisos()))
+
+  # El dataset nuevo declara de dónde salió en `fuente`: sin eso, dos meses
+  # después nadie sabe si esas columnas CP1 y CP2 son de este ajuste o de otro.
+  shiny::observeEvent(input$guardar_puntuaciones, {
+    c <- corrida()
+    if (is.null(c) || is.null(almacen)) {
+      shiny::showNotification("Todavía no hay corrida de la que sacar puntuaciones.",
+                              type = "warning", duration = 5)
+      return(invisible(NULL))
+    }
+    p <- piezas()
+    tabla <- puntuaciones_como_dataframe(c$ajuste)
+    guardado <- almacen_agregar(almacen(), nuevo_dataset(
+      NULL, sprintf("%s · %d componentes", p$dataset$nombre %||% "puntuaciones",
+                    ncol(tabla)),
+      tabla, fuente = sprintf("componentes de %s", c$id %||% p$modelo$metodo),
+      semilla = p$dataset$semilla %||% 42L))
+    almacen(guardado)
+    shiny::showNotification(
+      sprintf("Puntuaciones guardadas como %s", attr(guardado, "id_nuevo")),
+      type = "message", duration = 4)
+  })
 
   shiny::observeEvent(input$correr, {
     p <- piezas()

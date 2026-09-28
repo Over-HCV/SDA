@@ -10,9 +10,11 @@
 # Sirve para ACP y, sin cambios, para cualquier método que devuelva cargas,
 # puntuaciones y valores propios: análisis factorial, ACP robusto, MDS métrico.
 #
-# Las cinco funciones con sufijo `.ajuste_acp` son los métodos S3 de las
+# Las funciones con sufijo `.ajuste_reduccion` son los métodos S3 de las
 # genéricas de `metricas.R`: son la cara de esta familia hacia la UI, que no
-# sabe ni tiene que saber qué método produjo el ajuste que está pintando.
+# sabe ni tiene que saber qué método produjo el ajuste que está pintando. El
+# sufijo es el de la FAMILIA y no el del método: el ACP y el ACM declaran los
+# dos `ajuste_reduccion` en su clase y contestan por acá sin una vista nueva.
 
 #' Las métricas de un ajuste de reducción, como lista plana.
 #'
@@ -23,7 +25,7 @@
 #'
 #' Cuando entren métodos de otra familia tendrán su propia función hermana; el
 #' nombre dice a qué familia pertenece esta.
-metricas_de_corrida.ajuste_acp <- function(ajuste) {
+metricas_de_corrida.ajuste_reduccion <- function(ajuste) {
   retenidas <- seq_len(ajuste$k)
   list(n = ajuste$n, p = ajuste$p, k = ajuste$k,
        varianza_acumulada = sum(ajuste$varianza_explicada[retenidas]),
@@ -74,6 +76,11 @@ correlaciones_componentes <- function(ajuste, ejes = c(1L, 2L)) {
   ejes <- .ejes_validos(ajuste, ejes)
   escala <- if (identical(ajuste$matriz, "correlacion")) rep(1, ajuste$p)
             else ajuste$escala
+  # Un ACM no tiene una escala por variable: sus coordenadas son de categorias y
+  # no correlaciones. No declara esta vista, y si alguien la pide igual, mejor
+  # que falle diciendolo que devolver numeros con forma de correlacion.
+  if (is.null(escala))
+    stop("este ajuste no define escala por variable: el circulo no aplica")
   cor_de <- function(j) ajuste$cargas[, j] * sqrt(ajuste$valores_propios[j]) / escala
 
   x <- cor_de(ejes[1]); y <- cor_de(ejes[2])
@@ -85,15 +92,21 @@ correlaciones_componentes <- function(ajuste, ejes = c(1L, 2L)) {
 #'
 #' @param grupo vector con una entrada por fila usada en el ajuste, o NULL
 #' @return data.frame(fila, x, y, grupo)
-coordenadas_2d.ajuste_acp <- function(ajuste, ejes = c(1L, 2L), grupo = NULL,
-                                      ...) {
+coordenadas_2d.ajuste_reduccion <- function(ajuste, ejes = c(1L, 2L),
+                                            grupo = NULL, ...) {
   ejes <- .ejes_validos(ajuste, ejes)
   puntuaciones <- ajuste$puntuaciones
   tabla <- data.frame(fila = seq_len(nrow(puntuaciones)),
                       x = puntuaciones[, ejes[1]],
                       y = puntuaciones[, ejes[2]])
-  tabla$grupo <- if (is.null(grupo)) factor("todas")
-                 else factor(grupo[seq_len(nrow(tabla))])
+  # Un color continuo no es un grupo. Si el vector entra numérico se conserva
+  # numérico y el mapa lo pinta en degradado: colorear por millas por galón y
+  # ver cómo se aclara a lo largo de CP1 es lo que demuestra que ese eje ES
+  # rendimiento. Volverlo factor daría una leyenda de 32 niveles ilegible.
+  recortado <- if (is.null(grupo)) NULL else grupo[seq_len(nrow(tabla))]
+  tabla$grupo <- if (is.null(recortado)) factor("todas")
+                 else if (is.numeric(recortado)) recortado
+                 else factor(recortado)
   tabla
 }
 
@@ -122,13 +135,74 @@ coordenadas_biplot <- function(ajuste, ejes = c(1L, 2L), grupo = NULL,
   list(puntos = puntos, flechas = flechas, escala_flechas = factor)
 }
 
-#' Regla del codo: la primera componente donde el descenso deja de valer la
-#' pena. No es una verdad, es una heurística, y el texto del scree lo dice.
+#' Regla del umbral acumulado: la primera componente con la que se pasa el
+#' umbral. No es una verdad, es una heurística, y el texto del scree lo dice.
+#' Las otras dos reglas de la clase están en reglas_k().
 componentes_sugeridas <- function(ajuste, umbral_acumulado = 0.8) {
   tabla <- varianza_explicada(ajuste)
   suficientes <- which(tabla$acumulada >= umbral_acumulado)
   if (!length(suficientes)) return(nrow(tabla))
   suficientes[1]
+}
+
+#' Las tres reglas para decidir cuántas componentes se quedan.
+#'
+#' Ninguna gana: dan tres números que casi siempre coinciden, y cuando no
+#' coinciden la discrepancia es el resultado. Se devuelven juntas para que la
+#' decisión se tome mirando las tres y no la primera que apareció.
+#'
+#' - **umbral acumulado**: la convención del 80 %.
+#' - **Kaiser**: quedarse con λ > 1 porque una variable estandarizada tiene
+#'   varianza 1, y una componente que no llega a eso hace menos que una
+#'   variable sola. Sobre S (covarianza) el 1 no significa nada y el referente
+#'   pasa a ser la media de los valores propios; el detalle lo dice.
+#' - **codo**: el vértice del quiebre, medido con la segunda diferencia de los
+#'   valores propios — la componente donde la curva deja de caer. Es un juicio
+#'   hecho aritmética, no una verdad, y con una caída muy abrupta señala la
+#'   primera componente ya plana: una más de las que uno retendría a ojo.
+#'
+#' @return data.frame(regla, k, detalle)
+reglas_k <- function(ajuste, umbral = 0.8) {
+  valores <- as.numeric(ajuste$valores_propios)
+  tabla <- varianza_explicada(ajuste)
+  p <- length(valores)
+
+  sobre_r <- identical(ajuste$matriz, "correlacion")
+  corte <- if (sobre_r) 1 else mean(valores)
+  k_kaiser <- max(1L, sum(valores > corte))
+
+  fila <- function(regla, k, detalle)
+    data.frame(regla = regla, k = as.integer(k), detalle = detalle)
+
+  rbind(
+    fila(sprintf("umbral acumulado (%.0f %%)", 100 * umbral),
+         componentes_sugeridas(ajuste, umbral),
+         sprintf("con esas componentes se acumula %.1f %%",
+                 100 * tabla$acumulada[componentes_sugeridas(ajuste, umbral)])),
+    fila("Kaiser", k_kaiser, .detalle_kaiser(ajuste, k_kaiser, corte)),
+    fila("codo", .codo_valores(valores),
+         sprintf("la curva se quiebra mas en la componente %d de %d",
+                 .codo_valores(valores), p)))
+}
+
+# El 1 de Kaiser es la varianza de una variable estandarizada, así que solo
+# significa algo sobre R. Sobre S y sobre la indicadora del ACM el referente es
+# la media de los valores propios — que en un ACM vale exactamente 1/Q, el
+# umbral que la literatura del método usa.
+.detalle_kaiser <- function(ajuste, k, corte) {
+  switch(ajuste$matriz %||% "",
+    correlacion = sprintf("%d valores propios pasan de 1", k),
+    indicadora = sprintf("en un ACM el corte es 1/Q = %.3f, la media", corte),
+    sprintf("sobre S el 1 no aplica: el corte es la media (%.3f)", corte))
+}
+
+# La segunda diferencia mide cuánto cambia la pendiente; su máximo está en el
+# vértice del quiebre. Con menos de tres valores propios no hay curvatura que
+# medir y el codo es la primera componente.
+.codo_valores <- function(valores) {
+  if (length(valores) < 3L) return(1L)
+  segundas <- diff(diff(valores))
+  as.integer(which.max(segundas) + 1L)
 }
 
 .ejes_validos <- function(ajuste, ejes) {
@@ -143,14 +217,15 @@ componentes_sugeridas <- function(ajuste, umbral_acumulado = 0.8) {
 # La cara de la familia hacia la UI (genéricas de metricas.R)
 # ---------------------------------------------------------------------------
 
-#' El resultado principal del ACP es cuánto conserva cada componente.
-tabla_resultado.ajuste_acp <- function(ajuste) varianza_explicada(ajuste)
+#' El resultado principal de una reducción es cuánto conserva cada componente.
+tabla_resultado.ajuste_reduccion <- function(ajuste) varianza_explicada(ajuste)
 
-grafico_resultado.ajuste_acp <- function(ajuste, ...) {
-  graficar_scree(varianza_explicada(ajuste), k = ajuste$k, ...)
+grafico_resultado.ajuste_reduccion <- function(ajuste, ...) {
+  graficar_scree(varianza_explicada(ajuste), k = ajuste$k,
+                 reglas = reglas_k(ajuste), ...)
 }
 
-resumen_ajuste.ajuste_acp <- function(ajuste) {
+resumen_ajuste.ajuste_reduccion <- function(ajuste) {
   retenidas <- seq_len(ajuste$k)
   list("componentes" = sprintf("%d de %d", ajuste$k, ajuste$p),
        "explicado" = sprintf("%.1f %%",
@@ -158,7 +233,7 @@ resumen_ajuste.ajuste_acp <- function(ajuste) {
        "error relativo" = sprintf("%.1f %%", 100 * ajuste$error_relativo))
 }
 
-lectura_resultado.ajuste_acp <- function(ajuste, umbral = 0.8, ...) {
+lectura_resultado.ajuste_reduccion <- function(ajuste, umbral = 0.8, ...) {
   umbral <- umbral %||% 0.8
   necesarias <- componentes_sugeridas(ajuste, umbral)
   tabla <- varianza_explicada(ajuste)
@@ -168,6 +243,6 @@ lectura_resultado.ajuste_acp <- function(ajuste, umbral = 0.8, ...) {
           100 * tabla$acumulada[ajuste$k])
 }
 
-etiquetas_ejes.ajuste_acp <- function(ajuste) {
+etiquetas_ejes.ajuste_reduccion <- function(ajuste) {
   colnames(ajuste$cargas)[seq_len(ajuste$k)]
 }

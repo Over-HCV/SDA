@@ -60,6 +60,27 @@ columnas_numericas <- function(dataset) {
   d$columna[d$clase %in% c("discreta", "continua")]
 }
 
+#' Columnas cualitativas según el diccionario.
+#'
+#' La contracara de columnas_numericas(), y hace falta desde que hay métodos que
+#' trabajan con categorías: un ACM sobre columnas continuas no significa nada,
+#' igual que un ACP sobre códigos de país.
+columnas_cualitativas <- function(dataset) {
+  d <- dataset$diccionario
+  if (is.null(d) || !nrow(d)) return(character(0))
+  d$columna[d$clase == "cualitativa"]
+}
+
+#' Las columnas que un método con este `entrada$tipo` puede usar.
+#'
+#' Un solo lugar donde se traduce el tipo declarado en el registro a columnas
+#' concretas. Sin esto, cada vista volvía a suponer "numéricas" y el catálogo no
+#' podía crecer hacia lo cualitativo sin romper las tres que ya suponían.
+columnas_admisibles <- function(dataset, tipo = "matriz_numerica") {
+  if (identical(tipo, "matriz_cualitativa")) columnas_cualitativas(dataset)
+  else columnas_numericas(dataset)
+}
+
 # ---------------------------------------------------------------------------
 # Constructores
 # ---------------------------------------------------------------------------

@@ -549,6 +549,41 @@ tres huecos que ningún dataset de juguete había destapado.
       regularización; migra `projects/01-lasso/`
 - [ ] **Hito 6 · Evaluación completa** — explicabilidad, comparación de corridas,
       exportador a `.Rmd` + `revealjs`. El exportador a `.Rmd` ya está hecho para
-      la fase 1 (Hito 4b): falta extenderlo a las corridas y añadir `revealjs`
+      la fase 1 (Hito 4b): falta extenderlo a las corridas y añadir `revealjs`.
+
+      La explicabilidad de la reducción entró ya, contra `notes/04.md` (sesión 4):
+
+  - [x] `R/logica/reduccion/calidad.R` — contribución al eje, `cos²` de
+        variables y de individuos, correlación de las puntuaciones y las
+        puntuaciones como `data.frame`. `ajustar_acp()` guarda `norma2_filas`
+        porque `puntuaciones` viene truncada a `k`
+  - [x] `reglas_k()` — umbral acumulado, Kaiser y codo en una tabla. En un ACM el
+        corte de Kaiser es la media de los valores propios, que vale 1/Q: sale
+        gratis y el detalle lo dice
+  - [x] `R/logica/reduccion/suplementarios.R` — individuos y variables que no
+        construyeron los ejes, proyectados con el centro y la escala del AJUSTE
+  - [x] Colorear el plano factorial por una variable **continua**: es lo que
+        muestra que el primer eje ES esa variable
+  - [x] `metodos/acm.R` — correspondencias múltiples sobre la matriz indicadora,
+        con la de Burt en `logica/contingencia.R`. Entra a la fase 4 sin una
+        vista nueva: las genéricas pasaron de `.ajuste_acp` a `.ajuste_reduccion`
+  - [x] Las puntuaciones vuelven al almacén como dataset (`f4/composicion.R`):
+        variables nuevas, pocas y no correlacionadas
+  - [x] `R/ui/f4/plano.R` y `f4/aportes.R` — el contexto compartido y las cards
+        de variables, partidas de `f4/explicabilidad.R` por lo que cuentan
+  - [x] `test_reduccion.R` y `test_acm.R`; `test_app_metodo.R` cubre las cards
+        nuevas y el botón de puntuaciones
+  - [x] Cuatro textos nuevos con los cuatro bloques (`reglas_k`,
+        `ortogonalidad`, `contribuciones`, `calidad`) y `fichas/acm.md`.
+        `fichas/acp.md` gana las reglas para elegir `k`, la distinción entre
+        contribución y calidad, los suplementarios y para qué sirven las
+        puntuaciones
+
+      **Dos bugs que destapó**, ninguno de reducción: dos métodos con el mismo
+      nombre de hiperparámetro producían dos inputs con el mismo id HTML (Shiny
+      solo lo avisa con un warning y deja el binding roto; ahora el id lleva la
+      clave del método), y `.numericas_de()` existía en `ui/f1/analisis/` con un
+      solo argumento — una privada homónima en otra carpeta se sobrescribe en
+      silencio al sourcear y el error sale a diez archivos de distancia
 - [ ] **Hito 7 · Poblar el catálogo** — el resto de `libs/topics-map.md`, un
       método por vez, con su ficha y sus textos

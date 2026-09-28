@@ -13,10 +13,19 @@
 #        min =, max =, def =, paso =, opciones =, escala = "log10",
 #        etiqueta = "Texto visible con tildes")
 
+#' El id de un input de hiperparámetro.
+#'
+#' Lleva la clave del método dentro porque los formularios de TODOS los métodos
+#' activos se construyen a la vez (ver f2/hiperparametros.R): dos métodos que
+#' llaman igual a su hiperparámetro —`n_componentes` en el ACP y en el ACM—
+#' producirían dos inputs con el mismo id HTML, y Shiny solo avisa de eso con un
+#' warning en la consola mientras deja el binding roto.
+id_hiper <- function(clave, nombre) paste0("hiper_", clave, "_", nombre)
+
 #' Un widget a partir de una declaración.
-widget_hiper <- function(ns, nombre, spec) {
+widget_hiper <- function(ns, clave, nombre, spec) {
   etiqueta <- spec$etiqueta %||% nombre
-  id <- ns(paste0("hiper_", nombre))
+  id <- ns(id_hiper(clave, nombre))
 
   switch(spec$tipo %||% "real",
     entero = shiny::sliderInput(id, etiqueta, min = spec$min, max = spec$max,
@@ -54,7 +63,7 @@ formulario_hiper <- function(ns, clave) {
     return(shiny::tags$p(class = "text-muted small",
                          "Este método no tiene hiperparámetros de modelo."))
   shiny::tagList(lapply(names(hiper), function(nombre) {
-    shiny::tagList(widget_hiper(ns, nombre, hiper[[nombre]]),
+    shiny::tagList(widget_hiper(ns, clave, nombre, hiper[[nombre]]),
                    nota_escala(hiper[[nombre]]))
   }))
 }
@@ -65,7 +74,7 @@ valores_hiper <- function(input, clave) {
   hiper <- metodo(clave)$hiper
   if (!length(hiper)) return(list())
   valores <- lapply(names(hiper), function(nombre) {
-    crudo <- input[[paste0("hiper_", nombre)]]
+    crudo <- input[[id_hiper(clave, nombre)]]
     spec <- hiper[[nombre]]
     if (is.null(crudo)) return(spec$def)
     if (identical(spec$escala, "log10")) 10^crudo else crudo

@@ -23,8 +23,12 @@ evaluar_supuestos <- function(clave, dataset, columnas = NULL) {
   if (is.null(dataset)) return(list())
   m <- metodo(clave)
   if (!length(m$supuestos)) return(list())
-  columnas <- intersect(columnas %||% columnas_numericas(dataset),
-                        names(dataset$df))
+  # Las candidatas por defecto las decide el TIPO que el método declara: para un
+  # ACM son las cualitativas, y pasarle las numéricas haría fallar todas sus
+  # comprobaciones por la razón equivocada.
+  columnas <- intersect(
+    columnas %||% columnas_admisibles(dataset, m$entrada$tipo %||% "matriz_numerica"),
+    names(dataset$df))
 
   evaluados <- lapply(m$supuestos, function(supuesto) {
     comprobar <- .COMPROBACIONES_SUPUESTO[[supuesto]]
@@ -39,6 +43,8 @@ evaluar_supuestos <- function(clave, dataset, columnas = NULL) {
 nombre_supuesto <- function(supuesto) {
   legibles <- c(escalado_previo = "escalado previo",
                 estructura_lineal = "estructura lineal",
+                solo_cuantitativas = "variables cuantitativas",
+                categorias_suficientes = "categorias con suficientes casos",
                 sin_atipicos = "sin atipicos influyentes",
                 grupos_esfericos = "grupos esfericos",
                 tamanos_similares = "tamanos de grupo similares",
@@ -59,7 +65,19 @@ nombre_supuesto <- function(supuesto) {
 # Una comprobación por supuesto. Cada una devuelve un aviso, nunca lanza.
 # ---------------------------------------------------------------------------
 
+# Las comprobaciones que promedian, correlacionan o invierten una matriz solo
+# tienen sentido sobre columnas numericas. Antes de que hubiera metodos
+# cualitativos, `columnas` ya venia filtrada por la vista; ahora puede traer una
+# nominal marcada por error, y el semaforo tiene que decirlo (lo hace
+# .supuesto_cuantitativas) en vez de reventar con "'x' must be numeric".
+# El nombre lleva el sufijo porque `.numericas_de(ds)` ya existe en la fase 1 y
+# toma un solo argumento: dos privadas homonimas en carpetas distintas se
+# sobrescriben en silencio al sourcear, y el error sale a 10 archivos de aqui.
+.columnas_numericas_de <- function(dataset, columnas)
+  intersect(columnas, columnas_numericas(dataset))
+
 .supuesto_escalado <- function(dataset, columnas) {
+  columnas <- .columnas_numericas_de(dataset, columnas)
   if (.esta_escalado(dataset))
     return(.aviso("ok", "escalado_previo",
                   "Escalado previo: el dataset esta estandarizado."))
@@ -83,6 +101,7 @@ nombre_supuesto <- function(supuesto) {
 }
 
 .supuesto_lineal <- function(dataset, columnas) {
+  columnas <- .columnas_numericas_de(dataset, columnas)
   if (length(columnas) < 2L)
     return(.aviso("aviso", "estructura_lineal",
                   "Estructura lineal: hacen falta al menos dos variables numericas."))
@@ -105,6 +124,7 @@ nombre_supuesto <- function(supuesto) {
 }
 
 .supuesto_atipicos <- function(dataset, columnas) {
+  columnas <- .columnas_numericas_de(dataset, columnas)
   if (length(columnas) < 2L)
     return(.aviso("aviso", "sin_atipicos",
                   "Atipicos: hacen falta al menos dos variables numericas."))
@@ -135,6 +155,7 @@ nombre_supuesto <- function(supuesto) {
 # lo ancho. La razón entre el mayor y el menor valor propio de la correlación
 # mide justamente eso.
 .supuesto_esfericos <- function(dataset, columnas) {
+  columnas <- .columnas_numericas_de(dataset, columnas)
   if (length(columnas) < 2L)
     return(.aviso("aviso", "grupos_esfericos",
                   "Grupos esfericos: hacen falta al menos dos variables numericas."))
@@ -174,8 +195,62 @@ nombre_supuesto <- function(supuesto) {
          "k-medias parte antes un grupo grande que dejar uno pequeno: revisa los tamanos en Evaluacion - Desempeno.")
 }
 
+# El primer supuesto de la clase, y el único que no se puede negociar: una
+# correlación sobre una cualitativa promedia códigos y no significa nada. No es
+# un error del usuario, es una bifurcación del camino, así que el aviso nombra a
+# dónde lleva la otra rama en vez de limitarse a decir que no.
+.supuesto_cuantitativas <- function(dataset, columnas) {
+  cualitativas <- columnas_cualitativas(dataset)
+  if (!length(cualitativas))
+    return(.aviso("ok", "solo_cuantitativas",
+                  "Variables cuantitativas: todas las columnas lo son."))
+
+  dentro <- intersect(cualitativas, columnas)
+  if (length(dentro))
+    return(.aviso("error", "solo_cuantitativas",
+                  sprintf("Variables cuantitativas: %s son cualitativas y estan marcadas en la especificacion.",
+                          paste(dentro, collapse = ", ")),
+                  "Desmarcalas en Modelado - Especificacion, o corre un ACM con ellas."))
+  .aviso("ok", "solo_cuantitativas",
+         sprintf("Variables cuantitativas: %d columna(s) cualitativa(s) quedan fuera del ajuste (%s).",
+                 length(cualitativas), paste(cualitativas, collapse = ", ")),
+         "Para resumirlas hay un metodo propio: el analisis de correspondencias multiples (ACM).")
+}
+
+# El ACM no teme a los atípicos, teme a las categorías raras: una categoría con
+# tres casos define un eje ella sola, porque su masa es mínima y su desviación
+# respecto a la independencia, enorme.
+.supuesto_categorias <- function(dataset, columnas) {
+  cualitativas <- intersect(columnas_cualitativas(dataset), columnas)
+  if (length(cualitativas) < 2L)
+    cualitativas <- columnas_cualitativas(dataset)
+  if (length(cualitativas) < 2L)
+    return(.aviso("error", "categorias_suficientes",
+                  "Categorias: hacen falta al menos dos variables cualitativas.",
+                  "Marca la escala de las columnas en Datos - Diccionario."))
+
+  conteos <- lapply(dataset$df[cualitativas], function(x) table(x[!is.na(x)]))
+  escasas <- vapply(conteos, function(t) sum(t < 5L), integer(1))
+  unicas <- vapply(conteos, length, integer(1))
+  if (any(unicas < 2L))
+    return(.aviso("error", "categorias_suficientes",
+                  sprintf("Categorias: %s tiene una sola categoria y no aporta nada.",
+                          paste(names(unicas)[unicas < 2L], collapse = ", ")),
+                  "Quitala de la especificacion."))
+  if (!sum(escasas))
+    return(.aviso("ok", "categorias_suficientes",
+                  sprintf("Categorias: %d categorias en %d variables, todas con 5 casos o mas.",
+                          sum(unicas), length(cualitativas))))
+  .aviso("aviso", "categorias_suficientes",
+         sprintf("Categorias: %d categoria(s) con menos de 5 casos (%s). Una categoria rara puede definir un eje ella sola.",
+                 sum(escasas), paste(names(escasas)[escasas > 0], collapse = ", ")),
+         "Agrupa las categorias chicas en Datos - Transformacion antes de correr.")
+}
+
 .COMPROBACIONES_SUPUESTO <- list(
   escalado_previo = .supuesto_escalado,
+  solo_cuantitativas = .supuesto_cuantitativas,
+  categorias_suficientes = .supuesto_categorias,
   estructura_lineal = .supuesto_lineal,
   sin_atipicos = .supuesto_atipicos,
   grupos_esfericos = .supuesto_esfericos,

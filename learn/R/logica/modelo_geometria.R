@@ -78,7 +78,12 @@ resumen_matriz_diseno <- function(datos, columnas) {
     data.frame(campo = campo, valor = as.character(valor), nota = nota)
   }
   if (length(columnas) < 1L)
-    return(fila("columnas", 0, "elegi al menos una columna numerica"))
+    return(fila("columnas", 0, "elegi al menos una columna"))
+
+  # Con columnas cualitativas no hay rango que calcular: lo que se descompone es
+  # la matriz indicadora, y lo que hay que mirar es cuantas categorias salieron.
+  if (any(!vapply(datos[columnas], is.numeric, logical(1))))
+    return(.resumen_matriz_indicadora(datos, columnas, fila))
 
   matriz <- as.matrix(datos[, columnas, drop = FALSE])
   completas <- stats::complete.cases(matriz)
@@ -97,6 +102,35 @@ resumen_matriz_diseno <- function(datos, columnas) {
     fila("filas por variable",
          if (length(columnas)) sprintf("%.1f", nrow(matriz) / length(columnas)) else "-",
          "menos de 5 es poco para estimar con confianza"))
+}
+
+# La inercia total de un ACM es J/Q - 1: no depende de los datos, solo de
+# cuantas categorias haya. Verlo antes de correr explica por que los porcentajes
+# de varianza explicada de un ACM se ven bajos comparados con los de un ACP.
+.resumen_matriz_indicadora <- function(datos, columnas, fila) {
+  marco <- datos[, columnas, drop = FALSE]
+  completas <- stats::complete.cases(marco)
+  marco <- marco[completas, , drop = FALSE]
+
+  niveles <- vapply(marco, function(x) length(unique(x[!is.na(x)])), integer(1))
+  Q <- length(columnas)
+  J <- sum(niveles)
+  escasas <- vapply(marco, function(x) min(table(x)) < 5L, logical(1))
+
+  rbind(
+    fila("observaciones", nrow(marco),
+         if (sum(!completas)) sprintf("%d filas con faltantes quedaron fuera",
+                                      sum(!completas)) else "todas completas"),
+    fila("variables (Q)", Q, paste(columnas, collapse = ", ")),
+    fila("categorias (J)", J,
+         paste(sprintf("%s: %d", columnas, niveles), collapse = " · ")),
+    fila("inercia total", sprintf("%.3f", J / Q - 1),
+         "J/Q - 1: sale de cuantas categorias hay, no de los datos"),
+    fila("categorias escasas", sum(escasas),
+         if (any(escasas))
+           sprintf("con menos de 5 filas: %s. Una categoria rara jala un eje entera",
+                   paste(columnas[escasas], collapse = ", "))
+         else "ninguna categoria con menos de 5 filas"))
 }
 
 #' La función objetivo evaluada en una dirección elegida a mano.

@@ -11,11 +11,11 @@ Todas las rutas son relativas a `learn/`.
 
 ## Resumen
 
-- **Métodos**: 54 registrados — 2 activos, 46 pendientes, 6 bloqueados
-- **Explorables en ①**: 7 pendientes ya corren como análisis de datos
-- **Artefactos**: 86 registrados
-- **Textos escritos**: 43 de 86
-- **Fichas escritas**: 3 de 54
+- **Métodos**: 56 registrados — 3 activos, 47 pendientes, 6 bloqueados
+- **Explorables en ①**: 8 pendientes ya corren como análisis de datos
+- **Artefactos**: 90 registrados
+- **Textos escritos**: 47 de 90
+- **Fichas escritas**: 4 de 56
 
 ## Artefactos
 
@@ -90,18 +90,22 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f4.diagnostico.indices_internos` | Índices internos | `R/graficos/diagnostico.R::graficar_indices` | `R/logica/metricas_grupos.R::indices_internos` | *pendiente* |
 | `f4.diagnostico.influyentes` | Observaciones influyentes | `R/graficos/diagnostico.R::graficar_influyentes` | `R/logica/diagnostico_regresion.R::medidas_influencia` | *pendiente* |
 | `f4.diagnostico.knn_distancias` | Distancias al k-ésimo vecino | `R/graficos/diagnostico.R::graficar_knn_distancias` | `R/logica/metricas_grupos.R::distancias_knn` | *pendiente* |
+| `f4.diagnostico.ortogonalidad` | Ortogonalidad de las componentes | `R/graficos/multivariado.R::graficar_heatmap_correlacion` | `R/logica/reduccion/calidad.R::correlacion_puntuaciones` | `textos/f4/diagnostico/ortogonalidad.md` |
 | `f4.diagnostico.qq_mahalanobis` | Q-Q de Mahalanobis (residual) | `R/graficos/diagnostico.R::graficar_qq_mahalanobis` | `R/logica/distancias.R::mahalanobis_cuadrado` | *pendiente* |
 | `f4.diagnostico.qq_normal` | Q-Q normal de residuos | `R/graficos/diagnostico.R::graficar_qq_residuos` | `R/logica/normalidad.R::evaluar_normalidad` | *pendiente* |
+| `f4.diagnostico.reglas_k` | Reglas para elegir k | `—` | `R/logica/metricas_reduccion.R::reglas_k` | `textos/f4/diagnostico/reglas_k.md` |
 | `f4.diagnostico.residuos` | Residuos contra ajustados | `R/graficos/diagnostico.R::graficar_residuos` | `R/logica/diagnostico_regresion.R::calcular_residuos` | *pendiente* |
 | `f4.diagnostico.residuos_estandarizados` | Residuos estandarizados | `R/graficos/diagnostico.R::graficar_residuos_contingencia` | `R/logica/contingencia.R::residuos_estandarizados` | *pendiente* |
 | `f4.diagnostico.scree` | Gráfico de sedimentación | `R/graficos/diagnostico.R::graficar_scree` | `R/logica/metricas_reduccion.R::varianza_explicada` | `textos/f4/diagnostico/scree.md` |
 | `f4.diagnostico.silueta` | Silueta | `R/graficos/diagnostico.R::graficar_silueta` | `R/logica/metricas_grupos.R::silueta` | `textos/f4/diagnostico/silueta.md` |
 | `f4.diagnostico.vif` | Factor de inflación de varianza | `R/graficos/diagnostico.R::graficar_vif` | `R/logica/diagnostico_regresion.R::calcular_vif` | *pendiente* |
 | `f4.explicabilidad.biplot` | Biplot | `R/graficos/explicabilidad.R::graficar_biplot` | `R/logica/metricas_reduccion.R::coordenadas_biplot` | `textos/f4/explicabilidad/biplot.md` |
+| `f4.explicabilidad.calidad` | Calidad de representación | `R/graficos/explicabilidad.R::graficar_calidad` | `R/logica/reduccion/calidad.R::calidad_variables` | `textos/f4/explicabilidad/calidad.md` |
 | `f4.explicabilidad.cargas` | Cargas | `R/graficos/explicabilidad.R::graficar_cargas` | `R/logica/metricas_reduccion.R::cargas` | `textos/f4/explicabilidad/cargas.md` |
 | `f4.explicabilidad.centroides` | Perfil de los grupos | `R/graficos/grupos.R::graficar_centroides` | `R/logica/metricas_grupos.R::centroides_tabla` | `textos/f4/explicabilidad/centroides.md` |
 | `f4.explicabilidad.circulo_correlaciones` | Círculo de correlaciones | `R/graficos/explicabilidad.R::graficar_circulo` | `R/logica/metricas_reduccion.R::correlaciones_componentes` | `textos/f4/explicabilidad/circulo_correlaciones.md` |
 | `f4.explicabilidad.coeficientes` | Coeficientes estimados | `R/graficos/explicabilidad.R::graficar_coeficientes` | `R/logica/metricas_regresion.R::tabla_coeficientes` | *pendiente* |
+| `f4.explicabilidad.contribuciones` | Contribución al eje | `R/graficos/explicabilidad.R::graficar_contribuciones` | `R/logica/reduccion/calidad.R::contribuciones` | `textos/f4/explicabilidad/contribuciones.md` |
 | `f4.explicabilidad.efectos_aleatorios` | Efectos aleatorios | `R/graficos/explicabilidad.R::graficar_efectos_aleatorios` | `R/logica/metricas_mixtos.R::efectos_aleatorios` | *pendiente* |
 | `f4.explicabilidad.grafo` | Grafo de comunidades | `R/graficos/explicabilidad.R::graficar_grafo` | `R/logica/grafos.R::construir_grafo` | *pendiente* |
 | `f4.explicabilidad.heatmap_bicluster` | Mapa de calor de biclusters | `R/graficos/explicabilidad.R::graficar_heatmap_bicluster` | `R/logica/metricas_grupos.R::biclusters` | *pendiente* |
@@ -135,6 +139,8 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `fpca` | ACP funcional | 4 | reducir | pendiente | — | no | `fichas/fpca.md` | `150-extensiones/070-datos-funcionales` |
 | `acp_robusto` | ACP robusto | 4 | reducir | pendiente | — | no | `fichas/acp_robusto.md` | `090-reduccion/020-acp/050-decisiones/020-outliers` |
 | `acp` | Análisis de componentes principales | 4 | reducir | activo | — | sí | `fichas/acp.md` | `090-reduccion/020-acp` |
+| `acm` | Análisis de correspondencias múltiples | 4 | reducir | activo | — | sí | `fichas/acm.md` | `090-reduccion/030-emparentados/050-correspondencias` |
+| `acs` | Análisis de correspondencias simples | 4 | reducir | pendiente | f1.analisis.mosaico | sí | `fichas/acs.md` | `090-reduccion/030-emparentados/050-correspondencias` |
 | `efa` | Análisis factorial exploratorio | 4 | reducir | pendiente | — | no | `fichas/efa.md` | `090-reduccion/030-emparentados/010-analisis-factorial` |
 | `mds` | Escalamiento multidimensional | 4 | reducir | pendiente | — | sí | `fichas/mds.md` | `090-reduccion/030-emparentados/020-mds` |
 | `kernel_pca` | Kernel PCA | 4 | reducir | pendiente | — | no | `fichas/kernel_pca.md` | `090-reduccion/030-emparentados/040-no-lineal` |

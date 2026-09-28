@@ -131,13 +131,13 @@ probar("no se cuela el formulario del otro método",
 
 # Los dos hiperparametros del registro, movidos: es la tercera pata de C11, la
 # que ningun harness sin GUI puede comprobar.
-invisible(mover(app, `modelado-hiper_k` = 4))
+invisible(mover(app, `modelado-hiper_kmeans_k` = 4))
 probar("el numero de grupos esta enlazado",
-       app$get_value(input = "modelado-hiper_k") == 4)
-invisible(mover(app, `modelado-hiper_escalar` = FALSE))
+       app$get_value(input = "modelado-hiper_kmeans_k") == 4)
+invisible(mover(app, `modelado-hiper_kmeans_escalar` = FALSE))
 probar("el interruptor de escalado esta enlazado",
-       identical(app$get_value(input = "modelado-hiper_escalar"), FALSE))
-invisible(mover(app, `modelado-hiper_escalar` = TRUE))
+       identical(app$get_value(input = "modelado-hiper_kmeans_escalar"), FALSE))
+invisible(mover(app, `modelado-hiper_kmeans_escalar` = TRUE))
 
 app$click("modelado-guardar")
 app$wait_for_idle(duration = 800, timeout = 30000)
