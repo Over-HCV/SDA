@@ -48,6 +48,7 @@ nombre_supuesto <- function(supuesto) {
                 sin_atipicos = "sin atipicos influyentes",
                 grupos_esfericos = "grupos esfericos",
                 tamanos_similares = "tamanos de grupo similares",
+                distancia_valida = "distancia con sentido",
                 normalidad = "normalidad",
                 homocedasticidad = "homocedasticidad",
                 independencia = "observaciones independientes")
@@ -247,6 +248,28 @@ nombre_supuesto <- function(supuesto) {
          "Agrupa las categorias chicas en Datos - Transformacion antes de correr.")
 }
 
+# Un agrupamiento por distancias supone que restar dos filas significa algo.
+# Con una columna binaria no: la euclídea trata el 0 y el 1 como medidas, y la
+# variable pesa lo mismo que una continua de varianza parecida, sin serlo. No es
+# un error —a veces es lo que se quiere—, pero tiene que ser una decisión.
+.supuesto_distancia <- function(dataset, columnas) {
+  columnas <- .columnas_numericas_de(dataset, columnas)
+  if (length(columnas) < 2L)
+    return(.aviso("aviso", "distancia_valida",
+                  "Distancia: hacen falta al menos dos variables numericas."))
+  distintos <- vapply(dataset$df[columnas],
+                      function(x) length(unique(x[!is.na(x)])), integer(1))
+  binarias <- names(distintos)[distintos <= 2L]
+  if (!length(binarias))
+    return(.aviso("ok", "distancia_valida",
+                  sprintf("Distancia: las %d columnas toman mas de dos valores; restar filas tiene sentido.",
+                          length(columnas))))
+  .aviso("aviso", "distancia_valida",
+         sprintf("Distancia: %s toma(n) solo dos valores. La distancia las mide como si 0 y 1 fueran cantidades.",
+                 paste(binarias, collapse = ", ")),
+         "Si son indicadoras, quitalas de la especificacion o agrupa con un metodo para cualitativas.")
+}
+
 .COMPROBACIONES_SUPUESTO <- list(
   escalado_previo = .supuesto_escalado,
   solo_cuantitativas = .supuesto_cuantitativas,
@@ -254,4 +277,5 @@ nombre_supuesto <- function(supuesto) {
   estructura_lineal = .supuesto_lineal,
   sin_atipicos = .supuesto_atipicos,
   grupos_esfericos = .supuesto_esfericos,
-  tamanos_similares = .supuesto_tamanos)
+  tamanos_similares = .supuesto_tamanos,
+  distancia_valida = .supuesto_distancia)

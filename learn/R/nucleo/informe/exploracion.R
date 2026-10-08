@@ -101,50 +101,36 @@ armar_informe_exploracion <- function(seleccion, dataset = NULL,
 }
 
 #' Qué paquetes necesitan los paneles marcados.
+#'
+#' Lo contesta cada generador (paquetes_de_codigo(), en informe/codigos/):
+#' el que sabe si emite fviz_* o ggMarginal() es él. Acá solo se juntan,
+#' sin repetir y con ggplot2 siempre primero.
 .paquetes_de <- function(seleccion) {
-  hay <- function(condicion)
-    length(seleccion) > 0L && any(vapply(seleccion, condicion, logical(1)))
-  c("ggplot2",
-    if (hay(function(e) identical(e$clave, "f1.analisis.dispersion") &&
-            isTRUE(e$params$marginales))) "ggExtra" else NULL)
+  pedidos <- unlist(lapply(seleccion, function(e)
+    paquetes_de_codigo(e$clave %||% "", e$params %||% list())),
+    use.names = FALSE)
+  unique(c("ggplot2", pedidos))
 }
 
-#' La carga de datos. Dos caminos: la fuente `ori` se recarga desde el CSV
-#' original (reproducible de punta a punta); cualquier otra fuente se trae del
-#' CSV que el usuario baja de la misma pestaña Informe, con la preparación ya
-#' aplicada.
+#' Las fuentes publicadas en Kaggle: el cuaderno las recarga desde ahí.
+FUENTES_KAGGLE <- list(
+  ori = list(slug = "ori-dataset", archivo = "ORI.csv",
+             base = "la base del Taller 01 (IDEAM)"),
+  eia = list(slug = "eia-united-states", archivo = "EIA.csv",
+             base = "la base del Taller 02 (EIA, energía por país)"))
+
+#' La carga de datos. Dos caminos: una fuente publicada en Kaggle (`ori`,
+#' `eia`) se recarga desde el CSV original (reproducible de punta a punta);
+#' cualquier otra fuente se trae del CSV que el usuario baja de la misma
+#' pestaña Informe, con la preparación ya aplicada.
 .seccion_datos_exploracion <- function(dataset, opciones) {
   if (is.null(dataset)) return(c("# Los datos", "",
     "El cuaderno se exportó sin dataset cargado.", ""))
   meta <- if (incluye(opciones, "ficha_datos"))
     .meta_dataset(dataset) else character(0)
-  if (identical(dataset$fuente, "ori")) return(c("# Los datos", "", meta, "",
-    '```{r cargar-datos}',
-    '# ORI.csv es la base del Taller 01 (IDEAM), publicada en Kaggle como',
-    '# overhcv/ori-dataset. Se baja de ahí; sin internet se busca una copia',
-    '# local en los lugares habituales, en orden.',
-    'url_ori <- "https://www.kaggle.com/api/v1/datasets/download/overhcv/ori-dataset"',
-    'zip_ori <- file.path(tempdir(), "ori-dataset.zip")',
-    'ruta <- tryCatch({',
-    '  download.file(url_ori, zip_ori, mode = "wb", quiet = TRUE)',
-    '  unzip(zip_ori, files = "ORI.csv", exdir = tempdir())',
-    '}, error = function(e) {',
-    '  message("Sin acceso a Kaggle, se usa la copia local: ", conditionMessage(e))',
-    '  Filter(file.exists, c("ORI.csv", "data/ORI.csv",',
-    '                        "../../../data/ORI.csv"))[1]',
-    '})',
-    '# La copia que reparte el curso viene en ISO-8859-1 y la de data/ del repo',
-    '# en UTF-8. Se detecta en vez de suponer: suponer es lo que rompe las',
-    '# tildes de los municipios (ACACÍAS -> ACACÃAS).',
-    'codificacion <- if (all(validUTF8(readLines(ruta, warn = FALSE,',
-    '                                            encoding = "bytes"))))',
-    '  "UTF-8" else "latin1"',
-    'datos <- read.csv(ruta, sep = ";", dec = ".", fileEncoding = codificacion,',
-    '                  stringsAsFactors = FALSE)',
-    'names(datos) <- trimws(names(datos))   # el encabezado trae "Pronostico "',
-    'filas_al_cargar <- nrow(datos)         # antes de filtrar: lo usa el panel del filtro',
-    'cat("Al cargar:", nrow(datos), "filas x", ncol(datos), "columnas\\n")',
-    "```", ""))
+  kaggle <- FUENTES_KAGGLE[[dataset$fuente %||% ""]]
+  if (!is.null(kaggle))
+    return(c("# Los datos", "", meta, "", .carga_kaggle(kaggle)))
   c("# Los datos", "", meta, "",
     "```{r cargar-datos}",
     '# Bajá "Datos actuales (CSV)" de la pestaña Informe y ponelo al lado de',
@@ -153,6 +139,39 @@ armar_informe_exploracion <- function(seleccion, dataset = NULL,
     '# Este CSV ya viene filtrado: las filas del archivo original se anotan',
     '# tal como estaban al exportar.',
     sprintf('filas_al_cargar <- %dL', as.integer(dataset$n_crudo %||% dataset$n)),
+    'cat("Al cargar:", nrow(datos), "filas x", ncol(datos), "columnas\\n")',
+    "```", "")
+}
+
+#' El chunk que baja la base de Kaggle y cae a una copia local sin red.
+.carga_kaggle <- function(k) {
+  a <- k$archivo
+  c('```{r cargar-datos}',
+    sprintf('# %s es %s, publicada en Kaggle como', a, k$base),
+    sprintf('# overhcv/%s. Se baja de ahí; sin internet se busca una', k$slug),
+    '# copia local en los lugares habituales, en orden.',
+    'url <- paste0("https://www.kaggle.com/api/v1/datasets/download/",',
+    sprintf('              "overhcv/%s")', k$slug),
+    'zip <- file.path(tempdir(), "kaggle.zip")',
+    'ruta <- tryCatch({',
+    '  download.file(url, zip, mode = "wb", quiet = TRUE)',
+    sprintf('  unzip(zip, files = "%s", exdir = tempdir())', a),
+    '}, error = function(e) {',
+    '  message("Sin acceso a Kaggle, se usa la copia local: ",',
+    '          conditionMessage(e))',
+    sprintf('  Filter(file.exists, c("%s", "data/%s",', a, a),
+    sprintf('                        "../../../data/%s"))[1]', a),
+    '})',
+    '# Se detecta la codificación en vez de suponerla: suponer es lo que',
+    '# rompe las tildes (ACACÍAS -> ACACÃAS).',
+    'codificacion <- if (all(validUTF8(readLines(ruta, warn = FALSE,',
+    '                                            encoding = "bytes"))))',
+    '  "UTF-8" else "latin1"',
+    'datos <- read.csv(ruta, sep = ";", dec = ".",',
+    '                  fileEncoding = codificacion,',
+    '                  stringsAsFactors = FALSE)',
+    'names(datos) <- trimws(names(datos))  # ORI trae "Pronostico "',
+    'filas_al_cargar <- nrow(datos)  # antes de filtrar: lo usa el filtro',
     'cat("Al cargar:", nrow(datos), "filas x", ncol(datos), "columnas\\n")',
     "```", "")
 }
@@ -175,13 +194,13 @@ armar_informe_exploracion <- function(seleccion, dataset = NULL,
 
 #' La pila (filtros y transformaciones) traducida a R.
 #'
-#' Con fuente `ori` los chunks corren de verdad: los datos del cuaderno pasan
+#' Con una fuente de Kaggle los chunks corren de verdad: los datos del cuaderno pasan
 #' por exactamente lo mismo que los del lab. Con la otra vía ya viene aplicada
 #' en el CSV, así que se muestran `eval = FALSE`: documentan, no re-aplican.
 .seccion_preparacion <- function(dataset) {
   if (is.null(dataset) || !length(dataset$transformaciones))
     return(c("# Preparación", "", "Sin filtros ni transformaciones aplicados.", ""))
-  evaluar <- identical(dataset$fuente, "ori")
+  evaluar <- !is.null(FUENTES_KAGGLE[[dataset$fuente %||% ""]])
   encabezado <- if (evaluar) "```{r preparacion}" else "```{r preparacion, eval=FALSE}"
   lineas <- unlist(lapply(dataset$transformaciones, codigo_de_transformacion),
                    use.names = FALSE)
@@ -197,7 +216,8 @@ armar_informe_exploracion <- function(seleccion, dataset = NULL,
 #' Una entrada de la pila, en R autónomo.
 codigo_de_transformacion <- function(entrada) {
   if (identical(entrada$tipo, "filtro"))
-    return(sprintf("datos <- datos[datos$%s %%in%% c(%s), ]",
+    return(sprintf("datos <- datos[%sdatos$%s %%in%% c(%s), ]",
+                   if (isTRUE(entrada$params$excluir)) "!" else "",
                    entrada$columnas[1], .valores_r(entrada$params$valores)))
   lineas <- character(0)
   for (columna in entrada$columnas) {

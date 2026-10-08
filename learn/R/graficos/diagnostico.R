@@ -2,9 +2,9 @@
 #
 # Responsabilidad: los gráficos que juzgan un ajuste ya hecho.
 #
-# Fase 4, subsección Diagnóstico. Van entrando por método: acá está lo que el
-# ACP necesita; residuos, silueta, dendrograma y compañía llegan con sus
-# métodos, en su hito.
+# Fase 4, subsección Diagnóstico. Van entrando por método: el scree del ACP, el
+# codo y la silueta de k-medias, el dendrograma y la cofenética del jerárquico;
+# residuos y compañía llegan con sus métodos, en su hito.
 
 #' Gráfico de sedimentación: cuánta varianza aporta cada componente.
 #'
@@ -141,4 +141,97 @@ graficar_silueta <- function(tabla, ...) {
     sprintf(" · sobre una muestra de %d", nrow(tabla)) else ""
   sprintf("silueta media %.3f · %d observaciones mal ubicadas%s",
           media, negativas, parte)
+}
+
+#' Dendrograma con el corte en k grupos.
+#'
+#' La altura de cada unión es la distancia (según el enlace) a la que se
+#' juntaron esas dos ramas. Las ramas debajo del corte van del color de su
+#' grupo; las de arriba, en gris, juntan grupos distintos y son las que el
+#' corte decidió no hacer. Una rama larga justo encima del corte dice que ese
+#' k separa grupos que estaban lejos; ramas cortas, que el corte es arbitrario.
+#'
+#' @param arbol salida de arbol_jerarquico()
+#' @param etiquetas TRUE pone el nombre de cada hoja; NULL decide por n (más
+#'   de 150 hojas no se leen y solo ensucian)
+graficar_dendrograma <- function(arbol, etiquetas = NULL) {
+  if (is.null(arbol) || !nrow(arbol$segmentos))
+    return(.grafico_vacio("todavia no hay arbol que mirar"))
+
+  k <- arbol$k
+  etiquetas <- etiquetas %||% (arbol$n <= 150L)
+  techo <- max(arbol$segmentos$yend)
+  grafico <- ggplot2::ggplot(arbol$segmentos,
+                             ggplot2::aes(x = .data$x, y = .data$y,
+                                          xend = .data$xend, yend = .data$yend,
+                                          color = .data$grupo)) +
+    ggplot2::geom_rect(data = arbol$rectangulos,
+                       ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax,
+                                    ymin = .data$ymin, ymax = .data$ymax,
+                                    color = .data$grupo),
+                       inherit.aes = FALSE, fill = NA, linetype = "dashed",
+                       linewidth = 0.3) +
+    ggplot2::geom_segment(linewidth = 0.45) +
+    ggplot2::geom_hline(yintercept = arbol$corte, linetype = "dotted",
+                        color = "grey20") +
+    ggplot2::scale_color_manual(values = paleta_cat(k), na.value = "grey55",
+                                breaks = as.character(seq_len(k)),
+                                name = "grupo") +
+    ggplot2::scale_x_continuous(expand = ggplot2::expansion(add = 1)) +
+    # Sin alturas negativas en el eje: el tramo bajo el cero es de las etiquetas.
+    ggplot2::scale_y_continuous(breaks = function(limites) {
+      marcas <- pretty(c(0, limites[2])); marcas[marcas >= 0] }) +
+    ggplot2::labs(x = NULL, y = "altura de fusion",
+                  subtitle = .subtitulo_dendrograma(arbol)) +
+    tema_ggplot() +
+    ggplot2::theme(axis.text.x = ggplot2::element_blank(),
+                   axis.ticks.x = ggplot2::element_blank(),
+                   panel.grid.major.x = ggplot2::element_blank(),
+                   panel.grid.minor.x = ggplot2::element_blank())
+
+  if (!isTRUE(etiquetas)) return(grafico)
+  # Las hojas cuelgan debajo del cero, giradas: el espacio se le saca al eje y
+  # con un límite negativo, que es más estable que pelear con los márgenes.
+  grafico +
+    ggplot2::geom_text(data = arbol$hojas,
+                       ggplot2::aes(x = .data$x, y = -0.01 * techo,
+                                    label = .data$etiqueta, color = .data$grupo),
+                       inherit.aes = FALSE, angle = 90, hjust = 1,
+                       size = 2.1, show.legend = FALSE) +
+    ggplot2::expand_limits(y = -0.32 * techo)
+}
+
+.subtitulo_dendrograma <- function(arbol) {
+  sprintf("enlace %s · distancia %s · %d hojas cortadas en k = %d · cofenetica %.3f",
+          arbol$enlace, arbol$distancia, arbol$n, arbol$k,
+          arbol$cofenetica %||% NA_real_)
+}
+
+#' Distancia original contra distancia en el árbol.
+#'
+#' Cada punto es un par de observaciones. Si el dendrograma respetara las
+#' distancias, los puntos subirían en línea; la nube ancha y los escalones
+#' horizontales son la distorsión: pares a distancias muy distintas que el
+#' árbol junta a la misma altura.
+#'
+#' @param tabla salida de cofenetico()
+graficar_cofenetico <- function(tabla) {
+  if (!nrow(tabla)) return(.grafico_vacio("todavia no hay arbol que comparar"))
+
+  ggplot2::ggplot(tabla, ggplot2::aes(x = .data$original,
+                                      y = .data$cofenetica)) +
+    ggplot2::geom_point(alpha = 0.25, size = 0.9, color = paleta_cat(1)) +
+    ggplot2::geom_smooth(method = "lm", formula = y ~ x, se = FALSE,
+                         color = paleta_cat(2)[2], linewidth = 0.8) +
+    ggplot2::labs(x = "distancia original", y = "distancia cofenetica",
+                  subtitle = .subtitulo_cofenetico(tabla)) +
+    tema_ggplot()
+}
+
+.subtitulo_cofenetico <- function(tabla) {
+  base <- sprintf("correlacion cofenetica %.3f sobre %d pares",
+                  attr(tabla, "correlacion") %||% NA_real_,
+                  attr(tabla, "pares") %||% nrow(tabla))
+  if (!isTRUE(attr(tabla, "muestreada"))) return(base)
+  sprintf("%s · se dibujan %d", base, nrow(tabla))
 }

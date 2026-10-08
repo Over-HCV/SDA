@@ -1,0 +1,3058 @@
+% taller-qmd-template.tex — plantilla pandoc/quarto para TALLERES del curso AED
+% Basada en el driver de tesis main-es.tex (clase mitthesis parcheada UR), con
+% portada y resumen a medida para trabajos de curso. Compilar con XeLaTeX
+% (build.sh usa latexmk -pdfxe).
+%
+%   Metadatos por taller (YAML del .qmd): title, subtitle, fecha, resumen, palabras
+%   (fecha: clave propia; quarto reformatea `date:` a ISO-8601)
+%   Datos del curso (compartidos):         common/meta-taller-es.tex
+%   Preliminares (portada/resumen/índice): common/frontmatter-taller.tex
+\def\oaslang{es}
+\DocumentMetadata{lang=es, pdfversion=1.7, pdfstandard=a-2b}
+% Guardarraíl de motor: fontset=libertinus exige XeLaTeX (ver main-es.tex).
+\RequirePackage{iftex}\RequireXeTeX
+\documentclass[oneside, openany, fontset=libertinus]{mitthesis}
+\input{common/preamble}
+
+% --- Compatibilidad con la salida de pandoc ---
+\usepackage{fancyvrb}   % entornos Shaded/Highlighting del código R
+\usepackage{upquote}    % comillas rectas en verbatim
+\usepackage{float}      % opción de flotante [H] que quarto usa en las figuras
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\pandocbounded}[1]{#1}
+% pandoc marca las tablas sin caption con \def\LTcaptype{none}: necesita el contador
+\makeatletter\@ifundefined{c@none}{\newcounter{none}}{}\makeatother
+% Código y resultado lado a lado (salidas cortas): \begin{codres} código \codressep resultado \end{codres}
+\newenvironment{codres}%
+  {\par\smallskip\noindent\begin{minipage}[t]{0.57\linewidth}\vspace{0pt}}%
+  {\end{minipage}\par\medskip}
+\newcommand{\codressep}{\end{minipage}\hfill\begin{minipage}[t]{0.40\linewidth}\vspace{0pt}}
+% Bibliografía: \imprimirbibliografia la ubica donde se llame (p. ej. antes de
+% \appendix); si el taller no la llama, se imprime al final como siempre.
+\newif\ifbibimpresa
+\newcommand{\imprimirbibliografia}{\printbibliography[heading=bibintoc]\global\bibimpresatrue}
+% Paginación: \Needspace{alto} empieza en la página siguiente lo que no
+% cabe entero (lo emite paginar() de R/taller.R antes de cada chunk).
+\usepackage{needspace}
+% Notas para la sesión: recuadro rojo pastel titulado «Notas» que se puede
+% partir entre páginas. En el .qmd van como `::: notas` (filtro notas.lua).
+% Interruptor global: \mostrarnotasfalse (o `ocultar-notas: true` en el
+% YAML) las quita todas sin borrarlas del cuaderno.
+\usepackage{comment}
+\newif\ifmostrarnotas
+\mostrarnotastrue
+
+\definecolor{notasfondo}{HTML}{F8E1E3}
+\definecolor{notasmarco}{HTML}{A6192E}
+\ifmostrarnotas
+  \newtcolorbox{notas}{breakable, enhanced, colback=notasfondo,
+    colframe=notasmarco, coltitle=white, fonttitle=\bfseries,
+    title={Notas}, boxrule=0.6pt, arc=2pt, left=7pt, right=7pt,
+    top=5pt, bottom=5pt, before skip=12pt, after skip=12pt,
+    before upper={\setlength{\parindent}{0pt}\setlength{\parskip}{4pt}}}
+\else
+  \excludecomment{notas}
+\fi
+
+% --- Resolución de recursos hacia la plantilla (layout taller-XX junto a template/) ---
+\graphicspath{{assets/pics/}{figures/}{../template/assets/pics/}{../template/figures/}}
+\addbibresource{../template/bib/refs-taller.bib}
+
+% --- Metadatos del taller (vienen del YAML del .qmd vía pandoc) ---
+\newcommand{\tallertitulo}{Taller 2 --- Componentes principales y
+agrupamiento de países (EIA)}
+\newcommand{\tallersubtitulo}{Análisis Estadístico de Datos}
+\newcommand{\tallerfecha}{Bogotá D.C., 7 de octubre de 2026}
+\newcommand{\tallerresumen}{Se estudian 111 países descritos por 57
+variables de petróleo y electricidad de la U.S. Energy Information
+Administration (EIA). Primero se eligen cinco variables, una por
+dimensión y con poca redundancia entre sí (producción de crudo, consumo
+de petróleo, exportación de crudo, generación eléctrica y generación
+renovable), se estiman su vector de medias y su matriz de covarianzas y
+se describen de forma univariada y bivariada, encontrando distribuciones
+muy asimétricas dominadas por unos pocos países y dos bloques casi
+independientes, el de la oferta petrolera y el del tamaño energético.
+Luego se ejecuta un análisis de componentes principales (ACP) normado y
+otro sin normalizar, se eligen cuatro componentes por el criterio del 80
+\% de varianza acumulada y se interpretan las variables y los países en
+los planos (1,2) y (2,3), donde el primer eje resulta ser el tamaño
+energético del país y los siguientes oponen productores de petróleo a
+productores de electricidad renovable. Al retirar a Estados Unidos,
+China, Arabia Saudita y Rusia el primer eje pasa de explicar el 62 \% al
+49 \% y aparecen dos brazos de países que sugieren tres grupos.
+Finalmente se eligen tres grupos por la reducción de varianza explicada
+y se comparan k-medias y el agrupamiento jerárquico de enlace promedio,
+que coinciden en 101 de los 107 países y en separar a India y Japón,
+pero difieren en cómo tratan a ocho economías grandes, mientras que las
+cajas por grupo muestran que la partición sigue al consumo y a la
+generación eléctrica y no a la producción ni a la exportación de crudo.}
+\newcommand{\tallerpalabras}{Análisis de componentes principales;
+Círculo de correlaciones; Criterio de Kaiser; K-medias; Agrupamiento
+jerárquico; Silueta; EIA}
+\input{common/meta-taller-es}
+
+\begin{document}
+\input{common/frontmatter-taller}
+
+\chapter{Los datos}\label{datos}
+
+La base \texttt{EIA.csv} reúne, para 111 países, 57 variables de
+producción, consumo, comercio y capacidad instalada de petróleo y
+electricidad publicadas por la U.S. Energy Information Administration
+\parencite{eia-datos}, donde cada unidad estadística (UE) es un país.
+Las unidades vienen en el sufijo de cada nombre, es decir, TBPD son
+miles de barriles por día, MMTCD millones de toneladas métricas de
+CO\textsubscript{2}, BKWH miles de millones de kWh, MK millones de kW y
+BB miles de millones de barriles. Todo el análisis se realiza en R
+\parencite{r-core} con gráficos de \texttt{ggplot2} \parencite{ggplot2},
+\texttt{GGally} \parencite{ggally} y \texttt{factoextra}
+\parencite{factoextra}, mientras que la documentación de cada función
+utilizada se reúne en el Apéndice \ref{documentacion-r}.
+
+La base se descarga de Kaggle o, en caso de no haber conexión, se busca
+una copia local.
+
+\Needspace{2.28in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{url }\OtherTok{\textless{}{-}} \FunctionTok{paste0}\NormalTok{(}\StringTok{"https://www.kaggle.com/api/v1/datasets/download/"}\NormalTok{,}
+              \StringTok{"overhcv/eia{-}united{-}states"}\NormalTok{)}
+\NormalTok{zip }\OtherTok{\textless{}{-}} \FunctionTok{file.path}\NormalTok{(}\FunctionTok{tempdir}\NormalTok{(), }\StringTok{"kaggle.zip"}\NormalTok{)}
+\NormalTok{ruta }\OtherTok{\textless{}{-}} \FunctionTok{tryCatch}\NormalTok{(\{}
+  \FunctionTok{download.file}\NormalTok{(url, zip, }\AttributeTok{mode =} \StringTok{"wb"}\NormalTok{, }\AttributeTok{quiet =} \ConstantTok{TRUE}\NormalTok{)}
+  \FunctionTok{unzip}\NormalTok{(zip, }\AttributeTok{files =} \StringTok{"EIA.csv"}\NormalTok{, }\AttributeTok{exdir =} \FunctionTok{tempdir}\NormalTok{())}
+\NormalTok{\}, }\AttributeTok{error =} \ControlFlowTok{function}\NormalTok{(e) \{}
+  \FunctionTok{Filter}\NormalTok{(file.exists, }\FunctionTok{c}\NormalTok{(}\StringTok{"EIA.csv"}\NormalTok{, }\StringTok{"data/EIA.csv"}\NormalTok{,}
+                        \StringTok{"../../../data/EIA.csv"}\NormalTok{))[}\DecValTok{1}\NormalTok{]}
+\NormalTok{\})}
+\NormalTok{datos }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(ruta, }\AttributeTok{sep =} \StringTok{";"}\NormalTok{, }\AttributeTok{dec =} \StringTok{"."}\NormalTok{,}
+                  \AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Estructura de las variables}\label{estructura}
+
+Los nombres originales llegan a tener 60 caracteres, por lo que se
+reemplazan por abreviaturas con la función \texttt{abreviar()} del
+archivo \texttt{R/abreviaturas.R}, que se carga al inicio y cuyo código
+y tabla de equivalencias están en el Apéndice \ref{abreviaturas}. Por
+ejemplo \texttt{PetLiq\_cons} es el consumo de petróleo y otros líquidos
+y \texttt{Renov\_gen} la generación neta de electricidad renovable.
+Antes de calcular nada vale la pena ver cómo están organizadas las 57
+variables, pues no son 57 mediciones independientes sino un árbol en el
+que cada total se vuelve a medir en sus partes.
+
+\Needspace{4.20in}
+
+\includegraphics[width=5.2in,height=3.62in]{sda-lab-exploracion_files/figure-latex/mermaid-figure-1.png}
+
+Estructura de las 57 variables por energético, bloque y unidad: Cada
+total se repite en sus partes y cada fuente eléctrica se mide dos veces,
+por lo que la base es redundante desde su diseño.
+
+El petróleo se describe en tres niveles (el crudo que se extrae y se
+comercia, los totales de petróleo, refinados y emisiones, y los
+productos uno por uno), mientras que la electricidad se describe como
+sistema (generación, consumo, capacidad, comercio y pérdidas) y por
+fuente, con cada una de las 11 fuentes medida en capacidad instalada y
+en generación.
+
+\section{Diagnóstico de la base}\label{diagnostico}
+
+La matriz \texttt{num} guarda las 57 variables numéricas con el país
+como nombre de fila, y sobre ella se cuentan los faltantes y las
+variables casi repetidas.
+
+\Needspace{3.23in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{num }\OtherTok{\textless{}{-}} \FunctionTok{numericas}\NormalTok{(datos)}
+\NormalTok{r }\OtherTok{\textless{}{-}} \FunctionTok{cor}\NormalTok{(num)}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}\FunctionTok{nrow}\NormalTok{(num), }\FunctionTok{ncol}\NormalTok{(num), }\FunctionTok{sum}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(num)),}
+                        \FunctionTok{anyDuplicated}\NormalTok{(}\FunctionTok{names}\NormalTok{(num)),}
+                        \FunctionTok{sum}\NormalTok{(r[}\FunctionTok{upper.tri}\NormalTok{(r)] }\SpecialCharTok{\textgreater{}} \FloatTok{0.99}\NormalTok{),}
+                        \FunctionTok{sum}\NormalTok{(}\FunctionTok{duplicated}\NormalTok{(}\FunctionTok{as.list}\NormalTok{(num)))),}
+             \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"Países"}\NormalTok{, }\StringTok{"Variables"}\NormalTok{, }\StringTok{"Faltantes"}\NormalTok{,}
+                           \StringTok{"Nombres repetidos"}\NormalTok{, }\StringTok{"Pares r \textgreater{} 0.99"}\NormalTok{,}
+                           \StringTok{"Columnas repetidas"}\NormalTok{),}
+             \AttributeTok{caption =} \StringTok{"Diagnóstico de la base."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{1.36in}
+
+\begin{longtable}[]{@{}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.0886}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1266}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1266}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2278}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1899}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2405}}@{}}
+\caption{Diagnóstico de la base.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Países
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Variables
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Faltantes
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Nombres repetidos
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Pares r \textgreater{} 0.99
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Columnas repetidas
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedleft
+Países
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Variables
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Faltantes
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Nombres repetidos
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Pares r \textgreater{} 0.99
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Columnas repetidas
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+111 & 57 & 0 & 0 & 18 & 1 \\
+\end{longtable}
+
+\Needspace{2.09in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pares }\OtherTok{\textless{}{-}} \FunctionTok{which}\NormalTok{(}\FunctionTok{upper.tri}\NormalTok{(r) }\SpecialCharTok{\&}\NormalTok{ r }\SpecialCharTok{\textgreater{}} \FloatTok{0.99}\NormalTok{, }\AttributeTok{arr.ind =} \ConstantTok{TRUE}\NormalTok{)}
+\FunctionTok{cat}\NormalTok{(}\FunctionTok{strwrap}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}\FunctionTok{names}\NormalTok{(num)[pares[, }\DecValTok{1}\NormalTok{]], }\FunctionTok{names}\NormalTok{(num)[pares[, }\DecValTok{2}\NormalTok{]],}
+                  \AttributeTok{sep =} \StringTok{"\textasciitilde{}"}\NormalTok{, }\AttributeTok{collapse =} \StringTok{", "}\NormalTok{), }\DecValTok{64}\NormalTok{), }\AttributeTok{sep =} \StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Gasolina_cons~Gasolina_prod, PetLiq_CO2~PetLiq_cons,
+PetLiq_CO2~Refinados_cons, PetLiq_cons~Refinados_cons,
+Gasolina_prod~GananciaRef, Elec_cap~Elec_cons,
+Elec_cap~Elec_gen, Elec_cons~Elec_gen, Elec_cap~Fosil_cap,
+Elec_cons~Fosil_cap, Elec_gen~Fosil_cap, Elec_cons~Fosil_gen,
+Elec_gen~Fosil_gen, Fosil_cap~Fosil_gen,
+Geotermica_cap~Geotermica_gen, Hidro_cap~Hidro_gen,
+Nuclear_cap~Nuclear_gen, Renov_cap~Renov_gen
+\end{verbatim}
+
+\Needspace{2.47in}
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{names}\NormalTok{(num)[}\FunctionTok{duplicated}\NormalTok{(}
+  \FunctionTok{as.list}\NormalTok{(num))]}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+[1] "Refinados_cons"
+\end{verbatim}
+
+\end{codres}
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{max}\NormalTok{(}\FunctionTok{abs}\NormalTok{(num}\SpecialCharTok{$}\NormalTok{Renov\_gen }\SpecialCharTok{{-}}
+\NormalTok{  num}\SpecialCharTok{$}\NormalTok{Hidro\_gen }\SpecialCharTok{{-}}
+\NormalTok{  num}\SpecialCharTok{$}\NormalTok{NoHidro\_gen))}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+[1] 1
+\end{verbatim}
+
+\end{codres}
+
+\textbf{¿Está lista la base para el análisis?} Sí, pues no hay datos
+faltantes y las 57 abreviaturas son distintas entre sí, aunque la base
+es muy redundante y esto hay que tenerlo presente desde ya:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Lectura local.} La columna repetida, \texttt{Refinados\_cons},
+  es el consumo de productos refinados, que resulta idéntico al consumo
+  de petróleo y otros líquidos, mientras que la generación renovable
+  coincide con la suma de la hidroeléctrica y la no hidroeléctrica salvo
+  por una unidad de redondeo. Es decir, hay variables que no aportan
+  nada que no esté ya en otra.
+\item
+  \textbf{Lectura global.} Los 18 pares con correlación mayor a 0.99 no
+  son casualidad sino consecuencia del árbol de la figura anterior, ya
+  que cinco son la capacidad y la generación de una misma fuente (fósil,
+  hidro, nuclear, geotérmica y renovable), ocho son el sistema eléctrico
+  consigo mismo y con su parte fósil, tres son el consumo de petróleo,
+  el de refinados y las emisiones entre sí, y dos son la producción de
+  gasolina con su consumo y con la ganancia de refinación. Esto pesa en
+  el ACP, porque cada copia de una misma información suma varianza al
+  mismo eje, y en el agrupamiento, porque las distancias entre países
+  cuentan varias veces lo mismo.
+\end{enumerate}
+
+\chapter{Normal multivariada}\label{normal}
+
+\section{Pregunta 1 --- Vector de medias y matriz de
+covarianzas}\label{p1}
+
+\textbf{¿Qué cinco variables y por qué?} Se eligió una variable por cada
+dimensión de la base, buscando que entre ellas hubiera poca redundancia,
+ya que dos variables casi iguales describen dos veces lo mismo y no
+dicen nada nuevo de los países:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Oferta petrolera.} Se mide con la producción de crudo
+  (\texttt{Crudo\_prod}, TBPD), que indica cuánto petróleo extrae el
+  país.
+\item
+  \textbf{Demanda petrolera.} Se mide con el consumo de petróleo y otros
+  líquidos (\texttt{PetLiq\_cons}, TBPD), que refleja el tamaño de la
+  economía que lo usa.
+\item
+  \textbf{Comercio petrolero.} Se mide con la exportación de crudo
+  (\texttt{Crudo\_exp}, TBPD), que distingue al país que vende su
+  petróleo del que lo consume.
+\item
+  \textbf{Escala eléctrica.} Se mide con la generación neta de
+  electricidad (\texttt{Elec\_gen}, BKWH), que es el tamaño del sistema
+  eléctrico.
+\item
+  \textbf{Transición energética.} Se mide con la generación neta
+  renovable (\texttt{Renov\_gen}, BKWH), que indica cuánto de esa
+  electricidad viene de fuentes renovables.
+\end{enumerate}
+
+La elección se respalda con la matriz de correlación de las candidatas,
+que incluye las emisiones de CO\textsubscript{2} por petróleo
+(\texttt{PetLiq\_CO2}), la variable que a primera vista representaría la
+dimensión ambiental.
+
+\Needspace{3.04in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{candidatas }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Crudo\_prod"}\NormalTok{, }\StringTok{"PetLiq\_cons"}\NormalTok{, }\StringTok{"PetLiq\_CO2"}\NormalTok{,}
+                \StringTok{"Crudo\_exp"}\NormalTok{, }\StringTok{"Elec\_gen"}\NormalTok{, }\StringTok{"Renov\_gen"}\NormalTok{)}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{round}\NormalTok{(}\FunctionTok{cor}\NormalTok{(num[candidatas]), }\DecValTok{2}\NormalTok{),}
+             \AttributeTok{caption =} \StringTok{"Correlación de Pearson de las candidatas."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{2.31in}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1600}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1467}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1600}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1467}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1333}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1200}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1333}}@{}}
+\caption{Correlación de Pearson de las candidatas.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Crudo\_prod
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+PetLiq\_cons
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+PetLiq\_CO2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Crudo\_exp
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Elec\_gen
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Renov\_gen
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Crudo\_prod
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+PetLiq\_cons
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+PetLiq\_CO2
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Crudo\_exp
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Elec\_gen
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Renov\_gen
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Crudo\_prod & 1.00 & 0.64 & 0.64 & 0.83 & 0.52 & 0.44 \\
+PetLiq\_cons & 0.64 & 1.00 & 1.00 & 0.17 & 0.92 & 0.77 \\
+PetLiq\_CO2 & 0.64 & 1.00 & 1.00 & 0.17 & 0.92 & 0.77 \\
+Crudo\_exp & 0.83 & 0.17 & 0.17 & 1.00 & 0.07 & 0.06 \\
+Elec\_gen & 0.52 & 0.92 & 0.92 & 0.07 & 1.00 & 0.92 \\
+Renov\_gen & 0.44 & 0.77 & 0.77 & 0.06 & 0.92 & 1.00 \\
+\end{longtable}
+
+Las emisiones de CO\textsubscript{2} se descartan porque tienen
+correlación de 1.00 con el consumo, lo cual indica que se derivan del
+petróleo consumido y que incluirlas sería contar dos veces la demanda.
+En su lugar entra la exportación de crudo, que casi no se asocia con el
+bloque de tamaño (0.17 con el consumo, 0.07 con la generación y 0.06 con
+la renovable) y sí con la producción (0.83), aunque sin repetirla, pues
+como se ve en la Pregunta 2 hay países que producen sin exportar. Las
+otras tres variables tienen entre sí correlaciones altas (de 0.77 a
+0.92) pero describen cosas distintas, ya que el consumo de petróleo es
+demanda de combustibles y la generación es electricidad, mientras que la
+renovable es solo una parte de esa electricidad cuyo peso cambia mucho
+de un país a otro.
+
+Sobre las \(n = 111\) filas se estiman el vector de medias y la matriz
+de varianzas y covarianzas muestrales
+
+\[
+\bar{\mathbf{x}} = \frac{1}{n}\sum_{i=1}^{n}\mathbf{x}_i,
+\qquad
+S = \frac{1}{n-1}\sum_{i=1}^{n}
+    (\mathbf{x}_i - \bar{\mathbf{x}})(\mathbf{x}_i - \bar{\mathbf{x}})^\top,
+\]
+
+que son los estimadores insesgados de \(\boldsymbol{\mu}\) y \(\Sigma\)
+en el modelo normal multivariado (el de máxima verosimilitud de
+\(\Sigma\) divide por \(n\) en vez de \(n - 1\)).
+
+\Needspace{3.99in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cinco }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Crudo\_prod"}\NormalTok{, }\StringTok{"PetLiq\_cons"}\NormalTok{, }\StringTok{"Crudo\_exp"}\NormalTok{, }\StringTok{"Elec\_gen"}\NormalTok{,}
+           \StringTok{"Renov\_gen"}\NormalTok{)}
+\NormalTok{X }\OtherTok{\textless{}{-}}\NormalTok{ num[cinco]}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{Variable =}\NormalTok{ cinco,}
+                        \AttributeTok{Unidad =} \FunctionTok{c}\NormalTok{(}\StringTok{"TBPD"}\NormalTok{, }\StringTok{"TBPD"}\NormalTok{, }\StringTok{"TBPD"}\NormalTok{, }\StringTok{"BKWH"}\NormalTok{,}
+                                   \StringTok{"BKWH"}\NormalTok{),}
+                        \AttributeTok{Media =} \FunctionTok{round}\NormalTok{(}\FunctionTok{colMeans}\NormalTok{(X), }\DecValTok{2}\NormalTok{),}
+                        \AttributeTok{Mediana =} \FunctionTok{sapply}\NormalTok{(X, median),}
+                        \AttributeTok{row.names =} \ConstantTok{NULL}\NormalTok{),}
+             \AttributeTok{caption =} \StringTok{"Vector de medias (y mediana)."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{2.12in}
+
+\begin{longtable}[]{@{}llrr@{}}
+\caption{Vector de medias (y mediana).}\tabularnewline
+\toprule\noalign{}
+Variable & Unidad & Media & Mediana \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+Variable & Unidad & Media & Mediana \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Crudo\_prod & TBPD & 702.06 & 38.0 \\
+PetLiq\_cons & TBPD & 811.40 & 202.0 \\
+Crudo\_exp & TBPD & 361.56 & 8.5 \\
+Elec\_gen & BKWH & 198.29 & 43.0 \\
+Renov\_gen & BKWH & 44.77 & 8.3 \\
+\end{longtable}
+
+\Needspace{2.47in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{round}\NormalTok{(}\FunctionTok{cov}\NormalTok{(X), }\DecValTok{1}\NormalTok{),}
+             \AttributeTok{caption =} \StringTok{"Matriz de varianzas y covarianzas S."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{2.12in}
+
+\begin{longtable}[]{@{}lrrrrr@{}}
+\caption{Matriz de varianzas y covarianzas S.}\tabularnewline
+\toprule\noalign{}
+& Crudo\_prod & PetLiq\_cons & Crudo\_exp & Elec\_gen & Renov\_gen \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+& Crudo\_prod & PetLiq\_cons & Crudo\_exp & Elec\_gen & Renov\_gen \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Crudo\_prod & 3032022.8 & 2471112.6 & 1374119.6 & 594768.9 & 110047.2 \\
+PetLiq\_cons & 2471112.6 & 4858882.6 & 358231.7 & 1332865.6 &
+245051.1 \\
+Crudo\_exp & 1374119.6 & 358231.7 & 907732.0 & 41014.9 & 8667.9 \\
+Elec\_gen & 594768.9 & 1332865.6 & 41014.9 & 434095.0 & 87623.9 \\
+Renov\_gen & 110047.2 & 245051.1 & 8667.9 & 87623.9 & 20864.5 \\
+\end{longtable}
+
+\textbf{Vector de medias.} Se estima
+\(\bar{\mathbf{x}} = (702.06,\ 811.40,\ 361.56,\ 198.29,\ 44.77)^\top\),
+es decir que un país promedio produce 702 mil barriles diarios de crudo,
+consume 811 mil barriles diarios de petróleo, exporta 362 mil barriles
+diarios de crudo y genera 198 mil millones de kWh, de los cuales 45 son
+renovables.
+
+\textbf{Matriz de covarianzas.} Todas las covarianzas son positivas, lo
+que significa que las cinco variables crecen juntas y que un país que
+consume más petróleo también tiende a generar más electricidad. Sus
+magnitudes en cambio no se pueden comparar entre sí, puesto que cada
+entrada lleva el producto de las unidades de sus dos variables (por
+ejemplo, la varianza del consumo está en TBPD² y su covarianza con la
+generación en TBPD·BKWH), por lo que la fuerza de cada asociación se lee
+en la Pregunta 2 con la correlación.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Lectura local.} El país promedio no existe, pues la media de
+  la exportación de crudo (361.56 TBPD) es 42 veces su mediana (8.5
+  TBPD) y la de la producción (702.06 TBPD) más de 18 veces la suya (38
+  TBPD), de modo que cada componente de \(\bar{\mathbf{x}}\) la fijan
+  unos pocos países y no el país típico.
+\item
+  \textbf{Lectura global.} Bajo normalidad multivariada
+  \(\bar{\mathbf{x}}\) y \(S\) resumirían toda la distribución, pero
+  estos datos están lejos de ser normales y \(S\) mezcla dos bloques, el
+  petrolero (producción y exportación) y el de tamaño (consumo,
+  generación y renovable), que casi no se mueven juntos. Esto anticipa
+  que una sola dirección no basta para describir a los países y que el
+  ACP necesitará al menos dos ejes.
+\end{enumerate}
+
+\begin{notas}
+
+\textbf{Interpretaciones.}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{La elección es del grupo.} Con las cinco variables se cubren
+  la oferta, la demanda y el comercio de petróleo, la escala eléctrica y
+  la transición, y la única redundancia evidente (consumo y
+  CO\textsubscript{2}, \(r = 1.00\)) quedó por fuera.
+\item
+  \textbf{El costo de la elección.} La producción y la exportación de
+  crudo comparten el 69 \% de su variación (\(0.83^2\)), así que el
+  bloque petrolero pesa doble en las preguntas 2 y 11, del mismo modo
+  que el de tamaño pesa triple.
+\end{enumerate}
+
+\textbf{Para debatir (preguntas abiertas).}
+
+\begin{itemize}
+\tightlist
+\item
+  ¿Se debió medir por habitante y no en términos absolutos? La base no
+  trae población, de modo que no se puede verificar qué cambiaría.
+\item
+  ¿La dimensión ambiental se pierde al quitar el CO\textsubscript{2}, o
+  ya está implícita en el consumo?
+\end{itemize}
+
+\end{notas}
+
+\chapter{Análisis de componentes principales}\label{acp}
+
+Las preguntas 2 a 11 siguen la ruta del diagrama, que conviene tener a
+la mano porque el número de países y lo que se busca cambian por el
+camino. Primero se describen las cinco variables (Pregunta 2) y luego se
+resume la base completa con el ACP, primero con los 111 países y después
+sin los cuatro más extremos, para terminar agrupando a los 107
+restantes.
+
+\Needspace{4.30in}
+
+\includegraphics[width=5.2in,height=3.73in]{sda-lab-exploracion_files/figure-latex/mermaid-figure-5.png}
+
+Ruta del análisis de las preguntas 3 a 11: Cada etapa cambia los países
+o la pregunta, y las conclusiones de una justifican la siguiente.
+
+\section{Pregunta 2 --- Análisis descriptivo univariado y
+bivariado}\label{p2}
+
+\Needspace{3.04in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{resumen }\OtherTok{\textless{}{-}} \FunctionTok{t}\NormalTok{(}\FunctionTok{sapply}\NormalTok{(X, }\ControlFlowTok{function}\NormalTok{(x)}
+  \FunctionTok{c}\NormalTok{(}\AttributeTok{media =} \FunctionTok{mean}\NormalTok{(x), }\AttributeTok{mediana =} \FunctionTok{median}\NormalTok{(x), }\AttributeTok{s =} \FunctionTok{sd}\NormalTok{(x), }\AttributeTok{min =} \FunctionTok{min}\NormalTok{(x),}
+    \AttributeTok{max =} \FunctionTok{max}\NormalTok{(x), }\AttributeTok{g1 =} \FunctionTok{g1}\NormalTok{(x), }\AttributeTok{ceros =} \FunctionTok{sum}\NormalTok{(x }\SpecialCharTok{==} \DecValTok{0}\NormalTok{))))}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{round}\NormalTok{(resumen, }\DecValTok{2}\NormalTok{),}
+             \AttributeTok{caption =} \StringTok{"Resumen univariado de las cinco variables."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{2.12in}
+
+\begin{longtable}[]{@{}lrrrrrrr@{}}
+\caption{Resumen univariado de las cinco variables.}\tabularnewline
+\toprule\noalign{}
+& media & mediana & s & min & max & g1 & ceros \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+& media & mediana & s & min & max & g1 & ceros \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Crudo\_prod & 702.06 & 38.0 & 1741.27 & 0.0 & 10107 & 3.91 & 27 \\
+PetLiq\_cons & 811.40 & 202.0 & 2204.29 & 15.0 & 19100 & 6.32 & 0 \\
+Crudo\_exp & 361.56 & 8.5 & 952.75 & 0.0 & 7120 & 4.48 & 41 \\
+Elec\_gen & 198.29 & 43.0 & 658.86 & 0.9 & 5400 & 6.46 & 0 \\
+Renov\_gen & 44.77 & 8.3 & 144.45 & 0.0 & 1287 & 6.56 & 11 \\
+\end{longtable}
+
+\Needspace{2.09in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{sapply}\NormalTok{(X, }\ControlFlowTok{function}\NormalTok{(x) }\FunctionTok{rownames}\NormalTok{(X)[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{x)][}\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{]),}
+             \AttributeTok{caption =} \StringTok{"Los tres países con el valor más alto."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{1.74in}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1831}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1831}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2676}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1831}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1831}}@{}}
+\caption{Los tres países con el valor más alto.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Crudo\_prod
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+PetLiq\_cons
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Crudo\_exp
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Elec\_gen
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Renov\_gen
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Crudo\_prod
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+PetLiq\_cons
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Crudo\_exp
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Elec\_gen
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Renov\_gen
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Russia & UnitedStates & SaudiArabia & China & China \\
+SaudiArabia & China & Russia & UnitedStates & UnitedStates \\
+UnitedStates & Japan & UnitedArabEmirates & India & Brazil \\
+\end{longtable}
+
+\Needspace{2.28in}
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{sum}\NormalTok{(X}\SpecialCharTok{$}\NormalTok{Crudo\_prod }\SpecialCharTok{\textgreater{}} \DecValTok{0} \SpecialCharTok{\&}
+\NormalTok{    X}\SpecialCharTok{$}\NormalTok{Crudo\_exp }\SpecialCharTok{==} \DecValTok{0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+[1] 16
+\end{verbatim}
+
+\end{codres}
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{rownames}\NormalTok{(X)[X}\SpecialCharTok{$}\NormalTok{Crudo\_exp }\SpecialCharTok{\textgreater{}} \DecValTok{0} \SpecialCharTok{\&}
+\NormalTok{  X}\SpecialCharTok{$}\NormalTok{Crudo\_prod }\SpecialCharTok{==} \DecValTok{0}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+[1] "Senegal"   "Singapore"
+\end{verbatim}
+
+\end{codres}
+
+\Needspace{7.06in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggpairs}\NormalTok{(X, }\AttributeTok{upper =} \FunctionTok{list}\NormalTok{(}\AttributeTok{continuous =} \FunctionTok{wrap}\NormalTok{(}\StringTok{"cor"}\NormalTok{, }\AttributeTok{size =} \DecValTok{3}\NormalTok{)),}
+        \AttributeTok{lower =} \FunctionTok{list}\NormalTok{(}\AttributeTok{continuous =} \FunctionTok{wrap}\NormalTok{(}\StringTok{"points"}\NormalTok{, }\AttributeTok{size =} \FloatTok{0.6}\NormalTok{,}
+                                       \AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{))) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{8}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p2-pares-1.pdf}}
+
+}
+
+\caption{Matriz de dispersión de las cinco variables con densidades en
+la diagonal y correlación de Pearson arriba: Casi toda la nube está
+pegada al origen, unos pocos países definen las correlaciones y la
+exportación de crudo solo se asocia con la producción.}
+
+\end{figure}%
+
+\Needspace{2.47in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{round}\NormalTok{(}\FunctionTok{cor}\NormalTok{(X, }\AttributeTok{method =} \StringTok{"spearman"}\NormalTok{), }\DecValTok{2}\NormalTok{),}
+             \AttributeTok{caption =} \StringTok{"Correlación de Spearman."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{2.12in}
+
+\begin{longtable}[]{@{}lrrrrr@{}}
+\caption{Correlación de Spearman.}\tabularnewline
+\toprule\noalign{}
+& Crudo\_prod & PetLiq\_cons & Crudo\_exp & Elec\_gen & Renov\_gen \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+& Crudo\_prod & PetLiq\_cons & Crudo\_exp & Elec\_gen & Renov\_gen \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Crudo\_prod & 1.00 & 0.48 & 0.89 & 0.42 & 0.14 \\
+PetLiq\_cons & 0.48 & 1.00 & 0.39 & 0.92 & 0.57 \\
+Crudo\_exp & 0.89 & 0.39 & 1.00 & 0.28 & 0.01 \\
+Elec\_gen & 0.42 & 0.92 & 0.28 & 1.00 & 0.67 \\
+Renov\_gen & 0.14 & 0.57 & 0.01 & 0.67 & 1.00 \\
+\end{longtable}
+
+\Needspace{1.33in}
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sin }\OtherTok{\textless{}{-}}\NormalTok{ X[}\FunctionTok{rownames}\NormalTok{(X) }\SpecialCharTok{!=} \StringTok{"China"}\NormalTok{, ]}
+\FunctionTok{round}\NormalTok{(}\FunctionTok{cor}\NormalTok{(sin}\SpecialCharTok{$}\NormalTok{Elec\_gen,}
+\NormalTok{  sin}\SpecialCharTok{$}\NormalTok{Renov\_gen), }\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+[1] 0.803
+\end{verbatim}
+
+\end{codres}
+
+\textbf{Univariado.} Las cinco variables tienen asimetría positiva
+extrema, con coeficientes \(g_1\) entre 3.91 (producción de crudo) y
+6.56 (generación renovable), así como medias muy por encima de sus
+medianas, por ejemplo 811.40 contra 202 TBPD en el consumo de petróleo y
+361.56 contra 8.5 TBPD en la exportación de crudo. Las densidades de la
+diagonal lo muestran como un pico pegado al cero con una cola larga a la
+derecha formada por los países más grandes, ya que Estados Unidos y
+China ocupan los primeros puestos en consumo y generación, mientras que
+Rusia, Arabia Saudita y Estados Unidos encabezan la producción de crudo
+y Arabia Saudita, Rusia y Emiratos Árabes Unidos la exportación. Además
+la producción vale cero en 27 países y la exportación en 41, de modo que
+16 países producen crudo sin exportarlo y dos (Senegal y Singapur) lo
+exportan sin producirlo, lo cual podría deberse a reexportaciones que la
+base no permite verificar.
+
+\textbf{Bivariado.} Las asociaciones son todas positivas pero se ordenan
+en dos bloques:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Bloque petrolero.} La producción y la exportación de crudo
+  tienen correlación de Pearson \parencite{pearson1895} de 0.828, ya que
+  solo exporta crudo quien lo produce, aunque no todo productor lo
+  exporta.
+\item
+  \textbf{Bloque de tamaño.} El consumo de petróleo y la generación
+  eléctrica se asocian con \(r = 0.918\) y la generación con la
+  renovable con \(r = 0.921\), es decir que estas tres siguen al tamaño
+  de la economía.
+\item
+  \textbf{Entre bloques.} La exportación casi no se asocia con el bloque
+  de tamaño (0.171 con el consumo, 0.065 con la generación y 0.063 con
+  la renovable), dado que los tres mayores consumidores (Estados Unidos,
+  China y Japón) exportan poco o nada, mientras que la producción de
+  crudo hace de puente entre ambos bloques (0.644 con el consumo y 0.518
+  con la generación).
+\end{enumerate}
+
+Vale la pena matizar que varias de estas correlaciones dependen de los
+países extremos, pues la de Spearman \parencite{spearman1904}, que usa
+rangos y no se deja arrastrar por los valores grandes, baja de 0.921 a
+0.672 entre generación y renovable, de 0.770 a 0.569 entre consumo y
+renovable y de 0.438 a 0.140 entre producción de crudo y renovable. Solo
+el par consumo-generación (0.918) y el par producción-exportación (de
+0.828 a 0.891) se mantienen con ambos coeficientes.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Lectura local.} Un solo país mueve una correlación, ya que sin
+  China la de Pearson entre generación y renovable baja de 0.921 a
+  0.803, porque China es a la vez el mayor generador y el mayor
+  productor de renovables.
+\item
+  \textbf{Lectura global.} Con rangos la separación entre bloques es
+  todavía más clara (0.010 entre exportación y renovable), de modo que
+  las cinco variables viven en al menos dos dimensiones casi
+  independientes, la de tamaño y la petrolera, que son justo las que el
+  ACP de la Pregunta 5 encuentra en sus dos primeros ejes con las 57
+  variables.
+\end{enumerate}
+
+\section{Pregunta 3 --- Contribuciones en el ACP normado y sin
+normalizar}\label{p3}
+
+El análisis de componentes principales (ACP) \parencite{pearson1901,
+hotelling1933} busca combinaciones lineales de las variables, no
+correlacionadas entre sí, que recojan la mayor varianza posible. Para
+leerlo se usan tres medidas:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{ACP normado.} Es el ACP de las variables estandarizadas
+  (\(z_{ij} = (x_{ij} - \bar{x}_j)/s_j\)), es decir, el de la matriz de
+  correlación, de modo que cada variable aporta varianza 1 sin importar
+  su unidad. El ACP sin normalizar usa la matriz de covarianzas en las
+  unidades originales.
+\item
+  \textbf{Valor propio.} El valor propio \(\lambda_k\) es la varianza de
+  la componente \(k\), de modo que \(\lambda_k / \sum_j \lambda_j\) es
+  la proporción de varianza que explica. En el ACP normado los 57
+  valores propios suman 57.
+\item
+  \textbf{Contribución.} La contribución de la variable \(j\) al eje
+  \(k\) es \(100\,u_{jk}^2\), donde \(u_{jk}\) es su carga (su peso en
+  el vector propio), y mide qué porcentaje del eje construye esa
+  variable. La contribución a un plano pondera las de cada eje por su
+  valor propio y se compara contra la referencia uniforme
+  \(100/57 = 1.75\) \%.
+\end{enumerate}
+
+\Needspace{4.56in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{acp\_normado }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(num, }\AttributeTok{scale. =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{acp\_crudo }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(num, }\AttributeTok{scale. =} \ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{aporte }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(acp, }\AttributeTok{n =} \DecValTok{10}\NormalTok{) \{}
+\NormalTok{  a }\OtherTok{\textless{}{-}} \FunctionTok{facto\_summarize}\NormalTok{(acp, }\StringTok{"var"}\NormalTok{, }\AttributeTok{axes =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+\NormalTok{  a }\OtherTok{\textless{}{-}}\NormalTok{ a[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{a}\SpecialCharTok{$}\NormalTok{contrib), ]}
+  \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{variable =}\NormalTok{ a}\SpecialCharTok{$}\NormalTok{name,}
+             \AttributeTok{contrib =} \FunctionTok{round}\NormalTok{(a}\SpecialCharTok{$}\NormalTok{contrib, }\DecValTok{2}\NormalTok{))[}\DecValTok{1}\SpecialCharTok{:}\NormalTok{n, ]}
+\NormalTok{\}}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{cbind}\NormalTok{(}\FunctionTok{aporte}\NormalTok{(acp\_normado), }\FunctionTok{aporte}\NormalTok{(acp\_crudo)),}
+             \AttributeTok{row.names =} \ConstantTok{FALSE}\NormalTok{,}
+             \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"ACP normado"}\NormalTok{, }\StringTok{"\%"}\NormalTok{,}
+                           \StringTok{"Sin normalizar"}\NormalTok{, }\StringTok{"\%"}\NormalTok{),}
+             \AttributeTok{caption =} \StringTok{"Variables que más aportan al plano 1{-}2."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{3.07in}
+
+\begin{longtable}[]{@{}lrlr@{}}
+\caption{Variables que más aportan al plano 1-2.}\tabularnewline
+\toprule\noalign{}
+ACP normado & \% & Sin normalizar & \% \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+ACP normado & \% & Sin normalizar & \% \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+PetLiq\_cons & 2.49 & Refinados\_prod & 18.01 \\
+Refinados\_cons & 2.49 & PetLiq\_cons & 17.31 \\
+PetLiq\_CO2 & 2.48 & Refinados\_cons & 17.31 \\
+Refinados\_prod & 2.47 & PetLiq\_prod & 16.58 \\
+Destilado\_prod & 2.45 & Crudo\_prod & 10.79 \\
+Destilado\_cons & 2.44 & Crudo\_imp & 3.57 \\
+Elec\_cap & 2.43 & Crudo\_exp & 3.01 \\
+Elec\_cons & 2.42 & Gasolina\_prod & 2.84 \\
+Elec\_gen & 2.42 & Gasolina\_cons & 2.53 \\
+NoHidro\_cap & 2.42 & Destilado\_prod & 1.36 \\
+\end{longtable}
+
+\Needspace{3.23in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{varianza }\OtherTok{\textless{}{-}} \FunctionTok{sort}\NormalTok{(}\FunctionTok{sapply}\NormalTok{(num, var), }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{variable =} \FunctionTok{names}\NormalTok{(varianza)[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{],}
+  \AttributeTok{porcentaje =} \FunctionTok{round}\NormalTok{(}\DecValTok{100} \SpecialCharTok{*}\NormalTok{ varianza[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{] }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(varianza), }\DecValTok{1}\NormalTok{),}
+  \AttributeTok{row.names =} \ConstantTok{NULL}\NormalTok{),}
+  \AttributeTok{caption =} \StringTok{"Peso en la varianza total sin normalizar."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{2.12in}
+
+\begin{longtable}[]{@{}lr@{}}
+\caption{Peso en la varianza total sin normalizar.}\tabularnewline
+\toprule\noalign{}
+variable & porcentaje \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+variable & porcentaje \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Refinados\_prod & 17.7 \\
+PetLiq\_cons & 16.9 \\
+Refinados\_cons & 16.9 \\
+PetLiq\_prod & 16.2 \\
+Crudo\_prod & 10.5 \\
+\end{longtable}
+
+\Needspace{1.52in}
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{normado }\OtherTok{\textless{}{-}} \FunctionTok{facto\_summarize}\NormalTok{(}
+\NormalTok{  acp\_normado, }\StringTok{"var"}\NormalTok{,}
+  \AttributeTok{axes =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+\FunctionTok{sum}\NormalTok{(normado}\SpecialCharTok{$}\NormalTok{contrib }\SpecialCharTok{\textgreater{}} \DecValTok{100} \SpecialCharTok{/} \DecValTok{57}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+[1] 37
+\end{verbatim}
+
+\end{codres}
+
+\Needspace{4.27in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{fviz\_contrib}\NormalTok{(acp\_normado, }\AttributeTok{choice =} \StringTok{"var"}\NormalTok{, }\AttributeTok{axes =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{),}
+             \AttributeTok{top =} \DecValTok{20}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \ConstantTok{NULL}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p3-normado-1.pdf}}
+
+}
+
+\caption{Contribución de las 20 primeras variables al plano 1-2 del ACP
+normado: Todas quedan cerca de la referencia uniforme (línea roja), pues
+el plano lo construyen muchas variables a la vez.}
+
+\end{figure}%
+
+\Needspace{4.08in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{fviz\_contrib}\NormalTok{(acp\_crudo, }\AttributeTok{choice =} \StringTok{"var"}\NormalTok{, }\AttributeTok{axes =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{), }\AttributeTok{top =} \DecValTok{20}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \ConstantTok{NULL}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p3-crudo-1.pdf}}
+
+}
+
+\caption{Contribución de las 20 primeras variables al plano 1-2 del ACP
+sin normalizar: Cinco variables medidas en TBPD construyen el 80 \% del
+plano.}
+
+\end{figure}%
+
+\textbf{¿Cómo cambian las contribuciones al normalizar?} Cambian por
+completo, pues en el ACP sin normalizar el plano lo construyen casi solo
+cinco variables de barriles por día (producción de refinados con 18.01
+\%, consumo de petróleo y de refinados con 17.31 \% cada una, producción
+de petróleo con 16.58 \% y producción de crudo con 10.79 \%), que suman
+el 80 \% del plano. Esto sucede porque sin estandarizar cada variable
+pesa según su varianza, de manera que esas cinco variables concentran
+por sí solas el 78.2 \% de la varianza total (medidas en miles de
+barriles diarios alcanzan valores de miles), mientras que por ejemplo la
+generación eléctrica en BKWH tiene una varianza once veces menor que la
+del consumo de petróleo. Así el primer plano explica un 97.25 \% de la
+varianza (82.92 \% el primer eje y 14.34 \% el segundo), cifra que no
+indica una buena síntesis sino que la varianza total está en pocas
+columnas.
+
+En el ACP normado, en cambio, ninguna variable pasa de 2.49 \% y las
+diez primeras apenas suman 24.5 \%, con 37 de las 57 variables por
+encima de la referencia de 1.75 \%. Las que más aportan son de petróleo
+(consumo, emisiones, refinados y destilados) y de electricidad
+(capacidad instalada, consumo y generación), lo que significa que el
+primer plano resume el tamaño energético del país en ambos sectores. Por
+esto se usa el ACP normado en el resto del taller, ya que las variables
+tienen unidades distintas y no es la unidad de medida la que debe
+decidir qué variable importa.
+
+\Needspace{2.04in}
+
+\includegraphics[width=5.2in,height=1.32in]{sda-lab-exploracion_files/figure-latex/mermaid-figure-4.png}
+
+Por qué escalar cambia todo: La unidad de una sola columna decide, sin
+normalizar, quién construye el plano, mientras que normando el plano lo
+construye la estructura de toda la base.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Lectura local.} El peso de una variable en el ACP sin
+  normalizar lo decide su unidad y no lo que mide, pues el consumo de
+  petróleo tiene una varianza once veces mayor que la generación
+  eléctrica solo porque los barriles diarios alcanzan cifras de miles y
+  los BKWH de cientos.
+\item
+  \textbf{Lectura global.} El ACP sin normalizar no resume la base sino
+  que la ordena por unidades, mientras que el normado muestra que el
+  tamaño energético es una propiedad de toda la base, pues lo construyen
+  a la vez 37 de las 57 variables de los dos sectores.
+\end{enumerate}
+
+\section{Pregunta 4 --- Número de componentes}\label{p4}
+
+El criterio de Kaiser \parencite{kaiser1960} retiene las componentes con
+valor propio mayor que 1, es decir, las que explican más varianza que
+una sola variable original estandarizada. Se compara con el porcentaje
+acumulado (retener hasta alcanzar el 80 \%) y con el codo del gráfico de
+sedimentación.
+
+\Needspace{4.37in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{autovalores }\OtherTok{\textless{}{-}}\NormalTok{ acp\_normado}\SpecialCharTok{$}\NormalTok{sdev}\SpecialCharTok{\^{}}\DecValTok{2}
+\NormalTok{proporcion }\OtherTok{\textless{}{-}}\NormalTok{ autovalores }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(autovalores)}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{componente =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{, }\AttributeTok{autovalor =} \FunctionTok{round}\NormalTok{(autovalores[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{], }\DecValTok{2}\NormalTok{),}
+  \AttributeTok{porcentaje =} \FunctionTok{round}\NormalTok{(}\DecValTok{100} \SpecialCharTok{*}\NormalTok{ proporcion[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{], }\DecValTok{2}\NormalTok{),}
+  \AttributeTok{acumulado =} \FunctionTok{round}\NormalTok{(}\DecValTok{100} \SpecialCharTok{*} \FunctionTok{cumsum}\NormalTok{(proporcion)[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{], }\DecValTok{2}\NormalTok{)),}
+  \AttributeTok{caption =} \StringTok{"Valores propios de las diez primeras componentes."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{3.07in}
+
+\begin{longtable}[]{@{}rrrr@{}}
+\caption{Valores propios de las diez primeras
+componentes.}\tabularnewline
+\toprule\noalign{}
+componente & autovalor & porcentaje & acumulado \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+componente & autovalor & porcentaje & acumulado \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & 35.32 & 61.96 & 61.96 \\
+2 & 4.41 & 7.74 & 69.69 \\
+3 & 4.00 & 7.01 & 76.71 \\
+4 & 2.71 & 4.75 & 81.46 \\
+5 & 2.45 & 4.31 & 85.76 \\
+6 & 1.87 & 3.28 & 89.04 \\
+7 & 1.31 & 2.29 & 91.33 \\
+8 & 1.12 & 1.96 & 93.29 \\
+9 & 0.90 & 1.58 & 94.87 \\
+10 & 0.76 & 1.33 & 96.20 \\
+\end{longtable}
+
+\Needspace{2.09in}
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{sum}\NormalTok{(autovalores }\SpecialCharTok{\textgreater{}} \DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+[1] 8
+\end{verbatim}
+
+\end{codres}
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{which}\NormalTok{(}\FunctionTok{cumsum}\NormalTok{(proporcion)}
+      \SpecialCharTok{\textgreater{}=} \FloatTok{0.8}\NormalTok{)[}\DecValTok{1}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+[1] 4
+\end{verbatim}
+
+\end{codres}
+
+\Needspace{3.88in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{fviz\_eig}\NormalTok{(acp\_normado, }\AttributeTok{addlabels =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{ncp =} \DecValTok{10}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{limits =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{70}\NormalTok{)) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \ConstantTok{NULL}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p4-scree-1.pdf}}
+
+}
+
+\caption{Gráfico de sedimentación del ACP normado: El primer eje explica
+el 62 \% y desde el segundo la curva baja despacio.}
+
+\end{figure}%
+
+\textbf{¿Cuántas componentes se deberían seleccionar?} Cuatro, bajo el
+criterio del porcentaje de varianza acumulada, dado que con ellas se
+explica el 81.46 \% de la variación de las 57 variables (61.96 \% la
+primera, 7.74 \% la segunda, 7.01 \% la tercera y 4.75 \% la cuarta).
+Los otros dos criterios no sirven bien en este caso:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Codo.} El gráfico de sedimentación se quiebra en la segunda
+  componente, pero quedarse con dos componentes deja por fuera el 30.3
+  \% de la varianza y además la tercera explica casi lo mismo que la
+  segunda (7.01 \% frente a 7.74 \%), por lo que no hay razón para
+  cortar entre ellas.
+\item
+  \textbf{Kaiser.} Retiene ocho componentes (93.29 \%), lo cual es
+  excesivo porque con 57 variables este criterio tiende a retener de más
+  y las componentes de la quinta a la octava explican entre 1.96 \% y
+  4.31 \% cada una.
+\end{enumerate}
+
+Retener cuatro es coherente con lo que pide la Pregunta 5, que analiza
+el plano (2,3) porque la tercera componente todavía carga información
+relevante.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Lectura local.} La cuarta componente apenas agrega 4.75 \% y
+  es la que hace cruzar el umbral del 80 \%, de modo que la frontera
+  entre tres y cuatro componentes la marca la regla y no un cambio en la
+  curva.
+\item
+  \textbf{Lectura global.} El primer valor propio vale 35.32, es decir
+  que una sola componente equivale a 35 de las 57 variables, lo cual es
+  la otra cara de la redundancia del diagnóstico, pues las 57 columnas
+  describen en realidad unas pocas dimensiones de los países.
+\end{enumerate}
+
+\begin{notas}
+
+\textbf{Interpretaciones.}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Tres criterios, tres respuestas.} El codo da dos componentes
+  (69.69 \%), el 80 \% da cuatro (81.46 \%) y Kaiser da ocho (93.29 \%),
+  de modo que el número no lo decide el dato sino el criterio.
+\item
+  \textbf{Lo que sí se interpreta.} Las preguntas 5 y 6 encuentran
+  sentido hasta el tercer eje (exportadores frente a importadores de
+  electricidad), lo que respalda quedarse con cuatro y no con dos.
+\end{enumerate}
+
+\textbf{Para debatir (preguntas abiertas).}
+
+\begin{itemize}
+\tightlist
+\item
+  ¿Debe el número de componentes salir de una regla o de lo que se logra
+  interpretar?
+\item
+  ¿Cambiarían los criterios si antes del ACP se quitaran las copias del
+  diagnóstico (por ejemplo \texttt{Refinados\_cons})? No se calculó.
+\end{itemize}
+
+\end{notas}
+
+\section{Pregunta 5 --- Representación de las variables}\label{p5}
+
+El círculo de correlaciones ubica cada variable con coordenadas iguales
+a su correlación con cada eje del plano, de modo que la longitud de la
+flecha es \(\sqrt{\cos^2}\), donde el \(\cos^2\) (la correlación al
+cuadrado con el eje) mide qué tan bien representa el plano a esa
+variable. Una flecha que llega al círculo está bien representada,
+mientras que una corta está mayormente en otras componentes. Se dibujan
+solo las 30 variables que más contribuyen al plano.
+
+\Needspace{6.87in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{fviz\_pca\_var}\NormalTok{(acp\_normado, }\AttributeTok{axes =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{),}
+             \AttributeTok{select.var =} \FunctionTok{list}\NormalTok{(}\AttributeTok{contrib =} \DecValTok{30}\NormalTok{), }\AttributeTok{col.var =} \StringTok{"contrib"}\NormalTok{,}
+             \AttributeTok{labelsize =} \FloatTok{2.2}\NormalTok{, }\AttributeTok{repel =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \ConstantTok{NULL}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p5-12-1.pdf}}
+
+}
+
+\caption{Círculo de correlaciones del ACP normado en el plano (1,2), con
+las 30 variables que más contribuyen: Casi todas apuntan hacia la
+derecha, de modo que el primer eje es el tamaño energético del país.}
+
+\end{figure}%
+
+\Needspace{7.41in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Las mismas 30 sin la de bombeo, que apunta al otro lado.}
+\NormalTok{plano }\OtherTok{\textless{}{-}} \FunctionTok{facto\_summarize}\NormalTok{(acp\_normado, }\StringTok{"var"}\NormalTok{, }\AttributeTok{axes =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+\NormalTok{haz }\OtherTok{\textless{}{-}} \FunctionTok{setdiff}\NormalTok{(plano}\SpecialCharTok{$}\NormalTok{name[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{plano}\SpecialCharTok{$}\NormalTok{contrib)][}\DecValTok{1}\SpecialCharTok{:}\DecValTok{30}\NormalTok{],}
+               \StringTok{"Bombeo\_gen"}\NormalTok{)}
+\FunctionTok{fviz\_pca\_var}\NormalTok{(acp\_normado, }\AttributeTok{axes =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{),}
+             \AttributeTok{select.var =} \FunctionTok{list}\NormalTok{(}\AttributeTok{name =}\NormalTok{ haz), }\AttributeTok{col.var =} \StringTok{"contrib"}\NormalTok{,}
+             \AttributeTok{labelsize =} \FloatTok{2.6}\NormalTok{, }\AttributeTok{repel =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{coord\_cartesian}\NormalTok{(}\AttributeTok{xlim =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.65}\NormalTok{, }\FloatTok{1.02}\NormalTok{), }\AttributeTok{ylim =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{0.42}\NormalTok{, }\FloatTok{0.68}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \ConstantTok{NULL}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p5-zoom-1.pdf}}
+
+}
+
+\caption{Acercamiento al haz de flechas del plano (1,2): La mayoría de
+las de petróleo quedan arriba del eje horizontal y las de electricidad
+abajo, todas con correlación de al menos 0.70 con el primer eje.}
+
+\end{figure}%
+
+\Needspace{2.09in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{coord }\OtherTok{\textless{}{-}} \FunctionTok{get\_pca\_var}\NormalTok{(acp\_normado)}\SpecialCharTok{$}\NormalTok{coord[, }\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{]}
+\FunctionTok{round}\NormalTok{(coord[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{abs}\NormalTok{(coord[, }\DecValTok{2}\NormalTok{]))[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{8}\NormalTok{], ], }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+               Dim.1 Dim.2 Dim.3
+LGN_prod        0.70  0.65  0.06
+Crudo_exp       0.13  0.59 -0.68
+PetLiq_prod     0.69  0.58 -0.35
+Crudo_prod      0.60  0.57 -0.49
+Crudo_reservas  0.15  0.46 -0.60
+Hidro_gen       0.74 -0.42 -0.35
+Hidro_cap       0.78 -0.41 -0.33
+Solar_cap       0.77 -0.40  0.05
+\end{verbatim}
+
+\Needspace{1.90in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{round}\NormalTok{(coord[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{abs}\NormalTok{(coord[, }\DecValTok{3}\NormalTok{]))[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{8}\NormalTok{], ], }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+               Dim.1 Dim.2 Dim.3
+Crudo_exp       0.13  0.59 -0.68
+Crudo_reservas  0.15  0.46 -0.60
+Residual_prod   0.49  0.35 -0.53
+Crudo_prod      0.60  0.57 -0.49
+Residual_cons   0.53  0.09 -0.48
+Geotermica_cap  0.51  0.33  0.46
+Geotermica_gen  0.51  0.34  0.46
+Elec_imp        0.54  0.13  0.41
+\end{verbatim}
+
+\Needspace{0.95in}
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{sum}\NormalTok{(}\FunctionTok{abs}\NormalTok{(coord[, }\DecValTok{1}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \FloatTok{0.7}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+[1] 39
+\end{verbatim}
+
+\end{codres}
+
+\textbf{Plano (1,2).} Las 30 flechas más largas llegan casi al borde del
+círculo, lo cual muestra que el plano las representa muy bien (el
+consumo de petróleo tiene \(\cos^2 = 0.988\) y la generación eléctrica
+0.961). Se concluye que:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{El primer eje es un factor de tamaño.} Prácticamente todas las
+  variables tienen correlación alta y positiva con él, tanto las de
+  petróleo como las de electricidad, por lo que un país está a la
+  derecha si produce, consume, genera e importa mucho en términos
+  absolutos. La única flecha que apunta hacia la izquierda es la
+  generación neta por bombeo hidroeléctrico (\texttt{Bombeo\_gen},
+  \(r = -0.90\)), lo cual tiene sentido porque esa generación neta es
+  negativa (el bombeo consume más energía de la que devuelve) en 27
+  países y lo es más en los grandes, como Estados Unidos (\(-6.2\) BKWH)
+  y China (\(-4.7\) BKWH).
+\item
+  \textbf{El segundo eje separa petróleo de renovables.} Según las
+  correlaciones impresas arriba, del lado positivo quedan los líquidos
+  de gas natural (\texttt{LGN\_prod}, 0.65), las exportaciones de crudo
+  (0.59) y la producción de crudo y de petróleo (0.57 y 0.59), mientras
+  que del lado negativo quedan la generación y la capacidad
+  hidroeléctrica (−0.42 y −0.41) y la capacidad solar y renovable (−0.40
+  y −0.39). Es decir, entre países de igual tamaño el segundo eje
+  distingue a los productores de hidrocarburos de los que generan
+  electricidad renovable.
+\end{enumerate}
+
+\Needspace{5.87in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{fviz\_pca\_var}\NormalTok{(acp\_normado, }\AttributeTok{axes =} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{),}
+             \AttributeTok{select.var =} \FunctionTok{list}\NormalTok{(}\AttributeTok{contrib =} \DecValTok{30}\NormalTok{), }\AttributeTok{col.var =} \StringTok{"contrib"}\NormalTok{,}
+             \AttributeTok{labelsize =} \FloatTok{2.5}\NormalTok{, }\AttributeTok{repel =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \ConstantTok{NULL}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p5-23-1.pdf}}
+
+}
+
+\caption{Círculo de correlaciones del ACP normado en el plano (2,3), con
+las 30 variables que más contribuyen: Las exportaciones y reservas de
+crudo bajan, las renovables van a la izquierda y la geotermia y las
+importaciones eléctricas suben.}
+
+\end{figure}%
+
+\textbf{Plano (2,3).} Al quitar el efecto de tamaño las flechas se
+acortan y se abren en varias direcciones, lo que indica que este plano
+representa peor a cada variable (el mejor \(\cos^2\) es el de las
+exportaciones de crudo con 0.81) pero muestra perfiles que el primero
+escondía:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Perfil exportador de crudo.} Abajo a la derecha quedan las
+  exportaciones de crudo (\(-0.68\) con el tercer eje), las reservas
+  (\(-0.60\)), la producción de combustóleo residual (\(-0.53\)) y la
+  producción de crudo (\(-0.49\)), es decir, los países con yacimientos
+  que venden su petróleo.
+\item
+  \textbf{Perfil renovable.} A la izquierda quedan la capacidad y
+  generación hidroeléctrica, solar y renovable, con correlación negativa
+  con el segundo eje.
+\item
+  \textbf{Perfil importador de electricidad.} Arriba quedan la capacidad
+  y la generación geotérmica (0.46), las importaciones de electricidad
+  (0.41) y las importaciones netas (0.37), así como la ganancia de
+  refinación y la electricidad nuclear con correlaciones menores.
+\end{enumerate}
+
+Se concluye que el tercer eje separa a los exportadores de crudo de los
+países que compran electricidad o la generan con fuentes como la
+geotérmica y la nuclear, lo cual justifica haber retenido más de dos
+componentes.
+
+El diagrama resume lo que significa cada uno de los tres primeros ejes
+según las variables que más se asocian con él.
+
+\Needspace{4.30in}
+
+\includegraphics[width=5.2in,height=3.46in]{sda-lab-exploracion_files/figure-latex/mermaid-figure-3.png}
+
+Qué mide cada eje del ACP normado con los 111 países y qué variables lo
+construyen: El primero ordena por tamaño y solo los siguientes
+distinguen perfiles energéticos.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Lectura local.} La exportación de crudo, que en el primer
+  plano casi no aparece (0.13 con el primer eje), es la variable mejor
+  representada del plano (2,3), lo cual confirma que la dimensión
+  comercial que se buscó en la Pregunta 1 existe y está fuera del eje de
+  tamaño.
+\item
+  \textbf{Lectura global.} El primer eje es el tamaño porque 39 de las
+  57 variables tienen con él correlación mayor a 0.7 en valor absoluto,
+  de modo que lo que distingue a los países más allá de su tamaño
+  (petróleo, renovables, importaciones) solo aparece en los ejes
+  siguientes, que explican mucho menos.
+\end{enumerate}
+
+\begin{quote}
+\textbf{Nota.} El signo de cada componente es arbitrario, pues
+\texttt{prcomp()} puede devolver \(u_k\) o \(-u_k\) y ambos son igual de
+válidos. Lo que se interpreta es la oposición entre grupos de variables
+y no si quedan arriba o abajo.
+\end{quote}
+
+\section{Pregunta 6 --- Mapa de individuos}\label{p6}
+
+Para que el mapa se pueda leer se dibujan todos los países como puntos y
+se rotulan solo los 20 más alejados del origen en cada plano, que son
+los que más contribuyen a él.
+
+\Needspace{2.47in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mapa\_paises }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(acp, ejes, }\AttributeTok{n =} \DecValTok{20}\NormalTok{, }\AttributeTok{grupos =} \StringTok{"none"}\NormalTok{) \{}
+\NormalTok{  coord }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(acp}\SpecialCharTok{$}\NormalTok{x[, ejes])}
+  \FunctionTok{names}\NormalTok{(coord) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"x"}\NormalTok{, }\StringTok{"y"}\NormalTok{)}
+\NormalTok{  coord}\SpecialCharTok{$}\NormalTok{pais }\OtherTok{\textless{}{-}} \FunctionTok{rownames}\NormalTok{(coord)}
+\NormalTok{  lejanos }\OtherTok{\textless{}{-}}\NormalTok{ coord[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{(coord}\SpecialCharTok{$}\NormalTok{x}\SpecialCharTok{\^{}}\DecValTok{2} \SpecialCharTok{+}\NormalTok{ coord}\SpecialCharTok{$}\NormalTok{y}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{))[}\FunctionTok{seq\_len}\NormalTok{(n)], ]}
+  \FunctionTok{fviz\_pca\_ind}\NormalTok{(acp, }\AttributeTok{axes =}\NormalTok{ ejes, }\AttributeTok{geom =} \StringTok{"point"}\NormalTok{, }\AttributeTok{habillage =}\NormalTok{ grupos,}
+               \AttributeTok{col.ind =} \StringTok{"grey45"}\NormalTok{, }\AttributeTok{mean.point =} \ConstantTok{FALSE}\NormalTok{) }\SpecialCharTok{+}
+\NormalTok{    ggrepel}\SpecialCharTok{::}\FunctionTok{geom\_text\_repel}\NormalTok{(}\AttributeTok{data =}\NormalTok{ lejanos, }\AttributeTok{inherit.aes =} \ConstantTok{FALSE}\NormalTok{,}
+                             \FunctionTok{aes}\NormalTok{(x, y, }\AttributeTok{label =}\NormalTok{ pais), }\AttributeTok{size =} \FloatTok{2.4}\NormalTok{,}
+                             \AttributeTok{max.overlaps =} \ConstantTok{Inf}\NormalTok{,}
+                             \AttributeTok{min.segment.length =} \DecValTok{0}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \ConstantTok{NULL}\NormalTok{, }\AttributeTok{colour =} \StringTok{"Grupo"}\NormalTok{, }\AttributeTok{shape =} \StringTok{"Grupo"}\NormalTok{)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{4.69in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mapa\_paises}\NormalTok{(acp\_normado, }\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p6-12-1.pdf}}
+
+}
+
+\caption{Países en el plano (1,2) del ACP normado: Estados Unidos y
+China quedan aislados a la derecha y el resto se amontona cerca del
+origen.}
+
+\end{figure}%
+
+\Needspace{4.69in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mapa\_paises}\NormalTok{(acp\_normado, }\FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p6-23-1.pdf}}
+
+}
+
+\caption{Países en el plano (2,3) del ACP normado: Arabia Saudita y
+Rusia quedan juntos abajo a la derecha, China a la izquierda y Estados
+Unidos arriba a la derecha.}
+
+\end{figure}%
+
+\Needspace{0.76in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{contribucion }\OtherTok{\textless{}{-}} \FunctionTok{get\_pca\_ind}\NormalTok{(acp\_normado)}\SpecialCharTok{$}\NormalTok{contrib}
+\FunctionTok{round}\NormalTok{(}\FunctionTok{head}\NormalTok{(}\FunctionTok{sort}\NormalTok{(contribucion[, }\DecValTok{1}\NormalTok{], }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{), }\DecValTok{4}\NormalTok{), }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+UnitedStates        China        India       Russia 
+       52.02        30.96         2.01         1.98 
+\end{verbatim}
+
+\Needspace{2.47in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{round}\NormalTok{(acp\_normado}\SpecialCharTok{$}\NormalTok{x[}\FunctionTok{c}\NormalTok{(}\StringTok{"SaudiArabia"}\NormalTok{, }\StringTok{"Russia"}\NormalTok{, }\StringTok{"Kuwait"}\NormalTok{, }\StringTok{"Iraq"}\NormalTok{,}
+                      \StringTok{"Japan"}\NormalTok{, }\StringTok{"India"}\NormalTok{, }\StringTok{"Italy"}\NormalTok{, }\StringTok{"France"}\NormalTok{,}
+                      \StringTok{"Germany"}\NormalTok{), }\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{], }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+              PC1   PC2   PC3
+SaudiArabia  3.82  8.48 -8.63
+Russia       8.77  6.65 -8.26
+Kuwait      -0.82  2.03 -2.68
+Iraq        -0.52  2.49 -2.73
+Japan        8.65 -3.65 -2.15
+India        8.83 -2.88 -2.25
+Italy        4.31 -2.25  4.12
+France       4.01 -2.56  1.83
+Germany      1.65 -2.72  1.69
+\end{verbatim}
+
+\Needspace{1.14in}
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mean}\NormalTok{(}\FunctionTok{abs}\NormalTok{(acp\_normado}\SpecialCharTok{$}\NormalTok{x[, }\DecValTok{1}\NormalTok{])}
+     \SpecialCharTok{\textless{}} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+[1] 0.5495495
+\end{verbatim}
+
+\end{codres}
+
+\textbf{¿Qué se concluye de la cercanía entre países?} Que el ACP con
+los 111 países está dominado por cuatro de ellos y que la cercanía
+revela perfiles energéticos comunes:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Dos gigantes.} Estados Unidos (44.95 en el primer eje) y China
+  (34.68) están tan lejos del resto que construyen el 52.02 \% y el
+  30.96 \% del primer eje respectivamente, es decir, entre los dos el 83
+  \%. Ningún otro país pasa de 9 en esa coordenada y el 55 \% de los
+  países queda a menos de 2 unidades del origen.
+\item
+  \textbf{Petroleros.} En el plano (2,3) Arabia Saudita (8.48, −8.63) y
+  Rusia (6.65, −8.26) están juntos y lejos del resto, en la dirección de
+  las exportaciones y reservas de crudo de la Pregunta 5, mientras que
+  Kuwait, Irak, Emiratos Árabes, Venezuela e Irán aparecen en la misma
+  dirección aunque mucho más cerca del origen.
+\item
+  \textbf{Grandes consumidores sin petróleo.} Japón (8.65, −3.65) e
+  India (8.83, −2.88) quedan prácticamente superpuestos en el plano
+  (1,2), pues ambos son economías grandes que consumen mucho petróleo y
+  electricidad sin producir crudo en cantidad.
+\item
+  \textbf{China frente a Estados Unidos.} A pesar de estar ambos a la
+  derecha del primer plano, se separan en el segundo eje (−12.99 contra
+  9.48), ya que China pesa por su generación hidroeléctrica y renovable
+  mientras que Estados Unidos lo hace también por su producción de
+  petróleo.
+\item
+  \textbf{Importadores de electricidad.} En el plano (2,3) Italia (4.12
+  en el tercer eje), Francia (1.83) y Alemania (1.69) quedan arriba a la
+  izquierda, que es la dirección de las importaciones de electricidad y
+  la generación nuclear y geotérmica de la Pregunta 5.
+\end{enumerate}
+
+Estas cercanías se leen en dos niveles:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Lectura local.} La cercanía de India y Japón no dice que sean
+  países parecidos en todo sino que tienen el mismo perfil energético,
+  es decir, mucho consumo y poca producción de crudo, de modo que dos
+  economías que en otros aspectos pueden ser muy distintas quedan
+  superpuestas porque las 57 variables solo miden energía.
+\item
+  \textbf{Lectura global.} El plano lo organizan pocas economías, pues
+  Estados Unidos y China construyen el 83 \% del primer eje y fijan la
+  escala del mapa, de modo que la mayoría de países no se distingue en
+  estos planos y se justifica la Pregunta 7.
+\end{enumerate}
+
+\section{Pregunta 7 --- ACP sin los cuatro países atípicos}\label{p7}
+
+Desde aquí se excluyen Estados Unidos, China, Arabia Saudita y Rusia,
+tanto para el ACP como para el agrupamiento de las preguntas 8 a 11.
+
+\Needspace{4.56in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{atipicos }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"UnitedStates"}\NormalTok{, }\StringTok{"China"}\NormalTok{, }\StringTok{"SaudiArabia"}\NormalTok{, }\StringTok{"Russia"}\NormalTok{)}
+\NormalTok{datos }\OtherTok{\textless{}{-}}\NormalTok{ datos[}\SpecialCharTok{!}\NormalTok{datos}\SpecialCharTok{$}\NormalTok{Country }\SpecialCharTok{\%in\%}\NormalTok{ atipicos, ]}
+\NormalTok{num }\OtherTok{\textless{}{-}} \FunctionTok{numericas}\NormalTok{(datos)}
+\NormalTok{acp\_sin4 }\OtherTok{\textless{}{-}} \FunctionTok{prcomp}\NormalTok{(num, }\AttributeTok{scale. =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{valores }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(acp) \{}
+\NormalTok{  p }\OtherTok{\textless{}{-}}\NormalTok{ acp}\SpecialCharTok{$}\NormalTok{sdev}\SpecialCharTok{\^{}}\DecValTok{2} \SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(acp}\SpecialCharTok{$}\NormalTok{sdev}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
+  \FunctionTok{round}\NormalTok{(}\DecValTok{100} \SpecialCharTok{*} \FunctionTok{c}\NormalTok{(p[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{3}\NormalTok{], }\FunctionTok{cumsum}\NormalTok{(p)[}\DecValTok{2}\SpecialCharTok{:}\DecValTok{3}\NormalTok{]), }\DecValTok{2}\NormalTok{)}
+\NormalTok{\}}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{medida =} \FunctionTok{c}\NormalTok{(}\StringTok{"\% CP1"}\NormalTok{, }\StringTok{"\% CP2"}\NormalTok{, }\StringTok{"\% CP3"}\NormalTok{, }\StringTok{"\% plano 1{-}2"}\NormalTok{,}
+             \StringTok{"\% acumulado 3"}\NormalTok{),}
+  \AttributeTok{con\_111 =} \FunctionTok{valores}\NormalTok{(acp\_normado), }\AttributeTok{sin\_4 =} \FunctionTok{valores}\NormalTok{(acp\_sin4)),}
+  \AttributeTok{caption =} \StringTok{"Varianza explicada con y sin los cuatro países."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{2.12in}
+
+\begin{longtable}[]{@{}lrr@{}}
+\caption{Varianza explicada con y sin los cuatro países.}\tabularnewline
+\toprule\noalign{}
+medida & con\_111 & sin\_4 \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+medida & con\_111 & sin\_4 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\% CP1 & 61.96 & 48.95 \\
+\% CP2 & 7.74 & 10.24 \\
+\% CP3 & 7.01 & 8.11 \\
+\% plano 1-2 & 69.69 & 59.19 \\
+\% acumulado 3 & 76.71 & 67.30 \\
+\end{longtable}
+
+\Needspace{1.90in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{autovalores }\OtherTok{\textless{}{-}}\NormalTok{ acp\_sin4}\SpecialCharTok{$}\NormalTok{sdev}\SpecialCharTok{\^{}}\DecValTok{2}
+\NormalTok{coord }\OtherTok{\textless{}{-}} \FunctionTok{get\_pca\_var}\NormalTok{(acp\_sin4)}\SpecialCharTok{$}\NormalTok{coord}
+\FunctionTok{round}\NormalTok{(coord[}\FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{abs}\NormalTok{(coord[, }\DecValTok{2}\NormalTok{]))[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{6}\NormalTok{], }\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{], }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+               Dim.1 Dim.2
+PetLiq_prod     0.35 -0.84
+Crudo_prod      0.30 -0.83
+Crudo_exp       0.16 -0.75
+LGN_prod        0.31 -0.69
+Crudo_reservas  0.18 -0.66
+Bombeo_gen     -0.49 -0.53
+\end{verbatim}
+
+\Needspace{0.76in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{round}\NormalTok{(}\FunctionTok{head}\NormalTok{(}\FunctionTok{sort}\NormalTok{(}\FunctionTok{get\_pca\_ind}\NormalTok{(acp\_sin4)}\SpecialCharTok{$}\NormalTok{contrib[, }\DecValTok{1}\NormalTok{],}
+                \AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{), }\DecValTok{4}\NormalTok{), }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+ India  Japan Brazil Canada 
+ 23.37  20.04  11.49   6.38 
+\end{verbatim}
+
+\Needspace{3.23in}
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{c}\NormalTok{(}\AttributeTok{paises =} \FunctionTok{nrow}\NormalTok{(num),}
+  \AttributeTok{kaiser =} \FunctionTok{sum}\NormalTok{(autovalores }\SpecialCharTok{\textgreater{}} \DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+paises kaiser 
+   107      9 
+\end{verbatim}
+
+\end{codres}
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{c}\NormalTok{(}\AttributeTok{acumulado\_80 =} \FunctionTok{which}\NormalTok{(}
+  \FunctionTok{cumsum}\NormalTok{(autovalores) }\SpecialCharTok{/} \DecValTok{57}
+    \SpecialCharTok{\textgreater{}=} \FloatTok{0.8}\NormalTok{)[}\DecValTok{1}\NormalTok{],}
+  \AttributeTok{tamano =} \FunctionTok{sum}\NormalTok{(}\FunctionTok{abs}\NormalTok{(}
+\NormalTok{    coord[, }\DecValTok{1}\NormalTok{]) }\SpecialCharTok{\textgreater{}} \FloatTok{0.7}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+acumulado_80       tamano 
+           6           27 
+\end{verbatim}
+
+\end{codres}
+
+\Needspace{4.89in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mapa\_paises}\NormalTok{(acp\_sin4, }\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{), }\AttributeTok{n =} \DecValTok{24}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p7-mapa-1.pdf}}
+
+}
+
+\caption{Países en el plano (1,2) del ACP normado sin Estados Unidos,
+China, Arabia Saudita y Rusia: La masa central se abre y aparecen dos
+brazos, uno de grandes consumidores hacia arriba y otro de productores
+de petróleo hacia abajo.}
+
+\end{figure}%
+
+\textbf{¿En qué cambia el ACP al excluir estos países?} En tres
+aspectos:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{La varianza se reparte más.} La primera componente baja de
+  61.96 \% a 48.95 \% mientras que la segunda sube de 7.74 \% a 10.24 \%
+  y la tercera de 7.01 \% a 8.11 \%, por lo que ahora se necesitan seis
+  componentes para el 80 \% (antes cuatro) y Kaiser retiene nueve (antes
+  ocho). Esto muestra que buena parte del 62 \% del primer eje se debía
+  a que Estados Unidos y China son enormes en todas las variables a la
+  vez.
+\item
+  \textbf{El segundo eje se vuelve un eje petrolero más nítido.} Las
+  correlaciones de la producción de petróleo (\(-0.84\)), la producción
+  de crudo (\(-0.83\)), las exportaciones de crudo (\(-0.75\)) y los
+  líquidos de gas (\(-0.69\)) con la segunda componente son mucho más
+  fuertes que con los 111 países (alrededor de 0.6), mientras que en el
+  lado opuesto queda la electricidad solar (0.48). El signo cambió
+  respecto al ACP anterior, lo cual no tiene importancia según la nota
+  de la Pregunta 5.
+\item
+  \textbf{Aparecen nuevos países dominantes.} India (23.37 \%) y Japón
+  (20.04 \%) pasan a construir el primer eje, de modo que el efecto de
+  tamaño no desaparece sino que lo heredan los siguientes países más
+  grandes.
+\end{enumerate}
+
+\textbf{¿Se perciben clusters con mayor claridad?} Sí, aunque no como
+grupos compactos. La masa de países pequeños se abre hacia la derecha y
+de ella salen dos brazos, uno hacia arriba con grandes consumidores que
+no producen petróleo (Francia, Italia, Corea del Sur, Japón, Alemania y
+España) y otro hacia abajo con productores y exportadores de petróleo
+(Irak, Emiratos Árabes, Venezuela, Irán y México), al extremo del cual
+quedan Brasil y Canadá, que combinan producción de crudo (2255 y 3613
+TBPD) con la mayor generación renovable de los 107 países (429 y 412
+BKWH). India queda sola en el extremo derecho.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Lectura local.} Quitar cuatro países no borra el tamaño sino
+  que lo traslada, pues India y Japón construyen ahora el 43 \% del
+  primer eje, que es la mitad de lo que construían Estados Unidos y
+  China pero sigue siendo mucho para dos países de 107.
+\item
+  \textbf{Lectura global.} El tamaño es una propiedad de la base y no de
+  cuatro países, ya que todavía 27 de las 57 variables tienen
+  correlación mayor a 0.7 con el primer eje (antes 39). Lo que sí cambia
+  es que, al bajar la escala, la dimensión petrolera gana espacio y deja
+  ver la estructura en brazos que la Pregunta 8 lee como grupos.
+\end{enumerate}
+
+\begin{notas}
+
+\textbf{Interpretaciones.}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Qué cambió.} El primer eje pasa de 61.96 \% a 48.95 \%, las
+  variables ligadas a él de 39 a 27 y los países que lo construyen de
+  Estados Unidos y China (83 \%) a India y Japón (43 \%).
+\item
+  \textbf{Qué no cambió.} El primer eje sigue siendo tamaño y el segundo
+  sigue siendo petróleo, solo que más nítido.
+\item
+  \textbf{Quitar no es corregir.} Los cuatro países no son errores de
+  medición sino datos reales, de modo que excluirlos cambia la población
+  que se describe: Los resultados de las preguntas 7 a 11 valen para 107
+  países sin los cuatro mayores.
+\end{enumerate}
+
+\textbf{Para debatir (preguntas abiertas).}
+
+\begin{itemize}
+\tightlist
+\item
+  ¿Por qué cuatro y no seis, si India y Japón heredan el mismo papel?
+\item
+  ¿Una transformación logarítmica conseguiría lo mismo sin quitar a
+  nadie? No se calculó.
+\end{itemize}
+
+\end{notas}
+
+\chapter{Agrupamiento}\label{agrupamiento}
+
+Como pide el enunciado, las preguntas 8 a 11 se resuelven sin Estados
+Unidos, China, Arabia Saudita y Rusia, es decir, sobre los 107 países
+que quedaron en \texttt{datos} y \texttt{num} al final de la Pregunta 7.
+
+\section{Pregunta 8 --- Número de grupos en el primer plano}\label{p8}
+
+\textbf{¿Cuántos clusters se espera que existan?} Tres, leídos sobre el
+plano (1,2) de la Pregunta 7:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Masa central.} La mayoría de los 107 países, de consumo y
+  producción pequeños, que se amontonan cerca del origen.
+\item
+  \textbf{Brazo de consumidores.} Las economías grandes sin producción
+  importante de petróleo hacia arriba y a la derecha, con Japón e India
+  en el extremo.
+\item
+  \textbf{Brazo de productores.} Los exportadores de petróleo hacia
+  abajo, con Brasil y Canadá en el extremo.
+\end{enumerate}
+
+Cabe aclarar que esta es una estimación a ojo sobre un plano que solo
+explica el 59.19 \% de la varianza, que los brazos salen de la masa
+central sin un corte claro y que India, Japón, Brasil y Canadá están tan
+alejados que un método de agrupamiento podría separarlos como grupos
+propios. Por esto el número se contrasta en la Pregunta 9.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Lectura local.} Los cuatro países de los extremos (India,
+  Japón, Brasil y Canadá) son los que más construyen el primer eje (de
+  23.37 \% a 6.38 \%), de modo que pueden terminar como grupos propios
+  aunque a ojo parezcan la punta de un brazo.
+\item
+  \textbf{Lectura global.} El 40.81 \% de la varianza no está en este
+  plano, por lo que dos países que se ven cerca pueden estar lejos en
+  otras componentes, y por eso el número de grupos se lee aquí como una
+  hipótesis y no como un resultado.
+\end{enumerate}
+
+\section{Pregunta 9 --- Número de grupos por reducción de varianza
+explicada}\label{p9}
+
+La inercia intra-grupo \(W(k)\) es la suma de las distancias al cuadrado
+de cada país al centroide de su grupo, que mide qué tan compactos son
+los grupos, y la varianza explicada por la partición es
+
+\[
+1 - \frac{W(k)}{T}, \qquad
+T = W(1) = \sum_{i=1}^{n} \lVert \mathbf{z}_i - \bar{\mathbf{z}} \rVert^2,
+\]
+
+es decir, la fracción de la inercia total \(T\) que queda entre los
+grupos. Con las 57 variables estandarizadas
+\(T = (n - 1)\,p = 106 \times 57 = 6042\). Se corre k-medias
+\parencite{macqueen1967} para \(k = 1, \dots, 10\) y se busca el punto
+desde el que agregar un grupo ya no reduce mucho la inercia. Como
+verificación adicional se calcula la silueta media, que se define en la
+Pregunta 10.
+
+\Needspace{4.56in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{z }\OtherTok{\textless{}{-}} \FunctionTok{scale}\NormalTok{(num)}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{42}\NormalTok{)}
+\NormalTok{ajustes }\OtherTok{\textless{}{-}} \FunctionTok{lapply}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(k)}
+  \FunctionTok{kmeans}\NormalTok{(z, }\AttributeTok{centers =}\NormalTok{ k, }\AttributeTok{nstart =} \DecValTok{100}\NormalTok{))}
+\NormalTok{inercia }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(ajustes, }\StringTok{\textasciigrave{}}\AttributeTok{[[}\StringTok{\textasciigrave{}}\NormalTok{, }\StringTok{"tot.withinss"}\NormalTok{)}
+\NormalTok{explicada }\OtherTok{\textless{}{-}} \DecValTok{100} \SpecialCharTok{*}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ inercia }\SpecialCharTok{/}\NormalTok{ inercia[}\DecValTok{1}\NormalTok{])}
+\NormalTok{silueta }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\ConstantTok{NA}\NormalTok{, }\FunctionTok{sapply}\NormalTok{(ajustes[}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{], }\ControlFlowTok{function}\NormalTok{(a)}
+  \FunctionTok{mean}\NormalTok{(}\FunctionTok{silhouette}\NormalTok{(a}\SpecialCharTok{$}\NormalTok{cluster, }\FunctionTok{dist}\NormalTok{(z))[, }\DecValTok{3}\NormalTok{])))}
+\NormalTok{tamanos }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(ajustes, }\ControlFlowTok{function}\NormalTok{(a)}
+  \FunctionTok{paste}\NormalTok{(}\FunctionTok{sort}\NormalTok{(a}\SpecialCharTok{$}\NormalTok{size, }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{), }\AttributeTok{collapse =} \StringTok{"/"}\NormalTok{))}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{k =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{, }\AttributeTok{W =} \FunctionTok{round}\NormalTok{(inercia, }\DecValTok{1}\NormalTok{),}
+                        \AttributeTok{explicada =} \FunctionTok{round}\NormalTok{(explicada, }\DecValTok{1}\NormalTok{),}
+                        \AttributeTok{ganancia =} \FunctionTok{round}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\ConstantTok{NA}\NormalTok{, }\FunctionTok{diff}\NormalTok{(explicada)), }\DecValTok{1}\NormalTok{),}
+                        \AttributeTok{silueta =} \FunctionTok{round}\NormalTok{(silueta, }\DecValTok{3}\NormalTok{), tamanos),}
+             \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"k"}\NormalTok{, }\StringTok{"W"}\NormalTok{, }\StringTok{"explicada"}\NormalTok{, }\StringTok{"ganancia"}\NormalTok{,}
+                           \StringTok{"silueta"}\NormalTok{, }\StringTok{"tamaños"}\NormalTok{),}
+             \AttributeTok{caption =} \StringTok{"Inercia intra{-}grupo y varianza explicada."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{3.07in}
+
+\begin{longtable}[]{@{}rrrrrl@{}}
+\caption{Inercia intra-grupo y varianza explicada.}\tabularnewline
+\toprule\noalign{}
+k & W & explicada & ganancia & silueta & tamaños \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+k & W & explicada & ganancia & silueta & tamaños \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & 6042.0 & 0.0 & NA & NA & 107 \\
+2 & 3838.6 & 36.5 & 36.5 & 0.698 & 98/9 \\
+3 & 3226.7 & 46.6 & 10.1 & 0.666 & 97/8/2 \\
+4 & 2767.7 & 54.2 & 7.6 & 0.538 & 87/10/8/2 \\
+5 & 2303.1 & 61.9 & 7.7 & 0.546 & 87/10/6/2/2 \\
+6 & 2023.6 & 66.5 & 4.6 & 0.552 & 87/10/4/2/2/2 \\
+7 & 1828.8 & 69.7 & 3.2 & 0.444 & 76/15/6/4/2/2/2 \\
+8 & 1615.5 & 73.3 & 3.5 & 0.429 & 73/17/6/4/2/2/2/1 \\
+9 & 1468.9 & 75.7 & 2.4 & 0.412 & 71/17/5/4/3/2/2/2/1 \\
+10 & 1376.4 & 77.2 & 1.5 & 0.391 & 65/16/7/5/4/3/2/2/2/1 \\
+\end{longtable}
+
+\Needspace{5.02in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{k =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{, explicada), }\FunctionTok{aes}\NormalTok{(k, explicada)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_line}\NormalTok{(}\AttributeTok{colour =} \StringTok{"grey50"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{(}\AttributeTok{colour =} \StringTok{"\#a6192e"}\NormalTok{, }\AttributeTok{size =} \DecValTok{2}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{geom\_vline}\NormalTok{(}\AttributeTok{xintercept =} \DecValTok{3}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{,}
+             \AttributeTok{colour =} \StringTok{"grey50"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}\AttributeTok{breaks =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{10}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Número de grupos k"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Varianza explicada (\%)"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p9-curva-1.pdf}}
+
+}
+
+\caption{Varianza explicada por la partición de k-medias según el número
+de grupos: La ganancia cae de 36.5 a 10.1 puntos al pasar al tercer
+grupo y desde ahí se mantiene por debajo de 8.}
+
+\end{figure}%
+
+\textbf{¿Cuántos grupos se fijan?} Tres, que explican el 46.6 \% de la
+inercia total. La reducción más grande ocurre al pasar de uno a dos
+grupos (36.5 puntos), el tercer grupo todavía agrega 10.1 puntos y a
+partir de ahí cada grupo nuevo agrega 7.7 puntos o menos, cayendo a 4.6
+en \(k = 6\) y a 3.2 en \(k = 7\). Vale la pena anotar con honestidad
+que la curva no tiene un codo marcado después de \(k = 2\), sino una
+caída gradual, por lo que la elección se apoya además en dos hechos:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Silueta.} La silueta media pasa de 0.698 con dos grupos a
+  0.666 con tres, pero cae a 0.538 con cuatro, de modo que el cuarto
+  grupo empeora claramente la separación.
+\item
+  \textbf{Coherencia con el plano.} Tres grupos es lo que se esperaba a
+  ojo en la Pregunta 8, mientras que dos grupos solo separarían a nueve
+  países grandes del resto (partición 98/9).
+\end{enumerate}
+
+La elección también se lee en dos niveles:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Lectura local.} El tercer grupo cuesta poco y aporta mucho,
+  pues con 10.1 puntos más de varianza explicada la silueta solo baja de
+  0.698 a 0.666, mientras que el cuarto parte la masa central
+  (87/10/8/2) y la silueta cae a 0.538.
+\item
+  \textbf{Lectura global.} La curva sin codo después de \(k = 2\) indica
+  que la base no tiene grupos naturales bien separados sino una masa
+  continua con unos pocos países extremos, de modo que cualquier \(k\)
+  es en parte una decisión y no un descubrimiento.
+\end{enumerate}
+
+\section{Pregunta 10 --- K-medias frente a jerárquico de enlace
+promedio}\label{p10}
+
+Se comparan dos formas de partir los 107 países en tres grupos con las
+57 variables estandarizadas:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{K-medias.} Asigna cada país al centroide más cercano y mueve
+  los centroides hasta minimizar \(W(k)\). Se usan 100 arranques
+  aleatorios (\texttt{nstart\ =\ 100}) con semilla fija, por la razón
+  que explica la nota del final.
+\item
+  \textbf{Enlace promedio.} Es un agrupamiento jerárquico aglomerativo
+  que parte de un grupo por país y une en cada paso los dos grupos con
+  menor distancia promedio entre todos sus pares de países
+  \parencite{sokal1958}. Se corta el árbol en tres grupos.
+\item
+  \textbf{Correlación cofenética.} Es la correlación entre las
+  distancias originales y la altura del árbol a la que se unen cada par
+  de países, y mide qué tan fielmente el dendrograma conserva las
+  distancias.
+\item
+  \textbf{Silueta.} Para cada país es
+  \(s(i) = (b_i - a_i)/\max(a_i, b_i)\), con \(a_i\) su distancia
+  promedio a su propio grupo y \(b_i\) al grupo vecino más cercano
+  \parencite{rousseeuw1987}. Vale 1 si el país está bien ubicado, 0 si
+  está en la frontera y es negativa si estaría mejor en otro grupo.
+\end{enumerate}
+
+\Needspace{2.04in}
+
+\includegraphics[width=5.2in,height=1.29in]{sda-lab-exploracion_files/figure-latex/mermaid-figure-2.png}
+
+Qué optimiza cada método sobre los 107 países: K-medias busca grupos
+compactos y arma uno intermedio, mientras que el enlace promedio deja
+para el final a los países lejanos y los aísla en parejas.
+
+\Needspace{3.61in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{42}\NormalTok{)}
+\NormalTok{km3 }\OtherTok{\textless{}{-}} \FunctionTok{kmeans}\NormalTok{(z, }\AttributeTok{centers =} \DecValTok{3}\NormalTok{, }\AttributeTok{nstart =} \DecValTok{100}\NormalTok{)}
+\NormalTok{distancias }\OtherTok{\textless{}{-}} \FunctionTok{dist}\NormalTok{(z)}
+\NormalTok{hc\_average }\OtherTok{\textless{}{-}} \FunctionTok{hclust}\NormalTok{(distancias, }\AttributeTok{method =} \StringTok{"average"}\NormalTok{)}
+\NormalTok{jerarquico }\OtherTok{\textless{}{-}} \FunctionTok{cutree}\NormalTok{(hc\_average, }\AttributeTok{k =} \DecValTok{3}\NormalTok{)}
+\CommentTok{\# Grupos rotulados por tamaño: A el más grande. Los números que}
+\CommentTok{\# devuelven kmeans() y cutree() son arbitrarios.}
+\NormalTok{rotular }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(g) \{}
+\NormalTok{  orden }\OtherTok{\textless{}{-}} \FunctionTok{rank}\NormalTok{(}\SpecialCharTok{{-}}\FunctionTok{tabulate}\NormalTok{(g), }\AttributeTok{ties.method =} \StringTok{"first"}\NormalTok{)}
+  \FunctionTok{factor}\NormalTok{(LETTERS[orden[g]])}
+\NormalTok{\}}
+\NormalTok{kmedias }\OtherTok{\textless{}{-}} \FunctionTok{rotular}\NormalTok{(km3}\SpecialCharTok{$}\NormalTok{cluster)}
+\NormalTok{promedio }\OtherTok{\textless{}{-}} \FunctionTok{rotular}\NormalTok{(jerarquico)}
+\FunctionTok{table}\NormalTok{(kmedias, promedio)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+       promedio
+kmedias  A  B  C
+      A 97  0  0
+      B  6  2  0
+      C  0  0  2
+\end{verbatim}
+
+\Needspace{1.33in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{split}\NormalTok{(}\FunctionTok{rownames}\NormalTok{(num), kmedias)[}\FunctionTok{c}\NormalTok{(}\StringTok{"B"}\NormalTok{, }\StringTok{"C"}\NormalTok{)]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$B
+[1] "Brazil"        "Canada"        "France"       
+[4] "Germany"       "Italy"         "SouthKorea"   
+[7] "Spain"         "UnitedKingdom"
+
+$C
+[1] "India" "Japan"
+\end{verbatim}
+
+\Needspace{0.95in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{split}\NormalTok{(}\FunctionTok{rownames}\NormalTok{(num), promedio)[}\FunctionTok{c}\NormalTok{(}\StringTok{"B"}\NormalTok{, }\StringTok{"C"}\NormalTok{)]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$B
+[1] "Brazil" "Canada"
+
+$C
+[1] "India" "Japan"
+\end{verbatim}
+
+\Needspace{3.42in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{explicada }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(g) }\DecValTok{1} \SpecialCharTok{{-}} \FunctionTok{sum}\NormalTok{(}\FunctionTok{sapply}\NormalTok{(}\FunctionTok{split}\NormalTok{(}\FunctionTok{as.data.frame}\NormalTok{(z), g),}
+  \ControlFlowTok{function}\NormalTok{(b) }\FunctionTok{sum}\NormalTok{(}\FunctionTok{scale}\NormalTok{(b, }\AttributeTok{scale =} \ConstantTok{FALSE}\NormalTok{)}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{))) }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(z}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{)}
+\NormalTok{sil }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(g) }\FunctionTok{summary}\NormalTok{(}\FunctionTok{silhouette}\NormalTok{(}\FunctionTok{as.integer}\NormalTok{(g), distancias))}
+\NormalTok{medidas }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(g) }\FunctionTok{c}\NormalTok{(}\FunctionTok{explicada}\NormalTok{(g), }\FunctionTok{sil}\NormalTok{(g)}\SpecialCharTok{$}\NormalTok{avg.width,}
+                         \FunctionTok{sil}\NormalTok{(g)}\SpecialCharTok{$}\NormalTok{clus.avg.widths)}
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{round}\NormalTok{(}\FunctionTok{rbind}\NormalTok{(}\StringTok{"k{-}medias"} \OtherTok{=} \FunctionTok{medidas}\NormalTok{(kmedias),}
+                         \StringTok{"enlace promedio"} \OtherTok{=} \FunctionTok{medidas}\NormalTok{(promedio)), }\DecValTok{3}\NormalTok{),}
+             \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"Explicada"}\NormalTok{, }\StringTok{"Silueta media"}\NormalTok{,}
+                           \StringTok{"Silueta A"}\NormalTok{, }\StringTok{"Silueta B"}\NormalTok{, }\StringTok{"Silueta C"}\NormalTok{),}
+             \AttributeTok{caption =} \StringTok{"Varianza explicada y silueta."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{1.55in}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2286}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1429}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.2000}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1429}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1429}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1429}}@{}}
+\caption{Varianza explicada y silueta.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Explicada
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Silueta media
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Silueta A
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Silueta B
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Silueta C
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Explicada
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Silueta media
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Silueta A
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Silueta B
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Silueta C
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+k-medias & 0.466 & 0.666 & 0.731 & -0.022 & 0.254 \\
+enlace promedio & 0.390 & 0.713 & 0.732 & 0.174 & 0.266 \\
+\end{longtable}
+
+\Needspace{1.14in}
+
+\begin{codres}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{round}\NormalTok{(}\FunctionTok{cor}\NormalTok{(}\FunctionTok{cophenetic}\NormalTok{(}
+\NormalTok{  hc\_average), distancias), }\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\codressep
+
+\begin{verbatim}
+[1] 0.986
+\end{verbatim}
+
+\end{codres}
+
+\Needspace{7.72in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Con 107 hojas los nombres no se leen: se rotulan los extremos.}
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mar =} \FunctionTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{, }\DecValTok{4}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(hc\_average, }\AttributeTok{labels =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{hang =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{, }\AttributeTok{main =} \StringTok{""}\NormalTok{, }\AttributeTok{xlab =} \StringTok{""}\NormalTok{,}
+     \AttributeTok{sub =} \StringTok{""}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"Altura (distancia promedio)"}\NormalTok{)}
+\FunctionTok{rect.hclust}\NormalTok{(hc\_average, }\AttributeTok{k =} \DecValTok{3}\NormalTok{, }\AttributeTok{border =} \FunctionTok{c}\NormalTok{(}\StringTok{"\#a6192e"}\NormalTok{, }\StringTok{"\#f08a3c"}\NormalTok{,}
+                                          \StringTok{"\#3572a8"}\NormalTok{))}
+\CommentTok{\# Cada par se rotula con una línea a la altura a la que se une.}
+\NormalTok{hojas }\OtherTok{\textless{}{-}}\NormalTok{ hc\_average}\SpecialCharTok{$}\NormalTok{labels[hc\_average}\SpecialCharTok{$}\NormalTok{order]}
+\NormalTok{pares }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}\StringTok{"India y Japón"} \OtherTok{=} \FunctionTok{c}\NormalTok{(}\StringTok{"India"}\NormalTok{, }\StringTok{"Japan"}\NormalTok{),}
+              \StringTok{"Brasil y Canadá"} \OtherTok{=} \FunctionTok{c}\NormalTok{(}\StringTok{"Brazil"}\NormalTok{, }\StringTok{"Canada"}\NormalTok{))}
+\NormalTok{rotulo\_y }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FloatTok{27.5}\NormalTok{, }\FloatTok{25.5}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{) \{}
+\NormalTok{  par\_i }\OtherTok{\textless{}{-}}\NormalTok{ pares[[i]]}
+\NormalTok{  x }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(}\FunctionTok{match}\NormalTok{(par\_i, hojas))}
+\NormalTok{  y }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(}\FunctionTok{cophenetic}\NormalTok{(hc\_average))[par\_i[}\DecValTok{1}\NormalTok{], par\_i[}\DecValTok{2}\NormalTok{]]}
+  \FunctionTok{segments}\NormalTok{(x, y, }\DecValTok{12}\NormalTok{, rotulo\_y[i], }\AttributeTok{col =} \StringTok{"grey40"}\NormalTok{)}
+  \FunctionTok{text}\NormalTok{(}\DecValTok{12}\NormalTok{, rotulo\_y[i], }\FunctionTok{names}\NormalTok{(pares)[i], }\AttributeTok{pos =} \DecValTok{4}\NormalTok{, }\AttributeTok{cex =} \FloatTok{0.7}\NormalTok{)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p10-dendrograma-1.pdf}}
+
+}
+
+\caption{Dendrograma del enlace promedio con el corte en tres grupos,
+rotulando solo los cuatro países que quedan fuera de la rama grande:
+India y Japón, y Brasil y Canadá, se separan arriba del árbol mientras
+que los otros 103 países se unen en una sola rama.}
+
+\end{figure}%
+
+\Needspace{3.42in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}
+  \AttributeTok{k =} \DecValTok{2}\SpecialCharTok{:}\DecValTok{5}\NormalTok{,}
+  \AttributeTok{tamanos =} \FunctionTok{sapply}\NormalTok{(}\DecValTok{2}\SpecialCharTok{:}\DecValTok{5}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(k) }\FunctionTok{paste}\NormalTok{(}\FunctionTok{sort}\NormalTok{(}\FunctionTok{table}\NormalTok{(}
+    \FunctionTok{cutree}\NormalTok{(hc\_average, k)), }\AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{), }\AttributeTok{collapse =} \StringTok{"/"}\NormalTok{)),}
+  \AttributeTok{silueta =} \FunctionTok{sapply}\NormalTok{(}\DecValTok{2}\SpecialCharTok{:}\DecValTok{5}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(k)}
+    \FunctionTok{round}\NormalTok{(}\FunctionTok{sil}\NormalTok{(}\FunctionTok{cutree}\NormalTok{(hc\_average, k))}\SpecialCharTok{$}\NormalTok{avg.width, }\DecValTok{3}\NormalTok{))),}
+  \AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"k"}\NormalTok{, }\StringTok{"tamaños"}\NormalTok{, }\StringTok{"silueta"}\NormalTok{),}
+  \AttributeTok{caption =} \StringTok{"Cortes del árbol de enlace promedio."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{1.93in}
+
+\begin{longtable}[]{@{}rlr@{}}
+\caption{Cortes del árbol de enlace promedio.}\tabularnewline
+\toprule\noalign{}
+k & tamaños & silueta \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+k & tamaños & silueta \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+2 & 105/2 & 0.752 \\
+3 & 103/2/2 & 0.713 \\
+4 & 101/2/2/2 & 0.686 \\
+5 & 101/2/2/1/1 & 0.678 \\
+\end{longtable}
+
+\Needspace{4.69in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mapa\_paises}\NormalTok{(acp\_sin4, }\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{), }\AttributeTok{n =} \DecValTok{14}\NormalTok{, }\AttributeTok{grupos =}\NormalTok{ kmedias)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p10-mapa-1.pdf}}
+
+}
+
+\caption{Grupos de k-medias sobre el plano (1,2) del ACP sin los cuatro
+países: El grupo B reúne las economías grandes de los dos brazos y el C
+a India y Japón.}
+
+\end{figure}%
+
+\textbf{¿Son diferentes los resultados de los dos análisis?} Sí, aunque
+coinciden en lo principal, pues 101 de los 107 países quedan en el grupo
+equivalente con ambos métodos:
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{En qué coinciden.} Los dos aíslan a India y Japón como un
+  grupo propio (grupo C) y dejan juntos a los mismos 97 países de la
+  masa central.
+\item
+  \textbf{En qué difieren.} K-medias forma un grupo B de ocho economías
+  grandes (Brasil, Canadá, Francia, Alemania, Italia, Corea del Sur,
+  España y Reino Unido), mientras que el enlace promedio solo separa a
+  Brasil y Canadá y devuelve los otros seis a la masa central, que queda
+  de 103 países.
+\end{enumerate}
+
+Esta diferencia viene de lo que optimiza cada método. K-medias minimiza
+la inercia intra-grupo y por eso arma un grupo intermedio que le da más
+varianza explicada (46.6 \% frente a 39.0 \%), mientras que el enlace
+promedio une primero lo que está cerca en promedio, de modo que solo
+deja por fuera a los pares más alejados, tanto así que cortar el árbol
+en cuatro o cinco grupos tampoco rescata a las seis economías
+intermedias sino que separa otro par o países sueltos (particiones de
+101/2/2/2 y 101/2/2/1/1). La correlación cofenética de 0.986 indica que
+el árbol conserva muy bien las distancias, aunque cabe matizar que con
+una masa tan compacta y cuatro países tan lejanos cualquier árbol tiende
+a lograrlo. Por su parte la silueta media favorece al jerárquico (0.713
+frente a 0.666), lo cual sucede porque el grupo B de k-medias tiene
+silueta promedio de \(-0.022\), es decir que esos ocho países están en
+promedio tan cerca de la masa central como entre sí. En resumen ambos
+métodos ven la misma estructura de una masa grande y pocos países
+extremos, y lo que no está bien definido es si las economías grandes
+intermedias forman un grupo aparte.
+
+\Needspace{1.52in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{inicios }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(n) }\FunctionTok{sapply}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{42}\NormalTok{, }\DecValTok{2026}\NormalTok{), }\ControlFlowTok{function}\NormalTok{(s) \{}
+  \FunctionTok{set.seed}\NormalTok{(s)}
+  \FunctionTok{round}\NormalTok{(}\FunctionTok{kmeans}\NormalTok{(z, }\AttributeTok{centers =} \DecValTok{3}\NormalTok{, }\AttributeTok{nstart =}\NormalTok{ n)}\SpecialCharTok{$}\NormalTok{tot.withinss, }\DecValTok{1}\NormalTok{)}
+\NormalTok{\})}
+\FunctionTok{rbind}\NormalTok{(}\AttributeTok{nstart\_25 =} \FunctionTok{inicios}\NormalTok{(}\DecValTok{25}\NormalTok{), }\AttributeTok{nstart\_100 =} \FunctionTok{inicios}\NormalTok{(}\DecValTok{100}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+             [,1]   [,2]   [,3]
+nstart_25  3274.5 3231.9 3274.5
+nstart_100 3226.7 3226.7 3226.7
+\end{verbatim}
+
+\begin{quote}
+\textbf{Nota.} Con \texttt{nstart\ =\ 25} k-medias cae en óptimos
+locales distintos según la semilla (inercias de 3274.5 o 3231.9, con
+grupos de 90/14/3 y 95/10/2 países), mientras que con 100 arranques las
+tres semillas llegan a la misma partición de inercia 3226.7, que es
+también la que encuentra SDA Lab con 25 reinicios de k-medias++. Por eso
+se usan 100 arranques.
+\end{quote}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Lectura local.} El grupo B es el punto débil de k-medias, pues
+  su silueta promedio es negativa (\(-0.022\)) y la de Alemania llega a
+  \(-0.222\), es decir que Alemania está más cerca, en promedio, de la
+  masa central que de los otros siete países de su grupo.
+\item
+  \textbf{Lectura global.} Los dos métodos responden a la misma
+  estructura de la base, una masa compacta con unos pocos extremos, y
+  difieren solo en la franja intermedia, que es justo donde los datos no
+  tienen una frontera clara y donde cada criterio de optimización decide
+  por su cuenta.
+\end{enumerate}
+
+\Needspace{1.33in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{s }\OtherTok{\textless{}{-}} \FunctionTok{silhouette}\NormalTok{(}\FunctionTok{as.integer}\NormalTok{(kmedias), distancias)}
+\NormalTok{b }\OtherTok{\textless{}{-}}\NormalTok{ kmedias }\SpecialCharTok{==} \StringTok{"B"}
+\FunctionTok{round}\NormalTok{(}\FunctionTok{sort}\NormalTok{(}\FunctionTok{setNames}\NormalTok{(s[b, }\StringTok{"sil\_width"}\NormalTok{], }\FunctionTok{rownames}\NormalTok{(num)[b])), }\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+      Germany UnitedKingdom         Spain    SouthKorea 
+       -0.222        -0.092        -0.054        -0.021 
+        Italy        Canada        France        Brazil 
+        0.020         0.046         0.062         0.082 
+\end{verbatim}
+
+\begin{notas}
+
+\textbf{Interpretaciones.}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Cada método gana en su propio criterio.} K-medias explica más
+  varianza (46.6 \% frente a 39.0 \%) porque eso es lo que minimiza, y
+  el enlace promedio tiene mejor silueta (0.713 frente a 0.666) porque
+  no fuerza un grupo intermedio, de modo que «mejor» depende de qué se
+  le pida a la partición.
+\item
+  \textbf{El grupo B de k-medias.} Su silueta promedio es \(-0.022\),
+  con cuatro de sus ocho países en negativo (Alemania \(-0.222\), Reino
+  Unido \(-0.092\), España \(-0.054\) y Corea del Sur \(-0.021\)) y los
+  otros cuatro apenas por encima de cero (el mejor es Brasil con 0.082),
+  por lo que B se comporta más como una franja de transición que como un
+  grupo.
+\item
+  \textbf{Por qué el enlace promedio aísla parejas.} India y Japón, y
+  Brasil y Canadá, están lejos en promedio de todos los demás, de modo
+  que el árbol los une entre sí muy arriba y los deja para el final. Al
+  cortar en cuatro o cinco grupos se siguen separando parejas o países
+  sueltos (101/2/2/2 y 101/2/2/1/1) y nunca las seis economías
+  intermedias.
+\item
+  \textbf{El arranque importa.} Con \texttt{nstart\ =\ 25} la inercia
+  depende de la semilla (3274.5 o 3231.9) y solo con 100 arranques se
+  llega siempre a 3226.7, así que una partición de k-medias sin varios
+  arranques puede ser un óptimo local.
+\item
+  \textbf{Qué k defendería cada uno.} Por silueta los dos preferirían
+  \(k = 2\), pues k-medias llega a 0.698 (98/9) y el enlace promedio a
+  0.752 (105/2, solo India y Japón aparte). El \(k = 3\) se eligió por
+  la varianza explicada y por la lectura del plano, no por la silueta.
+\end{enumerate}
+
+\textbf{Para debatir (preguntas abiertas).}
+
+\begin{itemize}
+\tightlist
+\item
+  ¿Las ocho economías del grupo B son un grupo o el borde de la masa
+  central?
+\item
+  ¿Qué partición defendería el grupo: la que más explica (k-medias) o la
+  que mejor separa (enlace promedio)?
+\item
+  ¿Cambiaría el resultado si se agrupara sobre las cuatro componentes de
+  la Pregunta 4 en lugar de las 57 variables redundantes? No se calculó.
+\item
+  ¿Otro enlace (completo o de Ward) formaría el grupo intermedio? No se
+  calculó.
+\end{itemize}
+
+\end{notas}
+
+\section{Pregunta 11 --- Distribución de las cinco variables por
+grupo}\label{p11}
+
+\Needspace{8.33in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{largo }\OtherTok{\textless{}{-}} \FunctionTok{stack}\NormalTok{(num[cinco])}
+\NormalTok{largo}\SpecialCharTok{$}\NormalTok{grupo }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(kmedias, }\AttributeTok{times =} \FunctionTok{length}\NormalTok{(cinco))}
+\NormalTok{etiqueta }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(g) }\FunctionTok{sprintf}\NormalTok{(}\StringTok{"\%s (\%d)"}\NormalTok{, g, }\FunctionTok{table}\NormalTok{(kmedias)[g])}
+\FunctionTok{ggplot}\NormalTok{(largo, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =} \FunctionTok{etiqueta}\NormalTok{(grupo), }\AttributeTok{y =}\NormalTok{ values, }\AttributeTok{fill =}\NormalTok{ grupo)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_boxplot}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.6}\NormalTok{, }\AttributeTok{show.legend =} \ConstantTok{FALSE}\NormalTok{,}
+               \AttributeTok{outlier.size =} \FloatTok{0.8}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{stat\_summary}\NormalTok{(}\AttributeTok{fun =}\NormalTok{ median, }\AttributeTok{geom =} \StringTok{"text"}\NormalTok{, }\AttributeTok{size =} \FloatTok{2.4}\NormalTok{,}
+               \AttributeTok{vjust =} \SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{,}
+               \FunctionTok{aes}\NormalTok{(}\AttributeTok{label =} \FunctionTok{round}\NormalTok{(}\FunctionTok{after\_stat}\NormalTok{(y), }\DecValTok{1}\NormalTok{))) }\SpecialCharTok{+}
+  \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ ind, }\AttributeTok{scales =} \StringTok{"free\_y"}\NormalTok{, }\AttributeTok{nrow =} \DecValTok{2}\NormalTok{) }\SpecialCharTok{+}
+  \CommentTok{\# La escala se transforma DESPUÉS de calcular cajas y medianas,}
+  \CommentTok{\# para que la mediana anotada sea la de los datos originales.}
+  \FunctionTok{coord\_transform}\NormalTok{(}\AttributeTok{y =} \StringTok{"pseudo\_log"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}\AttributeTok{breaks =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{10}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DecValTok{1000}\NormalTok{, }\DecValTok{10000}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{scale\_fill\_manual}\NormalTok{(}\AttributeTok{values =} \FunctionTok{c}\NormalTok{(}\StringTok{"\#3572a8"}\NormalTok{, }\StringTok{"\#f08a3c"}\NormalTok{, }\StringTok{"\#a6192e"}\NormalTok{)) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Grupo de k{-}medias (países)"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Valor"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_minimal}\NormalTok{(}\AttributeTok{base\_size =} \DecValTok{9}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \pandocbounded{\includegraphics[keepaspectratio]{sda-lab-exploracion_files/figure-latex/p11-1.pdf}}
+
+}
+
+\caption{Distribución de las cinco variables de la Pregunta 1 por grupo
+de k-medias, en escala pseudo-logarítmica y con la mediana anotada: El
+consumo y la generación eléctrica y renovable crecen de A a C, mientras
+que la producción y la exportación de crudo no separan los grupos.}
+
+\end{figure}%
+
+\Needspace{2.47in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(}\FunctionTok{sapply}\NormalTok{(cinco, }\ControlFlowTok{function}\NormalTok{(v) }\FunctionTok{tapply}\NormalTok{(num[[v]], kmedias,}
+  \ControlFlowTok{function}\NormalTok{(x) }\FunctionTok{sprintf}\NormalTok{(}\StringTok{"\%g a \%g"}\NormalTok{, }\FunctionTok{round}\NormalTok{(}\FunctionTok{min}\NormalTok{(x), }\DecValTok{1}\NormalTok{),}
+                      \FunctionTok{round}\NormalTok{(}\FunctionTok{max}\NormalTok{(x), }\DecValTok{1}\NormalTok{)))),}
+  \AttributeTok{caption =} \StringTok{"Rango (mínimo a máximo) de cada variable por grupo."}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{1.74in}
+
+\begin{longtable}[]{@{}llllll@{}}
+\caption{Rango (mínimo a máximo) de cada variable por
+grupo.}\tabularnewline
+\toprule\noalign{}
+& Crudo\_prod & PetLiq\_cons & Crudo\_exp & Elec\_gen & Renov\_gen \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+& Crudo\_prod & PetLiq\_cons & Crudo\_exp & Elec\_gen & Renov\_gen \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+A & 0 a 3370 & 15 a 2040 & 0 a 2651 & 0.9 a 290 & 0 a 138 \\
+B & 0 a 3613 & 791.3 a 3279 & 0 a 2382 & 198 a 636 & 10 a 429 \\
+C & 4.8 a 767 & 3550 a 4288 & 0 a 0.7 & 1027 a 1258 & 129 a 198 \\
+\end{longtable}
+
+\Needspace{2.66in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{exportadores }\OtherTok{\textless{}{-}} \FunctionTok{order}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{num}\SpecialCharTok{$}\NormalTok{Crudo\_exp)[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{]}
+\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{exportacion =}\NormalTok{ num}\SpecialCharTok{$}\NormalTok{Crudo\_exp[exportadores],}
+           \AttributeTok{grupo =}\NormalTok{ kmedias[exportadores],}
+           \AttributeTok{row.names =} \FunctionTok{rownames}\NormalTok{(num)[exportadores])}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{1.93in}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}lrl@{}}
+\toprule\noalign{}
+& exportacion & grupo \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+UnitedArabEmirates & 2651 & A \\
+Iraq & 2518 & A \\
+Canada & 2382 & B \\
+Nigeria & 2120 & A \\
+Kuwait & 1995 & A \\
+\end{longtable}
+}
+
+\Needspace{0.57in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{c}\NormalTok{(}\AttributeTok{sin\_exportar\_A =} \FunctionTok{sum}\NormalTok{(num}\SpecialCharTok{$}\NormalTok{Crudo\_exp[kmedias }\SpecialCharTok{==} \StringTok{"A"}\NormalTok{] }\SpecialCharTok{==} \DecValTok{0}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+sin_exportar_A 
+            38 
+\end{verbatim}
+
+\textbf{¿Hay diferencias importantes entre grupos en una misma
+variable?} Sí en tres de las cinco variables (consumo de petróleo,
+generación eléctrica y generación renovable) y no en las dos petroleras
+(producción y exportación de crudo). Antes de leerlas vale la pena
+anotar que el grupo C tiene solo dos países (India y Japón) y el B ocho,
+de modo que sus cajas son apenas un resumen de pocos puntos y no una
+distribución, y que el eje es pseudo-logarítmico porque los valores de
+los tres grupos difieren en órdenes de magnitud.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Consumo de petróleo y generación eléctrica.} Las medianas
+  crecen con claridad de A a C, pues el consumo pasa de 155 a 1632 y a
+  3919 TBPD y la generación de 27 a 422.5 y a 1142.5 BKWH. India y Japón
+  superan a todos los países de los otros grupos en las dos variables,
+  aunque A y B se solapan en sus extremos, por ejemplo México consume
+  2040 TBPD y genera 290 BKWH siendo del grupo A, mientras que Alemania
+  consume 791.3 TBPD y genera 198 BKWH siendo del grupo B.
+\item
+  \textbf{Generación renovable.} También crece de A a C (medianas de 6,
+  102.5 y 163.5 BKWH) pero con mucho solapamiento, ya que el grupo B va
+  de 10 BKWH (Corea del Sur) a 429 BKWH (Brasil) y el máximo de A
+  (Noruega, 138 BKWH) supera incluso a Japón (129 BKWH) del grupo C.
+\item
+  \textbf{Producción de crudo.} No distingue los grupos, dado que los
+  tres tienen países que casi no producen y el rango de A (de 0 a 3370
+  TBPD, este último Irak) cubre casi por completo los de B (de 0 a 3613)
+  y C (de 4.8 a 767).
+\item
+  \textbf{Exportación de crudo.} Tampoco los distingue y además no crece
+  con el tamaño, pues las medianas son 3.3, 6.2 y 0.35 TBPD, India y
+  Japón casi no exportan (0.7 y 0 TBPD) y cuatro de los cinco mayores
+  exportadores de los 107 países (Emiratos Árabes Unidos con 2651 TBPD,
+  Irak con 2518, Nigeria con 2120 y Kuwait con 1995) están en el grupo
+  A, junto a 38 países que no exportan nada, mientras que el quinto,
+  Canadá (2382 TBPD), está en B por su tamaño y no por su petróleo.
+\end{enumerate}
+
+Se concluye que k-medias agrupó a los países por el tamaño de su consumo
+y de su sistema eléctrico, que es la información del primer eje del ACP,
+y no por ser o no productores y exportadores de petróleo, que es la
+información del segundo eje.
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Lectura local.} Emiratos Árabes Unidos, el mayor exportador de
+  crudo sin los cuatro atípicos, queda en el mismo grupo que países que
+  no exportan nada, porque en todo lo demás (consumo, generación) es un
+  país mediano.
+\item
+  \textbf{Lectura global.} La partición sigue al tamaño porque la base
+  mide sobre todo tamaño, ya que 27 de las 57 variables están ligadas al
+  primer eje y la dimensión petrolera la cargan unas pocas, de modo que
+  en la distancia euclidiana entre países el petróleo pesa poco. Haber
+  elegido la exportación en la Pregunta 1 es lo que permite verlo, pues
+  con las emisiones de CO\textsubscript{2} las cinco cajas habrían
+  repetido el consumo.
+\end{enumerate}
+
+\begin{notas}
+
+\textbf{Interpretaciones.}
+
+\begin{enumerate}
+\def\labelenumi{\alph{enumi}.}
+\tightlist
+\item
+  \textbf{Lo que separa y lo que no.} Las medianas de consumo (155, 1632
+  y 3919 TBPD) y de generación (27, 422.5 y 1142.5 BKWH) crecen de A a
+  C, mientras que las de exportación (3.3, 6.2 y 0.35 TBPD) no siguen
+  ningún orden.
+\item
+  \textbf{El petróleo queda dentro de A.} Cuatro de los cinco mayores
+  exportadores de los 107 países (Emiratos Árabes Unidos, Irak, Nigeria
+  y Kuwait) están en A, el mismo grupo de la masa central, es decir que
+  la partición no reconoce al brazo de productores que se veía en la
+  Pregunta 7.
+\item
+  \textbf{Cajas de pocos países.} C tiene dos países y B ocho, así que
+  sus cajas describen casos y no distribuciones.
+\end{enumerate}
+
+\textbf{Para debatir (preguntas abiertas).}
+
+\begin{itemize}
+\tightlist
+\item
+  ¿Un agrupamiento con solo las cinco variables, o con las componentes 2
+  y 3, separaría a los exportadores? No se calculó.
+\item
+  Si el objetivo del enunciado es caracterizar países por importación,
+  exportación y consumo, ¿sirve una partición que solo ve tamaño?
+\end{itemize}
+
+\end{notas}
+
+\imprimirbibliografia
+\appendix
+
+\chapter{Documentación de R}\label{documentacion-r}
+
+Se listan las funciones utilizadas en el taller junto con el paquete que
+las provee y la pregunta donde se usan, cada una enlazada a su página de
+ayuda oficial. El documento se generó con R 4.6.1, \texttt{ggplot2}
+4.0.3, \texttt{GGally} 2.4.0, \texttt{factoextra} 2.2.0 y
+\texttt{cluster} 2.1.8.2.
+
+\Needspace{4.56in}
+
+\Needspace{5.16in}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.4444}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.2444}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3111}}@{}}
+\caption{Funciones de R utilizadas y enlace a su
+documentación.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Función
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Paquete
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Uso
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Función
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Paquete
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Uso
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\href{https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html}{\texttt{read.csv()}}
+& utils & Carga \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/utils/html/download.file.html}{\texttt{download.file()}}
+& utils & Carga \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/base/html/source.html}{\texttt{source()}}
+& base & Datos \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/base/html/grep.html}{\texttt{gsub()}}
+& base & Datos \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/cor.html}{\texttt{cor()}}
+& stats & Datos, P1, P2 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/base/html/colSums.html}{\texttt{colMeans()}}
+& base & P1 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/median.html}{\texttt{median()}}
+& stats & P1, P2 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/cor.html}{\texttt{cov()}}
+& stats & P1 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/prcomp.html}{\texttt{prcomp()}}
+& stats & P3, P4, P7 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/base/html/scale.html}{\texttt{scale()}}
+& base & P9, P10 \\
+\href{https://rdrr.io/cran/factoextra/man/facto_summarize.html}{\texttt{facto\_summarize()}}
+& factoextra & P3 \\
+\href{https://rdrr.io/cran/factoextra/man/fviz_contrib.html}{\texttt{fviz\_contrib()}}
+& factoextra & P3 \\
+\href{https://rdrr.io/cran/factoextra/man/eigenvalue.html}{\texttt{fviz\_eig()}}
+& factoextra & P4 \\
+\href{https://rdrr.io/cran/factoextra/man/get_pca.html}{\texttt{get\_pca\_var()}}
+& factoextra & P5, P7 \\
+\href{https://rdrr.io/cran/factoextra/man/get_pca.html}{\texttt{get\_pca\_ind()}}
+& factoextra & P6, P7 \\
+\href{https://rdrr.io/cran/factoextra/man/fviz_pca.html}{\texttt{fviz\_pca\_var()}}
+& factoextra & P5 \\
+\href{https://rdrr.io/cran/factoextra/man/fviz_pca.html}{\texttt{fviz\_pca\_ind()}}
+& factoextra & P6, P7, P10 \\
+\href{https://rdrr.io/cran/ggrepel/man/geom_text_repel.html}{\texttt{geom\_text\_repel()}}
+& ggrepel & P6, P7, P10 \\
+\href{https://rdrr.io/cran/GGally/man/ggpairs.html}{\texttt{ggpairs()}}
+& GGally & P2 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html}{\texttt{kmeans()}}
+& stats & P9, P10 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/dist.html}{\texttt{dist()}}
+& stats & P9, P10 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/hclust.html}{\texttt{hclust()}}
+& stats & P10 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/cutree.html}{\texttt{cutree()}}
+& stats & P10 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/cophenetic.html}{\texttt{cophenetic()}}
+& stats & P10 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/rect.hclust.html}{\texttt{rect.hclust()}}
+& stats & P10 \\
+\href{https://rdrr.io/cran/cluster/man/silhouette.html}{\texttt{silhouette()}}
+& cluster & P9, P10 \\
+\href{https://stat.ethz.ch/R-manual/R-devel/library/utils/html/stack.html}{\texttt{stack()}}
+& utils & P11 \\
+\href{https://ggplot2.tidyverse.org/reference/ggplot.html}{\texttt{ggplot()}}
+& ggplot2 & P9, P11 \\
+\href{https://ggplot2.tidyverse.org/reference/geom_boxplot.html}{\texttt{geom\_boxplot()}}
+& ggplot2 & P11 \\
+\href{https://ggplot2.tidyverse.org/reference/facet_wrap.html}{\texttt{facet\_wrap()}}
+& ggplot2 & P11 \\
+\end{longtable}
+
+\chapter{Abreviaturas de las variables}\label{abreviaturas}
+
+El archivo \texttt{R/abreviaturas.R}, que se carga en el chunk de
+configuración, trae las dos funciones con las que se acortan los
+nombres. La función \texttt{abreviar()} cambia cada fragmento del nombre
+original por su abreviatura y quita la unidad del final, mientras que
+\texttt{numericas()} arma la matriz \texttt{num} con las columnas
+numéricas y el país como nombre de fila.
+
+\Needspace{4.56in}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# taller{-}02/R/abreviaturas.R}
+\CommentTok{\#}
+\CommentTok{\# Nombres cortos para las 57 variables de EIA.csv, que llegan a}
+\CommentTok{\# tener 60 caracteres y no caben en los gráficos. Se carga desde el}
+\CommentTok{\# chunk de configuración y su código se muestra en el Apéndice B.}
+
+\CommentTok{\# Cambia cada fragmento del nombre original por su abreviatura y}
+\CommentTok{\# quita la unidad del final (TBPD, BKWH, MK, MMTCD o BB). El orden}
+\CommentTok{\# importa: Los fragmentos largos van antes que los cortos que}
+\CommentTok{\# contienen.}
+\NormalTok{abreviar }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(v) \{}
+\NormalTok{  reglas }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+    \AttributeTok{Crude\_oil\_including\_lease\_condensate =} \StringTok{"Crudo"}\NormalTok{,}
+    \AttributeTok{Petroleum\_and\_other\_liquids =} \StringTok{"PetLiq"}\NormalTok{,}
+    \AttributeTok{Refined\_petroleum\_products =} \StringTok{"Refinados"}\NormalTok{,}
+    \AttributeTok{Liquefied\_petroleum\_gases\_.LPG. =} \StringTok{"GLP"}\NormalTok{,}
+    \AttributeTok{Natural\_gas\_plant\_liquids =} \StringTok{"LGN"}\NormalTok{,}
+    \AttributeTok{Bunker\_residual\_fuel\_oil =} \StringTok{"BunkerRes"}\NormalTok{,}
+    \AttributeTok{Bunker\_fuel =} \StringTok{"Bunker"}\NormalTok{,}
+    \AttributeTok{Distillate\_fuel\_oil =} \StringTok{"Destilado"}\NormalTok{,}
+    \AttributeTok{Residual\_fuel\_oil =} \StringTok{"Residual"}\NormalTok{,}
+    \AttributeTok{Motor\_gasoline =} \StringTok{"Gasolina"}\NormalTok{,}
+    \AttributeTok{Jet\_fuel =} \StringTok{"Jet"}\NormalTok{,}
+    \AttributeTok{Kerosene =} \StringTok{"Queroseno"}\NormalTok{,}
+    \AttributeTok{Other\_liquids =} \StringTok{"OtrosLiq"}\NormalTok{,}
+    \AttributeTok{Other\_refined\_products =} \StringTok{"OtrosRef"}\NormalTok{,}
+    \AttributeTok{Refinery\_processing\_gain =} \StringTok{"GananciaRef"}\NormalTok{,}
+    \AttributeTok{Hydroelectric\_pumped\_storage\_electricity =} \StringTok{"Bombeo"}\NormalTok{,}
+    \AttributeTok{Hydroelectricity =} \StringTok{"Hidro"}\NormalTok{,}
+    \AttributeTok{Biomass\_and\_waste\_electricity =} \StringTok{"Biomasa"}\NormalTok{,}
+    \AttributeTok{Fossil\_fuels\_electricity =} \StringTok{"Fosil"}\NormalTok{,}
+    \AttributeTok{Geothermal\_electricity =} \StringTok{"Geotermica"}\NormalTok{,}
+    \AttributeTok{Non.hydro\_renewable\_electricity =} \StringTok{"NoHidro"}\NormalTok{,}
+    \AttributeTok{Renewable\_electricity =} \StringTok{"Renov"}\NormalTok{,}
+    \AttributeTok{Nuclear\_electricity =} \StringTok{"Nuclear"}\NormalTok{,}
+    \AttributeTok{Solar\_electricity =} \StringTok{"Solar"}\NormalTok{,}
+    \AttributeTok{Tide\_and\_wave\_electricity =} \StringTok{"Mareas"}\NormalTok{,}
+    \AttributeTok{Wind\_electricity =} \StringTok{"Eolica"}\NormalTok{,}
+    \AttributeTok{Electricity =} \StringTok{"Elec"}\NormalTok{,}
+    \AttributeTok{installed\_capacity =} \StringTok{"cap"}\NormalTok{,}
+    \AttributeTok{net\_generation =} \StringTok{"gen"}\NormalTok{,}
+    \AttributeTok{net\_consumption =} \StringTok{"cons"}\NormalTok{,}
+    \AttributeTok{net\_imports =} \StringTok{"impNeta"}\NormalTok{,}
+    \AttributeTok{distribution\_losses =} \StringTok{"perdidas"}\NormalTok{,}
+    \AttributeTok{CO2\_emissions =} \StringTok{"CO2"}\NormalTok{,}
+    \AttributeTok{consumption =} \StringTok{"cons"}\NormalTok{,}
+    \AttributeTok{production =} \StringTok{"prod"}\NormalTok{,}
+    \AttributeTok{exports =} \StringTok{"exp"}\NormalTok{,}
+    \AttributeTok{imports =} \StringTok{"imp"}\NormalTok{,}
+    \AttributeTok{reserves =} \StringTok{"reservas"}\NormalTok{)}
+  \ControlFlowTok{for}\NormalTok{ (r }\ControlFlowTok{in} \FunctionTok{names}\NormalTok{(reglas))}
+\NormalTok{    v }\OtherTok{\textless{}{-}} \FunctionTok{gsub}\NormalTok{(r, reglas[[r]], v, }\AttributeTok{fixed =} \ConstantTok{TRUE}\NormalTok{)}
+  \FunctionTok{sub}\NormalTok{(}\StringTok{"\_(TBPD|BKWH|MK|MMTCD|BB)$"}\NormalTok{, }\StringTok{""}\NormalTok{, v)}
+\NormalTok{\}}
+
+\CommentTok{\# Las columnas numéricas, con el país como nombre de fila y los}
+\CommentTok{\# nombres abreviados.}
+\NormalTok{numericas }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(d) \{}
+\NormalTok{  num }\OtherTok{\textless{}{-}}\NormalTok{ d[}\FunctionTok{vapply}\NormalTok{(d, is.numeric, }\FunctionTok{logical}\NormalTok{(}\DecValTok{1}\NormalTok{))]}
+  \FunctionTok{rownames}\NormalTok{(num) }\OtherTok{\textless{}{-}}\NormalTok{ d}\SpecialCharTok{$}\NormalTok{Country}
+  \FunctionTok{names}\NormalTok{(num) }\OtherTok{\textless{}{-}} \FunctionTok{abreviar}\NormalTok{(}\FunctionTok{names}\NormalTok{(num))}
+\NormalTok{  num}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\Needspace{4.56in}
+
+\Needspace{5.16in}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.1875}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 2\tabcolsep) * \real{0.8125}}@{}}
+\caption{Abreviatura y nombre original (con su unidad).}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Abreviatura
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Variable
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Abreviatura
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Variable
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Bunker\_cons & Bunker fuel consumption (TBPD) \\
+BunkerRes\_cons & Bunker residual fuel oil consumption (TBPD) \\
+Crudo\_exp & Crude oil including lease condensate exports (TBPD) \\
+Crudo\_imp & Crude oil including lease condensate imports (TBPD) \\
+Crudo\_prod & Crude oil including lease condensate production (TBPD) \\
+Crudo\_reservas & Crude oil including lease condensate reserves (BB) \\
+Destilado\_cons & Distillate fuel oil consumption (TBPD) \\
+Destilado\_prod & Distillate fuel oil production (TBPD) \\
+Jet\_cons & Jet fuel consumption (TBPD) \\
+Jet\_prod & Jet fuel production (TBPD) \\
+Queroseno\_cons & Kerosene consumption (TBPD) \\
+Queroseno\_prod & Kerosene production (TBPD) \\
+GLP\_cons & Liquefied petroleum gases (LPG) consumption (TBPD) \\
+GLP\_prod & Liquefied petroleum gases (LPG) production (TBPD) \\
+Gasolina\_cons & Motor gasoline consumption (TBPD) \\
+Gasolina\_prod & Motor gasoline production (TBPD) \\
+LGN\_prod & Natural gas plant liquids production (TBPD) \\
+OtrosLiq\_prod & Other liquids production (TBPD) \\
+OtrosRef\_cons & Other refined products consumption (TBPD) \\
+OtrosRef\_prod & Other refined products production (TBPD) \\
+PetLiq\_CO2 & Petroleum and other liquids CO2 emissions (MMTCD) \\
+PetLiq\_cons & Petroleum and other liquids consumption (TBPD) \\
+PetLiq\_prod & Petroleum and other liquids production (TBPD) \\
+Refinados\_cons & Refined petroleum products consumption (TBPD) \\
+Refinados\_prod & Refined petroleum products production (TBPD) \\
+GananciaRef & Refinery processing gain (TBPD) \\
+Residual\_cons & Residual fuel oil consumption (TBPD) \\
+Residual\_prod & Residual fuel oil production (TBPD) \\
+Biomasa\_cap & Biomass and waste electricity installed capacity (MK) \\
+Biomasa\_gen & Biomass and waste electricity net generation (BKWH) \\
+Elec\_perdidas & Electricity distribution losses (BKWH) \\
+Elec\_exp & Electricity exports (BKWH) \\
+Elec\_imp & Electricity imports (BKWH) \\
+Elec\_cap & Electricity installed capacity (MK) \\
+Elec\_cons & Electricity net consumption (BKWH) \\
+Elec\_gen & Electricity net generation (BKWH) \\
+Elec\_impNeta & Electricity net imports (BKWH) \\
+Fosil\_cap & Fossil fuels electricity installed capacity (MK) \\
+Fosil\_gen & Fossil fuels electricity net generation (BKWH) \\
+Geotermica\_cap & Geothermal electricity installed capacity (MK) \\
+Geotermica\_gen & Geothermal electricity net generation (BKWH) \\
+Bombeo\_cap & Hydroelectric pumped storage electricity installed
+capacity (MK) \\
+Bombeo\_gen & Hydroelectric pumped storage electricity net generation
+(BKWH) \\
+Hidro\_cap & Hydroelectricity installed capacity (MK) \\
+Hidro\_gen & Hydroelectricity net generation (BKWH) \\
+NoHidro\_cap & Non-hydro renewable electricity installed capacity
+(MK) \\
+NoHidro\_gen & Non-hydro renewable electricity net generation (BKWH) \\
+Nuclear\_cap & Nuclear electricity installed capacity (MK) \\
+Nuclear\_gen & Nuclear electricity net generation (BKWH) \\
+Renov\_cap & Renewable electricity installed capacity (MK) \\
+Renov\_gen & Renewable electricity net generation (BKWH) \\
+Solar\_cap & Solar electricity installed capacity (MK) \\
+Solar\_gen & Solar electricity net generation (BKWH) \\
+Mareas\_cap & Tide and wave electricity installed capacity (MK) \\
+Mareas\_gen & Tide and wave electricity net generation (BKWH) \\
+Eolica\_cap & Wind electricity installed capacity (MK) \\
+Eolica\_gen & Wind electricity net generation (BKWH) \\
+\end{longtable}
+
+% --- Referencias mínimas (fuente de datos + software usado) ---
+\nocite{ideam-datos, r-core, ggplot2, ggextra}
+\ifbibimpresa\else\printbibliography[heading=bibintoc]\fi
+\end{document}

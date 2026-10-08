@@ -43,7 +43,7 @@ ajustar_kmeans <- function(datos, columnas = NULL, k = 3L, escalar = TRUE,
   inicializacion <- match.arg(inicializacion,
                               c("k-means++", "aleatoria", "Forgy"))
 
-  preparado <- .preparar_matriz_kmeans(datos, columnas, escalar)
+  preparado <- preparar_matriz_grupos(datos, columnas, escalar, "k-medias")
   z <- preparado$z
   n <- nrow(z)
   k <- as.integer(k)
@@ -66,7 +66,7 @@ ajustar_kmeans <- function(datos, columnas = NULL, k = 3L, escalar = TRUE,
     grupos = ganador$grupos,
     centroides = ganador$centroides,
     inercia = ganador$inercia,
-    inercia_por_grupo = .inercia_por_grupo(z, ganador$grupos, ganador$centroides),
+    inercia_por_grupo = inercia_de_grupos(z, ganador$grupos, ganador$centroides),
     inercia_total = inercia_total,
     proporcion_explicada = 1 - ganador$inercia / inercia_total,
     tamanos = tamanos,
@@ -85,39 +85,17 @@ ajustar_kmeans <- function(datos, columnas = NULL, k = 3L, escalar = TRUE,
     trazas_reinicios = stats::setNames(lapply(intentos, `[[`, "traza"),
                                        as.character(semillas)),
     asignaciones_por_iter = ganador$asignaciones),
-    class = c("ajuste_kmeans", "ajuste_sda"))
+    class = c("ajuste_kmeans", "ajuste_agrupamiento", "ajuste_sda"))
 }
 
 # ---------------------------------------------------------------------------
-# Preparación: qué entra a las distancias
+# Las etiquetas de los grupos
 # ---------------------------------------------------------------------------
 
-# Escalar no es cosmética acá: la distancia euclidiana suma cuadrados de cosas
-# con unidades distintas, así que sin escalar manda la columna con el rango más
-# grande. Se deja elegir porque a veces las unidades ya son comparables.
-.preparar_matriz_kmeans <- function(datos, columnas, escalar) {
-  numericas <- names(datos)[vapply(datos, is.numeric, logical(1))]
-  columnas <- intersect(columnas %||% numericas, numericas)
-  if (length(columnas) < 2L)
-    stop("k-medias necesita al menos dos columnas numericas")
-
-  bruta <- as.matrix(datos[, columnas, drop = FALSE])
-  completas <- stats::complete.cases(bruta)
-  if (sum(completas) < 3L)
-    stop("quedan menos de tres filas completas: imputa o quita columnas")
-  bruta <- bruta[completas, , drop = FALSE]
-
-  centro <- colMeans(bruta)
-  escala <- if (isTRUE(escalar)) apply(bruta, 2L, stats::sd) else
-    rep(1, length(columnas))
-  if (isTRUE(escalar) && any(escala == 0))
-    stop("hay columnas constantes: su varianza es cero y no se pueden escalar")
-
-  z <- scale(bruta, center = centro, scale = escala)
-  attributes(z) <- list(dim = dim(z), dimnames = list(NULL, columnas))
-  list(z = z, columnas = columnas, centro = centro, escala = escala,
-       descartadas = sum(!completas))
-}
+# Qué entra a las distancias lo decide preparar_matriz_grupos(), en
+# logica/metricas_grupos.R: el jerárquico prepara la misma matriz, y si cada
+# método la armara a su manera, comparar sus particiones sería comparar datos
+# distintos.
 
 # La etiqueta de un grupo es arbitraria: la misma partición con los números
 # permutados es la misma partición. Sin fijar el orden, dos corridas idénticas
@@ -256,15 +234,6 @@ ajustar_kmeans <- function(datos, columnas = NULL, k = 3L, escalar = TRUE,
 
 .inercia <- function(z, grupos, centroides) {
   sum((z - centroides[grupos, , drop = FALSE])^2)
-}
-
-.inercia_por_grupo <- function(z, grupos, centroides) {
-  vapply(seq_len(nrow(centroides)), function(j) {
-    filas <- which(grupos == j)
-    if (!length(filas)) return(0)
-    sum((z[filas, , drop = FALSE] -
-           rep(centroides[j, ], each = length(filas)))^2)
-  }, numeric(1))
 }
 
 # Los centroides como vector con nombre, que es lo que la traza genérica sabe

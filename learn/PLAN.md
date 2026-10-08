@@ -504,8 +504,10 @@ tres huecos que ningún dataset de juguete había destapado.
 - [x] `nucleo/informe/exploracion.R` — la selección a cuaderno: los datos, la
       pila de preparación traducida a R, y una sección por panel con su texto
       y sus parámetros congelados AL MARCAR, no al exportar
-- [x] `nucleo/informe/codigos.R` — un artefacto a R autónomo (base + ggplot2):
+- [x] `nucleo/informe/codigos/` — un artefacto a R autónomo (base + ggplot2):
       el cuaderno se abre en cualquier R, sin nada del lab instalado
+- [x] `codigos/fase4/` — ACP, k-medias y jerárquico a R autónomo (stats +
+      factoextra); `test_informe_f4.R` los CORRE sobre EIA
 - [x] `nucleo/informe/opciones.R` + `encabezado.R` — qué piezas lleva el
       cuaderno (texto del panel, procedencia, tablas, YAML) casilla por
       casilla, con el entregable del taller como valor de fábrica
@@ -587,3 +589,15 @@ tres huecos que ningún dataset de juguete había destapado.
       silencio al sourcear y el error sale a diez archivos de distancia
 - [ ] **Hito 7 · Poblar el catálogo** — el resto de `libs/topics-map.md`, un
       método por vez, con su ficha y sus textos
+
+  - [x] `metodos/jerarquico.R` — aglomerativo sobre `stats::hclust()` (Taller
+        02: enlace promedio). Cinco enlaces, tres distancias, `k_corte` y
+        `escalar`; la traza es el historial de fusiones (altura y W). Las
+        genéricas de grupos pasaron de `.ajuste_kmeans` a `.ajuste_agrupamiento`,
+        y la preparación de la matriz es común (`preparar_matriz_grupos()`)
+  - [x] `arbol_jerarquico()` + `graficar_dendrograma()` (segmentos desde
+        `$merge`, colores y rectángulos del corte) y `cofenetico()` +
+        `graficar_cofenetico()`; la silueta mide con la distancia del ajuste
+  - [x] Supuesto `distancia_valida` con comprobación; textos `dendrograma` y
+        `cofenetico`, `fichas/jerarquico.md`; `test_jerarquico.R` y
+        `test_app_jerarquico.R`

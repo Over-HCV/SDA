@@ -11,11 +11,11 @@ Todas las rutas son relativas a `learn/`.
 
 ## Resumen
 
-- **Métodos**: 56 registrados — 3 activos, 47 pendientes, 6 bloqueados
+- **Métodos**: 56 registrados — 4 activos, 46 pendientes, 6 bloqueados
 - **Explorables en ①**: 8 pendientes ya corren como análisis de datos
 - **Artefactos**: 90 registrados
-- **Textos escritos**: 47 de 90
-- **Fichas escritas**: 4 de 56
+- **Textos escritos**: 49 de 90
+- **Fichas escritas**: 5 de 56
 
 ## Artefactos
 
@@ -83,8 +83,8 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f4.desempeno.tamano_efecto` | Tamaño del efecto | `R/graficos/desempeno.R::graficar_tamano_efecto` | `R/logica/metricas_anova.R::tamano_efecto` | *pendiente* |
 | `f4.diagnostico.bic` | BIC por modelo | `R/graficos/diagnostico.R::graficar_bic` | `R/logica/metricas_grupos.R::bic_mezclas` | *pendiente* |
 | `f4.diagnostico.codo` | Codo de la inercia | `R/graficos/diagnostico.R::graficar_codo` | `R/logica/metricas_grupos.R::inercia_por_k` | `textos/f4/diagnostico/codo.md` |
-| `f4.diagnostico.cofenetico` | Correlación cofenética | `R/graficos/diagnostico.R::graficar_cofenetico` | `R/logica/metricas_grupos.R::cofenetico` | *pendiente* |
-| `f4.diagnostico.dendrograma` | Dendrograma | `R/graficos/diagnostico.R::graficar_dendrograma` | `R/logica/metricas_grupos.R::arbol_jerarquico` | *pendiente* |
+| `f4.diagnostico.cofenetico` | Correlación cofenética | `R/graficos/diagnostico.R::graficar_cofenetico` | `R/logica/metricas_grupos.R::cofenetico` | `textos/f4/diagnostico/cofenetico.md` |
+| `f4.diagnostico.dendrograma` | Dendrograma | `R/graficos/diagnostico.R::graficar_dendrograma` | `R/logica/metricas_grupos.R::arbol_jerarquico` | `textos/f4/diagnostico/dendrograma.md` |
 | `f4.diagnostico.esfericidad` | Esfericidad | `R/graficos/diagnostico.R::graficar_esfericidad` | `R/logica/metricas_anova.R::prueba_esfericidad` | *pendiente* |
 | `f4.diagnostico.homocedasticidad` | Escala-localización | `R/graficos/diagnostico.R::graficar_escala_localizacion` | `R/logica/diagnostico_regresion.R::prueba_homocedasticidad` | *pendiente* |
 | `f4.diagnostico.indices_internos` | Índices internos | `R/graficos/diagnostico.R::graficar_indices` | `R/logica/metricas_grupos.R::indices_internos` | *pendiente* |
@@ -148,7 +148,7 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `umap` | UMAP | 4 | reducir | pendiente | — | no | `fichas/umap.md` | `090-reduccion/030-emparentados/040-no-lineal` |
 | `dtw` | Agrupamiento de series con DTW | 5 | agrupar | pendiente | — | no | `fichas/dtw.md` | `150-extensiones/030-series-tiempo` |
 | `espectral` | Agrupamiento espectral | 5 | agrupar | pendiente | — | no | `fichas/espectral.md` | `100-agrupamiento/040-otros-enfoques` |
-| `jerarquico` | Agrupamiento jerárquico | 5 | agrupar | pendiente | — | sí | `fichas/jerarquico.md` | `100-agrupamiento/030-jerarquico` |
+| `jerarquico` | Agrupamiento jerárquico | 5 | agrupar | activo | — | sí | `fichas/jerarquico.md` | `100-agrupamiento/030-jerarquico` |
 | `biclustering` | Biclustering | 5 | agrupar | pendiente | — | no | `fichas/biclustering.md` | `100-agrupamiento/040-otros-enfoques` |
 | `dbscan` | DBSCAN | 5 | agrupar | pendiente | — | sí | `fichas/dbscan.md` | `100-agrupamiento/040-otros-enfoques/010-dbscan` |
 | `comunidades` | Detección de comunidades | 5 | agrupar | pendiente | — | no | `fichas/comunidades.md` | `150-extensiones/090-no-estructurados` |

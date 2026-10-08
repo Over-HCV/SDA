@@ -84,6 +84,10 @@ probar("un posicional omitido no llega como NA a la logica", {
   identical(.arg(character(0), 2L, "iqr"), "iqr") &&
     identical(.arg(c("Presion"), 2L, "iqr"), "iqr")
 })
+probar("datos sin cuántas filas muestra diez, no revienta", {
+  utils::capture.output(cabeza <- COMANDOS$datos(ds_cli, character(0)))
+  nrow(cabeza) == 10L
+})
 probar("el codigo de cada panel CORRE sobre los datos, no solo parsea", {
   # La prueba de sintaxis vive en test_informe.R; esta caza lo otro: una
   # funcion mal escrita, una columna que no existe, un paquete que el cuaderno
@@ -201,6 +205,110 @@ probar("el diccionario declarado viaja dentro del chunk", {
   codigo <- codigo_artefacto("f1.diccionario.tabla", list(), tabla)
   any(grepl("diccionario <- data.frame(", codigo, fixed = TRUE)) &&
     any(grepl("intervalo", paste(codigo, collapse = " "), fixed = TRUE))
+})
+
+cat("\n[lab.R · Taller 02: filtro de exclusión, fases 2-4]\n")
+PAISES_ATIPICOS <- "Country!=UnitedStates,China,SaudiArabia,Russia"
+CINCO <- c("Crude_oil_including_lease_condensate_production_TBPD",
+           "Petroleum_and_other_liquids_consumption_TBPD",
+           "Petroleum_and_other_liquids_CO2_emissions_MMTCD",
+           "Electricity_net_generation_BKWH",
+           "Renewable_electricity_net_generation_BKWH")
+ds_eia <- armar_dataset(list(fuente = "eia"))
+ds_sin4 <- suppressMessages(armar_dataset(list(fuente = "eia",
+                                                filtro = PAISES_ATIPICOS)))
+probar("la fuente eia carga 111 países x 58 columnas, Country de texto",
+       ds_eia$n == 111L && ds_eia$p == 58L && is.character(ds_eia$df$Country))
+probar("--filtro Columna!=a,b saca esas filas y deja 107", {
+  ds_sin4$n == 107L && !any(c("China", "Russia") %in% ds_sin4$df$Country) &&
+    isTRUE(ds_sin4$transformaciones[[1]]$params$excluir)
+})
+probar("la pila lo describe como exclusión y el cuaderno lo niega con !", {
+  entrada <- ds_sin4$transformaciones[[1]]
+  grepl("Country fuera de [UnitedStates", describir_transformacion(entrada),
+        fixed = TRUE) &&
+    grepl("datos[!datos$Country %in% c(", codigo_de_transformacion(entrada),
+          fixed = TRUE)
+})
+probar("un valor mal escrito en el filtro avisa en vez de no hacer nada", {
+  resultado <- aplicar_filtro(ds_eia$df, "Country", c("China", "EEUU"),
+                              excluir = TRUE)
+  nrow(resultado$datos) == 110L &&
+    any(grepl("EEUU", vapply(resultado$avisos, `[[`, "", "mensaje")))
+})
+probar("momentos da 5 medias y una S de 5 x 5 simétrica", {
+  utils::capture.output(m <- COMANDOS$momentos(ds_eia, CINCO))
+  length(diag(m)) == 5L && isSymmetric(unname(m)) &&
+    abs(m[1, 1] - stats::var(ds_eia$df[[CINCO[1]]])) < 1e-6
+})
+probar("metodo acp: R y S dan varianzas explicadas distintas", {
+  normado <- ajustar_cli(ds_sin4, "acp", list())$ajuste
+  crudo <- ajustar_cli(ds_sin4, "acp",
+                       list(metodo = "acp", hiper = "matriz=covarianza"))$ajuste
+  abs(metricas_de_corrida(normado)$varianza_acumulada -
+        metricas_de_corrida(crudo)$varianza_acumulada) > 0.05
+})
+probar("la consola y correr() ajustan por el mismo camino", {
+  directo <- ajustar_por_registro(ds_sin4$df, "acp",
+                                  hiper = list(matriz = "covarianza"))$ajuste
+  cli <- ajustar_cli(ds_sin4, "acp", list(hiper = "matriz=covarianza"))$ajuste
+  identical(directo$valores_propios, cli$valores_propios)
+})
+probar("un hiperparámetro mal escrito falla, no corre el default", {
+  error <- tryCatch(hiper_cli("acp", list(hiper = "matrz=covarianza")),
+                    error = function(e) e)
+  grepl("matrz", conditionMessage(error), fixed = TRUE)
+})
+probar("panel f4.diagnostico.scree --metodo acp devuelve capas", {
+  utils::capture.output(capas <- tabla_de_panel(
+    ds_sin4, "f4.diagnostico.scree", character(0), list(metodo = "acp")))
+  length(capas) >= 3L && nrow(capas[[1]]) == 57L
+})
+probar("reglas_k sale como tabla, no como capas", {
+  utils::capture.output(tabla <- tabla_de_panel(
+    ds_sin4, "f4.diagnostico.reglas_k", character(0), list(metodo = "acp")))
+  is.data.frame(tabla) && nrow(tabla) == 3L
+})
+probar("el mapa 2D trae el nombre de cada país", {
+  utils::capture.output(capas <- tabla_de_panel(
+    ds_sin4, "f4.explicabilidad.mapa_2d", character(0), list(metodo = "acp")))
+  puntos <- Filter(function(capa) "etiqueta" %in% names(capa), capas)
+  length(puntos) == 1L && "Albania" %in% puntos[[1]]$etiqueta
+})
+ds_grupos <- suppressMessages(armar_dataset(list(
+  fuente = "eia", filtro = PAISES_ATIPICOS, grupos = "kmeans", hiper = "k=3")))
+probar("--grupos kmeans --hiper k=3 agrega `grupo` con 3 niveles", {
+  is.factor(ds_grupos$df$grupo) && nlevels(ds_grupos$df$grupo) == 3L &&
+    ds_grupos$diccionario$rol[ds_grupos$diccionario$columna == "grupo"] ==
+      "grupo"
+})
+probar("las cajas por grupo de k-medias salen por consola", {
+  utils::capture.output(capas <- tabla_de_panel(
+    ds_grupos, "f1.analisis.boxplot_grupos", c(CINCO[1], "grupo")))
+  nrow(capas[[1]]) == 3L
+})
+probar("un cuaderno con una clave f4 produce su chunk y lleva el contrato", {
+  opciones <- list(grupos = "kmeans", hiper = "k=3")
+  entrada <- entrada_de_pedido(
+    "f4.explicabilidad.contribuciones:metodo=acp+matriz=covarianza+ejes=1-2+top=30",
+    ds_grupos, "p1", opciones)
+  lineas <- armar_informe_exploracion(list(entrada), ds_grupos)
+  identical(entrada$params$hiper$matriz, "covarianza") &&
+    identical(entrada$params$ejes, c(1L, 2L)) &&
+    identical(entrada$params$top, 30L) &&
+    identical(entrada$params$grupos$hiper$k, 3L) &&
+    any(grepl("# f4.explicabilidad.contribuciones", lineas, fixed = TRUE))
+})
+probar("la sesión guarda el filtro de exclusión, los grupos y los paneles f4", {
+  entrada <- entrada_de_pedido("f4.diagnostico.scree:metodo=acp", ds_grupos)
+  archivo <- tempfile(fileext = ".json")
+  exportar_sesion_json(sesion_actual(NULL, ds_grupos, list(entrada)), archivo)
+  fase1 <- importar_sesion_json(archivo)$fase1
+  rehecho <- suppressMessages(dataset_de_sesion(fase1))$dataset
+  rehecho$n == 107L && nlevels(rehecho$df$grupo) == 3L &&
+    length(seleccion_de_sesion(fase1)) == 1L &&
+    identical(seleccion_de_sesion(fase1)[[1]]$params$hiper$matriz,
+              "correlacion")
 })
 
 cat(sprintf("\n[test_lab] %s\n",

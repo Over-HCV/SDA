@@ -74,21 +74,63 @@ cargar_sda(con_ui = FALSE)   # headless: no bslib, no DT
 
 ## Driving the lab from the console
 
-`learn/R/lab.R` walks phase 1 without a browser. Prefer it over ad-hoc
+`learn/R/lab.R` walks phases 1-4 without a browser. Prefer it over ad-hoc
 `Rscript -e` snippets: it builds the same dataset object the app builds
-(source + filter stack), so what you measure is what the app shows.
+(source + filter stack), and fits methods through the same path as
+`run_headless.R::correr()` (`ajustar_por_registro()` in
+`learn/R/nucleo/ajuste.R`), so what you measure is what the app shows. Its
+pieces live in `learn/R/lab/` (sourced by `lab.R`, not by `cargar_sda()`, and
+excluded from the wasm bundle).
 
 ```bash
 Rscript learn/R/lab.R                                   # list the commands
 ORI="--fuente ori --filtro Hora=12:00"
 Rscript learn/R/lab.R resumen Temperatura $ORI
 Rscript learn/R/lab.R panel f1.analisis.histograma Temperatura $ORI
+
+# Taller 02: EIA without the four outlier countries (`!=` EXCLUDES rows)
+EIA="--fuente eia --filtro Country!=UnitedStates,China,SaudiArabia,Russia"
+Rscript learn/R/lab.R momentos ColA ColB ColC $EIA         # mean vector + S
+Rscript learn/R/lab.R metodo acp --hiper matriz=covarianza $EIA
+Rscript learn/R/lab.R metodo kmeans --hiper k=3 --columnas a,b,c $EIA
+Rscript learn/R/lab.R panel f4.diagnostico.scree --metodo acp $EIA
+Rscript learn/R/lab.R panel f4.explicabilidad.mapa_2d --metodo acp \
+  --ejes 2,3 --color grupo --grupos kmeans --hiper k=3 $EIA
+Rscript learn/R/lab.R panel f1.analisis.boxplot_grupos ColA grupo \
+  --grupos kmeans --hiper k=3 $EIA
+Rscript learn/R/lab.R cuaderno \
+  f4.explicabilidad.contribuciones:metodo=acp+matriz=covarianza+ejes=1-2+top=30,f4.diagnostico.scree:metodo=acp \
+  $EIA --salida taller02.Rmd
 ```
 
 `panel` returns a PLOT AS A TABLE: it builds the registered ggplot for that
 artefact key and prints `ggplot_build()` layers — bin edges and heights, box
-whiskers, point coordinates — instead of drawing it. That is the read path for
+whiskers, point coordinates — instead of drawing it. Discrete axes come back
+named (`x_nombre`/`y_nombre`), facets as `faceta`, and individual maps carry
+the row name (`etiqueta`, e.g. the country). That is the read path for
 anything that cannot look at an image.
+
+Phase-4 keys (`panel f4.<...>`) fit the method first (`--metodo`, or the only
+active method that declares the key) and chain the artefact's logic and plot
+with the same arguments its card uses; a key without its own recipe in
+`lab/paneles.R` is resolved generically from the registry (logic(fit) →
+plot(result)), so a new artefact works without touching the CLI. A logic-only
+artefact (`f4.diagnostico.reglas_k`) prints its table.
+
+| Option | Meaning |
+|---|---|
+| `--filtro Col=a,b` / `Col!=a,b` | keep / exclude rows; repeatable, applied in order |
+| `--hiper nombre=valor` | repeatable; each method in play takes the names its registry declares; unknown names fail |
+| `--columnas a,b,c` | columns that enter the fit (default: all admissible) |
+| `--grupos <metodo>` | fit that method before the command and add factor column `grupo` (rol `grupo`) |
+| `--reinicios n`, `--semilla n` | optimiser control (defaults 1 and 42, as in `correr()`) |
+| `--ejes 2,3`, `--umbral 0.8`, `--k_max 10`, `--color col` | the phase-4 sidebar controls |
+
+In `cuaderno`/`sesion`, an `f4.` entry's tokens become `params = list(metodo,
+hiper = <all of hiper_por_defecto(metodo), overridden>, ejes, top, grupos =
+list(metodo, hiper))` — the contract the notebook generators read. Line
+`--metodo/--hiper` are defaults for entries without `metodo=`. Sessions keep
+the exclusion flag, the `--grupos` recipe and the `f4.` entries.
 
 ## Commands
 
@@ -109,6 +151,7 @@ Rscript learn/R/pruebas/test_fase1_graficos.R
 
 # The exportable notebook, no GUI
 Rscript learn/R/pruebas/test_informe.R
+Rscript learn/R/pruebas/test_informe_f4.R   # runs the phase-4 chunks on EIA
 
 # The console CLI (lab.R), no GUI
 Rscript learn/R/pruebas/test_lab.R
@@ -119,6 +162,7 @@ Rscript learn/R/pruebas/test_sesion.R
 # One file per implemented method, no GUI
 Rscript learn/R/pruebas/test_acp.R
 Rscript learn/R/pruebas/test_kmeans.R
+Rscript learn/R/pruebas/test_jerarquico.R
 
 # S2 output contract + the three-parts rule (C11), no GUI
 Rscript learn/R/pruebas/test_contrato.R
@@ -128,6 +172,7 @@ Rscript learn/R/pruebas/test_contrato.R
 #   test_app_piezas.R    the chrome every card shares: seal, formulas, sidebar
 #   test_app_metodo.R    ACP walked through phases 2 -> 3 -> 4
 #   test_app_kmeans.R    k-means, same walk, different family
+#   test_app_jerarquico.R hierarchical: linkage/cut inputs, merge trace, dendrogram
 #   test_app_traspaso.R  dataset handoff ① -> ② (auto-save) + "Ver en ① Datos"
 #   test_app_taller01.R  Taller 01 end to end: ORI, noon filter, notebook
 #   test_app_sesion.R    open a session, edit, save from Inicio, reopen elsewhere
@@ -135,6 +180,7 @@ Rscript learn/R/pruebas/test_app.R
 Rscript learn/R/pruebas/test_app_piezas.R
 Rscript learn/R/pruebas/test_app_metodo.R
 Rscript learn/R/pruebas/test_app_kmeans.R
+Rscript learn/R/pruebas/test_app_jerarquico.R
 Rscript learn/R/pruebas/test_app_sesion.R
 
 # Run a method outside the app: same JSON the UI produces (S2)

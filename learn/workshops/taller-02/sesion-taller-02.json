@@ -1,0 +1,801 @@
+{
+  "proyecto": "sda-lab",
+  "tipo": "sesion",
+  "version": 2,
+  "exportado": "2026-10-07 17:03:01",
+  "modo": "servidor",
+  "fase1": {
+    "fuente": "eia",
+    "nombre": "eia",
+    "semilla": 42,
+    "n_crudo": 111,
+    "transformaciones": [
+      {
+        "tipo": "filtro",
+        "columnas": "Country",
+        "params": {
+          "valores": ["UnitedStates", "China", "SaudiArabia", "Russia"],
+          "excluir": true
+        }
+      }
+    ],
+    "balanceo": {},
+    "particion": {},
+    "grupos": {
+      "metodo": "kmeans",
+      "hiper": {
+        "k": 3
+      },
+      "columnas": {},
+      "reinicios": 25,
+      "semilla": 42
+    },
+    "diccionario": [
+      {
+        "columna": "Country",
+        "etiqueta": "Country",
+        "descripcion": "",
+        "escala": "nominal",
+        "clase": "cualitativa",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 107
+      },
+      {
+        "columna": "Bunker_fuel_consumption_TBPD",
+        "etiqueta": "Bunker_fuel_consumption_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 77
+      },
+      {
+        "columna": "Bunker_residual_fuel_oil_consumption_TBPD",
+        "etiqueta": "Bunker_residual_fuel_oil_consumption_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 54
+      },
+      {
+        "columna": "Crude_oil_including_lease_condensate_exports_TBPD",
+        "etiqueta": "Crude_oil_including_lease_condensate_exports_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 59
+      },
+      {
+        "columna": "Crude_oil_including_lease_condensate_imports_TBPD",
+        "etiqueta": "Crude_oil_including_lease_condensate_imports_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 67
+      },
+      {
+        "columna": "Crude_oil_including_lease_condensate_production_TBPD",
+        "etiqueta": "Crude_oil_including_lease_condensate_production_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 72
+      },
+      {
+        "columna": "Crude_oil_including_lease_condensate_reserves_BB",
+        "etiqueta": "Crude_oil_including_lease_condensate_reserves_BB",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 39
+      },
+      {
+        "columna": "Distillate_fuel_oil_consumption_TBPD",
+        "etiqueta": "Distillate_fuel_oil_consumption_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 86
+      },
+      {
+        "columna": "Distillate_fuel_oil_production_TBPD",
+        "etiqueta": "Distillate_fuel_oil_production_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 84
+      },
+      {
+        "columna": "Jet_fuel_consumption_TBPD",
+        "etiqueta": "Jet_fuel_consumption_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 74
+      },
+      {
+        "columna": "Jet_fuel_production_TBPD",
+        "etiqueta": "Jet_fuel_production_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 71
+      },
+      {
+        "columna": "Kerosene_consumption_TBPD",
+        "etiqueta": "Kerosene_consumption_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 39
+      },
+      {
+        "columna": "Kerosene_production_TBPD",
+        "etiqueta": "Kerosene_production_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 42
+      },
+      {
+        "columna": "Liquefied_petroleum_gases_.LPG._consumption_TBPD",
+        "etiqueta": "Liquefied_petroleum_gases_.LPG._consumption_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 78
+      },
+      {
+        "columna": "Liquefied_petroleum_gases_.LPG._production_TBPD",
+        "etiqueta": "Liquefied_petroleum_gases_.LPG._production_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 65
+      },
+      {
+        "columna": "Motor_gasoline_consumption_TBPD",
+        "etiqueta": "Motor_gasoline_consumption_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 86
+      },
+      {
+        "columna": "Motor_gasoline_production_TBPD",
+        "etiqueta": "Motor_gasoline_production_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 82
+      },
+      {
+        "columna": "Natural_gas_plant_liquids_production_TBPD",
+        "etiqueta": "Natural_gas_plant_liquids_production_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 41
+      },
+      {
+        "columna": "Other_liquids_production_TBPD",
+        "etiqueta": "Other_liquids_production_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 50
+      },
+      {
+        "columna": "Other_refined_products_consumption_TBPD",
+        "etiqueta": "Other_refined_products_consumption_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 88
+      },
+      {
+        "columna": "Other_refined_products_production_TBPD",
+        "etiqueta": "Other_refined_products_production_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 81
+      },
+      {
+        "columna": "Petroleum_and_other_liquids_CO2_emissions_MMTCD",
+        "etiqueta": "Petroleum_and_other_liquids_CO2_emissions_MMTCD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 82
+      },
+      {
+        "columna": "Petroleum_and_other_liquids_consumption_TBPD",
+        "etiqueta": "Petroleum_and_other_liquids_consumption_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 100
+      },
+      {
+        "columna": "Petroleum_and_other_liquids_production_TBPD",
+        "etiqueta": "Petroleum_and_other_liquids_production_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 93
+      },
+      {
+        "columna": "Refined_petroleum_products_consumption_TBPD",
+        "etiqueta": "Refined_petroleum_products_consumption_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 100
+      },
+      {
+        "columna": "Refined_petroleum_products_production_TBPD",
+        "etiqueta": "Refined_petroleum_products_production_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 91
+      },
+      {
+        "columna": "Refinery_processing_gain_TBPD",
+        "etiqueta": "Refinery_processing_gain_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 71
+      },
+      {
+        "columna": "Residual_fuel_oil_consumption_TBPD",
+        "etiqueta": "Residual_fuel_oil_consumption_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 82
+      },
+      {
+        "columna": "Residual_fuel_oil_production_TBPD",
+        "etiqueta": "Residual_fuel_oil_production_TBPD",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 81
+      },
+      {
+        "columna": "Biomass_and_waste_electricity_installed_capacity_MK",
+        "etiqueta": "Biomass_and_waste_electricity_installed_capacity_MK",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 25
+      },
+      {
+        "columna": "Biomass_and_waste_electricity_net_generation_BKWH",
+        "etiqueta": "Biomass_and_waste_electricity_net_generation_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 38
+      },
+      {
+        "columna": "Electricity_distribution_losses_BKWH",
+        "etiqueta": "Electricity_distribution_losses_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 68
+      },
+      {
+        "columna": "Electricity_exports_BKWH",
+        "etiqueta": "Electricity_exports_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 46
+      },
+      {
+        "columna": "Electricity_imports_BKWH",
+        "etiqueta": "Electricity_imports_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 47
+      },
+      {
+        "columna": "Electricity_installed_capacity_MK",
+        "etiqueta": "Electricity_installed_capacity_MK",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 78
+      },
+      {
+        "columna": "Electricity_net_consumption_BKWH",
+        "etiqueta": "Electricity_net_consumption_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 86
+      },
+      {
+        "columna": "Electricity_net_generation_BKWH",
+        "etiqueta": "Electricity_net_generation_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 86
+      },
+      {
+        "columna": "Electricity_net_imports_BKWH",
+        "etiqueta": "Electricity_net_imports_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 55
+      },
+      {
+        "columna": "Fossil_fuels_electricity_installed_capacity_MK",
+        "etiqueta": "Fossil_fuels_electricity_installed_capacity_MK",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 73
+      },
+      {
+        "columna": "Fossil_fuels_electricity_net_generation_BKWH",
+        "etiqueta": "Fossil_fuels_electricity_net_generation_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 91
+      },
+      {
+        "columna": "Geothermal_electricity_installed_capacity_MK",
+        "etiqueta": "Geothermal_electricity_installed_capacity_MK",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 9
+      },
+      {
+        "columna": "Geothermal_electricity_net_generation_BKWH",
+        "etiqueta": "Geothermal_electricity_net_generation_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 13
+      },
+      {
+        "columna": "Hydroelectric_pumped_storage_electricity_installed_capacity_MK",
+        "etiqueta": "Hydroelectric_pumped_storage_electricity_installed_capacity_MK",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 25
+      },
+      {
+        "columna": "Hydroelectric_pumped_storage_electricity_net_generation_BKWH",
+        "etiqueta": "Hydroelectric_pumped_storage_electricity_net_generation_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 14
+      },
+      {
+        "columna": "Hydroelectricity_installed_capacity_MK",
+        "etiqueta": "Hydroelectricity_installed_capacity_MK",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 53
+      },
+      {
+        "columna": "Hydroelectricity_net_generation_BKWH",
+        "etiqueta": "Hydroelectricity_net_generation_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 65
+      },
+      {
+        "columna": "Non.hydro_renewable_electricity_installed_capacity_MK",
+        "etiqueta": "Non.hydro_renewable_electricity_installed_capacity_MK",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 40
+      },
+      {
+        "columna": "Non.hydro_renewable_electricity_net_generation_BKWH",
+        "etiqueta": "Non.hydro_renewable_electricity_net_generation_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 51
+      },
+      {
+        "columna": "Nuclear_electricity_installed_capacity_MK",
+        "etiqueta": "Nuclear_electricity_installed_capacity_MK",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 22
+      },
+      {
+        "columna": "Nuclear_electricity_net_generation_BKWH",
+        "etiqueta": "Nuclear_electricity_net_generation_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 24
+      },
+      {
+        "columna": "Renewable_electricity_installed_capacity_MK",
+        "etiqueta": "Renewable_electricity_installed_capacity_MK",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 58
+      },
+      {
+        "columna": "Renewable_electricity_net_generation_BKWH",
+        "etiqueta": "Renewable_electricity_net_generation_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 71
+      },
+      {
+        "columna": "Solar_electricity_installed_capacity_MK",
+        "etiqueta": "Solar_electricity_installed_capacity_MK",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 24
+      },
+      {
+        "columna": "Solar_electricity_net_generation_BKWH",
+        "etiqueta": "Solar_electricity_net_generation_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 25
+      },
+      {
+        "columna": "Tide_and_wave_electricity_installed_capacity_MK",
+        "etiqueta": "Tide_and_wave_electricity_installed_capacity_MK",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 5
+      },
+      {
+        "columna": "Tide_and_wave_electricity_net_generation_BKWH",
+        "etiqueta": "Tide_and_wave_electricity_net_generation_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 7
+      },
+      {
+        "columna": "Wind_electricity_installed_capacity_MK",
+        "etiqueta": "Wind_electricity_installed_capacity_MK",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 27
+      },
+      {
+        "columna": "Wind_electricity_net_generation_BKWH",
+        "etiqueta": "Wind_electricity_net_generation_BKWH",
+        "descripcion": "",
+        "escala": "razon",
+        "clase": "continua",
+        "rol": "predictor",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 36
+      },
+      {
+        "columna": "grupo",
+        "etiqueta": "grupo",
+        "descripcion": "",
+        "escala": "nominal",
+        "clase": "cualitativa",
+        "rol": "grupo",
+        "unidad": "",
+        "faltantes_pct": 0,
+        "n_unicos": 3
+      }
+    ],
+    "seleccion": [
+      {
+        "id": "p1",
+        "clave": "f4.diagnostico.scree",
+        "titulo": "Gráfico de sedimentación",
+        "cuando": "17:03:01",
+        "params": {
+          "metodo": "acp",
+          "hiper": {
+            "n_componentes": 2,
+            "matriz": "correlacion"
+          },
+          "grupos": {
+            "metodo": "kmeans",
+            "hiper": {
+              "k": 3
+            }
+          }
+        }
+      },
+      {
+        "id": "p2",
+        "clave": "f4.explicabilidad.mapa_2d",
+        "titulo": "Mapa en dos dimensiones",
+        "cuando": "17:03:01",
+        "params": {
+          "metodo": "acp",
+          "hiper": {
+            "n_componentes": 2,
+            "matriz": "correlacion"
+          },
+          "ejes": [1, 2],
+          "grupos": {
+            "metodo": "kmeans",
+            "hiper": {
+              "k": 3
+            }
+          }
+        }
+      },
+      {
+        "id": "p3",
+        "clave": "f4.diagnostico.codo",
+        "titulo": "Codo de la inercia",
+        "cuando": "17:03:01",
+        "params": {
+          "metodo": "kmeans",
+          "hiper": {
+            "k": 3,
+            "escalar": true
+          },
+          "grupos": {
+            "metodo": "kmeans",
+            "hiper": {
+              "k": 3
+            }
+          }
+        }
+      },
+      {
+        "id": "p4",
+        "clave": "f4.desempeno.grupos",
+        "titulo": "Tamaño de los grupos",
+        "cuando": "17:03:01",
+        "params": {
+          "metodo": "kmeans",
+          "hiper": {
+            "k": 3,
+            "escalar": true
+          },
+          "grupos": {
+            "metodo": "kmeans",
+            "hiper": {
+              "k": 3
+            }
+          }
+        }
+      },
+      {
+        "id": "p5",
+        "clave": "f4.diagnostico.dendrograma",
+        "titulo": "Dendrograma",
+        "cuando": "17:03:01",
+        "params": {
+          "metodo": "jerarquico",
+          "hiper": {
+            "enlace": "average",
+            "distancia": "euclidean",
+            "k_corte": 3,
+            "escalar": true
+          },
+          "grupos": {
+            "metodo": "kmeans",
+            "hiper": {
+              "k": 3
+            }
+          }
+        }
+      },
+      {
+        "id": "p6",
+        "clave": "f1.analisis.boxplot_grupos",
+        "titulo": "Cajas comparadas por grupo",
+        "cuando": "17:03:01",
+        "params": {
+          "variable": "Crude_oil_including_lease_condensate_production_TBPD",
+          "grupo": "grupo"
+        }
+      }
+    ],
+    "cuaderno": [
+      "ficha_datos",
+      "notas",
+      "plantilla_taller"
+    ]
+  },
+  "almacen": {}
+}

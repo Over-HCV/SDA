@@ -8,6 +8,8 @@
 #   cargar_twins()        -> data.frame gemelos (16 vars numéricas)
 #   cargar_ori()          -> data.frame meteorológico del Taller 01 (18 vars)
 #   descargar_ori()       -> ruta a ORI.csv bajado de Kaggle (overhcv/ori-dataset)
+#   cargar_eia()          -> data.frame energético del Taller 02 (111 x 58)
+#   descargar_eia()       -> ruta a EIA.csv bajado de Kaggle (overhcv/eia-united-states)
 #   listar_flujos()       -> character() con los flujos disponibles
 #   listar_paises()       -> character() con los países disponibles
 #   filtrar_charcoal()    -> data.frame filtrado por país/año/flujo
@@ -164,19 +166,46 @@ URL_ORI_KAGGLE <- "https://www.kaggle.com/api/v1/datasets/download/overhcv/ori-d
 #' error si no hay red; quien llama decide si cae a la copia local.
 descargar_ori <- function(url = URL_ORI_KAGGLE,
                           destino = file.path(tempdir(), "ori-kaggle"),
-                          espera = 20) {
-  csv <- file.path(destino, "ORI.csv")
+                          espera = 20)
+  descargar_kaggle(url, "ORI.csv", destino, espera)
+
+#' Baja un zip público de Kaggle y devuelve la ruta al `archivo` que trae.
+descargar_kaggle <- function(url, archivo, destino, espera = 20) {
+  csv <- file.path(destino, archivo)
   if (file.exists(csv)) return(csv)
   dir.create(destino, recursive = TRUE, showWarnings = FALSE)
-  zip <- file.path(destino, "ori-dataset.zip")
+  zip <- file.path(destino, "kaggle.zip")
   previo <- options(timeout = espera)
   on.exit(options(previo), add = TRUE)
   utils::download.file(url, zip, mode = "wb", quiet = TRUE)
   extraidos <- utils::unzip(zip, exdir = destino)
   if (!file.exists(csv))
-    stop("el zip de Kaggle no trae ORI.csv: ", paste(basename(extraidos),
-                                                     collapse = ", "))
+    stop("el zip de Kaggle no trae ", archivo, ": ",
+         paste(basename(extraidos), collapse = ", "))
   csv
+}
+
+# ---------------------------------------------------------------------------
+# EIA.csv — energía por país (U.S. Energy Information Administration), base
+# del Taller 02. 111 países x 57 variables de petróleo y electricidad, una
+# fila por país. Mismo formato que ORI (`;` y punto decimal) y en Kaggle como
+# overhcv/eia-united-states. Los nombres pasan por make.names(), igual que con
+# read.csv() por defecto: "Non-hydro_..." queda "Non.hydro_..." y el código
+# del cuaderno puede escribir datos$Columna sin comillas invertidas.
+# ---------------------------------------------------------------------------
+ruta_eia <- function() file.path(proyecto_raiz(), "data", "EIA.csv")
+
+URL_EIA_KAGGLE <- paste0("https://www.kaggle.com/api/v1/datasets/download/",
+                         "overhcv/eia-united-states")
+
+descargar_eia <- function(url = URL_EIA_KAGGLE,
+                          destino = file.path(tempdir(), "eia-kaggle"),
+                          espera = 20)
+  descargar_kaggle(url, "EIA.csv", destino, espera)
+
+cargar_eia <- function(ruta = ruta_eia()) {
+  utils::read.csv(ruta, sep = ";", dec = ".", stringsAsFactors = FALSE,
+                  fileEncoding = codificacion_de(ruta))
 }
 
 cargar_ori <- function(ruta = ruta_ori()) {

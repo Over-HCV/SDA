@@ -6,8 +6,8 @@
 #
 #   source("../template/R/taller.R")
 #
-# Son dos familias: presentación (código y resultado lado a lado, tabla de
-# documentación) y estadística descriptiva que el enunciado pide una y otra
+# Son dos familias: presentación (código y resultado lado a lado,
+# paginación, tabla de documentación) y estadística descriptiva que el enunciado pide una y otra
 # vez (asimetría, cajas anotadas, densidades, modas). Todo depende de que el
 # cuaderno tenga un data.frame llamado `datos`, que es el nombre que usa el
 # cuaderno exportado por SDA Lab.
@@ -40,6 +40,70 @@ dos_columnas <- function(...) {
   }
 }
 
+#' Que LaTeX no parta lo que debe ir junto.
+#'
+#' Parte cada chunk de R en tramos (un bloque de código con la salida,
+#' tabla o figura que le sigue) y antes de cada tramo emite
+#' `\Needspace{alto}` (paquete needspace de taller-qmd-template.tex): Si
+#' el tramo no cabe en lo que queda de página, empieza en la siguiente. Así
+#' el código no queda al pie de una página con su salida en la otra, una
+#' tabla corta no se parte y una salida larga (más de `tope` renglones)
+#' empieza con aire. Es opcional: El taller que no la llame compila igual
+#' que antes. Un chunk se excluye con `paginar = FALSE`.
+#'
+#' @param tope renglones máximos que se reservan para un tramo sin figura
+#' @param renglon alto de un renglón de código o de salida, en pulgadas
+paginar <- function(tope = 24, renglon = 0.19) {
+  reservar <- function(alto) {
+    if (alto <= 0) return(character(0))
+    c("", "```{=latex}", sprintf("\\Needspace{%.2fin}", alto), "```", "")
+  }
+  alto_tramo <- function(l, fig_alto) {
+    l <- l[nzchar(trimws(l)) & !grepl("^\\s*(```|:::)", l)]
+    figura <- grepl("!\\[", l)
+    tabla <- grepl("^\\s*\\||^Table:", l)
+    renglones <- sum(!figura) + if (any(tabla)) 2 else 0
+    if (any(figura)) min(fig_alto + 0.7 + renglones * renglon, 8.6)
+    else min(renglones, tope) * renglon
+  }
+  # Un diagrama mermaid y su pie (que quarto deja como párrafo suelto)
+  # van juntos. Alto estimado a 5.2 pulgadas de ancho: Uno de arriba
+  # abajo mide unas 3.7; uno de izquierda a derecha, 0.72 por cada nodo
+  # de la columna más poblada (la clase con más nodos).
+  alto_mermaid <- function(codigo) {
+    clases <- grep("^\\s*class ", codigo, value = TRUE)
+    filas <- max(c(2, lengths(strsplit(clases, ","))))
+    alto <- if (any(grepl("flowchart LR", codigo))) 0.72 * filas else 3.7
+    alto + 0.6
+  }
+  previo <- knitr::knit_hooks$get("chunk")
+  knitr::knit_hooks$set(chunk = function(x, options) {
+    x <- previo(x, options)
+    if (isFALSE(options$paginar)) return(x)
+    if (tolower(options$engine) == "mermaid")
+      return(paste(c(reservar(alto_mermaid(options$code)), x),
+                   collapse = "\n"))
+    if (tolower(options$engine) != "r") return(x)
+    l <- unlist(strsplit(x, "\n"))
+    # Un tramo empieza en cada bloque de código mostrado.
+    inicio <- grepl("^```\\{?\\.?r[ }.]|^```r$", l)
+    # Una salida "asis" (dos_columnas) va entera: Sus bloques de código
+    # están dentro de minipages.
+    if (identical(options$results, "asis")) inicio[] <- FALSE
+    inicio[1] <- TRUE
+    tramo <- cumsum(inicio)
+    partes <- split(l, tramo)
+    paste(unlist(lapply(partes, function(p) {
+      # Una tabla corta no se parte aunque el código quede arriba.
+      t <- which(grepl("^\\s*\\||^Table:", p))
+      if (length(t))
+        p <- append(p, reservar(min(length(t), tope) * renglon + 0.6),
+                    after = t[1] - 1)
+      c(reservar(alto_tramo(p, options$fig.height)), p)
+    })), collapse = "\n")
+  })
+}
+
 #' La tabla del apéndice: función, paquete, dónde se usó y su ayuda oficial.
 #'
 #' El enlace es el mismo que abre `?función`. Las de ggplot2 y ggExtra no
@@ -50,11 +114,14 @@ tabla_documentacion <- function(funciones) {
   manual <- function(paquete, tema) sprintf(
     "https://stat.ethz.ch/R-manual/R-devel/library/%s/html/%s.html",
     paquete, tema)
+  # Los paquetes de CRAN que no vienen con R tienen su ayuda en rdrr.io.
+  cran <- c("ggExtra", "factoextra", "GGally", "cluster", "ggrepel")
   url <- ifelse(
     funciones$paquete == "ggplot2",
     paste0("https://ggplot2.tidyverse.org/reference/", funciones$tema, ".html"),
-    ifelse(funciones$paquete == "ggExtra",
-           paste0("https://rdrr.io/cran/ggExtra/man/", funciones$tema, ".html"),
+    ifelse(funciones$paquete %in% cran,
+           sprintf("https://rdrr.io/cran/%s/man/%s.html",
+                   funciones$paquete, funciones$tema),
            manual(funciones$paquete, funciones$tema)))
   knitr::kable(
     data.frame(Función = sprintf("[`%s()`](%s)", funciones$f, url),

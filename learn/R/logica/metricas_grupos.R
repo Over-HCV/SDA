@@ -1,17 +1,79 @@
 # learn/R/logica/metricas_grupos.R
 #
 # Responsabilidad: traducir un ajuste de agrupamiento a las tablas que se
-# dibujan y se exportan.
+# dibujan y se exportan, y preparar la matriz que esos ajustes miden.
 #
 # La hermana de `metricas_reduccion.R` para la otra familia. Sirve para
-# k-medias y, sin cambios, para cualquier método que devuelva `grupos`,
-# `centroides` y la matriz `z` sobre la que midió: jerárquico cortado,
+# k-medias, para el jerárquico cortado y, sin cambios, para cualquier método
+# que devuelva `grupos`, `centroides` y la matriz `z` sobre la que midió:
 # espectral, PAM.
 #
 # Todo se calcula sobre `ajuste$z`, la matriz que el método realmente usó. Si
 # se escaló al ajustar, la silueta se mide en esa misma escala; medirla en las
 # unidades originales daría un número que no corresponde a la partición que se
-# está juzgando.
+# está juzgando. Por la misma razón la silueta usa `ajuste$distancia` cuando el
+# método la declara: un jerárquico con Manhattan juzgado con euclídea es otro
+# jerárquico.
+#
+# Los métodos S3 llevan el sufijo de la FAMILIA (`.ajuste_agrupamiento`), igual
+# que en reducción: k-medias y jerárquico contestan por acá, y solo escriben lo
+# suyo —el gráfico principal, la frase que interpreta— los que tienen algo
+# propio que decir.
+
+# ---------------------------------------------------------------------------
+# Lo que entra a las distancias (compartido por los métodos de la familia)
+# ---------------------------------------------------------------------------
+
+#' La matriz numérica, completa y (si se pide) estandarizada que se agrupa.
+#'
+#' Escalar no es cosmética acá: la distancia euclidiana suma cuadrados de cosas
+#' con unidades distintas, así que sin escalar manda la columna con el rango
+#' más grande. Se deja elegir porque a veces las unidades ya son comparables.
+#'
+#' @param nombre quién la pide, para que el error diga qué método falló
+#' @return list(z, columnas, centro, escala, descartadas, completas)
+preparar_matriz_grupos <- function(datos, columnas, escalar,
+                                   nombre = "el agrupamiento") {
+  numericas <- names(datos)[vapply(datos, is.numeric, logical(1))]
+  columnas <- intersect(columnas %||% numericas, numericas)
+  if (length(columnas) < 2L)
+    stop(nombre, " necesita al menos dos columnas numericas")
+
+  bruta <- as.matrix(datos[, columnas, drop = FALSE])
+  completas <- stats::complete.cases(bruta)
+  if (sum(completas) < 3L)
+    stop("quedan menos de tres filas completas: imputa o quita columnas")
+  bruta <- bruta[completas, , drop = FALSE]
+
+  centro <- colMeans(bruta)
+  escala <- if (isTRUE(escalar)) apply(bruta, 2L, stats::sd) else
+    rep(1, length(columnas))
+  if (isTRUE(escalar) && any(escala == 0))
+    stop("hay columnas constantes: su varianza es cero y no se pueden escalar")
+
+  z <- scale(bruta, center = centro, scale = escala)
+  attributes(z) <- list(dim = dim(z), dimnames = list(NULL, columnas))
+  list(z = z, columnas = columnas, centro = centro, escala = escala,
+       descartadas = sum(!completas), completas = completas)
+}
+
+#' El promedio de cada grupo, variable a variable: k x p.
+centroides_de_grupos <- function(z, grupos, k) {
+  centroides <- t(vapply(seq_len(k), function(j)
+    colMeans(z[grupos == j, , drop = FALSE]), numeric(ncol(z))))
+  dimnames(centroides) <- list(paste0("g", seq_len(k)), colnames(z))
+  centroides
+}
+
+#' La suma de cuadrados de cada grupo contra su centroide. Sumadas dan W.
+inercia_de_grupos <- function(z, grupos, centroides) {
+  vapply(seq_len(nrow(centroides)), function(j) {
+    filas <- which(grupos == j)
+    if (!length(filas)) return(0)
+    sum((z[filas, , drop = FALSE] -
+           rep(centroides[j, ], each = length(filas)))^2)
+  }, numeric(1))
+}
 
 #' Silueta de cada observación.
 #'
@@ -40,7 +102,8 @@ silueta <- function(ajuste, muestra_max = 2000L, semilla = 42L) {
   }
 
   niveles <- sort(unique(grupos))
-  distancias <- as.matrix(stats::dist(z))
+  distancias <- as.matrix(stats::dist(z, method = ajuste$distancia %||%
+                                         "euclidean"))
   medias <- vapply(niveles, function(j) {
     columnas <- which(grupos == j)
     if (!length(columnas)) return(rep(NA_real_, nrow(z)))
@@ -114,10 +177,99 @@ centroides_tabla <- function(ajuste) {
 }
 
 # ---------------------------------------------------------------------------
+# El árbol de un jerárquico
+# ---------------------------------------------------------------------------
+
+#' El dendrograma como tablas: segmentos, hojas, rectángulos del corte.
+#'
+#' Se calcula a mano desde `$merge`, `$height` y `$order` en vez de pasar por
+#' `as.dendrogram()`: así cada segmento sabe a qué grupo del corte pertenece, y
+#' el gráfico solo tiene que pintar. Una fusión entre dos ramas del mismo grupo
+#' lleva su color; una por encima del corte junta grupos distintos y va en gris.
+#'
+#' La hoja i está en la posición que le da `$order`, que es la que garantiza
+#' que ninguna rama se cruce con otra. Cada nodo se dibuja en el punto medio de
+#' sus dos hijos.
+#'
+#' @param k grupos del corte; por defecto, los del ajuste
+#' @return list(segmentos, hojas, rectangulos, corte, k, n, enlace, distancia)
+arbol_jerarquico <- function(ajuste, k = ajuste$k) {
+  arbol <- ajuste$arbol
+  n <- length(arbol$order)
+  altura <- arbol$height
+  fusiones <- arbol$merge
+  posicion <- integer(n)
+  posicion[arbol$order] <- seq_len(n)
+  grupos <- as.integer(stats::cutree(arbol, k = k))
+
+  x_nodo <- numeric(n - 1L)
+  grupo_nodo <- rep(NA_integer_, n - 1L)
+  hijo <- function(j) if (j < 0) c(posicion[-j], 0, grupos[-j]) else
+    c(x_nodo[j], altura[j], grupo_nodo[j])
+  partes <- vector("list", n - 1L)
+  for (i in seq_len(n - 1L)) {
+    a <- hijo(fusiones[i, 1L]); b <- hijo(fusiones[i, 2L])
+    x_nodo[i] <- (a[1] + b[1]) / 2
+    if (!is.na(a[3]) && !is.na(b[3]) && a[3] == b[3]) grupo_nodo[i] <- a[3]
+    partes[[i]] <- c(a[1], a[2], a[1], altura[i], a[3],
+                     b[1], b[2], b[1], altura[i], b[3],
+                     a[1], altura[i], b[1], altura[i], grupo_nodo[i])
+  }
+  plano <- matrix(unlist(partes), ncol = 5L, byrow = TRUE)
+  segmentos <- data.frame(x = plano[, 1], y = plano[, 2], xend = plano[, 3],
+                          yend = plano[, 4],
+                          grupo = factor(plano[, 5], levels = seq_len(k)))
+
+  # cutree(k) corta después de la fusión n − k, así que la línea va a mitad de
+  # camino entre esa fusión y la siguiente.
+  corte <- mean(altura[c(n - k, n - k + 1L)])
+  etiquetas <- arbol$labels %||% as.character(seq_len(n))
+  hojas <- data.frame(x = seq_len(n), etiqueta = etiquetas[arbol$order],
+                      grupo = factor(grupos[arbol$order], levels = seq_len(k)))
+  rectangulos <- do.call(rbind, lapply(seq_len(k), function(g) {
+    lugares <- posicion[grupos == g]
+    data.frame(xmin = min(lugares) - 0.45, xmax = max(lugares) + 0.45,
+               ymin = 0, ymax = corte, grupo = factor(g, levels = seq_len(k)))
+  }))
+
+  list(segmentos = segmentos, hojas = hojas, rectangulos = rectangulos,
+       corte = corte, k = as.integer(k), n = n, enlace = ajuste$enlace,
+       distancia = ajuste$distancia,
+       cofenetica = ajuste$correlacion_cofenetica)
+}
+
+#' Distancia original contra distancia cofenética, par por par.
+#'
+#' La cofenética de dos observaciones es la altura a la que el árbol las junta
+#' por primera vez. Si el árbol respeta las distancias, las dos columnas se
+#' mueven juntas; la correlación entre ellas mide cuánto distorsionó el enlace.
+#'
+#' La correlación se calcula sobre TODOS los pares (es la del ajuste); lo que
+#' se muestrea por encima de `muestra_max` son los puntos a dibujar, y el
+#' atributo `muestreada` lo dice (C8).
+#'
+#' @return data.frame(original, cofenetica) con atributos correlacion, pares
+cofenetico <- function(ajuste, muestra_max = 20000L, semilla = 42L) {
+  original <- as.numeric(stats::dist(ajuste$z, method = ajuste$distancia))
+  cofenetica <- as.numeric(stats::cophenetic(ajuste$arbol))
+  tabla <- data.frame(original = original, cofenetica = cofenetica)
+  pares <- nrow(tabla)
+  muestreada <- pares > muestra_max
+  if (muestreada) {
+    set.seed(semilla)
+    tabla <- tabla[sort(sample.int(pares, muestra_max)), , drop = FALSE]
+  }
+  attr(tabla, "correlacion") <- stats::cor(original, cofenetica)
+  attr(tabla, "pares") <- pares
+  attr(tabla, "muestreada") <- muestreada
+  tabla
+}
+
+# ---------------------------------------------------------------------------
 # La cara de la familia hacia la UI (genéricas de metricas.R)
 # ---------------------------------------------------------------------------
 
-metricas_de_corrida.ajuste_kmeans <- function(ajuste) {
+metricas_de_corrida.ajuste_agrupamiento <- function(ajuste) {
   siluetas <- silueta(ajuste)
   list(n = ajuste$n, p = ajuste$p, k = ajuste$k,
        inercia = ajuste$inercia,
@@ -130,14 +282,18 @@ metricas_de_corrida.ajuste_kmeans <- function(ajuste) {
        convergio = isTRUE(ajuste$convergio))
 }
 
+metricas_de_corrida.ajuste_jerarquico <- function(ajuste) {
+  c(NextMethod(), list(correlacion_cofenetica = ajuste$correlacion_cofenetica))
+}
+
 #' El mapa 2D de una partición no tiene ejes propios: se proyecta sobre las dos
 #' primeras direcciones principales de la misma matriz que se agrupó. Es un
 #' dibujo, no un resultado — la partición vive en las p dimensiones.
 #'
 #' @param grupo asignaciones a pintar; NULL = las del ajuste. El paso a paso de
 #'   la fase 3 pasa acá la columna de `asignaciones_por_iter`.
-coordenadas_2d.ajuste_kmeans <- function(ajuste, ejes = c(1L, 2L), grupo = NULL,
-                                         ...) {
+coordenadas_2d.ajuste_agrupamiento <- function(ajuste, ejes = c(1L, 2L),
+                                               grupo = NULL, ...) {
   descomposicion <- svd(scale(ajuste$z, center = TRUE, scale = FALSE),
                         nu = 2L, nv = 2L)
   proyeccion <- descomposicion$u %*% diag(descomposicion$d[1:2], 2L, 2L)
@@ -147,17 +303,27 @@ coordenadas_2d.ajuste_kmeans <- function(ajuste, ejes = c(1L, 2L), grupo = NULL,
              grupo = factor(etiquetas, levels = seq_len(ajuste$k)))
 }
 
-tabla_resultado.ajuste_kmeans <- function(ajuste) resumen_grupos(ajuste)
+tabla_resultado.ajuste_agrupamiento <- function(ajuste) resumen_grupos(ajuste)
 
 grafico_resultado.ajuste_kmeans <- function(ajuste, ...) {
   graficar_codo(inercia_por_k(ajuste), k = ajuste$k, ...)
 }
 
-resumen_ajuste.ajuste_kmeans <- function(ajuste) {
+grafico_resultado.ajuste_jerarquico <- function(ajuste, ...) {
+  graficar_dendrograma(arbol_jerarquico(ajuste), ...)
+}
+
+resumen_ajuste.ajuste_agrupamiento <- function(ajuste) {
   list("grupos" = ajuste$k,
        "inercia" = sprintf("%.3f", ajuste$inercia),
        "explicado" = sprintf("%.1f %%", 100 * ajuste$proporcion_explicada),
        "grupo menor" = min(ajuste$tamanos))
+}
+
+resumen_ajuste.ajuste_jerarquico <- function(ajuste) {
+  c(list("enlace" = ajuste$enlace,
+         "cofenética" = sprintf("%.3f", ajuste$correlacion_cofenetica)),
+    NextMethod())
 }
 
 lectura_resultado.ajuste_kmeans <- function(ajuste, ...) {
@@ -169,6 +335,20 @@ lectura_resultado.ajuste_kmeans <- function(ajuste, ...) {
           100 * ajuste$proporcion_explicada)
 }
 
+# El jerárquico no tiene semilla que cambiar: lo que se pone a prueba es el
+# enlace. Un grupo de una sola observación suele ser un atípico que el árbol
+# dejó para el final, y con enlace promedio o simple pasa seguido.
+lectura_resultado.ajuste_jerarquico <- function(ajuste, ...) {
+  tamanos <- ajuste$tamanos
+  sprintf(paste("Cortado en %d grupos con enlace %s, van de %d a %d",
+                "observaciones y dejan explicada el %.1f %% de la inercia. La",
+                "correlación cofenética es %.2f. Un grupo de una sola",
+                "observación suele ser un atípico: mira si sobrevive a otro",
+                "enlace."),
+          ajuste$k, ajuste$enlace, min(tamanos), max(tamanos),
+          100 * ajuste$proporcion_explicada, ajuste$correlacion_cofenetica)
+}
+
 # Dos y solo dos: el plano de la proyección. Pedir un tercer eje sobre una
 # partición sería ofrecer una opción que no significa nada.
-etiquetas_ejes.ajuste_kmeans <- function(ajuste) c("eje 1", "eje 2")
+etiquetas_ejes.ajuste_agrupamiento <- function(ajuste) c("eje 1", "eje 2")

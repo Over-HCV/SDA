@@ -17,10 +17,10 @@
 #' @return data.frame(clave, nombre, descripcion, filas_aprox, diferida)
 fuentes_disponibles <- function() {
   data.frame(
-    clave = c("charcoal_crudo", "charcoal_pivot", "twins", "ori",
+    clave = c("charcoal_crudo", "charcoal_pivot", "twins", "ori", "eia",
               "sintetico_anova", "sintetico_regresion"),
     nombre = c("charcoal · panel crudo", "charcoal · pais x anio",
-               "twins", "ori · meteorologico IDEAM",
+               "twins", "ori · meteorologico IDEAM", "eia · energia por pais",
                "sintetico · anova", "sintetico · regresion"),
     descripcion = c(
       "Produccion y comercio de carbon vegetal por pais, ano y flujo.",
@@ -28,10 +28,12 @@ fuentes_disponibles <- function() {
       "Gemelos: salario, educacion y controles. 16 variables numericas.",
       paste("Taller 01: clima por municipio y hora en la Orinoquia.",
             "18 variables. Se baja de Kaggle (overhcv/ori-dataset)."),
+      paste("Taller 02: petroleo y electricidad de 111 paises, 57",
+            "variables. Se baja de Kaggle (overhcv/eia-united-states)."),
       "k grupos normales con medias separadas por 'efecto'.",
       "Relacion cubica con ruido: la recta se queda corta a proposito."),
-    filas_aprox = c(35113L, 145L, 182L, 4543L, 100L, 100L),
-    diferida = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE),
+    filas_aprox = c(35113L, 145L, 182L, 4543L, 111L, 100L, 100L),
+    diferida = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE),
     stringsAsFactors = FALSE)
 }
 
@@ -86,6 +88,13 @@ cargar_fuente <- function(clave, semilla = 42L, n = 100L, k_grupos = 4L,
                        })
       cargar_ori(ruta)
     },
+    eia = cargar_eia(tryCatch(suppressWarnings(descargar_eia()),
+                              error = function(e) {
+                                agregar(paste("no se pudo bajar EIA de Kaggle;",
+                                              "se usa la copia incluida en la app"),
+                                        conditionMessage(e))
+                                ruta_eia()
+                              })),
     sintetico_anova = gen_sintetico(n = n, k_grupos = k_grupos, efecto = efecto,
                                     semilla = semilla, tipo = "anova"),
     sintetico_regresion = gen_sintetico(n = n, semilla = semilla,

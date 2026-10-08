@@ -171,8 +171,10 @@ evaluar_objetivo <- function(datos, columnas, angulo) {
 #' Cada familia lo llama distinto en su `hiper` —componentes en reducción,
 #' grupos en agrupamiento— y el presupuesto de parámetros necesita el número,
 #' no el nombre. Que la vista tuviera escrito `hiper$n_componentes` era la
-#' última suposición del ACP que quedaba en la fase 2.
-k_del_modelo <- function(hiper) hiper$n_componentes %||% hiper$k
+#' última suposición del ACP que quedaba en la fase 2. El jerárquico lo llama
+#' `k_corte` porque su k no se ajusta: se elige dónde leer un árbol ya hecho.
+k_del_modelo <- function(hiper)
+  hiper$n_componentes %||% hiper$k %||% hiper$k_corte
 
 #' @return list(parametros, observaciones, razon, veredicto, detalle)
 contar_parametros <- function(clave, p, n, k = NULL) {

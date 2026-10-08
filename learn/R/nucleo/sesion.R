@@ -45,6 +45,9 @@ sesion_actual <- function(almacen = NULL, dataset = NULL, seleccion = list(),
       transformaciones = dataset$transformaciones %||% list(),
       balanceo = dataset$balanceo,
       particion = .receta_particion(dataset$particion),
+      # La receta de la columna `grupo` (lab.R --grupos): método + hiper +
+      # semilla, no la asignación, igual que balanceo y partición.
+      grupos = dataset$grupos,
       diccionario = dataset$diccionario,
       # Sin las tablas congeladas: se recalculan al abrirla
       # (seleccion_con_tablas). Guardarlas metía la vista previa y el
@@ -99,6 +102,8 @@ sesion_normalizada <- function(bruto) {
                                    .transformacion_normalizada)
   fase1$balanceo <- .bloque_normalizado(fase1$balanceo)
   fase1$particion <- .bloque_normalizado(fase1$particion)
+  if (length(fase1$grupos))
+    fase1$grupos <- lapply(fase1$grupos, .param_normalizado)
   fase1$seleccion <- lapply(fase1$seleccion %||% list(), .entrada_normalizada)
   fase1
 }
@@ -131,8 +136,7 @@ sesion_normalizada <- function(bruto) {
 .transformacion_normalizada <- function(entrada) {
   entrada$tipo <- .valor_unico(entrada$tipo)
   entrada$columnas <- unlist(entrada$columnas, use.names = FALSE)
-  entrada$params <- lapply(entrada$params %||% list(),
-                           function(v) unlist(v, use.names = FALSE))
+  entrada$params <- lapply(entrada$params %||% list(), .param_normalizado)
   entrada
 }
 
@@ -142,9 +146,18 @@ sesion_normalizada <- function(bruto) {
   entrada$titulo <- .valor_unico(entrada$titulo) %||% titulo_de(entrada$clave)
   entrada$cuando <- .valor_unico(entrada$cuando) %||% ""
   entrada$nota <- .valor_unico(entrada$nota) %||% ""
-  entrada$params <- lapply(entrada$params %||% list(),
-                           function(v) unlist(v, use.names = FALSE))
+  entrada$params <- lapply(entrada$params %||% list(), .param_normalizado)
   entrada
+}
+
+# Los paneles de la fase 4 traen parámetros anidados (`hiper`, `grupos`): un
+# objeto JSON vuelve como lista con nombres y se recorre; un arreglo vuelve
+# como lista sin nombres y se aplana. Aplanar todo convertía
+# `hiper = list(k = 3, escalar = TRUE)` en un vector de texto.
+.param_normalizado <- function(v) {
+  if (is.list(v) && !is.null(names(v)) && all(nzchar(names(v))))
+    return(lapply(v, .param_normalizado))
+  unlist(v, use.names = FALSE)
 }
 
 #' El dataset vivo reconstruido desde la sesión.
@@ -211,6 +224,21 @@ dataset_de_sesion <- function(fase1) {
                   semilla = as.integer(receta_part$semilla %||% 42L)),
       error = function(e) NULL)
   }
+  receta_grupos <- fase1$grupos
+  if (!is.null(receta_grupos$metodo)) {
+    agrupado <- tryCatch(
+      agregar_grupos(ds, receta_grupos$metodo, receta_grupos$hiper %||% list(),
+                     columnas = if (length(receta_grupos$columnas))
+                       unlist(receta_grupos$columnas) else NULL,
+                     reinicios = as.integer(receta_grupos$reinicios %||% 1L),
+                     semilla = as.integer(receta_grupos$semilla %||% 42L)),
+      error = function(e) NULL)
+    if (is.null(agrupado))
+      avisos <- c(avisos, list(list(
+        severidad = "aviso", mensaje = "no se pudo rehacer la columna grupo",
+        sugerencia = "Volvé a pedir --grupos en la consola.")))
+    else ds <- agrupado
+  }
   # El diccionario declarado manda sobre la autodetección: es la mitad de lo
   # que se guarda una sesión.
   ds$diccionario <- rehacer_diccionario(fase1$diccionario, ds$df)
@@ -219,9 +247,13 @@ dataset_de_sesion <- function(fase1) {
 
 #' Los paneles marcados, listos para el cuaderno. Se descartan los que apuntan
 #' a claves que ya no existen: una sesión vieja no debe romper el arranque.
+#' Los de la fase 4 (los arma la consola: `lab.R cuaderno f4....`) pasan si el
+#' registro los conoce, porque traen consigo el método con que se ajustan.
 seleccion_de_sesion <- function(fase1) {
   entradas <- fase1$seleccion %||% list()
-  Filter(function(e) !is.null(e$clave) && e$clave %in% CASILLAS_INFORME,
+  Filter(function(e) !is.null(e$clave) &&
+           (e$clave %in% CASILLAS_INFORME ||
+              (startsWith(e$clave, "f4.") && existe_artefacto(e$clave))),
          entradas)
 }
 

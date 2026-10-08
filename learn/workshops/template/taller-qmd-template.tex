@@ -32,6 +32,28 @@ $highlighting-macros$
 % \appendix); si el taller no la llama, se imprime al final como siempre.
 \newif\ifbibimpresa
 \newcommand{\imprimirbibliografia}{\printbibliography[heading=bibintoc]\global\bibimpresatrue}
+% Paginación: \Needspace{alto} empieza en la página siguiente lo que no
+% cabe entero (lo emite paginar() de R/taller.R antes de cada chunk).
+\usepackage{needspace}
+% Notas para la sesión: recuadro rojo pastel titulado «Notas» que se puede
+% partir entre páginas. En el .qmd van como `::: notas` (filtro notas.lua).
+% Interruptor global: \mostrarnotasfalse (o `ocultar-notas: true` en el
+% YAML) las quita todas sin borrarlas del cuaderno.
+\usepackage{comment}
+\newif\ifmostrarnotas
+\mostrarnotastrue
+$if(ocultar-notas)$\mostrarnotasfalse$endif$
+\definecolor{notasfondo}{HTML}{F8E1E3}
+\definecolor{notasmarco}{HTML}{A6192E}
+\ifmostrarnotas
+  \newtcolorbox{notas}{breakable, enhanced, colback=notasfondo,
+    colframe=notasmarco, coltitle=white, fonttitle=\bfseries,
+    title={Notas}, boxrule=0.6pt, arc=2pt, left=7pt, right=7pt,
+    top=5pt, bottom=5pt, before skip=12pt, after skip=12pt,
+    before upper={\setlength{\parindent}{0pt}\setlength{\parskip}{4pt}}}
+\else
+  \excludecomment{notas}
+\fi
 
 % --- Resolución de recursos hacia la plantilla (layout taller-XX junto a template/) ---
 \graphicspath{{assets/pics/}{figures/}{../template/assets/pics/}{../template/figures/}}

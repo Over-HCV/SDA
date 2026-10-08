@@ -36,6 +36,7 @@ poblar_catalogo_agrupamiento <- function() {
     clave = "jerarquico", nombre = "Agrupamiento jerárquico",
     objetivo = "agrupar", supervision = "no_supervisado", sesion = 5,
     nodo = "100-agrupamiento/030-jerarquico",
+    estado = "activo", ajustar = ajustar_jerarquico,
     entrada = list(tipo = "matriz_numerica", min_p = 2L, min_n = 5L,
                    faltantes = FALSE, escalado = TRUE),
     hiper = list(
@@ -47,9 +48,20 @@ poblar_catalogo_agrupamiento <- function() {
                        opciones = c("euclidean", "manhattan", "maximum"),
                        def = "euclidean", etiqueta = "Distancia"),
       k_corte = list(tipo = "entero", min = 2, max = 12, def = 3, paso = 1,
-                     etiqueta = "Grupos al cortar el dendrograma")),
-    artefactos = c("f4.diagnostico.dendrograma", "f4.diagnostico.silueta",
-                   "f4.diagnostico.cofenetico"),
+                     etiqueta = "Grupos al cortar el dendrograma"),
+      # El mismo interruptor que k-medias y por la misma razón: las distancias
+      # suman unidades distintas. Sin él, comparar las dos particiones sobre
+      # los mismos datos sería comparar matrices distintas.
+      escalar = list(tipo = "logico", def = TRUE,
+                     etiqueta = "Estandarizar antes de medir distancias")),
+    # Un solo algoritmo, el aglomerativo de hclust(). Se declara igual: su
+    # historial de fusiones es una traza de verdad, y la fase 3 la reproduce.
+    optimizador = list(metodos = "aglomerativo", traza = TRUE,
+                       paso_a_paso = TRUE),
+    artefactos = c("f3.analisis.convergencia", "f3.analisis.trayectoria",
+                   "f4.desempeno.grupos", "f4.diagnostico.dendrograma",
+                   "f4.diagnostico.silueta", "f4.diagnostico.cofenetico",
+                   "f4.explicabilidad.mapa_2d", "f4.explicabilidad.centroides"),
     supuestos = c("escalado_previo", "distancia_valida"))
 
   registrar_metodo(

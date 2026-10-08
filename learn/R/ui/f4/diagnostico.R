@@ -6,16 +6,15 @@
 # método de la corrida declara su clave en `artefactos`. Un scree sobre una
 # partición no sería un gráfico vacío, sería un gráfico equivocado.
 #
-# Residuos, dendrograma y compañía llegan con los métodos que los producen.
+# Residuos e índices internos llegan con los métodos que los producen.
 
 DETALLE_DIAGNOSTICO <- list(
   "Residuos y supuestos a posteriori" = paste(
     "Residuos contra ajustados, Q-Q de residuos, escala-localización, leverage",
     "y distancia de Cook. Entran con la regresión de la sesión 6."),
-  "Dendrograma e índices internos" = paste(
-    "El historial de fusiones con corte móvil, la correlación cofenética y",
-    "Calinski-Harabasz contra Davies-Bouldin. Entran con el agrupamiento",
-    "jerárquico y la validación de grupos, en el Hito 7."))
+  "Índices internos" = paste(
+    "Calinski-Harabasz contra Davies-Bouldin, junto a la silueta. Entran con",
+    "la validación de grupos, en el Hito 7."))
 
 controles_diagnostico <- function(ns) {
   shiny::tagList(
@@ -54,6 +53,12 @@ salida_diagnostico <- function(ns) {
     panel_si_declara(ns, "f4.diagnostico.silueta",
                      shiny::plotOutput(ns("silueta"), height = "420px"),
                      contexto = salida_contexto(ns, "contexto_silueta")),
+    panel_si_declara(ns, "f4.diagnostico.dendrograma",
+                     shiny::plotOutput(ns("dendrograma"), height = "460px"),
+                     contexto = salida_contexto(ns, "contexto_dendrograma")),
+    panel_si_declara(ns, "f4.diagnostico.cofenetico",
+                     shiny::plotOutput(ns("cofenetico"), height = "340px"),
+                     contexto = salida_contexto(ns, "contexto_cofenetico")),
     plegable("Lo que falta en esta subsección", shiny::tagList(pendientes)))
 }
 
@@ -91,6 +96,14 @@ servidor_diagnostico <- function(input, output, session, corrida) {
   output$codo <- shiny::renderPlot(graficar_codo(curva_codo(), k = ajuste()$k))
   output$silueta <- shiny::renderPlot(graficar_silueta(silueta(ajuste())))
 
+  # El árbol y la cofenética leen el ajuste tal cual: cambiar el corte es
+  # cambiar k_corte en la fase 2, no un control de dibujo que haría que el
+  # dendrograma y la silueta hablaran de particiones distintas.
+  output$dendrograma <- shiny::renderPlot(
+    graficar_dendrograma(arbol_jerarquico(ajuste())))
+  output$cofenetico <- shiny::renderPlot(
+    graficar_cofenetico(cofenetico(ajuste())))
+
   parametros <- shiny::reactive({
     c <- corrida()
     if (is.null(c)) return(NULL)
@@ -103,7 +116,9 @@ servidor_diagnostico <- function(input, output, session, corrida) {
                    c("f4.diagnostico.reglas_k", "contexto_reglas_k"),
                    c("f4.diagnostico.ortogonalidad", "contexto_ortogonalidad"),
                    c("f4.diagnostico.codo", "contexto_codo"),
-                   c("f4.diagnostico.silueta", "contexto_silueta")))
+                   c("f4.diagnostico.silueta", "contexto_silueta"),
+                   c("f4.diagnostico.dendrograma", "contexto_dendrograma"),
+                   c("f4.diagnostico.cofenetico", "contexto_cofenetico")))
     dibujar_contexto(output, par[1], corrida = shiny::reactive(corrida()),
                      params = parametros, metricas = metricas, sufijo = par[2])
   invisible(TRUE)

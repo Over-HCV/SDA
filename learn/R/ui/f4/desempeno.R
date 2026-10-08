@@ -26,6 +26,7 @@ FORMATO_METRICA <- list(
   silueta_media = list("silueta media", "decimal"),
   grupo_menor = list("grupo mas chico", "entero"),
   grupo_mayor = list("grupo mas grande", "entero"),
+  correlacion_cofenetica = list("correlacion cofenetica", "decimal"),
   iteraciones = list("iteraciones", "entero"))
 
 # Métricas que son banderas, no números: informan sobre otra métrica y no

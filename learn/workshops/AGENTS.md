@@ -79,8 +79,23 @@ Rscript learn/R/lab.R cuaderno <claves> --fuente <f> --filtro Col=valor \
 - **Apéndice**: `tabla_documentacion()` arma la tabla de funciones usadas con
   enlace a su ayuda oficial.
 - **Helpers**: `source("../template/R/taller.R")` trae `dos_columnas()`, `caja()`,
-  `densidad()`, `modas()`, `g1()` y `tabla_documentacion()`. Lo que se repita
-  en dos talleres se sube ahí.
+  `densidad()`, `modas()`, `g1()`, `paginar()` y `tabla_documentacion()`. Lo que
+  se repita en dos talleres se sube ahí; lo propio de un taller va en
+  `taller-XX/R/` y su código se muestra en un apéndice.
+- **Paginación**: `paginar()` en el chunk de configuración emite
+  `\Needspace{alto}` antes de cada chunk, de modo que una tabla o salida corta
+  no se parte y el código de una figura no queda al pie de una página con la
+  figura en la siguiente. Un chunk se excluye con `paginar = FALSE`. Las
+  salidas largas van como `knitr::kable()`, nunca como vector con nombres
+  impreso (se parte en columnas sueltas).
+- **Notas para la sesión**: con `filters: [../template/notas.lua]` en el YAML,
+  un bloque `::: notas … :::` sale como recuadro rojo pastel titulado «Notas»
+  (entorno `notas` de la plantilla, se parte entre páginas). Llevan
+  interpretaciones respaldadas por salidas de R y preguntas abiertas marcadas
+  como tales. Se quitan todas de una con `ocultar-notas: true` en el YAML (o
+  cambiando `\mostrarnotastrue` por `\mostrarnotasfalse` en el `.tex` y
+  corriendo `build.sh pdf`). Las notas de incertidumbre del informe siguen
+  siendo `> **Nota.**`.
 
 ## Compilar
 

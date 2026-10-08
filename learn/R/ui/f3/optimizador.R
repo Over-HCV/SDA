@@ -54,7 +54,7 @@ salida_optimizador <- function(ns) {
 
 # Las descripciones son de la app, no de un método: describen familias de
 # algoritmos. Cuando sean muchas se mudan a textos/, como todo lo explicativo
-# (C6); con dos, un archivo nuevo sería peor.
+# (C6); con cinco cortas, un archivo nuevo sería peor.
 .PASOS_OPTIMIZADOR <- list(
   potencia = c(
     "Arrancar con un vector al azar, gobernado por la semilla.",
@@ -77,7 +77,13 @@ salida_optimizador <- function(ns) {
     "Recorrer las observaciones de a una, en orden.",
     "Mover la observacion al centroide mas cercano y recentrar en el acto.",
     "Converge en menos barridos, y depende del orden de las filas.",
-    "Parar cuando un barrido completo no mueve a nadie."))
+    "Parar cuando un barrido completo no mueve a nadie."),
+  aglomerativo = c(
+    "Arrancar con cada observacion sola: n grupos de uno.",
+    "Medir la distancia entre todos los pares de grupos segun el enlace.",
+    "Fusionar los dos mas cercanos y anotar a que altura se juntaron.",
+    "Repetir n - 1 veces, hasta que quede un solo grupo.",
+    "Cortar el arbol donde quedan k grupos: no hay semilla ni tolerancia."))
 
 servidor_optimizador <- function(input, output, session, clave_metodo) {
   output$hay_inicializacion <- shiny::reactive({

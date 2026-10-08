@@ -52,7 +52,8 @@ probar("la fuente ori se recarga desde el CSV original, no desde el exportado",
        any(grepl('c("ORI.csv", "data/ORI.csv",', cuaderno, fixed = TRUE)) &&
          !any(grepl("datos-sda-lab.csv", cuaderno, fixed = TRUE)))
 probar("la fuente ori se baja de Kaggle y cae a la copia local sin red",
-       any(grepl("datasets/download/overhcv/ori-dataset", cuaderno, fixed = TRUE)) &&
+       any(grepl("datasets/download/", cuaderno, fixed = TRUE)) &&
+         any(grepl('"overhcv/ori-dataset"', cuaderno, fixed = TRUE)) &&
          any(grepl("tryCatch", cuaderno, fixed = TRUE)))
 probar("la recta de regresion viaja al codigo del cuaderno", {
   codigo <- codigo_artefacto("f1.analisis.dispersion",

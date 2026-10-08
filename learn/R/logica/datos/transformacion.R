@@ -47,7 +47,8 @@ aplicar_transformaciones <- function(datos, pila) {
 #' aviso en vez de romper: el usuario puede haber marcado la columna entera.
 aplicar_transformacion <- function(datos, tipo, columnas, params = list()) {
   if (identical(tipo, "filtro"))
-    return(aplicar_filtro(datos, columnas[1], params$valores %||% character(0)))
+    return(aplicar_filtro(datos, columnas[1], params$valores %||% character(0),
+                          excluir = isTRUE(params$excluir)))
   avisos <- list()
   agregar <- function(severidad, mensaje, sugerencia = NA_character_)
     avisos[[length(avisos) + 1L]] <<-
@@ -119,7 +120,8 @@ perfil_boxcox <- function(x, lambdas = seq(-2, 2, by = 0.05)) {
 #' Texto de una entrada de la pila, para la tabla de "qué se aplicó".
 describir_transformacion <- function(entrada) {
   if (identical(entrada$tipo, "filtro"))
-    return(sprintf("filtro %s en [%s]", entrada$columnas[1],
+    return(sprintf("filtro %s %s [%s]", entrada$columnas[1],
+                   if (isTRUE(entrada$params$excluir)) "fuera de" else "en",
                    paste(entrada$params$valores, collapse = ", ")))
   detalle <- if (length(entrada$params))
     paste0(" (", paste(names(entrada$params), unlist(entrada$params),
@@ -132,9 +134,14 @@ describir_transformacion <- function(entrada) {
 #' un aviso de error cuando el resultado quedaría vacío: un data.frame sin
 #' filas rompe todo lo que viene después y en silencio, que es peor.
 #'
-#' Las filas con NA en la columna quedan fuera del filtro: %in% las descarta.
-#' Si eso pasa se avisa, porque "perdió filas" y "no aplicó" se ven igual.
-aplicar_filtro <- function(datos, columna, valores) {
+#' @param excluir FALSE conserva las filas con esos valores; TRUE las saca. El
+#'   Taller 02 lo necesita así: "sin Estados Unidos, China, Arabia Saudita y
+#'   Rusia" son cuatro valores a sacar, no ciento siete a marcar.
+#'
+#' Al incluir, las filas con NA en la columna quedan fuera: %in% las descarta,
+#' y se avisa porque "perdió filas" y "no aplicó" se ven igual. Al excluir se
+#' quedan: un NA no es ninguno de los valores sacados.
+aplicar_filtro <- function(datos, columna, valores, excluir = FALSE) {
   if (!columna %in% names(datos))
     return(list(datos = datos, avisos = list(list(
       severidad = "error",
@@ -146,15 +153,26 @@ aplicar_filtro <- function(datos, columna, valores) {
       mensaje = "el filtro no trae valores",
       sugerencia = "Marcá al menos un valor en el selector."))))
 
-  quedan <- datos[[columna]] %in% valores
+  en_lista <- datos[[columna]] %in% valores
+  quedan <- if (excluir) !en_lista else en_lista
   avisos <- list()
   if (!any(quedan)) return(list(datos = datos, avisos = list(list(
     severidad = "error",
-    mensaje = sprintf("ninguna fila tiene %s en [%s]", columna,
+    mensaje = sprintf("ninguna fila queda con %s %s [%s]", columna,
+                      if (excluir) "fuera de" else "en",
                       paste(valores, collapse = ", ")),
     sugerencia = "El filtro no se aplicó: el dataset quedó como estaba."))))
+  # Un valor mal escrito ("United States" contra "UnitedStates") no filtra
+  # nada y no rompe nada: sin este aviso el país "excluido" sigue adentro.
+  ausentes <- setdiff(valores, as.character(datos[[columna]]))
+  if (length(ausentes))
+    avisos <- c(avisos, list(list(
+      severidad = "aviso",
+      mensaje = sprintf("'%s' no tiene: %s", columna,
+                        paste(ausentes, collapse = ", ")),
+      sugerencia = "Revisá cómo están escritos en los datos.")))
   n_na <- sum(is.na(datos[[columna]]))
-  if (n_na)
+  if (n_na && !excluir)
     avisos <- c(avisos, list(list(
       severidad = "aviso",
       mensaje = sprintf("%d filas con NA en '%s' quedaron fuera del filtro",

@@ -19,8 +19,12 @@ controles_filtro <- function(ns) {
   shiny::tagList(
     shiny::selectInput(ns("columna_filtro"), "Filtrar por columna",
                        choices = character(0)),
-    shiny::selectInput(ns("valores_filtro"), "Valores a conservar",
+    shiny::selectInput(ns("valores_filtro"), "Valores",
                        choices = character(0), multiple = TRUE),
+    # Sacar cuatro países de ciento once es marcar cuatro, no ciento siete.
+    shiny::checkboxInput(ns("excluir_filtro"),
+                         "Excluir los marcados (en vez de conservarlos)",
+                         value = FALSE),
     shiny::actionButton(ns("aplicar_filtro"), "Aplicar filtro",
                         class = "btn-primary w-100"),
     shiny::actionButton(ns("deshacer_filtro"), "Deshacer la última",
@@ -110,13 +114,14 @@ servidor_filtro <- function(input, output, session, datos_base, dataset) {
     shiny::req(ds, input$columna_filtro, !is.null(datos_base()))
     if (!length(input$valores_filtro)) {
       output$avisos_filtro <- shiny::renderUI(lista_avisos(list(list(
-        severidad = "error", mensaje = "elegí al menos un valor a conservar",
+        severidad = "error", mensaje = "elegí al menos un valor",
         sugerencia = NA_character_))))
       return(invisible(NULL))
     }
     pila <- agregar_transformacion(
       ds$transformaciones, "filtro", input$columna_filtro,
-      list(valores = input$valores_filtro))
+      list(valores = input$valores_filtro,
+           excluir = isTRUE(input$excluir_filtro)))
     aplicar_pila(ds, pila)
   })
 
@@ -154,13 +159,13 @@ servidor_filtro <- function(input, output, session, datos_base, dataset) {
                    }), sufijo = "contexto_filtro")
 }
 
-#' Los filtros de la pila, en una línea cada uno: "Hora en [12:00]".
-#' Lo usan el contexto del panel y lo que viaja al cuaderno.
+#' Los filtros de la pila, en una línea cada uno: "Hora en [12:00]" o
+#' "Country fuera de [China]". Lo usan el contexto del panel y lo que viaja al
+#' cuaderno; la frase sale de describir_transformacion() para que no haya dos.
 .describir_filtros <- function(ds) {
   pila <- ds$transformaciones
   filtros <- vapply(pila[is_tipos_pila(pila, "filtro")], function(entrada)
-    sprintf("%s en [%s]", entrada$columnas[1],
-            paste(entrada$params$valores, collapse = ", ")), "")
+    sub("^filtro ", "", describir_transformacion(entrada)), "")
   if (length(filtros)) filtros else "ninguno"
 }
 

@@ -26,9 +26,10 @@ source("learn/R/cargar.R")
 # en wasm (ver learn/R/nucleo/tema_app.R).
 .COMUN_BUNDLE <- c("datos.R", "metricas.R", "temas.R", "temas_bslib.R")
 
-# No se exportan: pruebas/ (no corren en el navegador) ni mapa.R (herramienta
-# de desarrollo). MAPA.md tampoco: es para agentes, no para la app.
-.EXCLUIR_R <- c("pruebas", "mapa.R")
+# No se exportan: pruebas/ (no corren en el navegador), lab/ (las piezas de
+# la consola lab.R) ni mapa.R (herramienta de desarrollo). MAPA.md tampoco:
+# es para agentes, no para la app.
+.EXCLUIR_R <- c("pruebas", "lab", "mapa.R")
 
 #' Datasets a incluir, resueltos desde donde de verdad están.
 #'
@@ -39,6 +40,7 @@ rutas_datos <- function() {
   candidatas <- c(ruta_repo("data", "charcoal.csv"),
                   ruta_repo("data", "twins.csv"),
                   ruta_repo("data", "ORI.csv"),
+                  ruta_repo("data", "EIA.csv"),
                   ruta_repo("workshops", "twins", "twins.csv"))
   existentes <- candidatas[file.exists(candidatas)]
   # Si twins aparece en los dos sitios, quedarse con uno solo.

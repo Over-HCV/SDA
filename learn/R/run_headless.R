@@ -49,15 +49,25 @@ correr <- function(escenario, metodo = "acp", fuente = "twins", columnas = NULL,
                    registrar_traza = TRUE, out_dir = "learn/outputs") {
   cargar_sda(con_ui = FALSE)
 
+  # El estado se mira antes de cargar datos: un método pendiente tiene que
+  # fallar por lo que es, no por una fuente que no viene al caso.
   m <- metodo(metodo)
   if (m$estado != "activo")
     stop(sprintf("'%s' esta '%s': todavia no se puede ajustar", metodo, m$estado))
-
   dataset <- .dataset_para_correr(fuente, semilla)
-  parametros <- utils::modifyList(hiper_por_defecto(metodo), as.list(hiper))
-  optimizador <- optimizador %||% (m$optimizador$metodos %||% NA_character_)[1]
-  inicializacion <- inicializacion %||%
-    (m$optimizador$inicializaciones %||% NA_character_)[1]
+
+  # Ajustar es el tramo que comparte con lab.R (nucleo/ajuste.R): una sola
+  # receta para que la consola y el batch no puedan contar cosas distintas.
+  resultado <- ajustar_por_registro(
+    dataset$df, metodo, columnas = columnas, hiper = hiper,
+    optimizador = optimizador, inicializacion = inicializacion,
+    reinicios = reinicios, tol = tol, maxit = maxit, semilla = semilla,
+    registrar_traza = registrar_traza)
+  ajuste <- resultado$ajuste
+  parametros <- resultado$parametros
+  optimizador <- resultado$optimizador
+  inicializacion <- resultado$inicializacion
+  duracion <- resultado$duracion
 
   modelo <- nuevo_modelo("m1", sprintf("%s (headless)", m$nombre), metodo,
                          spec = columnas, hiper = parametros)
@@ -67,15 +77,6 @@ correr <- function(escenario, metodo = "acp", fuente = "twins", columnas = NULL,
                                         reinicios = reinicios),
                          semilla = semilla)
   avisos <- validar_compatibilidad(dataset, modelo, receta)
-
-  inicio <- Sys.time()
-  ajuste <- do.call(m$ajustar, argumentos_ajuste(metodo, c(
-    list(datos = dataset$df, columnas = columnas),
-    parametros,
-    list(optimizador = optimizador, inicializacion = inicializacion,
-         reinicios = reinicios, tol = tol, maxit = maxit,
-         semilla = semilla, registrar_traza = registrar_traza))))
-  duracion <- as.numeric(difftime(Sys.time(), inicio, units = "secs"))
 
   corrida <- nueva_corrida("c1", dataset$id, modelo$id, receta$id, metodo,
                            ajuste = ajuste, traza = ajuste$traza,
