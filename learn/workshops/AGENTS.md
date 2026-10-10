@@ -66,6 +66,17 @@ Rscript learn/R/lab.R cuaderno <claves> --fuente <f> --filtro Col=valor \
   respuesta directa primero (`**¿…?** No, pues…`), oraciones largas unidas con
   conectores y no con comas, nunca coma antes de "y", mayúscula después de `:`
   y `;`, decimales y miles con punto, incisos `a. **Término.** Oración`.
+- **Sin coma antes de un conector causal**: `pues`, `porque`, `ya que`,
+  `puesto que`, `así que` ya unen las ideas, así que la coma corta la lectura
+  ("no existe pues la media…", no "no existe, pues…"). "Es decir que hay", no
+  "Es decir, hay".
+- **Nada de certezas sobre lo que viene**: Lo que una pregunta posterior va a
+  mostrar se dice con "puede", "sugiere" o "podría" ("esto puede anticiparnos
+  que…"), no como hecho ("esto anticipa que el ACP necesitará…").
+- **Preguntas para el profesor**: En los recuadros `::: notas` el bloque de
+  preguntas abiertas se titula `**Preguntas para el profesor.**` y cada
+  viñeta lleva debajo `*Por qué importa.*` con la razón, apoyada en cifras
+  que ya están en el informe.
 - **Código**: ≤ 68 columnas (más ancho se sale del margen), un chunk por
   pregunta, `echo: true`.
 - **`dos_columnas()`** solo cuando la salida es uno o dos números; el resto va como

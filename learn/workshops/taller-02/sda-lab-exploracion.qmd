@@ -23,7 +23,7 @@ resumen: |
   k-medias y el agrupamiento jerárquico de enlace promedio, que coinciden en
   101 de los 107 países y en separar a India y Japón, pero difieren en cómo
   tratan a ocho economías grandes, mientras que las cajas por grupo muestran
-  que la partición sigue al consumo y a la generación eléctrica y no a la
+  que la partición sigue al consumo, generación eléctrica y no a la
   producción ni a la exportación de crudo.
 palabras: "Análisis de componentes principales; Círculo de correlaciones; Criterio de Kaiser; K-medias; Agrupamiento jerárquico; Silueta; EIA"
 # Notas para la sesión (recuadros rojos): true las quita todas del PDF.
@@ -97,16 +97,16 @@ datos <- read.csv(ruta, sep = ";", dec = ".",
 
 Los nombres originales llegan a tener 60 caracteres, por lo que se reemplazan
 por abreviaturas con la función `abreviar()` del archivo `R/abreviaturas.R`,
-que se carga al inicio y cuyo código y tabla de equivalencias están en el
-Apéndice \ref{abreviaturas}. Por ejemplo `PetLiq_cons` es el consumo de
+que se carga al inicio y cuyo código y tabla de equivalencias decidimos
+mover al Apéndice \ref{abreviaturas} al ser tan extensa la tabla. Por ejemplo `PetLiq_cons` es el consumo de
 petróleo y otros líquidos y `Renov_gen` la generación neta de electricidad
 renovable. Antes de calcular nada vale la pena ver cómo están organizadas las
-57 variables, pues no son 57 mediciones independientes sino un árbol en el que
+57 variables pues no son 57 mediciones independientes sino un árbol en el que
 cada total se vuelve a medir en sus partes.
 
 ```{mermaid}
 %%| echo: false
-%%| fig-cap: "Estructura de las 57 variables por energético, bloque y unidad: Cada total se repite en sus partes y cada fuente eléctrica se mide dos veces, por lo que la base es redundante desde su diseño."
+%%| fig-cap: "Estructura de las 57 variables por sector energético, bloque y unidad: Cada total se repite en sus partes y cada fuente eléctrica se mide dos veces, por lo que la base es redundante desde su diseño."
 %%| fig-width: 5.2
 flowchart LR
     V["EIA.csv<br/>57 VARIABLES POR PAÍS"]
@@ -147,7 +147,7 @@ medida en capacidad instalada y en generación.
 ## Diagnóstico de la base {#diagnostico}
 
 La matriz `num` guarda las 57 variables numéricas con el país como nombre de
-fila, y sobre ella se cuentan los faltantes y las variables casi repetidas.
+fila y sobre ella se cuentan los faltantes y las variables casi repetidas.
 
 ```{r diagnostico}
 num <- numericas(datos)
@@ -173,7 +173,7 @@ dos_columnas("names(num)[duplicated(\n  as.list(num))]",
              "max(abs(num$Renov_gen -\n  num$Hidro_gen -\n  num$NoHidro_gen))")
 ```
 
-**¿Está lista la base para el análisis?** Sí, pues no hay datos faltantes y
+**¿Está lista la base para el análisis?** Sí pues no hay datos faltantes y
 las 57 abreviaturas son distintas entre sí, aunque la base es muy redundante y
 esto hay que tenerlo presente desde ya:
 
@@ -181,17 +181,18 @@ a. **Lectura local.** La columna repetida, `Refinados_cons`, es el consumo
    de productos refinados, que resulta idéntico al consumo de petróleo y
    otros líquidos, mientras que la generación renovable coincide con la suma
    de la hidroeléctrica y la no hidroeléctrica salvo por una unidad de
-   redondeo. Es decir, hay variables que no aportan nada que no esté ya en
+   redondeo. Es decir que hay variables que no aportan nada que no esté ya en
    otra.
 b. **Lectura global.** Los 18 pares con correlación mayor a 0.99 no son
-   casualidad sino consecuencia del árbol de la figura anterior, ya que cinco
+   casualidad sino consecuencia del árbol de la figura anterior ya que cinco
    son la capacidad y la generación de una misma fuente (fósil, hidro,
    nuclear, geotérmica y renovable), ocho son el sistema eléctrico consigo
    mismo y con su parte fósil, tres son el consumo de petróleo, el de
    refinados y las emisiones entre sí, y dos son la producción de gasolina
-   con su consumo y con la ganancia de refinación. Esto pesa en el ACP, porque cada copia de una
-   misma información suma varianza al mismo eje, y en el agrupamiento, porque
-   las distancias entre países cuentan varias veces lo mismo.
+   con su consumo y con la ganancia de refinación. Esto pesa en el ACP
+   porque cada copia de una misma información suma varianza al mismo eje
+   y en el agrupamiento porque las distancias entre países cuentan varias
+   veces lo mismo.
 
 # Normal multivariada {#normal}
 
@@ -215,7 +216,7 @@ e. **Transición energética.** Se mide con la generación neta renovable
    (`Renov_gen`, BKWH), que indica cuánto de esa electricidad viene de
    fuentes renovables.
 
-La elección se respalda con la matriz de correlación de las candidatas, que
+Intentamos respaldar las elecciones con la matriz de correlación de las candidatas, que
 incluye las emisiones de CO~2~ por petróleo (`PetLiq_CO2`), la variable que a
 primera vista representaría la dimensión ambiental.
 
@@ -231,9 +232,9 @@ consumo, lo cual indica que se derivan del petróleo consumido y que incluirlas
 sería contar dos veces la demanda. En su lugar entra la exportación de crudo,
 que casi no se asocia con el bloque de tamaño (0.17 con el consumo, 0.07 con
 la generación y 0.06 con la renovable) y sí con la producción (0.83), aunque
-sin repetirla, pues como se ve en la Pregunta 2 hay países que producen sin
+sin repetirla pues como se ve en la Pregunta 2 hay países que producen sin
 exportar. Las otras tres variables tienen entre sí correlaciones altas (de
-0.77 a 0.92) pero describen cosas distintas, ya que el consumo de petróleo es
+0.77 a 0.92) pero describen cosas distintas ya que el consumo de petróleo es
 demanda de combustibles y la generación es electricidad, mientras que la
 renovable es solo una parte de esa electricidad cuyo peso cambia mucho de un
 país a otro.
@@ -249,8 +250,8 @@ S = \frac{1}{n-1}\sum_{i=1}^{n}
 $$
 
 que son los estimadores insesgados de $\boldsymbol{\mu}$ y $\Sigma$ en el
-modelo normal multivariado (el de máxima verosimilitud de $\Sigma$ divide por
-$n$ en vez de $n - 1$).
+modelo normal multivariado explicado en clase (el de máxima verosimilitud de
+$\Sigma$ que se divide por $n$ en vez de $n - 1$).
 
 ```{r p1}
 cinco <- c("Crudo_prod", "PetLiq_cons", "Crudo_exp", "Elec_gen",
@@ -276,12 +277,12 @@ crudo y genera 198 mil millones de kWh, de los cuales 45 son renovables.
 **Matriz de covarianzas.** Todas las covarianzas son positivas, lo que
 significa que las cinco variables crecen juntas y que un país que consume más
 petróleo también tiende a generar más electricidad. Sus magnitudes en cambio
-no se pueden comparar entre sí, puesto que cada entrada lleva el producto de
+no se pueden comparar entre sí puesto que cada entrada lleva el producto de
 las unidades de sus dos variables (por ejemplo, la varianza del consumo está
 en TBPD² y su covarianza con la generación en TBPD·BKWH), por lo que la fuerza
 de cada asociación se lee en la Pregunta 2 con la correlación.
 
-a. **Lectura local.** El país promedio no existe, pues la media de la
+a. **Lectura local.** Como tal el país promedio no existe pues la media de la
    exportación de crudo (361.56 TBPD) es 42 veces su mediana (8.5 TBPD) y la
    de la producción (702.06 TBPD) más de 18 veces la suya (38 TBPD), de modo
    que cada componente de $\bar{\mathbf{x}}$ la fijan unos pocos países y no
@@ -290,8 +291,8 @@ b. **Lectura global.** Bajo normalidad multivariada $\bar{\mathbf{x}}$ y $S$
    resumirían toda la distribución, pero estos datos están lejos de ser
    normales y $S$ mezcla dos bloques, el petrolero (producción y exportación)
    y el de tamaño (consumo, generación y renovable), que casi no se mueven
-   juntos. Esto anticipa que una sola dirección no basta para describir a los
-   países y que el ACP necesitará al menos dos ejes.
+   juntos. Esto puede anticiparnos que una sola dirección no baste para
+   describir a los países y que el ACP necesite al menos dos ejes.
 
 ::: notas
 **Interpretaciones.**
@@ -301,22 +302,33 @@ a. **La elección es del grupo.** Con las cinco variables se cubren la
    transición, y la única redundancia evidente (consumo y CO~2~, $r = 1.00$)
    quedó por fuera.
 b. **El costo de la elección.** La producción y la exportación de crudo
-   comparten el 69 % de su variación ($0.83^2$), así que el bloque petrolero
+   comparten el 69 % de su variación ($0.83^2$) así que el bloque petrolero
    pesa doble en las preguntas 2 y 11, del mismo modo que el de tamaño pesa
    triple.
 
-**Para debatir (preguntas abiertas).**
+**Preguntas para el profesor.**
 
 - ¿Se debió medir por habitante y no en términos absolutos? La base no trae
   población, de modo que no se puede verificar qué cambiaría.
-- ¿La dimensión ambiental se pierde al quitar el CO~2~, o ya está implícita
+
+  *Por qué importa.* En términos absolutos el consumo, la generación y la
+  renovable crecen con el tamaño del país, de modo que parte de su
+  correlación (de 0.77 a 0.92) y del primer eje del ACP puede deberse a la
+  población y no al perfil energético.
+- ¿La dimensión ambiental se pierde al quitar el CO~2~ o ya está implícita
   en el consumo?
+
+  *Por qué importa.* La correlación de 1.00 sugiere que las emisiones se
+  calculan a partir del petróleo consumido, por lo que no aportarían nada
+  nuevo, pero si el enunciado espera una dimensión ambiental explícita hay
+  que justificar su ausencia en las cinco variables.
 :::
 
 # Análisis de componentes principales {#acp}
 
-Las preguntas 2 a 11 siguen la ruta del diagrama, que conviene tener a la mano
-porque el número de países y lo que se busca cambian por el camino. Primero
+Las preguntas 2 a 11 siguen la ruta del diagrama, consideramos que conviene
+tenerlo a la mano porque el número de países y lo que se busca cambian por
+el camino. Primero
 se describen las cinco variables (Pregunta 2) y luego se resume la base
 completa con el ACP, primero con los 111 países y después sin los cuatro
 más extremos, para terminar agrupando a los 107 restantes.
@@ -393,7 +405,7 @@ renovable), así como medias muy por encima de sus medianas, por ejemplo 811.40
 contra 202 TBPD en el consumo de petróleo y 361.56 contra 8.5 TBPD en la
 exportación de crudo. Las densidades de la diagonal lo muestran como un pico
 pegado al cero con una cola larga a la derecha formada por los países más
-grandes, ya que Estados Unidos y China ocupan los primeros puestos en consumo
+grandes ya que Estados Unidos y China ocupan los primeros puestos en consumo
 y generación, mientras que Rusia, Arabia Saudita y Estados Unidos encabezan la
 producción de crudo y Arabia Saudita, Rusia y Emiratos Árabes Unidos la
 exportación. Además la producción vale cero en 27 países y la exportación en
@@ -405,7 +417,7 @@ que la base no permite verificar.
 bloques:
 
 a. **Bloque petrolero.** La producción y la exportación de crudo tienen
-   correlación de Pearson \parencite{pearson1895} de 0.828, ya que solo
+   correlación de Pearson \parencite{pearson1895} de 0.828 ya que solo
    exporta crudo quien lo produce, aunque no todo productor lo exporta.
 b. **Bloque de tamaño.** El consumo de petróleo y la generación eléctrica se
    asocian con $r = 0.918$ y la generación con la renovable con $r = 0.921$,
@@ -418,21 +430,21 @@ c. **Entre bloques.** La exportación casi no se asocia con el bloque de
    generación).
 
 Vale la pena matizar que varias de estas correlaciones dependen de los países
-extremos, pues la de Spearman \parencite{spearman1904}, que usa rangos y no se
+extremos pues la de Spearman \parencite{spearman1904}, que usa rangos y no se
 deja arrastrar por los valores grandes, baja de 0.921 a 0.672 entre generación
 y renovable, de 0.770 a 0.569 entre consumo y renovable y de 0.438 a 0.140
 entre producción de crudo y renovable. Solo el par consumo-generación (0.918)
 y el par producción-exportación (de 0.828 a 0.891) se mantienen con ambos
 coeficientes.
 
-a. **Lectura local.** Un solo país mueve una correlación, ya que sin China la
-   de Pearson entre generación y renovable baja de 0.921 a 0.803, porque
+a. **Lectura local.** Un solo país mueve una correlación ya que sin China la
+   de Pearson entre generación y renovable baja de 0.921 a 0.803 porque
    China es a la vez el mayor generador y el mayor productor de renovables.
 b. **Lectura global.** Con rangos la separación entre bloques es todavía más
    clara (0.010 entre exportación y renovable), de modo que las cinco
    variables viven en al menos dos dimensiones casi independientes, la de
-   tamaño y la petrolera, que son justo las que el ACP de la Pregunta 5
-   encuentra en sus dos primeros ejes con las 57 variables.
+   tamaño y la petrolera, que podrían ser las que el ACP de la Pregunta 5
+   encuentre en sus dos primeros ejes con las 57 variables.
 
 ## Pregunta 3 --- Contribuciones en el ACP normado y sin normalizar {#p3}
 
@@ -450,7 +462,7 @@ b. **Valor propio.** El valor propio $\lambda_k$ es la varianza de la
    componente $k$, de modo que $\lambda_k / \sum_j \lambda_j$ es la proporción
    de varianza que explica. En el ACP normado los 57 valores propios suman 57.
 c. **Contribución.** La contribución de la variable $j$ al eje $k$ es
-   $100\,u_{jk}^2$, donde $u_{jk}$ es su carga (su peso en el vector propio),
+   $100\,u_{jk}^2$, donde $u_{jk}$ es su carga (su peso en el vector propio)
    y mide qué porcentaje del eje construye esa variable. La contribución a un
    plano pondera las de cada eje por su valor propio y se compara contra la
    referencia uniforme $100/57 = 1.75$ %.
@@ -482,7 +494,7 @@ dos_columnas("normado <- facto_summarize(\n  acp_normado, \"var\",\n  axes = c(1
 ```
 
 ```{r p3-normado}
-#| fig-cap: "Contribución de las 20 primeras variables al plano 1-2 del ACP normado: Todas quedan cerca de la referencia uniforme (línea roja), pues el plano lo construyen muchas variables a la vez."
+#| fig-cap: "Contribución de las 20 primeras variables al plano 1-2 del ACP normado: Todas quedan cerca de la referencia uniforme (línea roja) pues el plano lo construyen muchas variables a la vez."
 #| fig-height: 3
 fviz_contrib(acp_normado, choice = "var", axes = c(1, 2),
              top = 20) +
@@ -496,7 +508,7 @@ fviz_contrib(acp_crudo, choice = "var", axes = c(1, 2), top = 20) +
   labs(title = NULL)
 ```
 
-**¿Cómo cambian las contribuciones al normalizar?** Cambian por completo,
+**¿Cómo cambian las contribuciones al normalizar?** Cambian por completo
 pues en el ACP sin normalizar el plano lo construyen casi solo cinco variables
 de barriles por día (producción de refinados con 18.01 %, consumo de petróleo y
 de refinados con 17.31 % cada una, producción de petróleo con 16.58 % y
@@ -515,7 +527,7 @@ referencia de 1.75 %. Las que más aportan son de petróleo (consumo, emisiones,
 refinados y destilados) y de electricidad (capacidad instalada, consumo y
 generación), lo que significa que el primer plano resume el tamaño energético
 del país en ambos sectores. Por esto se usa el ACP normado en el resto del
-taller, ya que las variables tienen unidades distintas y no es la unidad de
+taller ya que las variables tienen unidades distintas y no es la unidad de
 medida la que debe decidir qué variable importa.
 
 ```{mermaid}
@@ -547,12 +559,12 @@ flowchart LR
 ```
 
 a. **Lectura local.** El peso de una variable en el ACP sin normalizar lo
-   decide su unidad y no lo que mide, pues el consumo de petróleo tiene una
+   decide su unidad y no lo que mide pues el consumo de petróleo tiene una
    varianza once veces mayor que la generación eléctrica solo porque los
    barriles diarios alcanzan cifras de miles y los BKWH de cientos.
 b. **Lectura global.** El ACP sin normalizar no resume la base sino que la
    ordena por unidades, mientras que el normado muestra que el tamaño
-   energético es una propiedad de toda la base, pues lo construyen a la vez
+   energético es una propiedad de toda la base pues lo construyen a la vez
    37 de las 57 variables de los dos sectores.
 
 ## Pregunta 4 --- Número de componentes {#p4}
@@ -606,7 +618,7 @@ a. **Lectura local.** La cuarta componente apenas agrega 4.75 % y es la que
    componentes la marca la regla y no un cambio en la curva.
 b. **Lectura global.** El primer valor propio vale 35.32, es decir que una
    sola componente equivale a 35 de las 57 variables, lo cual es la otra cara
-   de la redundancia del diagnóstico, pues las 57 columnas describen en
+   de la redundancia del diagnóstico pues las 57 columnas describen en
    realidad unas pocas dimensiones de los países.
 
 ::: notas
@@ -619,12 +631,21 @@ b. **Lo que sí se interpreta.** Las preguntas 5 y 6 encuentran sentido hasta
    el tercer eje (exportadores frente a importadores de electricidad), lo que
    respalda quedarse con cuatro y no con dos.
 
-**Para debatir (preguntas abiertas).**
+**Preguntas para el profesor.**
 
 - ¿Debe el número de componentes salir de una regla o de lo que se logra
   interpretar?
+
+  *Por qué importa.* Los tres criterios dan dos, cuatro y ocho componentes y
+  de esa elección depende cuántos planos se interpretan en las preguntas 5
+  y 6, así que saber qué criterio espera el curso define si quedarse con
+  cuatro es defendible.
 - ¿Cambiarían los criterios si antes del ACP se quitaran las copias del
   diagnóstico (por ejemplo `Refinados_cons`)? No se calculó.
+
+  *Por qué importa.* Los 18 pares con correlación mayor a 0.99 suman
+  varianza al mismo eje, lo que puede inflar el 62 % del primer eje y con
+  ello mover el número de componentes que pide el criterio del 80 %.
 :::
 
 ## Pregunta 5 --- Representación de las variables {#p5}
@@ -687,7 +708,7 @@ b. **El segundo eje separa petróleo de renovables.** Según las
    natural (`LGN_prod`, 0.65), las exportaciones de crudo
    (0.59) y la producción de crudo y de petróleo (0.57 y 0.59), mientras que
    del lado negativo quedan la generación y la capacidad hidroeléctrica (−0.42 y
-   −0.41) y la capacidad solar y renovable (−0.40 y −0.39). Es decir, entre
+   −0.41) y la capacidad solar y renovable (−0.40 y −0.39). Es decir que entre
    países de igual tamaño el segundo eje distingue a los productores de
    hidrocarburos de los que generan electricidad renovable.
 
@@ -756,7 +777,7 @@ flowchart TD
 
 a. **Lectura local.** La exportación de crudo, que en el primer plano casi no
    aparece (0.13 con el primer eje), es la variable mejor representada del
-   plano (2,3), lo cual confirma que la dimensión comercial que se buscó en
+   plano (2,3), lo cual respalda que la dimensión comercial que se buscó en
    la Pregunta 1 existe y está fuera del eje de tamaño.
 b. **Lectura global.** El primer eje es el tamaño porque 39 de las 57
    variables tienen con él correlación mayor a 0.7 en valor absoluto, de modo
@@ -764,7 +785,7 @@ b. **Lectura global.** El primer eje es el tamaño porque 39 de las 57
    renovables, importaciones) solo aparece en los ejes siguientes, que
    explican mucho menos.
 
-> **Nota.** El signo de cada componente es arbitrario, pues `prcomp()` puede
+> **Nota.** El signo de cada componente es arbitrario pues `prcomp()` puede
 > devolver $u_k$ o $-u_k$ y ambos son igual de válidos. Lo que se interpreta es
 > la oposición entre grupos de variables y no si quedan arriba o abajo.
 
@@ -829,11 +850,11 @@ b. **Petroleros.** En el plano (2,3) Arabia Saudita (8.48, −8.63) y Rusia
    Irak, Emiratos Árabes, Venezuela e Irán aparecen en la misma dirección
    aunque mucho más cerca del origen.
 c. **Grandes consumidores sin petróleo.** Japón (8.65, −3.65) e India (8.83,
-   −2.88) quedan prácticamente superpuestos en el plano (1,2), pues ambos son
+   −2.88) quedan prácticamente superpuestos en el plano (1,2) pues ambos son
    economías grandes que consumen mucho petróleo y electricidad sin producir
    crudo en cantidad.
 d. **China frente a Estados Unidos.** A pesar de estar ambos a la derecha del
-   primer plano, se separan en el segundo eje (−12.99 contra 9.48), ya que
+   primer plano, se separan en el segundo eje (−12.99 contra 9.48) ya que
    China pesa por su generación hidroeléctrica y renovable mientras que
    Estados Unidos lo hace también por su producción de petróleo.
 e. **Importadores de electricidad.** En el plano (2,3) Italia (4.12 en el
@@ -848,7 +869,7 @@ a. **Lectura local.** La cercanía de India y Japón no dice que sean países
    mucho consumo y poca producción de crudo, de modo que dos economías que en
    otros aspectos pueden ser muy distintas quedan superpuestas porque las 57
    variables solo miden energía.
-b. **Lectura global.** El plano lo organizan pocas economías, pues Estados
+b. **Lectura global.** El plano lo organizan pocas economías pues Estados
    Unidos y China construyen el 83 % del primer eje y fijan la escala del
    mapa, de modo que la mayoría de países no se distingue en estos planos y
    se justifica la Pregunta 7.
@@ -919,11 +940,11 @@ producción de crudo (2255 y 3613 TBPD) con la mayor generación renovable de
 los 107 países (429 y 412 BKWH). India queda sola en el extremo derecho.
 
 a. **Lectura local.** Quitar cuatro países no borra el tamaño sino que lo
-   traslada, pues India y Japón construyen ahora el 43 % del primer eje, que
+   traslada pues India y Japón construyen ahora el 43 % del primer eje, que
    es la mitad de lo que construían Estados Unidos y China pero sigue siendo
    mucho para dos países de 107.
 b. **Lectura global.** El tamaño es una propiedad de la base y no de cuatro
-   países, ya que todavía 27 de las 57 variables tienen correlación mayor a
+   países ya que todavía 27 de las 57 variables tienen correlación mayor a
    0.7 con el primer eje (antes 39). Lo que sí cambia es que, al bajar la
    escala, la dimensión petrolera gana espacio y deja ver la estructura en
    brazos que la Pregunta 8 lee como grupos.
@@ -941,11 +962,20 @@ c. **Quitar no es corregir.** Los cuatro países no son errores de medición
    describe: Los resultados de las preguntas 7 a 11 valen para 107 países sin
    los cuatro mayores.
 
-**Para debatir (preguntas abiertas).**
+**Preguntas para el profesor.**
 
 - ¿Por qué cuatro y no seis, si India y Japón heredan el mismo papel?
+
+  *Por qué importa.* El enunciado pide quitar los atípicos pero no dice cómo
+  decidir cuáles son y al retirar a los cuatro mayores India y Japón pasan
+  a construir el 43 % del primer eje, de modo que el criterio de corte
+  decide qué países dominan las preguntas 7 a 11.
 - ¿Una transformación logarítmica conseguiría lo mismo sin quitar a nadie?
   No se calculó.
+
+  *Por qué importa.* El logaritmo reduce el peso de los valores extremos sin
+  excluirlos, con lo cual los resultados valdrían para los 111 países y no
+  solo para 107.
 :::
 
 # Agrupamiento {#agrupamiento}
@@ -979,13 +1009,13 @@ a. **Lectura local.** Los cuatro países de los extremos (India, Japón, Brasil
    punta de un brazo.
 b. **Lectura global.** El 40.81 % de la varianza no está en este plano, por
    lo que dos países que se ven cerca pueden estar lejos en otras
-   componentes, y por eso el número de grupos se lee aquí como una hipótesis
+   componentes y por eso el número de grupos se lee aquí como una hipótesis
    y no como un resultado.
 
 ## Pregunta 9 --- Número de grupos por reducción de varianza explicada {#p9}
 
 La inercia intra-grupo $W(k)$ es la suma de las distancias al cuadrado de cada
-país al centroide de su grupo, que mide qué tan compactos son los grupos, y la
+país al centroide de su grupo, que mide qué tan compactos son los grupos y la
 varianza explicada por la partición es
 
 $$
@@ -1050,7 +1080,7 @@ b. **Coherencia con el plano.** Tres grupos es lo que se esperaba a ojo en la
 
 La elección también se lee en dos niveles:
 
-a. **Lectura local.** El tercer grupo cuesta poco y aporta mucho, pues con
+a. **Lectura local.** El tercer grupo cuesta poco y aporta mucho pues con
    10.1 puntos más de varianza explicada la silueta solo baja de 0.698 a
    0.666, mientras que el cuarto parte la masa central (87/10/8/2) y la
    silueta cae a 0.538.
@@ -1185,7 +1215,7 @@ mapa_paises(acp_sin4, c(1, 2), n = 14, grupos = kmedias)
 ```
 
 **¿Son diferentes los resultados de los dos análisis?** Sí, aunque coinciden
-en lo principal, pues 101 de los 107 países quedan en el grupo equivalente con
+en lo principal pues 101 de los 107 países quedan en el grupo equivalente con
 ambos métodos:
 
 a. **En qué coinciden.** Los dos aíslan a India y Japón como un grupo propio
@@ -1208,7 +1238,7 @@ matizar que con una masa tan compacta y cuatro países tan lejanos cualquier
 (0.713 frente a 0.666), lo cual sucede porque el grupo B de k-medias tiene
 silueta promedio de $-0.022$, es decir que esos ocho países están en promedio
 tan cerca de la masa central como entre sí. En resumen ambos métodos ven la
-misma estructura de una masa grande y pocos países extremos, y lo que no está
+misma estructura de una masa grande y pocos países extremos y lo que no está
 bien definido es si las economías grandes intermedias forman un grupo aparte.
 
 ```{r p10-nstart}
@@ -1225,12 +1255,12 @@ rbind(nstart_25 = inicios(25), nstart_100 = inicios(100))
 > partición de inercia 3226.7, que es también la que encuentra SDA Lab con 25
 > reinicios de k-medias++. Por eso se usan 100 arranques.
 
-a. **Lectura local.** El grupo B es el punto débil de k-medias, pues
+a. **Lectura local.** El grupo B es el punto débil de k-medias pues
    su silueta promedio es negativa ($-0.022$) y la de Alemania llega a
    $-0.222$, es decir que Alemania está más cerca, en promedio, de la masa
    central que de los otros siete países de su grupo.
 b. **Lectura global.** Los dos métodos responden a la misma estructura de
-   la base, una masa compacta con unos pocos extremos, y difieren solo en la
+   la base, una masa compacta con unos pocos extremos y difieren solo en la
    franja intermedia, que es justo donde los datos no tienen una frontera
    clara y donde cada criterio de optimización decide por su cuenta.
 
@@ -1244,7 +1274,7 @@ round(sort(setNames(s[b, "sil_width"], rownames(num)[b])), 3)
 **Interpretaciones.**
 
 a. **Cada método gana en su propio criterio.** K-medias explica más
-   varianza (46.6 % frente a 39.0 %) porque eso es lo que minimiza, y el
+   varianza (46.6 % frente a 39.0 %) porque eso es lo que minimiza y el
    enlace promedio tiene mejor silueta (0.713 frente a 0.666) porque no
    fuerza un grupo intermedio, de modo que «mejor» depende de qué se le pida
    a la partición.
@@ -1260,22 +1290,40 @@ c. **Por qué el enlace promedio aísla parejas.** India y Japón, y Brasil y
    101/2/2/1/1) y nunca las seis economías intermedias.
 d. **El arranque importa.** Con `nstart = 25` la inercia depende de la
    semilla (3274.5 o 3231.9) y solo con 100 arranques se llega siempre a
-   3226.7, así que una partición de k-medias sin varios arranques puede ser
+   3226.7 así que una partición de k-medias sin varios arranques puede ser
    un óptimo local.
-e. **Qué k defendería cada uno.** Por silueta los dos preferirían $k = 2$,
+e. **Qué k defendería cada uno.** Por silueta los dos preferirían $k = 2$
    pues k-medias llega a 0.698 (98/9) y el enlace promedio a 0.752 (105/2,
    solo India y Japón aparte). El $k = 3$ se eligió por la varianza explicada
    y por la lectura del plano, no por la silueta.
 
-**Para debatir (preguntas abiertas).**
+**Preguntas para el profesor.**
 
 - ¿Las ocho economías del grupo B son un grupo o el borde de la masa central?
-- ¿Qué partición defendería el grupo: la que más explica (k-medias) o la que
+
+  *Por qué importa.* Su silueta promedio es de $-0.022$ y si B no es un
+  grupo la partición en tres equivale en la práctica a una masa central más
+  India y Japón.
+- ¿Qué partición se debería defender: la que más explica (k-medias) o la que
   mejor separa (enlace promedio)?
+
+  *Por qué importa.* Cada método gana en su propio criterio (46.6 % frente
+  a 39.0 % de varianza explicada y 0.666 frente a 0.713 de silueta), de
+  modo que la respuesta a la Pregunta 10 depende de qué criterio considere
+  el curso como el adecuado.
 - ¿Cambiaría el resultado si se agrupara sobre las cuatro componentes de la
   Pregunta 4 en lugar de las 57 variables redundantes? No se calculó.
+
+  *Por qué importa.* Las distancias sobre las 57 variables cuentan varias
+  veces la misma información (los 18 pares casi repetidos del diagnóstico),
+  mientras que agrupar sobre las componentes es la forma usual de combinar
+  el ACP con el agrupamiento.
 - ¿Otro enlace (completo o de Ward) formaría el grupo intermedio? No se
   calculó.
+
+  *Por qué importa.* El enlace promedio solo aísla parejas y nunca forma el
+  grupo de las economías intermedias, por lo que otro enlace diría si ese
+  grupo es un rasgo de los datos o del método.
 :::
 
 ## Pregunta 11 --- Distribución de las cinco variables por grupo {#p11}
@@ -1319,26 +1367,26 @@ tres de las cinco variables (consumo de petróleo, generación eléctrica y
 generación renovable) y no en las dos petroleras (producción y exportación de
 crudo). Antes de leerlas vale la pena anotar que el grupo C tiene solo dos
 países (India y Japón) y el B ocho, de modo que sus cajas son apenas un
-resumen de pocos puntos y no una distribución, y que el eje es
+resumen de pocos puntos y no una distribución y que el eje es
 pseudo-logarítmico porque los valores de los tres grupos difieren en órdenes
 de magnitud.
 
 a. **Consumo de petróleo y generación eléctrica.** Las medianas crecen con
-   claridad de A a C, pues el consumo pasa de 155 a 1632 y a 3919 TBPD y la
+   claridad de A a C pues el consumo pasa de 155 a 1632 y a 3919 TBPD y la
    generación de 27 a 422.5 y a 1142.5 BKWH. India y Japón superan a todos
    los países de los otros grupos en las dos variables, aunque A y B se
    solapan en sus extremos, por ejemplo México consume 2040 TBPD y genera
    290 BKWH siendo del grupo A, mientras que Alemania consume 791.3 TBPD y
    genera 198 BKWH siendo del grupo B.
 b. **Generación renovable.** También crece de A a C (medianas de 6, 102.5 y
-   163.5 BKWH) pero con mucho solapamiento, ya que el grupo B va de 10 BKWH
+   163.5 BKWH) pero con mucho solapamiento ya que el grupo B va de 10 BKWH
    (Corea del Sur) a 429 BKWH (Brasil) y el máximo de A (Noruega, 138 BKWH)
    supera incluso a Japón (129 BKWH) del grupo C.
 c. **Producción de crudo.** No distingue los grupos, dado que los tres tienen
    países que casi no producen y el rango de A (de 0 a 3370 TBPD, este último
    Irak) cubre casi por completo los de B (de 0 a 3613) y C (de 4.8 a 767).
 d. **Exportación de crudo.** Tampoco los distingue y además no crece con el
-   tamaño, pues las medianas son 3.3, 6.2 y 0.35 TBPD, India y Japón casi no
+   tamaño pues las medianas son 3.3, 6.2 y 0.35 TBPD, India y Japón casi no
    exportan (0.7 y 0 TBPD) y cuatro de los cinco mayores exportadores de los
    107 países (Emiratos Árabes Unidos con 2651 TBPD, Irak con 2518, Nigeria
    con 2120 y Kuwait con 1995) están en el grupo A, junto a 38 países que no
@@ -1346,19 +1394,19 @@ d. **Exportación de crudo.** Tampoco los distingue y además no crece con el
    su tamaño y no por su petróleo.
 
 Se concluye que k-medias agrupó a los países por el tamaño de su consumo y de
-su sistema eléctrico, que es la información del primer eje del ACP, y no por
+su sistema eléctrico, que es la información del primer eje del ACP y no por
 ser o no productores y exportadores de petróleo, que es la información del
 segundo eje.
 
 a. **Lectura local.** Emiratos Árabes Unidos, el mayor exportador de crudo
    sin los cuatro atípicos, queda en el mismo grupo que países que no
-   exportan nada, porque en todo lo demás (consumo, generación) es un país
+   exportan nada porque en todo lo demás (consumo, generación) es un país
    mediano.
 b. **Lectura global.** La partición sigue al tamaño porque la base mide
-   sobre todo tamaño, ya que 27 de las 57 variables están ligadas al primer
+   sobre todo tamaño ya que 27 de las 57 variables están ligadas al primer
    eje y la dimensión petrolera la cargan unas pocas, de modo que en la
    distancia euclidiana entre países el petróleo pesa poco. Haber elegido la
-   exportación en la Pregunta 1 es lo que permite verlo, pues con las
+   exportación en la Pregunta 1 es lo que permite verlo pues con las
    emisiones de CO~2~ las cinco cajas habrían repetido el consumo.
 
 ::: notas
@@ -1372,15 +1420,24 @@ b. **El petróleo queda dentro de A.** Cuatro de los cinco mayores
    exportadores de los 107 países (Emiratos Árabes Unidos, Irak, Nigeria y
    Kuwait) están en A, el mismo grupo de la masa central, es decir que la partición no reconoce al brazo
    de productores que se veía en la Pregunta 7.
-c. **Cajas de pocos países.** C tiene dos países y B ocho, así que sus cajas
+c. **Cajas de pocos países.** C tiene dos países y B ocho así que sus cajas
    describen casos y no distribuciones.
 
-**Para debatir (preguntas abiertas).**
+**Preguntas para el profesor.**
 
-- ¿Un agrupamiento con solo las cinco variables, o con las componentes 2 y
-  3, separaría a los exportadores? No se calculó.
+- ¿Un agrupamiento con solo las cinco variables o con las componentes 2 y
+  3 separaría a los exportadores? No se calculó.
+
+  *Por qué importa.* La partición actual sigue al tamaño y deja a cuatro de
+  los cinco mayores exportadores en el grupo A, aunque el segundo eje del
+  ACP es justamente el petrolero.
 - Si el objetivo del enunciado es caracterizar países por importación,
   exportación y consumo, ¿sirve una partición que solo ve tamaño?
+
+  *Por qué importa.* El enunciado busca caracterizar a los países «en
+  términos de importación, exportación, consumo, producción», y si la
+  partición solo responde al consumo y a la generación habría que decidir
+  si se reformula el agrupamiento o se reporta como una limitación.
 :::
 
 ```{=latex}
@@ -1449,7 +1506,7 @@ columnas numéricas y el país como nombre de fila.
 
 ```{r abreviaturas, echo=FALSE}
 # Autocontenido: Solo usa `ruta` (cargar-datos) y abreviar()
-# (configuración), así que se puede mover a cualquier lugar.
+# (configuración) así que se puede mover a cualquier lugar.
 original <- names(read.csv(ruta, sep = ";", nrows = 1,
                            check.names = FALSE))[-1]
 knitr::kable(data.frame(
