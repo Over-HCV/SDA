@@ -203,6 +203,16 @@ descargar_eia <- function(url = URL_EIA_KAGGLE,
                           espera = 20)
   descargar_kaggle(url, "EIA.csv", destino, espera)
 
+# Zoo (UCI) del proyecto final, publicada como overhcv/uci-zoo. El zip trae
+# un solo zoo.csv, idéntico byte a byte a data/zoo.csv; el lector con los
+# tipos corregidos vive en learn/R/logica/datos/zoo.R.
+URL_ZOO_KAGGLE <- "https://www.kaggle.com/api/v1/datasets/download/overhcv/uci-zoo"
+
+descargar_zoo <- function(url = URL_ZOO_KAGGLE,
+                          destino = file.path(tempdir(), "zoo-kaggle"),
+                          espera = 20)
+  descargar_kaggle(url, "zoo.csv", destino, espera)
+
 cargar_eia <- function(ruta = ruta_eia()) {
   utils::read.csv(ruta, sep = ";", dec = ".", stringsAsFactors = FALSE,
                   fileEncoding = codificacion_de(ruta))

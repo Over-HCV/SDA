@@ -1,0 +1,1364 @@
+---
+title: "Agrupamiento de variables cualitativas: la base Zoo"
+subtitle: "Análisis Estadístico de Datos · proyecto final"
+author: "Anyelo Álvarez · Daniel Arias · Tania Mora · Over Castrillón"
+output:
+  rmdformats::downcute
+---
+
+```{r configuracion, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+# install.packages(c("ggplot2", "cluster", "factoextra"))
+library(ggplot2)
+library(cluster)
+library(factoextra)
+```
+
+# Dependencias
+
+Para ejecutar este cuaderno hay que instalar antes, desde la consola de R o desde el menú Tools > Install Packages de RStudio, los siguientes paquetes:
+
+- `install.packages("ggplot2")`.
+- `install.packages("cluster")`.
+- `install.packages("factoextra")`.
+- `install.packages("rmdformats")` (opcional: es el formato del cuaderno de la sesión 5).
+
+Los tres métodos cualitativos se escriben a mano en R base (k-modas y el EM de las clases latentes) o con `cluster` (Gower), así que no hace falta `klaR` ni `poLCA`. El código de cada chunk lo genera SDA Lab (`projects/final/cuaderno/generar.sh`) y es el mismo que el laboratorio ejecuta: con la misma semilla y los mismos reinicios, las particiones de este cuaderno coinciden con las del lab.
+
+# Objetivo y alcance
+
+**Objetivo**: este cuaderno continúa la discusión del agrupamiento de la sesión 5, ahora con una tabla de datos donde **todas las variables son cualitativas**. Se busca entender qué cambia del k-medias cuando no se puede restar ni promediar, y comparar tres maneras de responderlo: cambiar el centro (k-modas), cambiar la distancia (Gower con aglomeración jerárquica) y cambiar el modelo (clases latentes).
+
+**Alcance**: se sigue el esqueleto del cuaderno de la sesión 5 (datos, medición de la calidad de una partición, algoritmo, selección de K, aglomeración jerárquica y aplicación), con las piezas cualitativas en lugar de las numéricas. La base trae la clase real de cada animal, que **no entra a ningún ajuste**: se usa solo al final, para medir cuánto de esa clase recupera cada partición.
+
+# Datos
+
+```{r cargar-datos}
+# zoo.csv es la base Zoo (UCI) del proyecto final, publicada en Kaggle como
+# overhcv/uci-zoo. Se baja de ahí; sin internet se busca una
+# copia local en los lugares habituales, en orden.
+url <- paste0("https://www.kaggle.com/api/v1/datasets/download/",
+              "overhcv/uci-zoo")
+zip <- file.path(tempdir(), "kaggle.zip")
+ruta <- tryCatch({
+  download.file(url, zip, mode = "wb", quiet = TRUE)
+  unzip(zip, files = "zoo.csv", exdir = tempdir())
+}, error = function(e) {
+  message("Sin acceso a Kaggle, se usa la copia local: ",
+          conditionMessage(e))
+  Filter(file.exists, c("zoo.csv", "data/zoo.csv",
+                        "../../../data/zoo.csv"))[1]
+})
+# Se detecta la codificación en vez de suponerla: suponer es lo que
+# rompe las tildes (ACACÍAS -> ACACÃAS).
+codificacion <- if (all(validUTF8(readLines(ruta, warn = FALSE,
+                                            encoding = "bytes"))))
+  "UTF-8" else "latin1"
+datos <- read.csv(ruta, sep = ",", dec = ".",
+                  fileEncoding = codificacion,
+                  stringsAsFactors = FALSE)
+names(datos) <- trimws(names(datos))  # ORI trae "Pronostico "
+filas_al_cargar <- nrow(datos)  # antes de filtrar: lo usa el filtro
+cat("Al cargar:", nrow(datos), "filas x", ncol(datos), "columnas\n")
+```
+
+## Descripción del conjunto de datos
+
+La base Zoo (UCI) describe 101 animales con 16 atributos: quince binarios en `si`/`no` (pelo, plumas, huevos, leche, vuela, acuático, depredador, dientes, vertebrado, respira, venenoso, aletas, cola, doméstico y tamaño de gato) y `patas`, que viene escrita como número (0, 2, 4, 5, 6 u 8) pero es un **código**: un animal de seis patas no es el triple de uno de dos, y por eso todo el cuaderno la trata como factor. La columna `animal` es el nombre de la fila y `tipo` es la clase real (mamífero, ave, reptil, pez, anfibio, insecto, invertebrado).
+
+```{r}
+# f1.fuente.vista_previa
+cat("Unidades estadísticas (filas):", nrow(datos), "\n")
+cat("Variables (columnas):     ", ncol(datos), "\n")
+utils::head(datos, 10)
+```
+
+------------------------------------------------------------------------
+
+### Ejercicio 1
+
+> ¿Qué tan balanceadas están las siete clases? ¿Qué se puede esperar de un agrupamiento en k = 7 grupos con ese reparto?
+
+```{r}
+# f1.balanceo.frecuencias
+tabla <- sort(table(datos$tipo), decreasing = TRUE)
+print(cbind(n = tabla, prop = round(prop.table(tabla), 3)))
+cat("Más frecuente:  ", names(tabla)[1], " (n = ", tabla[1], ")\n",
+    sep = "")
+cat("Menos frecuente: ", names(tabla)[length(tabla)],
+    " (n = ", tabla[length(tabla)], ")\n", sep = "")
+barplot(tabla, horiz = TRUE, las = 1, cex.names = 0.7,
+        main = "Frecuencias de tipo")
+```
+
+**¿Están balanceadas?** No, pues los mamíferos son 41 de los 101 animales (40.6 %) y los anfibios apenas 4 (4 %). Un agrupamiento no supervisado busca grupos homogéneos y no grupos del tamaño de las clases, así que con k = 7 puede pasar que los mamíferos ocupen dos grupos y que los reptiles y anfibios, que son pocos y heterogéneos, queden repartidos entre otros.
+
+------------------------------------------------------------------------
+
+### Ejercicio 2
+
+> ¿Hay algún atributo que, solo, ya separe una clase completa?
+
+```{r}
+# f1.analisis.mosaico
+tabla <- table(datos$leche, datos$tipo)
+mosaicplot(tabla, shade = TRUE, las = 2,
+           main = "leche x tipo", xlab = "leche", ylab = "tipo")
+print(chisq.test(tabla))
+```
+
+**¿Hay alguno?** Sí, `leche`: el estadístico chi-cuadrado vale 101, exactamente el número de animales, lo que en una tabla 2 × 7 equivale a una V de Cramér igual a 1. Los 41 animales que dan leche son los 41 mamíferos y ninguno más, así que cualquier método que respete esa variable puede aislar a los mamíferos sin mirar la clase.
+
+------------------------------------------------------------------------
+
+# Métodos de agrupamiento (Clustering)
+
+En la sesión 5 se usó el ACP para ver los datos en dos dimensiones informativas antes de agruparlos. Con variables cualitativas el análogo es el **análisis de correspondencias múltiples (ACM)**: se descompone la tabla indicadora (una columna por categoría) y se obtienen coordenadas para las filas y para las categorías. Igual que allá, **esto no implica que el agrupamiento se haga sobre el ACM**: los tres métodos de abajo trabajan sobre los 16 factores, y el plano del ACM es solo un dibujo.
+
+```{r}
+# f4.diagnostico.scree
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# ACM a mano: la SVD de los residuos estandarizados de la
+# indicadora (una columna por categoría). Devuelve las coordenadas
+# de filas y de categorías y la inercia de cada dimensión.
+acm_coordenadas <- function(x, d = 2) {
+  Z <- do.call(cbind, lapply(names(x), function(v) {
+    niveles <- sort(unique(as.character(x[[v]])))
+    bloque <- outer(as.character(x[[v]]), niveles, "==") * 1
+    colnames(bloque) <- paste0(v, "=", niveles)
+    bloque
+  }))
+  P <- Z / sum(Z)
+  r <- rowSums(P)
+  masas <- colSums(P)
+  S <- (P - outer(r, masas)) / sqrt(outer(r, masas))
+  descomposicion <- svd(S)
+  ejes <- seq_len(d)
+  filas <- sweep(descomposicion$u[, ejes, drop = FALSE], 2,
+                 descomposicion$d[ejes], `*`) / sqrt(r)
+  categorias <- sweep(descomposicion$v[, ejes, drop = FALSE], 2,
+                      descomposicion$d[ejes], `*`) / sqrt(masas)
+  dimnames(filas) <- list(rownames(x), paste0("Dim", ejes))
+  dimnames(categorias) <- list(colnames(Z), paste0("Dim", ejes))
+  # La inercia total es J/Q - 1 (categorías / variables - 1):
+  # depende solo de cuántas categorías hay, y por eso los %
+  # salen pesimistas.
+  util <- seq_len(ncol(Z) - ncol(x))
+  inercia <- descomposicion$d[util]^2 / (ncol(Z) / ncol(x) - 1)
+  list(filas = filas, categorias = categorias, inercia = inercia,
+       rotulos = sprintf("Dim%d (%.1f %%)", util, 100 * inercia))
+}
+acm <- acm_coordenadas(cuali, 2)
+usar <- seq_len(min(10, length(acm$inercia)))
+acumulada <- cumsum(acm$inercia)[usar]
+print(data.frame(dimension = usar,
+                 inercia = round(100 * acm$inercia[usar], 2),
+                 acumulada = round(100 * acumulada, 2)),
+      row.names = FALSE)
+barplot(100 * acm$inercia[usar], names.arg = usar, col = "#a6192e",
+        xlab = "dimensión", ylab = "% de la inercia total")
+```
+
+Las dos primeras dimensiones retienen 26.0 % y 18.8 % de la inercia (44.9 % entre las dos). En el ACM la inercia total es J/Q − 1, que depende solo de cuántas categorías hay, y por eso estos porcentajes salen pesimistas comparados con los de un ACP.
+
+```{r}
+# f4.explicabilidad.mapa_2d
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# acm_coordenadas() ya se definió más arriba.
+ejes <- c(1, 2)
+acm <- acm_coordenadas(cuali, max(ejes))
+plano <- as.data.frame(acm$filas[, ejes])
+names(plano) <- c("x", "y")
+# La clase real no entró al ACM: solo pinta los puntos.
+plano$color <- datos[["tipo"]][match(rownames(plano),
+                                    filas)]
+ggplot(plano, aes(x, y, color = color)) +
+  geom_hline(yintercept = 0, color = "grey80") +
+  geom_vline(xintercept = 0, color = "grey80") +
+  geom_point(size = 2, alpha = 0.8) +
+  geom_text(aes(label = rownames(plano)), size = 2.2, vjust = -0.9,
+            check_overlap = TRUE, show.legend = FALSE) +
+  labs(x = acm$rotulos[ejes[1]], y = acm$rotulos[ejes[2]],
+       color = NULL, title = "ACM: las filas en el primer plano") +
+  theme_minimal()
+# Las categorías: las que caen lejos del origen construyen el eje.
+categorias <- as.data.frame(acm$categorias[, ejes])
+names(categorias) <- c("x", "y")
+ggplot(categorias, aes(x, y, label = rownames(categorias))) +
+  geom_hline(yintercept = 0, color = "grey80") +
+  geom_vline(xintercept = 0, color = "grey80") +
+  geom_point(color = "#a6192e") +
+  geom_text(size = 2.4, vjust = -0.7, check_overlap = TRUE) +
+  labs(x = acm$rotulos[ejes[1]], y = acm$rotulos[ejes[2]],
+       title = "ACM: las categorías en el mismo plano") +
+  theme_minimal()
+```
+
+> **Nota.** Los colores del plano son la clase real, que no entró al ACM. Que los mamíferos, las aves y los peces aparezcan en zonas distintas sugiere que hay grupos que un algoritmo podría encontrar, pero no dice cuántos.
+
+## K-modas (K-modes)
+
+Se busca, como en k-medias, una partición de los n animales en K grupos lo más homogéneos posible. Lo que cambia es la manera de medir la homogeneidad: entre dos animales no se resta nada, se cuenta **en cuántas de las 16 variables difieren** (el emparejamiento simple, o distancia de Hamming sobre categorías).
+
+### Medición de calidad de la partición
+
+En la sesión 5 la calidad de un agrupamiento era la suma, grupo por grupo, de las distancias euclídeas al cuadrado entre los pares de observaciones, dividida por el tamaño del grupo:
+
+$$d(\text{Agrupamiento}) = \sum_{k=1}^{K} \frac{1}{n_k} \sum_{i<j \in G_k} d(i, j).$$
+
+Con factores la fórmula es la misma y lo único que cambia es $d(i, j)$, que pasa a ser el número de variables en que $i$ y $j$ difieren. A continuación se comparan dos agrupamientos hechos a mano: el **A** separa por los rasgos que definen una clase (leche, plumas, aletas) y el **B** por rasgos de estilo de vida (doméstico, tamaño de gato, acuático).
+
+```{r calidad-particion}
+# Dos agrupamientos hechos a mano, como los A y B del cuaderno de
+# la sesión 5. A: leche, plumas, aletas; B: doméstico, tamaño y
+# acuático.
+agrupamiento_a <- with(cuali, ifelse(leche == "si", "G1",
+                         ifelse(plumas == "si", "G2",
+                         ifelse(aletas == "si", "G3", "G4"))))
+agrupamiento_b <- with(cuali, ifelse(domestico == "si", "G1",
+                         ifelse(tamano_gato == "si", "G2",
+                         ifelse(acuatico == "si", "G3", "G4"))))
+# d(i, j) = en cuántas variables difieren i y j. Con solo factores,
+# Gower es esa cuenta dividida por p: se multiplica de vuelta.
+desacuerdos <- as.matrix(cluster::daisy(cuali, metric = "gower")) *
+  ncol(cuali)
+# La d de un agrupamiento: por grupo, la suma de desacuerdos entre
+# sus pares dividida por su tamaño.
+d_agrupamiento <- function(d, grupos)
+  sapply(split(seq_along(grupos), grupos), function(g)
+    sum(d[g, g][upper.tri(d[g, g])]) / length(g))
+d_a <- d_agrupamiento(desacuerdos, agrupamiento_a)
+d_b <- d_agrupamiento(desacuerdos, agrupamiento_b)
+print(rbind(A = round(d_a, 2), B = round(d_b, 2)))
+cat("d(A) =", round(sum(d_a), 2), "· d(B) =", round(sum(d_b), 2),
+    "\n")
+```
+
+Así, $d(\text{Agrupamiento}_A) = 51.34 + 19.10 + 7.38 + 63.15 = 140.97$ y $d(\text{Agrupamiento}_B) = 32.54 + 85.47 + 46.09 + 69.89 = 234.00$. El agrupamiento A es claramente más homogéneo, y lo es aunque su cuarto grupo (todo lo que no da leche, no tiene plumas ni aletas: insectos, invertebrados, reptiles y anfibios) sea el más disperso de A.
+
+------------------------------------------------------------------------
+
+### Ejercicio 3
+
+> ¿Por qué el grupo G1 de A (los 41 mamíferos) tiene una d más alta que el G3 (los 13 animales con aletas), si los dos grupos son "puros"?
+
+**¿Es porque son menos parecidos?** No del todo, pues la d de un grupo suma los desacuerdos de todos sus pares y divide solo por $n_k$, así que crece con el tamaño del grupo: 41 animales tienen 820 pares y 13 tienen 78. Un grupo grande y heterogéneo en rasgos secundarios (depredador, acuático, tamaño) pesa más que uno chico, y por eso la d sirve para comparar particiones del mismo tamaño K y no grupos sueltos entre sí.
+
+------------------------------------------------------------------------
+
+### Algoritmo de K-modas
+
+Recorrer todas las particiones posibles en K = 7 grupos es imposible, así que, como en k-medias, se usa un algoritmo que encuentra una buena partición rápido (Huang, 1998):
+
+- i = 1. Se eligen K modas iniciales: cada variable se sortea según la frecuencia de sus categorías y cada candidata se cambia por la fila real más parecida (arranque de Huang). Cada animal va a la moda con la que discrepa en menos variables.
+- i = 2. Se repite hasta que un barrido completo no mueva a nadie:
+- \*2.1. La moda de cada grupo es la categoría más frecuente de cada variable (el análogo del centroide).
+- \*2.2. Se recorren los animales en orden y uno se muda de grupo solo si queda **estrictamente** más cerca de otra moda; las dos modas tocadas se recalculan en el acto.
+
+El código siguiente es ese algoritmo escrito a mano; se corre con 25 arranques (semillas 42 a 66) y se queda el de menor costo, que es el total de desacuerdos de cada animal con la moda de su grupo.
+
+```{r}
+# f3.analisis.convergencia
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# K-modas (Huang, 1998), escrito a mano. Es k-medias con dos piezas
+# cambiadas: la distancia cuenta en cuántas variables difieren
+# dos filas, y el centro de cada grupo es su moda, variable por
+# variable.
+kmodas_una <- function(codigos, niveles, k, semilla, maxit) {
+  set.seed(semilla)
+  # La moda de cada grupo: la categoría más frecuente de cada
+  # variable (en un empate gana el primer nivel).
+  modas_de <- function(g) t(sapply(seq_len(k), function(j)
+    sapply(seq_len(ncol(codigos)), function(v)
+      which.max(tabulate(codigos[g == j, v], niveles[v])))))
+  costo <- function(g, m) sum(codigos != m[g, , drop = FALSE])
+  # Arranque de Huang: sortear k filas candidatas (cada variable
+  # según la frecuencia de sus categorías) y cambiar cada una por la
+  # fila real distinta más parecida que nadie haya tomado.
+  distintas <- codigos[!duplicated(codigos), , drop = FALSE]
+  candidatas <- matrix(sapply(seq_len(ncol(codigos)), function(v) {
+    tabla <- table(distintas[, v])
+    as.integer(names(tabla))[sample.int(length(tabla), k,
+      replace = TRUE, prob = as.numeric(tabla))]
+  }), nrow = k)
+  libres <- seq_len(nrow(distintas))
+  modas <- matrix(0L, k, ncol(codigos))
+  for (j in seq_len(k)) {
+    lejania <- rowSums(distintas[libres, , drop = FALSE] !=
+                       rep(candidatas[j, ], each = length(libres)))
+    cercanas <- libres[lejania == min(lejania)]
+    elegida <- cercanas[sample.int(length(cercanas), 1)]
+    modas[j, ] <- distintas[elegida, ]
+    libres <- setdiff(libres, elegida)
+  }
+  # Asignar cada fila a la moda con que menos discrepa y recalcular.
+  lejos <- sapply(seq_len(k), function(j)
+    rowSums(codigos != rep(modas[j, ], each = nrow(codigos))))
+  grupos <- max.col(-lejos, ties.method = "first")
+  modas <- modas_de(grupos)
+  traza <- costo(grupos, modas)
+  historia <- matrix(grupos)
+  for (barrido in seq_len(maxit)) {
+    movidas <- 0
+    for (i in seq_len(nrow(codigos))) {
+      d <- colSums(t(modas) != codigos[i, ])
+      origen <- grupos[i]
+      destino <- which.min(d)
+      # Se muda solo si mejora ESTRICTAMENTE, y el último miembro
+      # no se va: un grupo vacío no tendría moda.
+      if (d[destino] >= d[origen] || sum(grupos == origen) == 1)
+        next
+      grupos[i] <- destino
+      modas <- modas_de(grupos)  # las modas tocadas, en el acto
+      movidas <- movidas + 1
+    }
+    traza <- c(traza, costo(grupos, modas))
+    historia <- cbind(historia, grupos)
+    if (movidas == 0) break  # un barrido sin mudanzas: convergió
+  }
+  list(grupos = grupos, modas = modas, costo = costo(grupos, modas),
+       traza = traza, historia = historia)
+}
+
+# Varios arranques (semilla, semilla + 1, ...): k-modas cae en
+# óptimos locales, y se queda el de menor costo.
+kmodas <- function(x, k, reinicios = 10, semilla = 42,
+                   maxit = 100) {
+  codigos <- sapply(x, as.integer)  # cada categoría, su número
+  niveles <- sapply(x, nlevels)
+  intentos <- lapply(semilla + seq_len(reinicios) - 1, function(s)
+    kmodas_una(codigos, niveles, k, s, maxit))
+  mejor <- intentos[[which.min(sapply(intentos, `[[`, "costo"))]]
+  # Los números de grupo son arbitrarios: g1 es el más grande y, a
+  # igual tamaño, el que aparece primero (la regla del lab).
+  orden <- order(-tabulate(mejor$grupos, k),
+                 match(seq_len(k), mejor$grupos))
+  modas <- as.data.frame(lapply(seq_along(x), function(v)
+    levels(x[[v]])[mejor$modas[orden, v]]), col.names = names(x))
+  list(grupos = setNames(match(mejor$grupos, orden), rownames(x)),
+       k = k, x = x, modas = modas, costo = mejor$costo,
+       traza = mejor$traza,
+       trazas = lapply(intentos, `[[`, "traza"),
+       criterio = "costo (desacuerdos con la moda)",
+       eje = "barrido",
+       asignaciones = matrix(match(mejor$historia, orden), nrow(x)))
+}
+if (!exists("kmodas7") ||
+    !identical(names(kmodas7$grupos), rownames(cuali))) {
+  kmodas7 <- kmodas(cuali, k = 7, reinicios = 25,
+                    semilla = 42, maxit = 500)
+}
+trazas <- kmodas7$trazas
+traza <- kmodas7$traza
+plot(NULL, xlim = c(0, max(lengths(trazas)) - 1),
+     ylim = range(unlist(trazas)), xlab = kmodas7$eje,
+     ylab = kmodas7$criterio, main = "Convergencia")
+for (t in trazas) lines(seq_along(t) - 1, t, col = "grey75")
+lines(seq_along(traza) - 1, traza, type = "b", pch = 19,
+      lwd = 2, col = "#a6192e")
+finales <- sapply(trazas, function(t) t[length(t)])
+cat("Iteraciones del ganador:", length(traza) - 1,
+    "· objetivo final:", round(traza[length(traza)], 4), "\n")
+cat("Reinicios que llegaron a ese valor:",
+    sum(abs(finales - traza[length(traza)]) < 1e-6), "de",
+    length(trazas), "\n")
+```
+
+El ganador llega a un costo de 138 desacuerdos en dos barridos, y solo 2 de los 25 arranques alcanzan ese valor: k-modas cae con facilidad en óptimos locales, y por eso los reinicios no son un adorno.
+
+```{r}
+# f3.analisis.trayectoria
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# kmodas_una() ya se definió más arriba.
+
+# kmodas() ya se definió más arriba.
+if (!exists("kmodas7") ||
+    !identical(names(kmodas7$grupos), rownames(cuali))) {
+  kmodas7 <- kmodas(cuali, k = 7, reinicios = 25,
+                    semilla = 42, maxit = 500)
+}
+A <- kmodas7$asignaciones
+antes <- A[, -ncol(A), drop = FALSE]
+despues <- A[, -1, drop = FALSE]
+cambios <- colSums(despues != antes)
+print(data.frame(barrido = seq_along(cambios),
+                 filas_que_cambian = cambios), row.names = FALSE)
+barplot(cambios, names.arg = seq_along(cambios), col = "#a6192e",
+        xlab = "barrido", ylab = "filas que cambian de grupo")
+```
+
+```{r}
+# f3.consola.estado
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# kmodas_una() ya se definió más arriba.
+
+# kmodas() ya se definió más arriba.
+if (!exists("kmodas7") ||
+    !identical(names(kmodas7$grupos), rownames(cuali))) {
+  kmodas7 <- kmodas(cuali, k = 7, reinicios = 25,
+                    semilla = 42, maxit = 500)
+}
+# acm_coordenadas() ya se definió más arriba.
+A <- kmodas7$asignaciones
+pasos <- unique(round(seq(1, ncol(A),
+                         length.out = min(4, ncol(A)))))
+acm <- acm_coordenadas(kmodas7$x, 2)
+estados <- do.call(rbind, lapply(pasos, function(j)
+  data.frame(acm$filas, grupo = factor(A[, j]),
+             iteracion = paste("iteración", j - 1))))
+estados$iteracion <- factor(estados$iteracion,
+                            levels = unique(estados$iteracion))
+ggplot(estados, aes(Dim1, Dim2, color = grupo)) +
+  geom_point(size = 1.6) +
+  facet_wrap(~ iteracion) +
+  labs(x = acm$rotulos[1], y = acm$rotulos[2]) +
+  theme_minimal()
+```
+
+------------------------------------------------------------------------
+
+### Ejercicio 4
+
+> En el primer barrido cambian de grupo 29 animales y en el segundo ninguno. ¿Quiere decir que la partición es la mejor posible?
+
+**¿Es la mejor?** No necesariamente, pues el algoritmo para cuando ninguna mudanza individual baja el costo, que es un óptimo **local**. La prueba está en la traza de convergencia: 23 de los 25 arranques terminaron en un costo mayor que 138, y nada garantiza que algún arranque que no se probó no termine por debajo.
+
+------------------------------------------------------------------------
+
+### Selección de K
+
+#### Primera guía general: primer plano factorial
+
+```{r}
+# f4.explicabilidad.mapa_2d
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# kmodas_una() ya se definió más arriba.
+
+# kmodas() ya se definió más arriba.
+if (!exists("kmodas7") ||
+    !identical(names(kmodas7$grupos), rownames(cuali))) {
+  kmodas7 <- kmodas(cuali, k = 7, reinicios = 25,
+                    semilla = 42, maxit = 500)
+}
+# acm_coordenadas() ya se definió más arriba.
+ejes <- c(1, 2)
+acm <- acm_coordenadas(kmodas7$x, max(ejes))
+plano <- as.data.frame(acm$filas[, ejes])
+names(plano) <- c("x", "y")
+plano$color <- factor(kmodas7$grupos)
+
+ggplot(plano, aes(x, y, color = color)) +
+  geom_point(size = 2, alpha = 0.8) +
+  geom_text(aes(label = rownames(plano)), size = 2.2, vjust = -0.9,
+            check_overlap = TRUE, show.legend = FALSE) +
+  labs(x = acm$rotulos[ejes[1]], y = acm$rotulos[ejes[2]],
+       color = NULL, title = "Los grupos sobre el plano del ACM") +
+  theme_minimal()
+```
+
+El plano del ACM muestra separados a las aves, a los peces y a buena parte de los mamíferos, pero los grupos chicos (reptiles, anfibios, invertebrados) se solapan cerca del origen. Como en la sesión 5, el plano sugiere que hay entre tres y cinco grupos claros y deja el resto a un método más riguroso.
+
+#### Selección de K mediante d
+
+A medida que K crece los grupos son cada vez más homogéneos y el costo baja, hasta llegar a cero cuando cada animal distinto es su propio grupo. La pregunta es en qué K esa bajada se vuelve marginal.
+
+```{r}
+# f4.diagnostico.codo
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# kmodas_una() ya se definió más arriba.
+
+# kmodas() ya se definió más arriba.
+if (!exists("kmodas7") ||
+    !identical(names(kmodas7$grupos), rownames(cuali))) {
+  kmodas7 <- kmodas(cuali, k = 7, reinicios = 25,
+                    semilla = 42, maxit = 500)
+}
+x <- kmodas7$x
+
+# k = 1: un solo grupo, cuya moda es la categoría más frecuente.
+costo_k <- function(k) {
+  if (k == 1) return(sum(sapply(x, function(v)
+    length(v) - max(table(v)))))
+  kmodas(x, k, reinicios = 25, semilla = 42, maxit = 500)$costo
+}
+criterio <- "costo (desacuerdos con la moda)"
+
+
+k_max <- min(10, sum(!duplicated(x)), nrow(x) - 1)
+costos <- sapply(seq_len(k_max), costo_k)
+# La reducción respecto de k = 1, en porcentaje: el codo es donde
+# deja de valer la pena otro grupo.
+reduccion <- round(100 * (1 - costos / costos[1]), 1)
+codo <- data.frame(k = seq_len(k_max), costo = round(costos, 2),
+                   reduccion = reduccion)
+print(codo, row.names = FALSE)
+plot(codo$k, codo$costo, type = "b", pch = 19, xlab = "k",
+     ylab = criterio)
+# La línea punteada es el k elegido.
+abline(v = kmodas7$k, lty = 2, col = "grey50")
+```
+
+El costo baja de 501 (k = 1) a 330, 234 y 188 en k = 2, 3 y 4, y después las bajadas se achican (167, 148, 138 en k = 5, 6, 7). El codo está entre k = 3 y k = 4; se mantiene k = 7 porque es el número de clases reales y permite comparar los tres métodos con la misma K, sabiendo que los tres últimos grupos explican poco.
+
+```{r}
+# f4.diagnostico.silueta
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# kmodas_una() ya se definió más arriba.
+
+# kmodas() ya se definió más arriba.
+if (!exists("kmodas7") ||
+    !identical(names(kmodas7$grupos), rownames(cuali))) {
+  kmodas7 <- kmodas(cuali, k = 7, reinicios = 25,
+                    semilla = 42, maxit = 500)
+}
+# Con solo factores, Gower es el emparejamiento simple dividido
+# por p: la misma disimilitud que usa el método.
+d <- cluster::daisy(kmodas7$x, metric = "gower")
+sil <- cluster::silhouette(kmodas7$grupos, d)
+# Imprime la silueta media por grupo y la global.
+fviz_silhouette(sil)
+```
+
+La silueta media es 0.46. Las aves (grupo 3, 0.66) y los invertebrados acuáticos (grupo 6, 0.64) son los grupos más nítidos; el grupo 7 (0.20), que mezcla reptiles con una rana y un escorpión, es el más débil.
+
+#### Lectura de los grupos
+
+```{r}
+# f4.desempeno.grupos
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# kmodas_una() ya se definió más arriba.
+
+# kmodas() ya se definió más arriba.
+if (!exists("kmodas7") ||
+    !identical(names(kmodas7$grupos), rownames(cuali))) {
+  kmodas7 <- kmodas(cuali, k = 7, reinicios = 25,
+                    semilla = 42, maxit = 500)
+}
+grupos <- kmodas7$grupos
+print(table(grupo = grupos))
+print(split(names(grupos), grupos))
+barplot(table(grupos), col = "#a6192e", xlab = "grupo",
+        ylab = "filas", main = "Tamaño de cada grupo")
+```
+
+```{r}
+#| fig-height: 9
+# f4.explicabilidad.modos
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# kmodas_una() ya se definió más arriba.
+
+# kmodas() ya se definió más arriba.
+if (!exists("kmodas7") ||
+    !identical(names(kmodas7$grupos), rownames(cuali))) {
+  kmodas7 <- kmodas(cuali, k = 7, reinicios = 25,
+                    semilla = 42, maxit = 500)
+}
+x <- kmodas7$x
+grupos <- kmodas7$grupos
+perfil <- do.call(rbind, lapply(names(x), function(v) {
+  tabla <- prop.table(table(grupo = grupos,
+                              categoria = x[[v]]), 1)
+
+  data.frame(variable = v,
+             as.data.frame(tabla, responseName = "proporcion"))
+}))
+perfil$grupo <- factor(perfil$grupo)
+# La moda de cada grupo en cada variable (empate: el primer nivel).
+modas <- sapply(split(perfil, perfil$variable), function(b)
+  tapply(seq_len(nrow(b)), b$grupo, function(i)
+    as.character(b$categoria[i][which.max(b$proporcion[i])])))
+print(t(modas)[names(x), ])
+ggplot(perfil, aes(grupo, categoria, fill = proporcion)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = round(100 * proporcion)), size = 2.2) +
+  facet_grid(variable ~ ., scales = "free_y", space = "free_y",
+             switch = "y") +
+  scale_fill_gradient(low = "grey97", high = "#a6192e",
+                      limits = c(0, 1), name = "en el grupo") +
+  labs(x = "grupo", y = NULL) +
+  theme_minimal(base_size = 9) +
+  theme(strip.placement = "outside",
+        strip.text.y.left = element_text(angle = 0, hjust = 1),
+        panel.spacing.y = unit(1, "pt"))
+```
+
+```{r}
+# f4.desempeno.cruce_clase
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# kmodas_una() ya se definió más arriba.
+
+# kmodas() ya se definió más arriba.
+if (!exists("kmodas7") ||
+    !identical(names(kmodas7$grupos), rownames(cuali))) {
+  kmodas7 <- kmodas(cuali, k = 7, reinicios = 25,
+                    semilla = 42, maxit = 500)
+}
+grupos <- kmodas7$grupos
+# La clase real NO entró al ajuste: se alinea recién acá, por
+# nombre de fila.
+clase <- datos[["tipo"]][match(names(grupos), filas)]
+cruce <- table(grupo = grupos, clase = clase)
+print(cruce)
+# Índice de Rand ajustado: pares que las dos particiones dejan
+# juntos, corregido por el acuerdo que daría el azar con los
+# mismos tamaños.
+ari <- function(a, b) {
+  tabla <- table(a, b)
+  pares <- function(v) sum(choose(v, 2))
+  filas_t <- pares(rowSums(tabla))
+  columnas_t <- pares(colSums(tabla))
+  esperado <- filas_t * columnas_t / choose(sum(tabla), 2)
+  maximo <- (filas_t + columnas_t) / 2
+  (pares(tabla) - esperado) / (maximo - esperado)
+}
+pureza <- sum(apply(cruce, 1, max)) / length(grupos)
+cat("ARI =", round(ari(grupos, clase), 3),
+    "· pureza =", round(100 * pureza), "%\n")
+# Se busca que cada FILA (grupo) se concentre en una columna: la
+# numeración de los grupos es arbitraria: no hay diagonal.
+celdas <- as.data.frame(prop.table(cruce, 1), responseName = "p")
+celdas$n <- as.data.frame(cruce)$Freq
+ggplot(celdas, aes(clase, grupo, fill = p)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = ifelse(n > 0, n, "")), size = 3) +
+  scale_fill_gradient(low = "grey97", high = "#a6192e",
+                      limits = c(0, 1), name = "en el grupo") +
+  labs(x = "clase real", y = "grupo") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+```
+
+**¿Recupera las clases?** En parte: el índice de Rand ajustado (ARI) es 0.626 y la pureza 90 %. Los mamíferos quedan partidos en dos grupos de 20 y 19 que se distinguen por `depredador` (la moda es "si" en uno y "no" en el otro), y el grupo de los peces se lleva además a dos mamíferos acuáticos (delfín y marsopa) y a dos anfibios.
+
+## Aglomeración jerárquica
+
+Una de las deficiencias de k-modas, igual que de k-medias, es que K se fija antes del análisis. La aglomeración jerárquica construye los grupos de manera progresiva y deja la decisión para el final, cuando se corta el **dendrograma**. Con factores se necesita una disimilitud que no exija números: la de **Gower**, que con solo factores es la fracción de variables en que difieren dos animales (el mismo emparejamiento simple dividido por 16). Se usa el enlace promedio, y el árbol se corta en 7 grupos.
+
+```{r}
+# f4.diagnostico.dendrograma
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# Gower (1971): con solo factores es la fracción de variables en que
+# difieren dos filas. PAM elige como centro de cada grupo una fila
+# real (el medoide); el árbol fusiona de a dos, sin centro.
+agrupar_gower <- function(x, k, estrategia = "pam",
+                          enlace = "average", asimetricas = FALSE) {
+  d <- cluster::daisy(x, metric = "gower")
+  if (estrategia == "pam") {
+    pam <- cluster::pam(d, k = k, diss = TRUE)
+    grupos <- pam$clustering
+    arbol <- NULL
+    medoides <- pam$id.med
+    # PAM solo devuelve el costo al cerrar BUILD y al cerrar SWAP.
+    traza <- unname(pam$objective)
+    eje <- "fase de PAM (0 = BUILD, 1 = SWAP)"
+    criterio <- "disimilitud media al medoide"
+  } else {
+    arbol <- hclust(as.dist(d), method = enlace)
+    grupos <- cutree(arbol, k = k)
+    medoides <- NULL
+    traza <- arbol$height  # la altura de cada fusión
+    eje <- "fusión"
+    criterio <- "altura de fusión"
+  }
+  # g1 es el grupo más grande; a igual tamaño, el número original.
+  orden <- order(-tabulate(grupos, k), seq_len(k))
+  list(grupos = setNames(match(grupos, orden), rownames(x)), k = k,
+       x = x, d = d, arbol = arbol,
+       medoides = if (is.null(medoides)) NULL else
+         rownames(x)[medoides[orden]],
+       objetivo = if (is.null(arbol)) tail(traza, 1) else NA,
+       traza = traza, trazas = list(traza), criterio = criterio,
+       eje = eje, asignaciones = NULL)
+}
+if (!exists("gower_average7") ||
+    !identical(names(gower_average7$grupos), rownames(cuali))) {
+  gower_average7 <- agrupar_gower(cuali, k = 7,
+    estrategia = "jerarquico", enlace = "average",
+    asimetricas = FALSE)
+}
+arbol <- gower_average7$arbol
+plot(arbol, hang = -1, cex = 0.45, xlab = "", sub = "",
+     main = "Gower, enlace average", ylab = "altura de fusión")
+rect.hclust(arbol, k = 7, border = seq_len(7) + 1)
+# Correlación cofenética: cuánto respeta el árbol las disimilitudes
+# originales (1 = las reproduce tal cual).
+cofenetica <- cor(as.numeric(gower_average7$d),
+                  as.numeric(cophenetic(arbol)))
+cat("Correlación cofenética:", round(cofenetica, 3), "\n")
+```
+
+La correlación cofenética es 0.857: el árbol respeta bastante bien las disimilitudes originales.
+
+```{r}
+# f4.diagnostico.silueta
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# agrupar_gower() ya se definió más arriba.
+if (!exists("gower_average7") ||
+    !identical(names(gower_average7$grupos), rownames(cuali))) {
+  gower_average7 <- agrupar_gower(cuali, k = 7,
+    estrategia = "jerarquico", enlace = "average",
+    asimetricas = FALSE)
+}
+d <- gower_average7$d
+sil <- cluster::silhouette(gower_average7$grupos, d)
+# Imprime la silueta media por grupo y la global.
+fviz_silhouette(sil)
+```
+
+```{r}
+# f4.desempeno.cruce_clase
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# agrupar_gower() ya se definió más arriba.
+if (!exists("gower_average7") ||
+    !identical(names(gower_average7$grupos), rownames(cuali))) {
+  gower_average7 <- agrupar_gower(cuali, k = 7,
+    estrategia = "jerarquico", enlace = "average",
+    asimetricas = FALSE)
+}
+grupos <- gower_average7$grupos
+# La clase real NO entró al ajuste: se alinea recién acá, por
+# nombre de fila.
+clase <- datos[["tipo"]][match(names(grupos), filas)]
+cruce <- table(grupo = grupos, clase = clase)
+print(cruce)
+# ari() ya se definió más arriba.
+pureza <- sum(apply(cruce, 1, max)) / length(grupos)
+cat("ARI =", round(ari(grupos, clase), 3),
+    "· pureza =", round(100 * pureza), "%\n")
+# Se busca que cada FILA (grupo) se concentre en una columna: la
+# numeración de los grupos es arbitraria: no hay diagonal.
+celdas <- as.data.frame(prop.table(cruce, 1), responseName = "p")
+celdas$n <- as.data.frame(cruce)$Freq
+ggplot(celdas, aes(clase, grupo, fill = p)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = ifelse(n > 0, n, "")), size = 3) +
+  scale_fill_gradient(low = "grey97", high = "#a6192e",
+                      limits = c(0, 1), name = "en el grupo") +
+  labs(x = "clase real", y = "grupo") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+```
+
+**¿Recupera las clases?** Mejor que k-modas: ARI = 0.889 con pureza 89 %. 40 de los 41 mamíferos quedan juntos, las aves son un grupo propio, y un solo grupo reúne a los 13 peces con los 4 anfibios y 4 reptiles. A cambio el corte deja dos grupos de uno y dos animales (siluetas 0.00 y 0.09), que es el precio de un enlace que no fuerza grupos de tamaño parecido.
+
+## Clases latentes
+
+El tercer enfoque cambia el modelo y no la distancia: cada clase es una tabla de probabilidades por variable y, dentro de la clase, las variables se suponen independientes. Se estima por el algoritmo EM (escrito a mano abajo) y cada animal queda con una probabilidad posterior de pertenecer a cada clase; la partición es la clase más probable.
+
+```{r}
+# f3.analisis.convergencia
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# Clases latentes por EM, escrito a mano. Cada clase es una tabla
+# de probabilidades por variable y, dentro de la clase, las
+# variables son independientes. La partición es la clase más
+# probable de cada fila.
+em_latente <- function(Y, variable, k, semilla, maxit, tol) {
+  set.seed(semilla)
+  # Arranque: probabilidades al azar (Dirichlet(1)) y pesos iguales.
+  theta <- matrix(rgamma(ncol(Y) * k, shape = 1), ncol = k)
+  theta <- theta / rowsum(theta, variable)[variable, , drop = FALSE]
+  pesos <- rep(1 / k, k)
+  # Paso E: la posterior de cada fila en cada clase, en logaritmos
+  # (el producto de dieciséis probabilidades es diminuto).
+  paso_e <- function(theta, pesos) {
+    log_f <- Y %*% log(pmax(theta, 1e-300)) +
+      rep(log(pmax(pesos, 1e-300)), each = nrow(Y))
+    tope <- apply(log_f, 1, max)
+    suma <- rowSums(exp(log_f - tope))
+    list(posterior = exp(log_f - tope - log(suma)),
+         ll = sum(tope + log(suma)))
+  }
+  e <- paso_e(theta, pesos)
+  traza <- e$ll
+  historia <- max.col(e$posterior, ties.method = "first")
+  pesos_iter <- pesos
+  for (iteracion in seq_len(maxit)) {
+    # Paso M: el peso es la masa posterior media de la clase; theta,
+    # la fracción de esa masa que eligió cada categoría. Una clase
+    # sin masa conserva su theta.
+    masa <- colSums(e$posterior)
+    vivas <- masa > 1e-300
+    nueva <- crossprod(Y, e$posterior)
+    theta[, vivas] <- sweep(nueva[, vivas, drop = FALSE], 2,
+                            masa[vivas], "/")
+    pesos <- masa / sum(masa)
+    e <- paso_e(theta, pesos)
+    traza <- c(traza, e$ll)
+    historia <- cbind(historia,
+                      max.col(e$posterior, ties.method = "first"))
+    pesos_iter <- rbind(pesos_iter, pesos)
+    # EM nunca baja la verosimilitud: se para cuando deja de subir.
+    if (diff(tail(traza, 2)) < tol) break
+  }
+  list(pesos = pesos, theta = theta, posterior = e$posterior,
+       ll = e$ll, traza = traza, historia = historia,
+       pesos_iter = pesos_iter)
+}
+
+clases_latentes <- function(x, k, reinicios = 10, semilla = 42,
+                            maxit = 1000, tol = 1e-8, k_max = 8) {
+  # La indicadora: una columna por categoría, un 1 por variable.
+  Y <- do.call(cbind, lapply(x, function(v)
+    outer(as.integer(v), seq_len(nlevels(v)), "==") * 1))
+  variable <- rep(seq_along(x), sapply(x, nlevels))
+  semillas <- semilla + seq_len(reinicios) - 1
+  intentos <- lapply(semillas, function(s)
+    em_latente(Y, variable, k, s, maxit, tol))
+  mejor <- intentos[[which.max(sapply(intentos, `[[`, "ll"))]]
+  # Las clases se numeran por tamaño y, a igual tamaño, por peso.
+  grupos <- max.col(mejor$posterior, ties.method = "first")
+  orden <- order(-tabulate(grupos, k), -mejor$pesos)
+  # BIC por k, con (k - 1) pesos + k * sum(R_j - 1) parámetros.
+  # k = 1 es la independencia; el k pedido usa el ajuste de arriba
+  # y el resto los mismos arranques (con menos, un k alto puede
+  # quedar en un máximo local peor que el de un k menor). Se saltan los k con más
+  # parámetros que celdas tiene la tabla (no identificables).
+  n_par <- function(k) (k - 1) + k * sum(sapply(x, nlevels) - 1)
+  ks <- seq_len(min(k_max, nrow(x) - 1))
+  ks <- ks[log(n_par(ks) + 1) <= sum(log(sapply(x, nlevels)))]
+  ll <- sapply(ks, function(kk) if (kk == k) mejor$ll else
+    max(sapply(semilla + seq_len(reinicios) - 1, function(s)
+      em_latente(Y, variable, kk, s, maxit, tol)$ll)))
+  seleccion <- data.frame(k = ks, log_verosimilitud = ll,
+                          n_parametros = n_par(ks),
+                          bic = -2 * ll + n_par(ks) * log(nrow(x)),
+                          aic = -2 * ll + 2 * n_par(ks))
+  probabilidades <- lapply(seq_along(x), function(j) {
+    bloque <- t(mejor$theta[variable == j, orden, drop = FALSE])
+    dimnames(bloque) <- list(grupo = seq_len(k),
+                             categoria = levels(x[[j]]))
+    bloque
+  })
+  names(probabilidades) <- names(x)
+  list(grupos = setNames(match(grupos, orden), rownames(x)), k = k,
+       x = x, pesos = mejor$pesos[orden],
+       probabilidades = probabilidades,
+       posterior = mejor$posterior[, orden], ll = mejor$ll,
+       bic = -2 * mejor$ll + n_par(k) * log(nrow(x)),
+       seleccion = seleccion, traza = mejor$traza,
+       trazas = lapply(intentos, `[[`, "traza"),
+       criterio = "log-verosimilitud", eje = "iteración EM",
+       asignaciones = matrix(match(mejor$historia, orden), nrow(x)),
+       pesos_iter = mejor$pesos_iter[, orden, drop = FALSE])
+}
+if (!exists("clases7") ||
+    !identical(names(clases7$grupos), rownames(cuali))) {
+  clases7 <- clases_latentes(cuali, k = 7, reinicios = 25,
+                             semilla = 42, maxit = 500,
+                             tol = 1e-8, k_max = 8)
+}
+trazas <- clases7$trazas
+traza <- clases7$traza
+plot(NULL, xlim = c(0, max(lengths(trazas)) - 1),
+     ylim = range(unlist(trazas)), xlab = clases7$eje,
+     ylab = clases7$criterio, main = "Convergencia")
+for (t in trazas) lines(seq_along(t) - 1, t, col = "grey75")
+lines(seq_along(traza) - 1, traza, type = "b", pch = 19,
+      lwd = 2, col = "#a6192e")
+finales <- sapply(trazas, function(t) t[length(t)])
+cat("Iteraciones del ganador:", length(traza) - 1,
+    "· objetivo final:", round(traza[length(traza)], 4), "\n")
+cat("Reinicios que llegaron a ese valor:",
+    sum(abs(finales - traza[length(traza)]) < 1e-6), "de",
+    length(trazas), "\n")
+```
+
+```{r}
+# f4.diagnostico.bic
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# em_latente() ya se definió más arriba.
+
+# clases_latentes() ya se definió más arriba.
+if (!exists("clases7") ||
+    !identical(names(clases7$grupos), rownames(cuali))) {
+  clases7 <- clases_latentes(cuali, k = 7, reinicios = 25,
+                             semilla = 42, maxit = 500,
+                             tol = 1e-8, k_max = 8)
+}
+seleccion <- clases7$seleccion
+print(seleccion, row.names = FALSE, digits = 6)
+matplot(seleccion$k, seleccion[c("bic", "aic")], type = "b",
+        pch = 19, lty = 1, col = c("#a6192e", "grey40"),
+        xlab = "número de clases (k)",
+        ylab = "criterio (menor es mejor)")
+points(seleccion$k[which.min(seleccion$bic)], min(seleccion$bic),
+       cex = 2.5, col = "#a6192e")
+points(seleccion$k[which.min(seleccion$aic)], min(seleccion$aic),
+       cex = 2.5, col = "grey40")
+abline(v = clases7$k, lty = 3)
+legend("topright", c("BIC", "AIC"), col = c("#a6192e", "grey40"),
+       pch = 19, bty = "n")
+```
+
+El BIC tiene su mínimo en k = 4 (1520.7) y el AIC en k = 7 (1261.7). Es decir que el criterio más exigente con los parámetros prefiere un modelo más chico que el de siete clases que aquí se compara.
+
+> **Nota.** Cada k de la tabla se ajusta con los mismos 25 arranques, por lo cual la log-verosimilitud crece con k (de −994.9 con k = 1 a −480.9 con k = 8), como debe pasar con los óptimos globales. Con solo 5 arranques por k, k = 8 quedaba en un máximo local peor que el de k = 7: es el mismo problema de los arranques que se vio con k-medias.
+
+```{r}
+#| fig-height: 9
+# f4.explicabilidad.modos
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# em_latente() ya se definió más arriba.
+
+# clases_latentes() ya se definió más arriba.
+if (!exists("clases7") ||
+    !identical(names(clases7$grupos), rownames(cuali))) {
+  clases7 <- clases_latentes(cuali, k = 7, reinicios = 25,
+                             semilla = 42, maxit = 500,
+                             tol = 1e-8, k_max = 8)
+}
+x <- clases7$x
+grupos <- clases7$grupos
+perfil <- do.call(rbind, lapply(names(x), function(v) {
+  # En clases latentes el retrato es el modelo: theta por clase.
+  tabla <- as.table(clases7$probabilidades[[v]])
+
+  data.frame(variable = v,
+             as.data.frame(tabla, responseName = "proporcion"))
+}))
+perfil$grupo <- factor(perfil$grupo)
+# La moda de cada grupo en cada variable (empate: el primer nivel).
+modas <- sapply(split(perfil, perfil$variable), function(b)
+  tapply(seq_len(nrow(b)), b$grupo, function(i)
+    as.character(b$categoria[i][which.max(b$proporcion[i])])))
+print(t(modas)[names(x), ])
+ggplot(perfil, aes(grupo, categoria, fill = proporcion)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = round(100 * proporcion)), size = 2.2) +
+  facet_grid(variable ~ ., scales = "free_y", space = "free_y",
+             switch = "y") +
+  scale_fill_gradient(low = "grey97", high = "#a6192e",
+                      limits = c(0, 1), name = "en el grupo") +
+  labs(x = "grupo", y = NULL) +
+  theme_minimal(base_size = 9) +
+  theme(strip.placement = "outside",
+        strip.text.y.left = element_text(angle = 0, hjust = 1),
+        panel.spacing.y = unit(1, "pt"))
+```
+
+```{r}
+# f4.desempeno.cruce_clase
+# Los factores que se agrupan, con el nombre de cada fila (la
+# columna de texto sin repetidos) como rótulo.
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+columnas <- c("pelo", "plumas", "huevos", "leche", "vuela",
+              "acuatico", "depredador", "dientes", "vertebrado",
+              "respira", "venenoso", "aletas", "patas", "cola",
+              "domestico", "tamano_gato")
+cuali <- datos[columnas]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+cuali[] <- lapply(cuali, factor)
+# em_latente() ya se definió más arriba.
+
+# clases_latentes() ya se definió más arriba.
+if (!exists("clases7") ||
+    !identical(names(clases7$grupos), rownames(cuali))) {
+  clases7 <- clases_latentes(cuali, k = 7, reinicios = 25,
+                             semilla = 42, maxit = 500,
+                             tol = 1e-8, k_max = 8)
+}
+grupos <- clases7$grupos
+# La clase real NO entró al ajuste: se alinea recién acá, por
+# nombre de fila.
+clase <- datos[["tipo"]][match(names(grupos), filas)]
+cruce <- table(grupo = grupos, clase = clase)
+print(cruce)
+# ari() ya se definió más arriba.
+pureza <- sum(apply(cruce, 1, max)) / length(grupos)
+cat("ARI =", round(ari(grupos, clase), 3),
+    "· pureza =", round(100 * pureza), "%\n")
+# Se busca que cada FILA (grupo) se concentre en una columna: la
+# numeración de los grupos es arbitraria: no hay diagonal.
+celdas <- as.data.frame(prop.table(cruce, 1), responseName = "p")
+celdas$n <- as.data.frame(cruce)$Freq
+ggplot(celdas, aes(clase, grupo, fill = p)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = ifelse(n > 0, n, "")), size = 3) +
+  scale_fill_gradient(low = "grey97", high = "#a6192e",
+                      limits = c(0, 1), name = "en el grupo") +
+  labs(x = "clase real", y = "grupo") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+```
+
+**¿Recupera las clases?** ARI = 0.826 y pureza 92 %: deja a los 13 peces solos, reúne a las 20 aves (con un reptil) y a los 8 insectos (con dos invertebrados), y separa en un grupo aparte a 6 mamíferos cuya moda es acuático = si y aletas = si.
+
+# Aplicación: el tándem ACM + K-medias y la comparación
+
+Una forma habitual de agrupar factores con las herramientas numéricas es el **tándem**: se calcula el ACM, se guardan las coordenadas de las primeras dimensiones y se corre k-medias sobre ellas. Acá se usan 5 dimensiones (71.6 % de la inercia) sin estandarizar, porque las dimensiones del ACM ya vienen en la escala de su inercia.
+
+```{r}
+# f4.explicabilidad.mapa_2d
+# Las numéricas, con la columna de texto que identifica cada fila
+# como nombre: así los gráficos rotulan países y no números.
+num <- datos[vapply(datos, is.numeric, logical(1))]
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+rownames(num) <- filas
+num <- na.omit(num)
+# Una columna constante no tiene varianza que repartir ni escalar.
+num <- num[vapply(num, sd, numeric(1)) > 0]
+# Tándem, primera mitad: el ACM de los factores, escrito a mano
+# (es la misma cuenta que hace el lab). Sus coordenadas reemplazan
+# a `num`, y el agrupamiento de abajo trabaja sobre ellas.
+columnas_acm <- c("pelo", "plumas", "huevos", "leche", "vuela",
+                  "acuatico", "depredador", "dientes",
+                  "vertebrado", "respira", "venenoso", "aletas",
+                  "patas", "cola", "domestico", "tamano_gato")
+cuali <- datos[columnas_acm]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+# La indicadora: una columna por categoría, un 1 por variable
+# y fila.
+Z <- do.call(cbind, lapply(cuali, function(v) {
+  v <- as.character(v)
+  outer(v, sort(unique(v)), "==") * 1
+}))
+P <- Z / sum(Z)
+r <- rowSums(P)
+masas <- colSums(P)
+S <- (P - outer(r, masas)) / sqrt(outer(r, masas))
+descomposicion <- svd(S)
+d <- 5
+num <- as.data.frame(sweep(descomposicion$u[, 1:d, drop = FALSE], 2,
+                           descomposicion$d[1:d], `*`) / sqrt(r))
+names(num) <- paste0("Dim", 1:d)
+rownames(num) <- rownames(cuali)
+# La inercia total del ACM es J/Q - 1: depende solo de cuántas
+# categorías hay, y por eso estos porcentajes salen pesimistas.
+inercia <- descomposicion$d^2 / (ncol(Z) / ncol(cuali) - 1)
+cat("Inercia por dimensión (%):",
+    round(100 * inercia[1:d], 1), "\n")
+if (!exists("km7_crudo") ||
+    !identical(names(km7_crudo$cluster), rownames(num))) {
+  set.seed(42)
+  km7_crudo <- kmeans(as.matrix(num), centers = 7, nstart = 100)
+}
+grupos <- km7_crudo$cluster
+fviz_cluster(list(data = as.matrix(num), cluster = grupos),
+             axes = c(1, 2), repel = TRUE, labelsize = 8,
+             ellipse.type = "convex")
+```
+
+```{r}
+# f4.desempeno.cruce_clase
+# Las numéricas, con la columna de texto que identifica cada fila
+# como nombre: así los gráficos rotulan países y no números.
+num <- datos[vapply(datos, is.numeric, logical(1))]
+id <- Filter(function(v) is.character(v) && !anyDuplicated(v),
+             datos)
+filas <- if (length(id)) id[[1]] else rownames(datos)
+rownames(num) <- filas
+num <- na.omit(num)
+# Una columna constante no tiene varianza que repartir ni escalar.
+num <- num[vapply(num, sd, numeric(1)) > 0]
+# Tándem, primera mitad: el ACM de los factores, escrito a mano
+# (es la misma cuenta que hace el lab). Sus coordenadas reemplazan
+# a `num`, y el agrupamiento de abajo trabaja sobre ellas.
+columnas_acm <- c("pelo", "plumas", "huevos", "leche", "vuela",
+                  "acuatico", "depredador", "dientes",
+                  "vertebrado", "respira", "venenoso", "aletas",
+                  "patas", "cola", "domestico", "tamano_gato")
+cuali <- datos[columnas_acm]
+rownames(cuali) <- filas
+cuali <- na.omit(cuali)
+# La indicadora: una columna por categoría, un 1 por variable
+# y fila.
+Z <- do.call(cbind, lapply(cuali, function(v) {
+  v <- as.character(v)
+  outer(v, sort(unique(v)), "==") * 1
+}))
+P <- Z / sum(Z)
+r <- rowSums(P)
+masas <- colSums(P)
+S <- (P - outer(r, masas)) / sqrt(outer(r, masas))
+descomposicion <- svd(S)
+d <- 5
+num <- as.data.frame(sweep(descomposicion$u[, 1:d, drop = FALSE], 2,
+                           descomposicion$d[1:d], `*`) / sqrt(r))
+names(num) <- paste0("Dim", 1:d)
+rownames(num) <- rownames(cuali)
+# La inercia total del ACM es J/Q - 1: depende solo de cuántas
+# categorías hay, y por eso estos porcentajes salen pesimistas.
+inercia <- descomposicion$d^2 / (ncol(Z) / ncol(cuali) - 1)
+cat("Inercia por dimensión (%):",
+    round(100 * inercia[1:d], 1), "\n")
+if (!exists("km7_crudo") ||
+    !identical(names(km7_crudo$cluster), rownames(num))) {
+  set.seed(42)
+  km7_crudo <- kmeans(as.matrix(num), centers = 7, nstart = 100)
+}
+grupos <- km7_crudo$cluster
+# La clase real NO entró al ajuste: se alinea recién acá, por
+# nombre de fila.
+clase <- datos[["tipo"]][match(rownames(num), filas)]
+cruce <- table(grupo = grupos, clase = clase)
+print(cruce)
+# ari() ya se definió más arriba.
+pureza <- sum(apply(cruce, 1, max)) / length(grupos)
+cat("ARI =", round(ari(grupos, clase), 3),
+    "· pureza =", round(100 * pureza), "%\n")
+# Se busca que cada FILA (grupo) se concentre en una columna: la
+# numeración de los grupos es arbitraria: no hay diagonal.
+celdas <- as.data.frame(prop.table(cruce, 1), responseName = "p")
+celdas$n <- as.data.frame(cruce)$Freq
+ggplot(celdas, aes(clase, grupo, fill = p)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = ifelse(n > 0, n, "")), size = 3) +
+  scale_fill_gradient(low = "grey97", high = "#a6192e",
+                      limits = c(0, 1), name = "en el grupo") +
+  labs(x = "clase real", y = "grupo") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+```
+
+```{r comparacion}
+# Cada partición contra la clase real, con la d de la sesión 5 en
+# desacuerdos (la misma medida de A y B).
+particiones <- list(
+  "K-modas" = kmodas7$grupos,
+  "Gower, enlace promedio" = gower_average7$grupos,
+  "Clases latentes" = clases7$grupos,
+  "ACM + k-medias" = km7_crudo$cluster)
+clase_de <- function(g) datos$tipo[match(names(g), filas)]
+resumen <- data.frame(
+  metodo = names(particiones),
+  ari = sapply(particiones, function(g)
+    round(ari(g, clase_de(g)), 3)),
+  d = sapply(particiones, function(g) {
+    g <- g[rownames(desacuerdos)]
+    round(sum(d_agrupamiento(desacuerdos, g)), 1)
+  }),
+  menor = sapply(particiones, function(g) min(table(g))),
+  mayor = sapply(particiones, function(g) max(table(g))),
+  row.names = NULL)
+knitr::kable(resumen)
+```
+
+------------------------------------------------------------------------
+
+### Ejercicio 5
+
+> ¿Cuál de los cuatro agrupamientos recupera mejor la clase real, y es el mismo que tiene la d más baja?
+
+**¿Cuál?** El jerárquico con Gower (ARI 0.889), seguido del tándem (0.829; en el SDA Lab, con Lloyd y 25 reinicios, el mismo tándem da 0.812, otra muestra de que K-medias depende del optimizador y de los arranques) y de las clases latentes (0.826); k-modas queda último (0.626). No es el de menor d: el jerárquico tiene justamente la d más alta (115.2) y la más baja es la de clases latentes (98.6), con k-modas en 103.5. Que el ARI y la d no ordenen igual es esperable, pues la d premia grupos homogéneos en **todas** las variables mientras la clase real se define por unas pocas (leche, plumas, aletas, vertebrado), y el jerárquico paga en d su grupo de 40 mamíferos, que es enorme y variado en los rasgos secundarios. Tampoco k-modas tiene la d mínima aunque minimice desacuerdos, porque lo que minimiza son los desacuerdos de cada animal con la **moda** de su grupo y no los desacuerdos entre pares.
+
+> **Nota.** El ARI compara con una clase que el algoritmo nunca vio: un ARI alto dice que la estructura que se encontró coincide con la taxonomía, no que el método sea mejor en general. Con otra semilla o con otro K los números pueden cambiar.
+
+# Anexo
+
+## Reproducir este cuaderno
+
+Desde la raíz del repositorio, `sh projects/final/cuaderno/generar.sh` vuelve a pedir a SDA Lab todos los chunks de arriba (salvo los dos escritos a mano: `calidad-particion` y `comparacion`) con los mismos parámetros: fuente `zoo`, clase de referencia `tipo`, k = 7, 25 reinicios y semilla 42. El laboratorio y este cuaderno dan las mismas particiones; `learn/R/pruebas/test_informe_cualitativo.R` lo comprueba ejecutando los chunks.
+
+```{r sesion}
+sessionInfo()
+```

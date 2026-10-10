@@ -16,7 +16,8 @@
 #' es un error, porque correr el default en silencio es peor que no correr.
 hiper_cli <- function(metodo, opciones, pares = opciones$hiper) {
   crudos <- .lab_pares(pares)
-  en_juego <- unique(c(metodo, opciones$metodo, opciones$grupos))
+  en_juego <- unique(c(metodo, opciones$metodo, opciones$grupos,
+                       opciones$reduccion, opciones$en_juego))
   en_juego <- en_juego[nzchar(en_juego) & vapply(en_juego, existe_metodo, TRUE)]
   conocidos <- unique(unlist(lapply(en_juego, function(m)
     names(hiper_por_defecto(m)))))
@@ -70,11 +71,19 @@ metodo_para_clave <- function(clave, pedido = NULL) {
 }
 
 #' El ajuste de la línea de comandos, por el mismo camino que `correr()`.
+#'
+#' Si el dataset declara clase de referencia (`--clase`), se adjunta al ajuste
+#' DESPUÉS de ajustar: el método no la vio, y la fase 4 la usa para medir.
+#' `--inicializacion` es el arranque del optimizador (k-modas: Huang, Cao o
+#' aleatoria); sin ella, el primero que declara el registro, como en la app.
 ajustar_cli <- function(ds, metodo, opciones, hiper = hiper_cli(metodo, opciones)) {
-  ajustar_por_registro(ds$df, metodo, columnas = columnas_cli(opciones),
-                       hiper = hiper,
-                       reinicios = as.integer(opciones$reinicios %||% 25L),
-                       semilla = as.integer(opciones$semilla %||% 42L))
+  resultado <- ajustar_por_registro(
+    ds$df, metodo, columnas = columnas_para(ds, metodo, opciones),
+    hiper = hiper, inicializacion = opciones$inicializacion,
+    reinicios = as.integer(opciones$reinicios %||% 25L),
+    semilla = as.integer(opciones$semilla %||% 42L))
+  resultado$ajuste <- adjuntar_referencia(resultado$ajuste, ds)
+  resultado
 }
 
 #' `momentos <col> <col> ...`: x̄ y S sobre las filas completas.

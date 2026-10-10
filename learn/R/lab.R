@@ -47,6 +47,28 @@
 #     f4.explicabilidad.contribuciones:metodo=acp+ejes=1-2+top=30,\
 #     f4.diagnostico.scree:metodo=acp+matriz=covarianza $EIA
 #
+# Proyecto final (Zoo): la clase conocida y el tándem ACM + k-medias.
+#
+#   ZOO="--fuente zoo --clase tipo"
+#   Rscript learn/R/lab.R panel f4.explicabilidad.modos --metodo kmodos \
+#     --hiper k=7 $ZOO
+#   Rscript learn/R/lab.R metodo kmeans --reduccion acm \
+#     --hiper n_componentes=5 --hiper k=7 --hiper escalar=FALSE $ZOO
+#
+# Un panel como IMAGEN, el mismo ggplot de la app (lab/figuras.R), y la
+# concordancia entre dos métodos (`--comparar`: la partición del otro hace de
+# clase en el cruce, con su ARI):
+#
+#   Rscript learn/R/lab.R panel f4.diagnostico.codo --metodo kmodos \
+#     --hiper k=7 $ZOO --salida codo.png --ancho 7 --alto 4.5 --dpi 200
+#   Rscript learn/R/lab.R panel f4.desempeno.cruce_clase --metodo kmodos \
+#     --comparar gower --hiper estrategia=jerarquico --hiper k=7 $ZOO
+#
+# `--clase` declara la columna de referencia (rol "respuesta"): queda fuera de
+# las columnas del ajuste y se usa después para el cruce y el ARI.
+# `--reduccion acm` agrega las dimensiones del ACM como columnas Dim1..Dimd, y
+# un método numérico sin `--columnas` agrupa sobre ellas.
+#
 # `--filtro Columna!=a,b` saca esas filas en vez de conservarlas. `--hiper
 # nombre=valor` se repite y cada método se lleva los nombres que declara;
 # `--grupos <metodo>` ajusta ese método antes del comando y deja la columna
@@ -167,9 +189,15 @@ COMANDOS <- list(
     data.frame(clave = CASILLAS_INFORME,
                titulo = vapply(CASILLAS_INFORME, titulo_de, "")),
 
-  panel = function(ds, args, opciones = list()) tabla_de_panel(ds, .exigir(
-    args[1], "panel <clave> [columnas...] | panel f4.<...> --metodo <clave>"),
-    args[-1], opciones),
+  #' Con `--salida x.png|x.pdf` el panel se guarda como imagen (lab/figuras.R)
+  #' en vez de imprimirse como tabla; cualquier otra salida no aplica acá.
+  panel = function(ds, args, opciones = list()) {
+    clave <- .exigir(args[1], paste("panel <clave> [columnas...] |",
+                                    "panel f4.<...> --metodo <clave>"))
+    if (es_salida_figura(opciones$salida))
+      return(figura_de_panel(ds, clave, args[-1], opciones))
+    tabla_de_panel(ds, clave, args[-1], opciones)
+  },
 
   momentos = comando_momentos,
 
@@ -225,17 +253,34 @@ correr_lab <- function(argumentos = commandArgs(trailingOnly = TRUE)) {
         "panel f4.<...> --metodo <clave>\n",
         "         --hiper nombre=valor (repetible) · --columnas a,b,c ·",
         "--grupos <metodo> · --reinicios n · --semilla n\n",
-        "         --ejes 2,3 · --umbral 0.8 · --k_max 10 · --color columna\n")
+        "         --ejes 2,3 · --umbral 0.8 · --k_max 10 · --color columna\n",
+        "         --clase columna (referencia, no entra al ajuste) ·",
+        "--reduccion acm [--columnas_reduccion a,b] (tándem: agrega Dim1..Dimd)\n",
+        "         --inicializacion x · --comparar <metodo> [--hiper_comparar a=1,b=2",
+        "--semilla_comparar n --inicializacion_comparar x] (concordancia)\n",
+        "figura: panel <clave> ... --salida fig.png|fig.pdf [--ancho 7 --alto 4.5",
+        "--dpi 200] · --hojas FALSE (dendrograma sin nombres) ·",
+        "--forma circular (dendrograma radial)\n")
     cat("métodos activos:", paste(Filter(function(k)
       metodo(k)$estado == "activo", claves_metodos()), collapse = " · "), "\n")
     cat("piezas del cuaderno:", paste(names(PIEZAS_CUADERNO), collapse = " · "),
         "\n")
     return(invisible(FALSE))
   }
+  # `metodo kmeans` nombra el método como posicional; armar el dataset lo
+  # necesita como opción, o un `--hiper k=7` del tándem (que se arma antes)
+  # no tendría dueño entre los métodos en juego.
+  if (identical(comando, "metodo") && is.null(partido$opciones$metodo) &&
+      length(partido$posicionales) > 1L)
+    partido$opciones$metodo <- partido$posicionales[2]
+  # Lo mismo con los `metodo=` de los paneles de `cuaderno` y `sesion`.
+  partido$opciones$en_juego <- unique(c(sub("^metodo=", "", unlist(regmatches(
+    partido$posicionales, gregexpr("metodo=[a-z_]+", partido$posicionales)))),
+    partido$opciones$comparar))
   # `fuentes` y `casillas` son catálogos: preguntan qué hay, no miran datos.
   # Exigirles --fuente era pedir el dataset para poder preguntar cuál elegir.
   ds <- if (comando %in% c("fuentes", "casillas")) NULL
-        else armar_dataset(partido$opciones)
+        else armar_dataset(sin_opciones_de_comparacion(partido$opciones))
   accion <- COMANDOS[[comando]]
   resultado <- if (length(formals(accion)) >= 3L)
     accion(ds, partido$posicionales[-1], partido$opciones)
@@ -246,6 +291,8 @@ correr_lab <- function(argumentos = commandArgs(trailingOnly = TRUE)) {
     cat("cuaderno escrito en", salida, "\n")
     return(invisible(TRUE))
   }
+  if (identical(comando, "panel") && es_salida_figura(salida))
+    return(invisible(TRUE))
   if (identical(comando, "sesion") && !is.null(salida)) {
     exportar_sesion_json(resultado, salida)
     cat("sesión escrita en", salida, "\n")

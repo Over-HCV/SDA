@@ -130,6 +130,9 @@ servidor_composicion <- function(input, output, session, piezas, corrida,
          reinicios = control$reinicios %||% 1L,
          tol = control$tol %||% 1e-8,
          maxit = control$maxit %||% 500L, semilla = semilla))))
+  # La clase de referencia (rol "respuesta") se pega DESPUÉS de ajustar: el
+  # método no la vio, y Desempeño la usa para el cruce y el ARI.
+  ajuste <- adjuntar_referencia(ajuste, p$dataset)
 
   nueva_corrida(
     NULL, p$dataset$id, p$modelo$id,

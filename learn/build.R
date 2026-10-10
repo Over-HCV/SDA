@@ -41,6 +41,7 @@ rutas_datos <- function() {
                   ruta_repo("data", "twins.csv"),
                   ruta_repo("data", "ORI.csv"),
                   ruta_repo("data", "EIA.csv"),
+                  ruta_repo("data", "zoo.csv"),
                   ruta_repo("workshops", "twins", "twins.csv"))
   existentes <- candidatas[file.exists(candidatas)]
   # Si twins aparece en los dos sitios, quedarse con uno solo.

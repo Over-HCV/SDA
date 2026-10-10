@@ -1,1 +1,457 @@
-% Ácá van a estar los temas en formato beamer para la exposición final
+% =============================================================================
+% Proyecto final AED — Clustering de variables cualitativas
+%
+%   ./build.sh            compila main.pdf (LuaLaTeX, latexmk, dos pasadas)
+%
+% Formato: Midcentury Modern (tema/), tema Kraft. De Slate Blocks solo la foto
+% de portada y la marca de agua (tema/portada.sty). Las figuras salen del SDA
+% Lab (headless) a figuras/; mientras falte una se dibuja un recuadro con su
+% nombre, para que el deck compile desde el primer día.
+% =============================================================================
+\documentclass[aspectratio=169]{beamer}
+\usepackage{tema/beamerthememidcenturymodern}
+\usepackage{tema/portada}
+\usepackage[spanish, es-noshorthands]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage[backend=biber, style=authoryear, sorting=nyt]{biblatex}
+\addbibresource{refs.bib}
+
+\mcmTheme{Kraft}
+\portadaFoto{tema/fotos/portada.png}{0.55}
+\marcaDeAgua{tema/fotos/portada.png}
+
+\title[Clustering cualitativo]{Clustering de variables cualitativas}
+\subtitle{Cuando la media no existe: k-modas, Gower y clases latentes}
+\author{Álvarez · Arias · Mora · Castrillón}
+\institute{Análisis Estadístico de Datos · Universidad del Rosario}
+\date{2026}
+\titlegraphic{\includegraphics[height=0.8cm]{tema/logos/ur-logo.png}}
+
+% Sin portadillas por sección: las cuatro diapositivas de relevo (\parte) ya
+% marcan los cortes, y una portadilla por sección duplicaba pausas.
+\AtEveryCite{\color{mcmPrimary}}
+
+% \figura{archivo}{alto}: la figura del lab o, si todavía no existe, un
+% recuadro con el nombre que falta.
+% El ancho opcional limita la figura (y el recuadro) cuando van varias en fila.
+\newcommand{\figura}[3][0.95\linewidth]{%
+  \IfFileExists{figuras/#2}%
+    {\includegraphics[height=#3,width=#1,keepaspectratio]{figuras/#2}}%
+    {\fbox{\parbox[c][#3][c]{\dimexpr#1*6/10\relax}{\centering\small
+       falta \texttt{figuras/\detokenize{#2}}}}}%
+}
+
+% --- Las cuatro partes ---------------------------------------------------------
+% El video lo exponen los cuatro, una parte cada uno (≈3 min); en vivo exponen
+% quien salga al azar, así que cada parte se entiende sola y el guion
+% (content.md) las trae completas. Cambiar el reparto = cambiar estas líneas.
+\newcommand{\exponeUno}   {Anyelo Álvarez}
+\newcommand{\exponeDos}   {Daniel Arias}
+\newcommand{\exponeTres}  {Tania Mora}
+\newcommand{\exponeCuatro}{Over Castrillón}
+
+% \parte{n}{nombre}{título}: el pie de cada diapositiva pasa a decir quién
+% expone, y una diapositiva de relevo marca el cambio en el video.
+\newcommand{\parte}[3]{%
+  \author[Parte #1/4 · #2]{Álvarez · Arias · Mora · Castrillón}%
+  \begin{frame}[plain]
+    \centering\vfill
+    {\usebeamercolor[fg]{frametitle}\color{mcmPrimary}\Large\textsc{Parte #1 de 4}}\par
+    \vspace{0.6em}{\LARGE #3}\par
+    \vspace{0.8em}{\large #2}\par\vfill
+  \end{frame}}
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+\begin{frame}{Cuatro partes, un solo arco}
+  \centering\small
+  \begin{tabular}{@{}cllr@{}}
+    \toprule
+    & Parte & Expone & \\
+    \midrule
+    1 & La pregunta de la sesión 5 y los datos      & \exponeUno    & 3 min \\
+    2 & Distancia, calidad de la partición y k-modas & \exponeDos    & 3 min \\
+    3 & Elegir $K$ y jerárquico sobre Gower         & \exponeTres   & 3 min \\
+    4 & Clases latentes, tándem y anexo             & \exponeCuatro & 3 min \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\parte{1}{\exponeUno}{La pregunta de la sesión 5 y los datos}
+
+% =============================================================================
+\section{Puente desde la sesión 5}
+% =============================================================================
+
+\begin{frame}{La pregunta que quedó abierta}
+  \begin{columns}[c]
+    \begin{column}{0.5\textwidth}
+      En la sesión 5 agrupamos 15 estaciones de Bogotá con 5 contaminantes:
+      \begin{itemize}
+        \item distancia \textbf{euclídea} y \textbf{estandarizar siempre};
+        \item centroide = \textbf{media} del grupo;
+        \item plano factorial del \textbf{ACP} para ver los grupos.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{alertblock}{¿Y si las variables son cualitativas?}
+        ¿Qué es la media de «tiene plumas»? ¿Qué es estandarizar «sí/no»?
+      \end{alertblock}
+      \begin{block}{La idea de toda la charla}
+        Se cambia la \textbf{distancia}, el \textbf{centro} o el
+        \textbf{modelo}; el resto del arco se mantiene.
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{El mismo arco, con categorías}
+  \centering\footnotesize
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Sesión 5 (aire de Bogotá) & Este trabajo (Zoo) \\
+    \midrule
+    Boxplots y correlación          & Frecuencias y asociación \\
+    ACP: primer plano factorial     & ACM: primer plano factorial \\
+    Euclídea + estandarizar         & Emparejamiento simple · Gower \\
+    $d^2$ de la partición           & $d$ de la partición (desacuerdos) \\
+    K-medias (Lloyd, \texttt{nstart}) & K-modas (Huang, reinicios) \\
+    Codo sobre $d^2$                & Codo sobre desacuerdos \\
+    Jerárquico: 3 enlaces           & Jerárquico sobre Gower: 3 enlaces \\
+    GMM: «cursos más avanzados»     & Clases latentes: EM y BIC \\
+    Anexo: estructura espacial      & Anexo: la clase \texttt{tipo} \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+% =============================================================================
+\section{Los datos: Zoo}
+% =============================================================================
+
+\begin{frame}{101 animales, 16 atributos}
+  \begin{columns}[c]
+    \begin{column}{0.4\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item 15 binarias: pelo, plumas, huevos, leche, vuela, acuático,
+          depredador, dientes, vertebrado, respira, venenoso, aletas, cola,
+          doméstico, tamaño de gato.
+        \item \texttt{patas}: 0, 2, 4, 5, 6, 8 (categoría, no número).
+        \item \texttt{tipo}: 7 clases reales. \textbf{No entra} al
+          agrupamiento: se guarda para el anexo.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.58\textwidth}
+      \centering\figura{zoo-frecuencias.png}{0.68\textheight}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Asociación entre atributos}
+  \centering\figura{zoo-asociacion.png}{0.72\textheight}
+
+  \footnotesize Como CO, NO y NO$_2$ en el aire: pelo y leche van juntos
+  porque vienen de la misma «fuente».
+\end{frame}
+
+\begin{frame}{Primer plano factorial del ACM}
+  \centering\figura{zoo-acm-mapa.png}{0.72\textheight}
+
+  \footnotesize El ACM es el ACP de las cualitativas: \textbf{herramienta de
+  diagnóstico}, no parte del agrupamiento.
+\end{frame}
+
+\parte{2}{\exponeDos}{Distancia, calidad de la partición y k-modas}
+
+% =============================================================================
+\section{Distancia y calidad de una partición}
+% =============================================================================
+
+\begin{frame}{Duros y suaves, igual que en la sesión 5}
+  \centering\small
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    & Duros & Suaves \\
+    \midrule
+    Numéricas    & K-medias, jerárquico & GMM \\
+    Cualitativas & \textbf{K-modas}, \textbf{Gower + jerárquico/PAM}
+                 & \textbf{Clases latentes} \\
+    Salida       & $g_i \in \{1,\dots,K\}$ & $\boldsymbol\pi_i=(\pi_{i1},\dots,\pi_{iK})$ \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{De la euclídea a los desacuerdos}
+  \begin{columns}[T]
+    \begin{column}{0.5\textwidth}
+      \[
+        d(\mathbf{x}_i,\mathbf{x}_j) = \sum_{k=1}^{p} \mathbb{1}[x_{ik} \neq x_{jk}]
+      \]
+      \footnotesize Emparejamiento simple (Hamming): en cuántos atributos
+      difieren. Todas las variables ya están en la misma escala:
+      \textbf{no hay nada que estandarizar}.
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \[
+        s_{ij} = \frac{\sum_k w_{ijk}\, s_{ijk}}{\sum_k w_{ijk}}
+      \]
+      \footnotesize Gower \parencite{gower1971}: con datos mixtos normaliza
+      cada numérica por su rango (su «estandarizar»); con binarias
+      asimétricas dos «no» no cuentan.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Calidad de la partición}
+  La fórmula de la sesión 5 no necesita un centro, solo distancias:
+  \[
+    d(\text{Agrupamiento}) = \sum_{k=1}^{K} \frac{1}{n_k}
+      \sum_{i,j \in G_k} d(\mathbf{x}_i,\mathbf{x}_j)
+  \]
+  \begin{itemize}
+    \item Con $d$ = euclídea al cuadrado es el $d^2$ de clase.
+    \item Con $d$ = desacuerdos funciona igual: \textbf{sirve con cualquier
+      distancia}.
+  \end{itemize}
+\end{frame}
+
+% =============================================================================
+\section{K-modas}
+% =============================================================================
+
+\begin{frame}{Lloyd con otro centro}
+  \begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+      \begin{enumerate}
+        \item Inicialización: $K$ animales como modas iniciales.
+        \item Asignación: cada animal a la moda con menos desacuerdos.
+        \item Actualización: la moda de cada atributo en el grupo.
+        \item Repetir hasta que nadie cambie.
+      \end{enumerate}
+    \end{column}
+    \begin{column}{0.45\textwidth}
+      \[
+        \sum_{i \in G} d(\mathbf{x}_i,\mathbf{m})
+          = \sum_{k}\bigl(n_G - n_k(m_k)\bigr)
+      \]
+      \footnotesize El costo se separa por atributo, y lo minimiza la
+      categoría más frecuente \parencite{huang1998}.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{K-modas paso a paso}
+  \centering\figura{kmodos-traza.png}{0.75\textheight}
+\end{frame}
+
+\begin{frame}{Advertencia importante: la inicialización}
+  \begin{columns}[c]
+    \begin{column}{0.55\textwidth}
+      \centering\figura{kmodos-estabilidad.png}{0.7\textheight}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \footnotesize
+      \begin{tabular}{@{}lrr@{}}
+        \toprule
+        Arranque & Costo & ARI \\
+        \midrule
+        Huang     & 138 & 0,63 \\
+        Cao       & 137 & 0,59 \\
+        Aleatorio & 139 & 0,83 \\
+        \bottomrule
+      \end{tabular}
+
+      \vspace{0.5em}
+      Como \texttt{nstart}: varios arranques y quedarse con el menor costo.
+      Pero menor costo \textbf{no} garantiza recuperar la clase real.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Perfiles de los grupos}
+  \centering\figura{kmodos-modos.png}{0.75\textheight}
+\end{frame}
+
+\parte{3}{\exponeTres}{Elegir $K$ y jerárquico sobre Gower}
+
+% =============================================================================
+\section{Selección del número de grupos K}
+% =============================================================================
+
+\begin{frame}{Dos guías, como en la sesión 5}
+  \begin{columns}[c]
+    \begin{column}{0.49\textwidth}
+      \centering\figura{zoo-acm-mapa.png}{0.55\textheight}
+
+      \footnotesize Guía 1: el plano factorial del ACM.
+    \end{column}
+    \begin{column}{0.49\textwidth}
+      \centering\figura{kmodos-codo.png}{0.55\textheight}
+
+      \footnotesize Guía 2: el codo sobre los desacuerdos.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================================
+\section{Jerárquico sobre Gower}
+% =============================================================================
+
+\begin{frame}{Los tres enlaces}
+  \centering
+  \figura[0.32\linewidth]{gower-dendrograma-completo.png}{0.55\textheight}\hfill
+  \figura[0.32\linewidth]{gower-dendrograma.png}{0.55\textheight}\hfill
+  \figura[0.32\linewidth]{gower-dendrograma-simple.png}{0.55\textheight}
+
+  \footnotesize Completo · promedio · simple. El promedio suele ser el más
+  robusto; el simple forma cadenas.
+\end{frame}
+
+\begin{frame}{Cortar el árbol}
+  \centering\figura{gower-dendrograma.png}{0.75\textheight}
+\end{frame}
+
+\begin{frame}{¿Qué tan concordantes son los dos métodos?}
+  \centering\figura{concordancia.png}{0.72\textheight}
+
+  \footnotesize K-modas contra Gower jerárquico: donde discrepan están los
+  animales de frontera.
+\end{frame}
+
+\parte{4}{\exponeCuatro}{Clases latentes, tándem y anexo}
+
+% =============================================================================
+\section{Métodos suaves: clases latentes}
+% =============================================================================
+
+\begin{frame}{El GMM de las categorías}
+  \[
+    P(\mathbf{x}_i) = \sum_{c=1}^{K} \pi_c \prod_{k=1}^{p} \prod_{r}
+      \theta_{krc}^{\,\mathbb{1}[x_{ik}=r]}
+  \]
+  \begin{itemize}
+    \item Donde el GMM pone una normal, aquí va un producto de categóricas
+      (\textbf{independencia local}).
+    \item EM: probabilidad de pertenencia $\pi_{ic}$ → nuevas $\pi_c$ y
+      $\theta_{krc}$.
+    \item $K$ por BIC \parencite{linzer2011}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{¿Cuántas clases?}
+  \centering\figura{lca-bic.png}{0.72\textheight}
+
+  \footnotesize El BIC elige 4 clases; el AIC, que castiga menos los
+  parámetros, elige 7, justo los tipos de Zoo.
+\end{frame}
+
+\begin{frame}{Clases latentes en el plano factorial}
+  \centering\figura{lca-mapa.png}{0.75\textheight}
+\end{frame}
+
+% =============================================================================
+\section{¿Y agrupar sobre el ACM?}
+% =============================================================================
+
+\begin{frame}{El tándem ACM + k-medias}
+  \begin{columns}[c]
+    \begin{column}{0.58\textwidth}
+      \centering\figura{tandem-mapa.png}{0.68\textheight}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \footnotesize
+      En clase: «el ACP es diagnóstico, no parte del proceso».
+
+      \vspace{0.5em}
+      Aquí el tándem (5 dimensiones) recupera bien los tipos, pero las
+      primeras dimensiones resumen inercia, no separación: no hay garantía de
+      que eso se repita.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================================
+\section{Anexo: ¿recuperamos los tipos?}
+% =============================================================================
+
+\begin{frame}{La estructura que no se midió}
+  \begin{columns}[c]
+    \begin{column}{0.55\textwidth}
+      \centering\figura{validacion-ari.png}{0.7\textheight}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \footnotesize
+      \begin{tabular}{@{}lr@{}}
+        \toprule
+        Método ($K=7$) & ARI \\
+        \midrule
+        K-modas (Huang)       & 0,63 \\
+        Gower + PAM           & 0,64 \\
+        Gower + jer. promedio & 0,89 \\
+        Clases latentes       & 0,83 \\
+        Tándem ACM + k-medias & 0,81 \\
+        \bottomrule
+      \end{tabular}
+
+      \vspace{0.5em}
+      Como las estaciones y sus zonas: \texttt{tipo} nunca entró al
+      agrupamiento y aun así se recupera.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% =============================================================================
+\section{Supuestos, fallos y síntesis}
+% =============================================================================
+
+\begin{frame}{Dónde se rompe cada uno}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{alertblock}{K-modas}
+        \footnotesize Depende del arranque · empates de moda · pesos iguales ·
+        pierde el orden de las ordinales.
+      \end{alertblock}
+      \begin{alertblock}{Gower}
+        \footnotesize Pesos iguales · binarias asimétricas · memoria $O(n^2)$.
+      \end{alertblock}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{alertblock}{Clases latentes}
+        \footnotesize Independencia local (pelo y leche) · máximos locales ·
+        celdas con $\theta = 0$ o $1$.
+      \end{alertblock}
+      \begin{alertblock}{Tándem}
+        \footnotesize Las dimensiones del ACM no buscan separar grupos.
+      \end{alertblock}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Para llevarse}
+  \begin{itemize}
+    \item El arco de la sesión 5 se mantiene; cambian la distancia, el centro
+      o el modelo.
+    \item Duros (k-modas, Gower) y suaves (clases latentes) también existen
+      para categorías.
+    \item El ACM y el clustering son \textbf{complementarios, no
+      sustitutos}.
+  \end{itemize}
+  \begin{exampleblock}{Una frase}
+    Con datos cualitativos no se agrupa distinto: se mide distinto.
+  \end{exampleblock}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{Referencias}
+  \nocite{zoo1990,kaufman1990,greenacre2017,cao2009}
+  \printbibliography[heading=none]
+  \vfill
+  \tiny Foto de portada: \emph{Slate Blocks}, CC BY 4.0. Formato:
+  \emph{Mid-Century Modern} Beamer.
+\end{frame}
+
+\end{document}

@@ -83,7 +83,26 @@ salida_optimizador <- function(ns) {
     "Medir la distancia entre todos los pares de grupos segun el enlace.",
     "Fusionar los dos mas cercanos y anotar a que altura se juntaron.",
     "Repetir n - 1 veces, hasta que quede un solo grupo.",
-    "Cortar el arbol donde quedan k grupos: no hay semilla ni tolerancia."))
+    "Cortar el arbol donde quedan k grupos: no hay semilla ni tolerancia."),
+  # Los tres del agrupamiento cualitativo (k-modas, Gower, clases latentes).
+  Huang = c(
+    "Elegir k modas iniciales: sortear cada variable según sus frecuencias y quedarse con la fila real más parecida (semilla).",
+    "Asignar cada observación a la moda con la que discrepa en menos variables.",
+    "Recalcular cada moda como la categoría más frecuente de su grupo, variable por variable.",
+    "Barrer las filas en orden: si una queda estrictamente más cerca de otra moda, se muda y las dos modas tocadas se recalculan en el acto.",
+    "Parar cuando un barrido completo no mueve a nadie; con reinicios, quedarse con el de menor costo."),
+  EM = c(
+    "Arrancar con probabilidades por clase al azar (semilla) y pesos iguales.",
+    "Paso E: con los parámetros actuales, calcular la probabilidad posterior de que cada fila pertenezca a cada clase.",
+    "Paso M: rehacer los pesos como la masa posterior media y las probabilidades de cada categoría como la fracción de esa masa que la eligió.",
+    "Repetir: la log-verosimilitud nunca baja entre una vuelta y la siguiente.",
+    "Parar cuando sube menos que la tolerancia; con reinicios, quedarse con el de mayor verosimilitud y comparar k por BIC."),
+  "PAM / aglomerativo" = c(
+    "Medir la disimilitud de Gower entre todos los pares: la fracción de variables en que difieren dos filas.",
+    "PAM, BUILD: elegir los k medoides de a uno, cada vez el que más baja la disimilitud media al medoide más cercano.",
+    "PAM, SWAP: probar cambiar un medoide por una fila que no lo es y aceptar el cambio si baja el costo; repetir hasta que ninguno lo baje.",
+    "Aglomerativo: partir de n grupos de uno y fusionar los dos más cercanos según el enlace, n - 1 veces.",
+    "Cortar el árbol en k grupos o quedarse con los medoides finales: ninguno de los dos depende de la semilla."))
 
 servidor_optimizador <- function(input, output, session, clave_metodo) {
   output$hay_inicializacion <- shiny::reactive({

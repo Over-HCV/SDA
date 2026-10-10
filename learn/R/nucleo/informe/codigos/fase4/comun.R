@@ -11,7 +11,9 @@
 #        hiper  = list(...),          # nombres del registro
 #        ejes   = c(1L, 2L),          # opcional
 #        top    = 30L,                # opcional
-#        grupos = list(metodo =, hiper =))  # opcional
+#        grupos = list(metodo =, hiper =),  # opcional
+#        reduccion = list(metodo = "acm", hiper, columnas, dimensiones),
+#        clase  = "tipo")             # opcional: la clase de referencia
 #
 # El código emitido es R base + stats + factoextra, nada del lab: el
 # cuaderno tiene que correr en la máquina de quien entrega el taller.
@@ -31,7 +33,8 @@
   "f4.diagnostico.silueta" = list("grupos", ".f4_silueta"),
   "f4.explicabilidad.centroides" = list("grupos", ".f4_centroides"),
   "f4.desempeno.grupos" = list("grupos", ".f4_grupos"),
-  "f4.diagnostico.dendrograma" = list("jerarquico", ".f4_dendrograma"))
+  "f4.diagnostico.dendrograma" = list("jerarquico", ".f4_dendrograma"),
+  "f4.desempeno.cruce_clase" = list("grupos", ".f4_cruce_clase"))
 
 # Las claves que dibujan con factoextra (fviz_*); la silueta además
 # calcula con cluster::silhouette().
@@ -42,6 +45,9 @@
 
 #' @return character() de líneas, o NULL si la clave no tiene generador.
 .codigo_fase4 <- function(clave, params) {
+  # k-modas, Gower, clases latentes y el ACM tienen su carpeta propia.
+  cualitativo <- .codigo_cualitativo(clave, params)
+  if (!is.null(cualitativo)) return(cualitativo)
   generador <- .GENERADORES_F4[[clave]]
   if (is.null(generador)) return(NULL)
   if (!.f4_aplica(generador[[1]], params$metodo))
@@ -50,7 +56,8 @@
              "# Volvé al lab y marcalo desde una corrida que lo declare."))
   adjunto <- .f4_adjuntar_grupos(params$grupos)
   cuerpo <- get(generador[[2]], mode = "function")(params)
-  c(.f4_matriz(), adjunto, .f4_sin_repetir(cuerpo, adjunto))
+  c(.f4_matriz(), .f4_reduccion(params$reduccion), adjunto,
+    .f4_sin_repetir(cuerpo, adjunto))
 }
 
 #' Saca del cuerpo los bloques `if (!exists(...)) { ... }` que los grupos
@@ -72,6 +79,8 @@
 }
 
 .paquetes_fase4 <- function(clave, params) {
+  if (!is.null(.codigo_cualitativo(clave, params)))
+    return(.paquetes_cualitativos(clave, params))
   generador <- .GENERADORES_F4[[clave]]
   if (is.null(generador) || !.f4_aplica(generador[[1]], params$metodo))
     return(character(0))

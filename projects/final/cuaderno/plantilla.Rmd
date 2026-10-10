@@ -1,0 +1,262 @@
+---
+title: "Agrupamiento de variables cualitativas: la base Zoo"
+subtitle: "Análisis Estadístico de Datos · proyecto final"
+author: "Anyelo Álvarez · Daniel Arias · Tania Mora · Over Castrillón"
+output:
+  rmdformats::downcute
+---
+
+@@CONFIG@@
+
+# Dependencias
+
+Para ejecutar este cuaderno hay que instalar antes, desde la consola de R o desde el menú Tools > Install Packages de RStudio, los siguientes paquetes:
+
+- `install.packages("ggplot2")`.
+- `install.packages("cluster")`.
+- `install.packages("factoextra")`.
+- `install.packages("rmdformats")` (opcional: es el formato del cuaderno de la sesión 5).
+
+Los tres métodos cualitativos se escriben a mano en R base (k-modas y el EM de las clases latentes) o con `cluster` (Gower), así que no hace falta `klaR` ni `poLCA`. El código de cada chunk lo genera SDA Lab (`projects/final/cuaderno/generar.sh`) y es el mismo que el laboratorio ejecuta: con la misma semilla y los mismos reinicios, las particiones de este cuaderno coinciden con las del lab.
+
+# Objetivo y alcance
+
+**Objetivo**: este cuaderno continúa la discusión del agrupamiento de la sesión 5, ahora con una tabla de datos donde **todas las variables son cualitativas**. Se busca entender qué cambia del k-medias cuando no se puede restar ni promediar, y comparar tres maneras de responderlo: cambiar el centro (k-modas), cambiar la distancia (Gower con aglomeración jerárquica) y cambiar el modelo (clases latentes).
+
+**Alcance**: se sigue el esqueleto del cuaderno de la sesión 5 (datos, medición de la calidad de una partición, algoritmo, selección de K, aglomeración jerárquica y aplicación), con las piezas cualitativas en lugar de las numéricas. La base trae la clase real de cada animal, que **no entra a ningún ajuste**: se usa solo al final, para medir cuánto de esa clase recupera cada partición.
+
+# Datos
+
+@@DATOS@@
+
+## Descripción del conjunto de datos
+
+La base Zoo (UCI) describe 101 animales con 16 atributos: quince binarios en `si`/`no` (pelo, plumas, huevos, leche, vuela, acuático, depredador, dientes, vertebrado, respira, venenoso, aletas, cola, doméstico y tamaño de gato) y `patas`, que viene escrita como número (0, 2, 4, 5, 6 u 8) pero es un **código**: un animal de seis patas no es el triple de uno de dos, y por eso todo el cuaderno la trata como factor. La columna `animal` es el nombre de la fila y `tipo` es la clase real (mamífero, ave, reptil, pez, anfibio, insecto, invertebrado).
+
+@@CHUNK 1@@
+
+------------------------------------------------------------------------
+
+### Ejercicio 1
+
+> ¿Qué tan balanceadas están las siete clases? ¿Qué se puede esperar de un agrupamiento en k = 7 grupos con ese reparto?
+
+@@CHUNK 2@@
+
+**¿Están balanceadas?** No, pues los mamíferos son 41 de los 101 animales (40.6 %) y los anfibios apenas 4 (4 %). Un agrupamiento no supervisado busca grupos homogéneos y no grupos del tamaño de las clases, así que con k = 7 puede pasar que los mamíferos ocupen dos grupos y que los reptiles y anfibios, que son pocos y heterogéneos, queden repartidos entre otros.
+
+------------------------------------------------------------------------
+
+### Ejercicio 2
+
+> ¿Hay algún atributo que, solo, ya separe una clase completa?
+
+@@CHUNK 3@@
+
+**¿Hay alguno?** Sí, `leche`: el estadístico chi-cuadrado vale 101, exactamente el número de animales, lo que en una tabla 2 × 7 equivale a una V de Cramér igual a 1. Los 41 animales que dan leche son los 41 mamíferos y ninguno más, así que cualquier método que respete esa variable puede aislar a los mamíferos sin mirar la clase.
+
+------------------------------------------------------------------------
+
+# Métodos de agrupamiento (Clustering)
+
+En la sesión 5 se usó el ACP para ver los datos en dos dimensiones informativas antes de agruparlos. Con variables cualitativas el análogo es el **análisis de correspondencias múltiples (ACM)**: se descompone la tabla indicadora (una columna por categoría) y se obtienen coordenadas para las filas y para las categorías. Igual que allá, **esto no implica que el agrupamiento se haga sobre el ACM**: los tres métodos de abajo trabajan sobre los 16 factores, y el plano del ACM es solo un dibujo.
+
+@@CHUNK 4@@
+
+Las dos primeras dimensiones retienen 26.0 % y 18.8 % de la inercia (44.9 % entre las dos). En el ACM la inercia total es J/Q − 1, que depende solo de cuántas categorías hay, y por eso estos porcentajes salen pesimistas comparados con los de un ACP.
+
+@@CHUNK 5@@
+
+> **Nota.** Los colores del plano son la clase real, que no entró al ACM. Que los mamíferos, las aves y los peces aparezcan en zonas distintas sugiere que hay grupos que un algoritmo podría encontrar, pero no dice cuántos.
+
+## K-modas (K-modes)
+
+Se busca, como en k-medias, una partición de los n animales en K grupos lo más homogéneos posible. Lo que cambia es la manera de medir la homogeneidad: entre dos animales no se resta nada, se cuenta **en cuántas de las 16 variables difieren** (el emparejamiento simple, o distancia de Hamming sobre categorías).
+
+### Medición de calidad de la partición
+
+En la sesión 5 la calidad de un agrupamiento era la suma, grupo por grupo, de las distancias euclídeas al cuadrado entre los pares de observaciones, dividida por el tamaño del grupo:
+
+$$d(\text{Agrupamiento}) = \sum_{k=1}^{K} \frac{1}{n_k} \sum_{i<j \in G_k} d(i, j).$$
+
+Con factores la fórmula es la misma y lo único que cambia es $d(i, j)$, que pasa a ser el número de variables en que $i$ y $j$ difieren. A continuación se comparan dos agrupamientos hechos a mano: el **A** separa por los rasgos que definen una clase (leche, plumas, aletas) y el **B** por rasgos de estilo de vida (doméstico, tamaño de gato, acuático).
+
+```{r calidad-particion}
+# Dos agrupamientos hechos a mano, como los A y B del cuaderno de
+# la sesión 5. A: leche, plumas, aletas; B: doméstico, tamaño y
+# acuático.
+agrupamiento_a <- with(cuali, ifelse(leche == "si", "G1",
+                         ifelse(plumas == "si", "G2",
+                         ifelse(aletas == "si", "G3", "G4"))))
+agrupamiento_b <- with(cuali, ifelse(domestico == "si", "G1",
+                         ifelse(tamano_gato == "si", "G2",
+                         ifelse(acuatico == "si", "G3", "G4"))))
+# d(i, j) = en cuántas variables difieren i y j. Con solo factores,
+# Gower es esa cuenta dividida por p: se multiplica de vuelta.
+desacuerdos <- as.matrix(cluster::daisy(cuali, metric = "gower")) *
+  ncol(cuali)
+# La d de un agrupamiento: por grupo, la suma de desacuerdos entre
+# sus pares dividida por su tamaño.
+d_agrupamiento <- function(d, grupos)
+  sapply(split(seq_along(grupos), grupos), function(g)
+    sum(d[g, g][upper.tri(d[g, g])]) / length(g))
+d_a <- d_agrupamiento(desacuerdos, agrupamiento_a)
+d_b <- d_agrupamiento(desacuerdos, agrupamiento_b)
+print(rbind(A = round(d_a, 2), B = round(d_b, 2)))
+cat("d(A) =", round(sum(d_a), 2), "· d(B) =", round(sum(d_b), 2),
+    "\n")
+```
+
+Así, $d(\text{Agrupamiento}_A) = 51.34 + 19.10 + 7.38 + 63.15 = 140.97$ y $d(\text{Agrupamiento}_B) = 32.54 + 85.47 + 46.09 + 69.89 = 234.00$. El agrupamiento A es claramente más homogéneo, y lo es aunque su cuarto grupo (todo lo que no da leche, no tiene plumas ni aletas: insectos, invertebrados, reptiles y anfibios) sea el más disperso de A.
+
+------------------------------------------------------------------------
+
+### Ejercicio 3
+
+> ¿Por qué el grupo G1 de A (los 41 mamíferos) tiene una d más alta que el G3 (los 13 animales con aletas), si los dos grupos son "puros"?
+
+**¿Es porque son menos parecidos?** No del todo, pues la d de un grupo suma los desacuerdos de todos sus pares y divide solo por $n_k$, así que crece con el tamaño del grupo: 41 animales tienen 820 pares y 13 tienen 78. Un grupo grande y heterogéneo en rasgos secundarios (depredador, acuático, tamaño) pesa más que uno chico, y por eso la d sirve para comparar particiones del mismo tamaño K y no grupos sueltos entre sí.
+
+------------------------------------------------------------------------
+
+### Algoritmo de K-modas
+
+Recorrer todas las particiones posibles en K = 7 grupos es imposible, así que, como en k-medias, se usa un algoritmo que encuentra una buena partición rápido (Huang, 1998):
+
+- i = 1. Se eligen K modas iniciales: cada variable se sortea según la frecuencia de sus categorías y cada candidata se cambia por la fila real más parecida (arranque de Huang). Cada animal va a la moda con la que discrepa en menos variables.
+- i = 2. Se repite hasta que un barrido completo no mueva a nadie:
+- \*2.1. La moda de cada grupo es la categoría más frecuente de cada variable (el análogo del centroide).
+- \*2.2. Se recorren los animales en orden y uno se muda de grupo solo si queda **estrictamente** más cerca de otra moda; las dos modas tocadas se recalculan en el acto.
+
+El código siguiente es ese algoritmo escrito a mano; se corre con 25 arranques (semillas 42 a 66) y se queda el de menor costo, que es el total de desacuerdos de cada animal con la moda de su grupo.
+
+@@CHUNK 6@@
+
+El ganador llega a un costo de 138 desacuerdos en dos barridos, y solo 2 de los 25 arranques alcanzan ese valor: k-modas cae con facilidad en óptimos locales, y por eso los reinicios no son un adorno.
+
+@@CHUNK 7@@
+
+@@CHUNK 8@@
+
+------------------------------------------------------------------------
+
+### Ejercicio 4
+
+> En el primer barrido cambian de grupo 29 animales y en el segundo ninguno. ¿Quiere decir que la partición es la mejor posible?
+
+**¿Es la mejor?** No necesariamente, pues el algoritmo para cuando ninguna mudanza individual baja el costo, que es un óptimo **local**. La prueba está en la traza de convergencia: 23 de los 25 arranques terminaron en un costo mayor que 138, y nada garantiza que algún arranque que no se probó no termine por debajo.
+
+------------------------------------------------------------------------
+
+### Selección de K
+
+#### Primera guía general: primer plano factorial
+
+@@CHUNK 9@@
+
+El plano del ACM muestra separados a las aves, a los peces y a buena parte de los mamíferos, pero los grupos chicos (reptiles, anfibios, invertebrados) se solapan cerca del origen. Como en la sesión 5, el plano sugiere que hay entre tres y cinco grupos claros y deja el resto a un método más riguroso.
+
+#### Selección de K mediante d
+
+A medida que K crece los grupos son cada vez más homogéneos y el costo baja, hasta llegar a cero cuando cada animal distinto es su propio grupo. La pregunta es en qué K esa bajada se vuelve marginal.
+
+@@CHUNK 10@@
+
+El costo baja de 501 (k = 1) a 330, 234 y 188 en k = 2, 3 y 4, y después las bajadas se achican (167, 148, 138 en k = 5, 6, 7). El codo está entre k = 3 y k = 4; se mantiene k = 7 porque es el número de clases reales y permite comparar los tres métodos con la misma K, sabiendo que los tres últimos grupos explican poco.
+
+@@CHUNK 11@@
+
+La silueta media es 0.46. Las aves (grupo 3, 0.66) y los invertebrados acuáticos (grupo 6, 0.64) son los grupos más nítidos; el grupo 7 (0.20), que mezcla reptiles con una rana y un escorpión, es el más débil.
+
+#### Lectura de los grupos
+
+@@CHUNK 12@@
+
+@@CHUNK 13@@
+
+@@CHUNK 14@@
+
+**¿Recupera las clases?** En parte: el índice de Rand ajustado (ARI) es 0.626 y la pureza 90 %. Los mamíferos quedan partidos en dos grupos de 20 y 19 que se distinguen por `depredador` (la moda es "si" en uno y "no" en el otro), y el grupo de los peces se lleva además a dos mamíferos acuáticos (delfín y marsopa) y a dos anfibios.
+
+## Aglomeración jerárquica
+
+Una de las deficiencias de k-modas, igual que de k-medias, es que K se fija antes del análisis. La aglomeración jerárquica construye los grupos de manera progresiva y deja la decisión para el final, cuando se corta el **dendrograma**. Con factores se necesita una disimilitud que no exija números: la de **Gower**, que con solo factores es la fracción de variables en que difieren dos animales (el mismo emparejamiento simple dividido por 16). Se usa el enlace promedio, y el árbol se corta en 7 grupos.
+
+@@CHUNK 15@@
+
+La correlación cofenética es 0.857: el árbol respeta bastante bien las disimilitudes originales.
+
+@@CHUNK 16@@
+
+@@CHUNK 17@@
+
+**¿Recupera las clases?** Mejor que k-modas: ARI = 0.889 con pureza 89 %. 40 de los 41 mamíferos quedan juntos, las aves son un grupo propio, y un solo grupo reúne a los 13 peces con los 4 anfibios y 4 reptiles. A cambio el corte deja dos grupos de uno y dos animales (siluetas 0.00 y 0.09), que es el precio de un enlace que no fuerza grupos de tamaño parecido.
+
+## Clases latentes
+
+El tercer enfoque cambia el modelo y no la distancia: cada clase es una tabla de probabilidades por variable y, dentro de la clase, las variables se suponen independientes. Se estima por el algoritmo EM (escrito a mano abajo) y cada animal queda con una probabilidad posterior de pertenecer a cada clase; la partición es la clase más probable.
+
+@@CHUNK 18@@
+
+@@CHUNK 19@@
+
+El BIC tiene su mínimo en k = 4 (1520.7) y el AIC en k = 7 (1261.7). Es decir que el criterio más exigente con los parámetros prefiere un modelo más chico que el de siete clases que aquí se compara.
+
+> **Nota.** Cada k de la tabla se ajusta con los mismos 25 arranques, por lo cual la log-verosimilitud crece con k (de −994.9 con k = 1 a −480.9 con k = 8), como debe pasar con los óptimos globales. Con solo 5 arranques por k, k = 8 quedaba en un máximo local peor que el de k = 7: es el mismo problema de los arranques que se vio con k-medias.
+
+@@CHUNK 20@@
+
+@@CHUNK 21@@
+
+**¿Recupera las clases?** ARI = 0.826 y pureza 92 %: deja a los 13 peces solos, reúne a las 20 aves (con un reptil) y a los 8 insectos (con dos invertebrados), y separa en un grupo aparte a 6 mamíferos cuya moda es acuático = si y aletas = si.
+
+# Aplicación: el tándem ACM + K-medias y la comparación
+
+Una forma habitual de agrupar factores con las herramientas numéricas es el **tándem**: se calcula el ACM, se guardan las coordenadas de las primeras dimensiones y se corre k-medias sobre ellas. Acá se usan 5 dimensiones (71.6 % de la inercia) sin estandarizar, porque las dimensiones del ACM ya vienen en la escala de su inercia.
+
+@@CHUNK 22@@
+
+@@CHUNK 23@@
+
+```{r comparacion}
+# Cada partición contra la clase real, con la d de la sesión 5 en
+# desacuerdos (la misma medida de A y B).
+particiones <- list(
+  "K-modas" = kmodas7$grupos,
+  "Gower, enlace promedio" = gower_average7$grupos,
+  "Clases latentes" = clases7$grupos,
+  "ACM + k-medias" = km7_crudo$cluster)
+clase_de <- function(g) datos$tipo[match(names(g), filas)]
+resumen <- data.frame(
+  metodo = names(particiones),
+  ari = sapply(particiones, function(g)
+    round(ari(g, clase_de(g)), 3)),
+  d = sapply(particiones, function(g) {
+    g <- g[rownames(desacuerdos)]
+    round(sum(d_agrupamiento(desacuerdos, g)), 1)
+  }),
+  menor = sapply(particiones, function(g) min(table(g))),
+  mayor = sapply(particiones, function(g) max(table(g))),
+  row.names = NULL)
+knitr::kable(resumen)
+```
+
+------------------------------------------------------------------------
+
+### Ejercicio 5
+
+> ¿Cuál de los cuatro agrupamientos recupera mejor la clase real, y es el mismo que tiene la d más baja?
+
+**¿Cuál?** El jerárquico con Gower (ARI 0.889), seguido del tándem (0.829; en el SDA Lab, con Lloyd y 25 reinicios, el mismo tándem da 0.812, otra muestra de que K-medias depende del optimizador y de los arranques) y de las clases latentes (0.826); k-modas queda último (0.626). No es el de menor d: el jerárquico tiene justamente la d más alta (115.2) y la más baja es la de clases latentes (98.6), con k-modas en 103.5. Que el ARI y la d no ordenen igual es esperable, pues la d premia grupos homogéneos en **todas** las variables mientras la clase real se define por unas pocas (leche, plumas, aletas, vertebrado), y el jerárquico paga en d su grupo de 40 mamíferos, que es enorme y variado en los rasgos secundarios. Tampoco k-modas tiene la d mínima aunque minimice desacuerdos, porque lo que minimiza son los desacuerdos de cada animal con la **moda** de su grupo y no los desacuerdos entre pares.
+
+> **Nota.** El ARI compara con una clase que el algoritmo nunca vio: un ARI alto dice que la estructura que se encontró coincide con la taxonomía, no que el método sea mejor en general. Con otra semilla o con otro K los números pueden cambiar.
+
+# Anexo
+
+## Reproducir este cuaderno
+
+Desde la raíz del repositorio, `sh projects/final/cuaderno/generar.sh` vuelve a pedir a SDA Lab todos los chunks de arriba (salvo los dos escritos a mano: `calidad-particion` y `comparacion`) con los mismos parámetros: fuente `zoo`, clase de referencia `tipo`, k = 7, 25 reinicios y semilla 42. El laboratorio y este cuaderno dan las mismas particiones; `learn/R/pruebas/test_informe_cualitativo.R` lo comprueba ejecutando los chunks.
+
+```{r sesion}
+sessionInfo()
+```

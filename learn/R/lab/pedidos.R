@@ -51,7 +51,8 @@ entrada_de_pedido <- function(pedido, ds, id = "p1", opciones = list()) {
          call. = FALSE)
   tokens <- if (length(partes) > 1L)
     strsplit(partes[2], "+", fixed = TRUE)[[1]] else character(0)
-  params <- if (startsWith(clave, "f4.")) params_f4(clave, tokens, opciones)
+  params <- if (grepl("^f[34][.]", clave))
+    params_f4(clave, tokens, opciones, ds)
             else .completar_params(clave, params_de_pedido(clave, tokens), ds)
   if (!params_completos(clave, params))
     message("[aviso] ", clave, " necesita ",
@@ -69,12 +70,18 @@ entrada_de_pedido <- function(pedido, ds, id = "p1", opciones = list()) {
 #'        hiper  = <todos los de hiper_por_defecto(metodo), pisados>,
 #'        ejes   = c(1L, 2L),          # si se pidió `ejes=1-2`
 #'        top    = 30L,                # si se pidió `top=30`
-#'        grupos = list(metodo, hiper) # si la línea trae --grupos)
+#'        grupos = list(metodo, hiper) # si la línea trae --grupos
+#'        reduccion = list(metodo, hiper, columnas, dimensiones),  # tándem
+#'        clase  = "tipo",             # si hay clase de referencia
+#'        semilla = 42L, reinicios = 25L,  # el control del ajuste
+#'        columnas = c(...), numericas = c(...))  # métodos cualitativos
+#'
+#' Los paneles de la fase 3 (`f3.`) usan el mismo contrato: son del método.
 #'
 #' `--metodo` y `--hiper` de la línea valen de default para el panel que no
 #' traiga `metodo=`; lo que traiga el token pisa. Otros `nombre=valor` (como
 #' `umbral=0.9`) pasan tal cual.
-params_f4 <- function(clave, tokens, opciones = list()) {
+params_f4 <- function(clave, tokens, opciones = list(), ds = NULL) {
   pares <- .lab_pares(tokens[grepl("=", tokens, fixed = TRUE)])
   sueltos <- tokens[!grepl("=", tokens, fixed = TRUE)]
   if (length(sueltos))
@@ -99,7 +106,29 @@ params_f4 <- function(clave, tokens, opciones = list()) {
   if (!is.null(opciones$grupos) && nzchar(opciones$grupos))
     params$grupos <- list(metodo = opciones$grupos,
                           hiper = hiper_cli(opciones$grupos, opciones))
-  params
+  # El tándem viaja como receta, igual que los grupos: el cuaderno rehace el
+  # ACM y agrupa sobre sus dimensiones, en vez de leerlas de un CSV.
+  if (!is.null(ds$reduccion)) params$reduccion <- ds$reduccion
+  clase <- opciones$clase %||% columna_referencia(ds)
+  if (!is.null(clase) && nzchar(clase)) params$clase <- clase
+  # El control del ajuste, con los defaults de ajustar_cli(): sin ellos el
+  # cuaderno ajusta con otros reinicios y su partición no es la del lab.
+  params$semilla <- as.integer(opciones$semilla %||% 42L)
+  params$reinicios <- as.integer(opciones$reinicios %||% 25L)
+  c(params, .columnas_cualitativas(metodo, opciones, ds))
+}
+
+#' Las columnas con que el lab ajusta un método cualitativo, para que el
+#' cuaderno agrupe exactamente esas (y sepa cuáles eran números: Gower las
+#' trata distinto). Los métodos numéricos rehacen su matriz en el chunk.
+.columnas_cualitativas <- function(clave_metodo, opciones, ds) {
+  if (is.null(ds) || !identical(metodo(clave_metodo)$entrada$tipo,
+                                "matriz_cualitativa")) return(list())
+  columnas <- columnas_para(ds, clave_metodo, opciones) %||%
+    columnas_de_entrada(ds, clave_metodo)
+  numericas <- columnas[vapply(ds$df[columnas], is.numeric, logical(1))]
+  c(list(columnas = columnas),
+    if (length(numericas)) list(numericas = numericas))
 }
 
 #' Lo que la app saca de sus controles y la consola tiene que sacar del

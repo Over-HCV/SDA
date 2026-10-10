@@ -16,7 +16,8 @@ SUBSECCIONES_EVALUACION <- c("Composición", "Desempeño", "Diagnóstico",
 
 # Todo lo que la fase 4 sabe dibujar. Cada card se muestra si el método de la
 # corrida la declara en `artefactos` (SCHEMA.md §4).
-CLAVES_EVALUACION <- c("f4.desempeno.grupos",
+CLAVES_EVALUACION <- c("f4.desempeno.grupos", "f4.desempeno.cruce_clase",
+                       "f4.diagnostico.bic", "f4.explicabilidad.modos",
                        "f4.diagnostico.scree", "f4.diagnostico.reglas_k",
                        "f4.diagnostico.ortogonalidad",
                        "f4.diagnostico.codo", "f4.diagnostico.silueta",

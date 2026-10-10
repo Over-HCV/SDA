@@ -67,11 +67,18 @@ armar_informe_exploracion <- function(seleccion, dataset = NULL,
   # tres densidades kernel, y repetir sus cuarenta renglones tres veces es
   # justo lo que el enunciado castiga.
   explicadas <- character(0)
+  # Lo mismo con el código: una función que el método define (kmodas(),
+  # em_latente(), ari()...) se escribe en el primer chunk que la usa.
+  definidas <- character(0)
   secciones <- unlist(lapply(seleccion, function(entrada) {
     repetida <- entrada$clave %in% explicadas
     explicadas <<- c(explicadas, entrada$clave)
+    plegado <- plegar_definiciones(
+      codigo_artefacto(entrada$clave, entrada$params, entrada$tabla),
+      definidas)
+    definidas <<- plegado$vistas
     .seccion_artefacto(entrada, opciones,
-                       if (repetida) "repetido" else nivel)
+                       if (repetida) "repetido" else nivel, plegado$lineas)
   }), use.names = FALSE)
 
   c(
@@ -113,14 +120,17 @@ armar_informe_exploracion <- function(seleccion, dataset = NULL,
 }
 
 #' Las fuentes publicadas en Kaggle: el cuaderno las recarga desde ahí.
+#' `sep` es el del CSV publicado: ORI y EIA van con `;`, Zoo con comas.
 FUENTES_KAGGLE <- list(
-  ori = list(slug = "ori-dataset", archivo = "ORI.csv",
+  ori = list(slug = "ori-dataset", archivo = "ORI.csv", sep = ";",
              base = "la base del Taller 01 (IDEAM)"),
-  eia = list(slug = "eia-united-states", archivo = "EIA.csv",
-             base = "la base del Taller 02 (EIA, energía por país)"))
+  eia = list(slug = "eia-united-states", archivo = "EIA.csv", sep = ";",
+             base = "la base del Taller 02 (EIA, energía por país)"),
+  zoo = list(slug = "uci-zoo", archivo = "zoo.csv", sep = ",",
+             base = "la base Zoo (UCI) del proyecto final"))
 
 #' La carga de datos. Dos caminos: una fuente publicada en Kaggle (`ori`,
-#' `eia`) se recarga desde el CSV original (reproducible de punta a punta);
+#' `eia`, `zoo`) se recarga desde el CSV original (reproducible de punta a punta);
 #' cualquier otra fuente se trae del CSV que el usuario baja de la misma
 #' pestaña Informe, con la preparación ya aplicada.
 .seccion_datos_exploracion <- function(dataset, opciones) {
@@ -167,7 +177,7 @@ FUENTES_KAGGLE <- list(
     'codificacion <- if (all(validUTF8(readLines(ruta, warn = FALSE,',
     '                                            encoding = "bytes"))))',
     '  "UTF-8" else "latin1"',
-    'datos <- read.csv(ruta, sep = ";", dec = ".",',
+    sprintf('datos <- read.csv(ruta, sep = "%s", dec = ".",', k$sep %||% ";"),
     '                  fileEncoding = codificacion,',
     '                  stringsAsFactors = FALSE)',
     'names(datos) <- trimws(names(datos))  # ORI trae "Pronostico "',
@@ -258,7 +268,12 @@ codigo_de_transformacion <- function(entrada) {
             columna, columna, columna))
 
 #' Una sección por panel marcado: título, texto, parámetros y chunk.
-.seccion_artefacto <- function(entrada, opciones, texto = "completo") {
+.seccion_artefacto <- function(entrada, opciones, texto = "completo",
+                               codigo = codigo_artefacto(entrada$clave,
+                                                         entrada$params,
+                                                         entrada$tabla)) {
+  # Las opciones `#|` (alto de figura) van primero o knitr no las ve.
+  opcion <- grepl("^#[|] ", codigo)
   c(sprintf("## %s", .titulo_con_variables(entrada)),
     if (incluye(opciones, "procedencia"))
       c(sprintf("Panel `%s` · marcado a las %s", entrada$clave,
@@ -269,8 +284,7 @@ codigo_de_transformacion <- function(entrada) {
     if (incluye(opciones, "parametros") &&
         length(entrada$params %||% list()))
       c("", "Parámetros:", "", .lista_a_tabla(entrada$params)) else NULL,
-    "", "```{r}",
-    codigo_artefacto(entrada$clave, entrada$params, entrada$tabla), "```", "",
+    "", "```{r}", codigo[opcion], codigo[!opcion], "```", "",
     if (incluye(opciones, "notas")) .lectura(entrada) else NULL)
 }
 
@@ -296,6 +310,13 @@ codigo_de_transformacion <- function(entrada) {
 #' caja": sin la variable en el título, el índice no sirve para navegar y las
 #' secciones se confunden entre sí.
 .titulo_con_variables <- function(entrada) {
+  # Un panel de las fases 3 y 4 se distingue por el método, no por la
+  # clase de referencia: cuatro "Grupos contra clase real · tipo" no dicen
+  # cuál es cuál.
+  m <- entrada$params$metodo
+  if (grepl("^f[34][.]", entrada$clave %||% "") && !is.null(m) &&
+      existe_metodo(m))
+    return(sprintf("%s · %s", entrada$titulo, metodo(m)$nombre))
   campos <- c("variable", "columna", "clase", "x", "y", "a", "b", "variables")
   valores <- unlist(entrada$params[intersect(campos, names(entrada$params))],
                     use.names = FALSE)

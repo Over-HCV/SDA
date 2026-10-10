@@ -12,6 +12,12 @@ puntuaciones están centradas por construcción.
 Si elegiste una columna con rol de grupo, el color la usa. El color no
 participó del ajuste: el ACP no sabía que existía.
 
+Con un agrupamiento cualitativo (k-modos, Gower, clases latentes) el plano es
+el de un ACM de los mismos factores que se agruparon, y los ejes llevan su
+porcentaje de inercia. Es un dibujo: la partición vive en todas las variables,
+y el ACM solo muestra la parte de la asociación que cabe en dos dimensiones
+(sus porcentajes, además, son pesimistas por construcción).
+
 ## Qué buscar
 
 - **Separación por color.** Si los grupos se separan, las variables que

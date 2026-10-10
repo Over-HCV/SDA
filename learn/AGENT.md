@@ -101,6 +101,16 @@ Rscript learn/R/lab.R panel f1.analisis.boxplot_grupos ColA grupo \
 Rscript learn/R/lab.R cuaderno \
   f4.explicabilidad.contribuciones:metodo=acp+matriz=covarianza+ejes=1-2+top=30,f4.diagnostico.scree:metodo=acp \
   $EIA --salida taller02.Rmd
+
+# Final project (Zoo): reference class + tandem ACM (5 dims) -> k-means k=7
+ZOO="--fuente zoo --clase tipo"
+TANDEM="--reduccion acm --hiper n_componentes=5 --hiper k=7 --hiper escalar=FALSE"
+Rscript learn/R/lab.R panel f4.explicabilidad.modos --metodo kmodos --hiper k=7 $ZOO
+Rscript learn/R/lab.R metodo kmeans $TANDEM $ZOO
+Rscript learn/R/lab.R panel f4.desempeno.cruce_clase --metodo kmeans $TANDEM $ZOO
+Rscript learn/R/lab.R cuaderno \
+  f4.explicabilidad.mapa_2d:metodo=kmeans,f4.desempeno.cruce_clase:metodo=kmeans \
+  $TANDEM $ZOO --salida tandem.Rmd
 ```
 
 `panel` returns a PLOT AS A TABLE: it builds the registered ggplot for that
@@ -125,6 +135,11 @@ artefact (`f4.diagnostico.reglas_k`) prints its table.
 | `--grupos <metodo>` | fit that method before the command and add factor column `grupo` (rol `grupo`) |
 | `--reinicios n`, `--semilla n` | optimiser control (defaults 1 and 42, as in `correr()`) |
 | `--ejes 2,3`, `--umbral 0.8`, `--k_max 10`, `--color col` | the phase-4 sidebar controls |
+| `--clase col` | reference class (rol `respuesta`): excluded from default fit columns, attached to the fit AFTER fitting (`adjuntar_referencia()`), read by `f4.desempeno.cruce_clase` and the `ari` metric |
+| `--inicializacion x` | optimiser start (`Huang`, `Cao`, `aleatoria` for kmodos; `k-means++`, … for kmeans) |
+| `--comparar <metodo>` | with `panel f4.desempeno.cruce_clase`: cross the main fit against a second method (`--hiper_comparar a=1,b=2`, `--semilla_comparar n`, `--inicializacion_comparar x`) instead of the reference class; ARI between the two partitions |
+| `--salida fig.png\|fig.pdf` | with `panel`: save the figure exactly as the app draws it (`--ancho 7 --alto 4.5 --dpi 200`, `--hojas FALSE`) instead of printing the table; f1, f3 and f4 keys. `projects/final/figuras.sh` is the worked example |
+| `--reduccion acm` | tandem: fit ACM (`--hiper n_componentes=d`, columns from `--columnas_reduccion` or all qualitative inputs) and append `Dim1..Dimd`; a numeric method without `--columnas` clusters on them; the recipe travels to the notebook as `params$reduccion` |
 
 In `cuaderno`/`sesion`, an `f4.` entry's tokens become `params = list(metodo,
 hiper = <all of hiper_por_defecto(metodo), overridden>, ejes, top, grupos =
@@ -155,6 +170,12 @@ Rscript learn/R/pruebas/test_informe_f4.R   # runs the phase-4 chunks on EIA
 
 # The console CLI (lab.R), no GUI
 Rscript learn/R/pruebas/test_lab.R
+Rscript learn/R/pruebas/test_lab_cualitativo.R  # Zoo: --clase, ACM + k-medias tandem, notebook
+Rscript learn/R/pruebas/test_figuras_cli.R      # panel --salida png/pdf, qualitative elbow, --comparar
+Rscript learn/R/pruebas/test_informe_cualitativo.R  # notebook chunks for kmodos/gower/clases_latentes == lab
+
+# Qualitative clustering family (fake fits, no method needed), no GUI
+Rscript learn/R/pruebas/test_cualitativo.R
 
 # Saved sessions round-trip (pile, dictionary, balance, partition, notes), no GUI
 Rscript learn/R/pruebas/test_sesion.R

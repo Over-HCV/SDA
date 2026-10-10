@@ -6,8 +6,8 @@ de dónde deja de valer la pena.
 
 ## Qué muestra
 
-Para cada `k` de 2 al máximo que pediste, la inercia intra-grupo del mejor
-ajuste con ese `k`:
+Para cada `k` de 2 al máximo que pediste (de 1, con factores), la inercia
+intra-grupo del mejor ajuste con ese `k`:
 
 $$
 W(k) = \sum_{j=1}^{k} \sum_{i \in C_j} \lVert x_i - \mu_j \rVert^2
@@ -16,6 +16,27 @@ $$
 Cada punto es un ajuste completo, con la misma semilla, el mismo optimizador y
 los mismos reinicios que el ajuste que estás mirando. La línea punteada
 vertical marca el `k` que elegiste.
+
+### Con variables cualitativas
+
+Sobre factores no hay centroide ni inercia, así que la curva mide el costo que
+cada método sabe medir, desde `k = 1` (todos en un solo grupo):
+
+- **k-modas**: el total de desacuerdos con el modo de su grupo, que es lo que
+  el algoritmo minimiza. Con `k = 1` es el desacuerdo con el modo global.
+- **Gower** (PAM o jerárquico): la $d$ de la partición de la sesión 5 sobre la
+  matriz de Gower del ajuste,
+
+$$
+d = \sum_{k=1}^{K} \frac{1}{n_k} \sum_{i<j \in G_k} d(z_i, z_j)
+$$
+
+  que con la euclídea al cuadrado es exactamente la $W(k)$ de arriba.
+
+Se dibuja el **costo**, igual que la inercia, y el subtítulo da la reducción
+del curso: cuánto bajó respecto de `k = 1`, en porcentaje. La curva del
+cuaderno (`dist_tot − Σ withinss`) es esa misma resta sin dividir, vista al
+revés: sube donde esta baja.
 
 ## Qué buscar
 

@@ -110,6 +110,9 @@ salida_explicabilidad <- function(ns) {
     panel_si_declara(ns, "f4.explicabilidad.centroides",
                      shiny::plotOutput(ns("centroides"), height = "400px"),
                      contexto = salida_contexto(ns, "contexto_centroides")),
+    panel_si_declara(ns, "f4.explicabilidad.modos",
+                     shiny::plotOutput(ns("modos"), height = "640px"),
+                     contexto = salida_contexto(ns, "contexto_modos")),
     panel_si_declara(ns, "f4.explicabilidad.biplot",
                      shiny::plotOutput(ns("biplot"), height = "420px"),
                      contexto = salida_contexto(ns, "contexto_biplot")),
@@ -140,6 +143,7 @@ servidor_explicabilidad <- function(input, output, session, corrida, dataset,
 
   output$centroides <- shiny::renderPlot(
     graficar_centroides(centroides_tabla(ajuste())))
+  output$modos <- shiny::renderPlot(graficar_modos(perfiles_grupos(ajuste())))
 
   output$biplot <- shiny::renderPlot({
     contexto$exigir_ejes()
@@ -153,6 +157,7 @@ servidor_explicabilidad <- function(input, output, session, corrida, dataset,
 
   for (par in list(c("f4.explicabilidad.mapa_2d", "contexto_mapa"),
                    c("f4.explicabilidad.centroides", "contexto_centroides"),
+                   c("f4.explicabilidad.modos", "contexto_modos"),
                    c("f4.explicabilidad.biplot", "contexto_biplot")))
     dibujar_contexto(output, par[1], params = contexto$parametros,
                      metricas = contexto$metricas, corrida = contexto$corrida,

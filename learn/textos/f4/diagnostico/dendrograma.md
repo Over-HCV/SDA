@@ -54,3 +54,7 @@ lee es la altura a la que se juntan.
 
 **Con el centroide la altura puede bajar.** Una fusión por debajo de la
 anterior (una inversión) es una propiedad de ese enlace, no un error de dibujo.
+
+**Con Gower + PAM no hay árbol.** PAM parte por medoides, de una vez, y no
+deja historial de fusiones: el panel lo dice en vez de quedar en blanco. Para
+ver el dendrograma de Gower, elegí la estrategia jerárquica.

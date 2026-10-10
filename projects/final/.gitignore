@@ -1,0 +1,14 @@
+# auxiliares de latexmk/biber; el PDF sí se versiona
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.nav
+*.out
+*.run.xml
+*.snm
+*.toc
+*.vrb

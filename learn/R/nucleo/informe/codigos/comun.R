@@ -50,7 +50,14 @@ PARAMS_REQUERIDOS <- c(list(
     "f4.explicabilidad.mapa_2d", "f4.explicabilidad.cargas",
     "f4.explicabilidad.calidad", "f4.diagnostico.codo",
     "f4.diagnostico.silueta", "f4.explicabilidad.centroides",
-    "f4.desempeno.grupos", "f4.diagnostico.dendrograma")))
+    "f4.desempeno.grupos", "f4.diagnostico.dendrograma")),
+  list("f4.desempeno.cruce_clase" = c("metodo", "clase")),
+  # Las de los métodos cualitativos (cualitativos/): fase 3 y sus paneles
+  # propios de la fase 4.
+  stats::setNames(rep(list("metodo"), 5L), c(
+    "f3.analisis.convergencia", "f3.analisis.trayectoria",
+    "f3.consola.estado", "f4.explicabilidad.modos",
+    "f4.diagnostico.bic")))
 
 #' ¿Están los parámetros que el generador de esta clave necesita?
 params_completos <- function(clave, params) {
@@ -74,6 +81,7 @@ codigo_artefacto <- function(clave, params, tabla = NULL) {
     return(c(sprintf("# %s", clave),
              .codigo_incompleto(clave, params)))
   lineas <- if (startsWith(clave, "f4.")) .codigo_fase4(clave, params)
+    else if (startsWith(clave, "f3.")) .codigo_fase3(clave, params)
     else .codigo_fase1(clave, params, tabla)
   # La clave viaja como comentario: es el puente entre el cuaderno y el lab.
   c(sprintf("# %s", clave), lineas %||% .codigo_generico(clave, params))
@@ -85,6 +93,7 @@ codigo_artefacto <- function(clave, params, tabla = NULL) {
 #' sabe qué funciones emite un generador es el generador, no el cuaderno.
 paquetes_de_codigo <- function(clave, params) {
   if (startsWith(clave, "f4.")) return(.paquetes_fase4(clave, params))
+  if (startsWith(clave, "f3.")) return(.paquetes_cualitativos(clave, params))
   if (identical(clave, "f1.analisis.dispersion") &&
       isTRUE(params$marginales)) return("ggExtra")
   character(0)
@@ -107,4 +116,48 @@ paquetes_de_codigo <- function(clave, params) {
   c("# (Sin generador autónomo para este panel.)",
     sprintf("# Parámetros con que se produjo: %s",
             jsonlite::toJSON(params %||% list(), auto_unbox = TRUE)))
+}
+
+#' Pliega las funciones que el cuaderno ya definió en un chunk anterior.
+#'
+#' Los generadores cualitativos emiten la definición de su método (kmodas(),
+#' em_latente(), acm_coordenadas(), ari()...) en cada chunk, para que cada
+#' uno corra solo. En el cuaderno los chunks corren en orden, así que la
+#' segunda vez la definición sobra: se cambia por un comentario y el lector
+#' ve el algoritmo una sola vez. Un bloque es `nombre <- function(...`
+#' en la columna 0 hasta la primera `}` en la columna 0; si el texto
+#' cambió (otra variante), se vuelve a escribir entero.
+#'
+#' @param vistas los bloques ya emitidos (texto entero, con el nombre)
+#' @return list(lineas, vistas)
+plegar_definiciones <- function(lineas, vistas = character(0)) {
+  salida <- character(0)
+  i <- 1L
+  while (i <= length(lineas)) {
+    # La cabecera puede ocupar hasta tres renglones antes de la `{`.
+    inicio <- grepl("^[a-z_][a-z0-9_.]* <- function\\(", lineas[i]) &&
+      any(grepl("\\{$", lineas[i:min(length(lineas), i + 2L)]))
+    fin <- if (inicio) match("}", lineas[i:length(lineas)]) else NA
+    if (is.na(fin)) {
+      salida <- c(salida, lineas[i])
+      i <- i + 1L
+      next
+    }
+    bloque <- lineas[i:(i + fin - 1L)]
+    nombre <- sub(" <- function.*$", "", lineas[i])
+    texto <- paste(bloque, collapse = "\n")
+    if (texto %in% vistas) {
+      # Los comentarios que la presentaban se van con ella.
+      while (length(salida) &&
+             grepl("^#", salida[length(salida)]) &&
+             !grepl("^# f[0-9][.]", salida[length(salida)]))
+        salida <- salida[-length(salida)]
+      salida <- c(salida, sprintf("# %s() ya se definió más arriba.", nombre))
+    } else {
+      salida <- c(salida, bloque)
+      vistas <- c(vistas, texto)
+    }
+    i <- i + fin
+  }
+  list(lineas = salida, vistas = vistas)
 }

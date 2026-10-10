@@ -88,44 +88,58 @@ inercia_de_grupos <- function(z, grupos, centroides) {
 #' muestra con semilla y el atributo `muestreada` lo dice, para que el número
 #' no se cite como si fuera del total (C8).
 #'
+#' Las distancias las pone `distancias_de_grupos()`, que despacha por familia:
+#' una partición numérica se mide sobre `z`, una cualitativa con su
+#' disimilitud (metricas_cualitativo.R). La cuenta de la silueta es la misma.
+#'
 #' @return data.frame(fila, grupo, vecino, s)
 silueta <- function(ajuste, muestra_max = 2000L, semilla = 42L) {
-  z <- ajuste$z
-  grupos <- ajuste$grupos
-  filas <- seq_len(nrow(z))
-  muestreada <- nrow(z) > muestra_max
+  n <- length(ajuste$grupos)
+  filas <- seq_len(n)
+  muestreada <- n > muestra_max
   if (muestreada) {
     set.seed(semilla)
-    filas <- sort(sample.int(nrow(z), muestra_max))
-    z <- z[filas, , drop = FALSE]
-    grupos <- grupos[filas]
+    filas <- sort(sample.int(n, muestra_max))
   }
+  grupos <- ajuste$grupos[filas]
+  distancias <- distancias_de_grupos(ajuste, filas)
+  m <- nrow(distancias)
 
   niveles <- sort(unique(grupos))
-  distancias <- as.matrix(stats::dist(z, method = ajuste$distancia %||%
-                                         "euclidean"))
   medias <- vapply(niveles, function(j) {
     columnas <- which(grupos == j)
-    if (!length(columnas)) return(rep(NA_real_, nrow(z)))
+    if (!length(columnas)) return(rep(NA_real_, m))
     suma <- rowSums(distancias[, columnas, drop = FALSE])
     cuantos <- ifelse(grupos == j, length(columnas) - 1L, length(columnas))
     ifelse(cuantos > 0, suma / cuantos, NA_real_)
-  }, numeric(nrow(z)))
-  medias <- matrix(medias, nrow = nrow(z), ncol = length(niveles))
+  }, numeric(m))
+  medias <- matrix(medias, nrow = m, ncol = length(niveles))
 
   propio <- match(grupos, niveles)
-  a <- medias[cbind(seq_len(nrow(z)), propio)]
+  a <- medias[cbind(seq_len(m), propio)]
   ajenas <- medias
-  ajenas[cbind(seq_len(nrow(z)), propio)] <- Inf
+  ajenas[cbind(seq_len(m), propio)] <- Inf
   vecino <- max.col(-ajenas, ties.method = "first")
-  b <- ajenas[cbind(seq_len(nrow(z)), vecino)]
+  b <- ajenas[cbind(seq_len(m), vecino)]
 
-  s <- ifelse(is.na(a) | !is.finite(b), 0, (b - a) / pmax(a, b))
+  # Con a = b = 0 (dos filas idénticas en grupos distintos) el cociente es 0/0:
+  # la observación está exactamente en la frontera, y eso vale 0.
+  s <- ifelse(is.na(a) | !is.finite(b) | pmax(a, b) == 0, 0,
+              (b - a) / pmax(a, b))
   tabla <- data.frame(fila = filas, grupo = factor(grupos, levels = niveles),
                       vecino = factor(niveles[vecino], levels = niveles),
                       s = as.numeric(s))
   attr(tabla, "muestreada") <- muestreada
   tabla
+}
+
+#' Las distancias entre las filas pedidas, en la métrica con que se agrupó.
+#' @return matriz cuadrada length(filas) x length(filas)
+distancias_de_grupos <- function(ajuste, filas) UseMethod("distancias_de_grupos")
+
+distancias_de_grupos.default <- function(ajuste, filas) {
+  as.matrix(stats::dist(ajuste$z[filas, , drop = FALSE],
+                        method = ajuste$distancia %||% "euclidean"))
 }
 
 #' Inercia intra-grupo para cada k: la curva del codo.
@@ -134,8 +148,14 @@ silueta <- function(ajuste, muestra_max = 2000L, semilla = 42L) {
 #' el mismo optimizador. Es caro a propósito: el codo es un resultado del
 #' método, no una extrapolación de un solo ajuste.
 #'
+#' Es genérica porque "inercia" solo existe sobre números: una partición de
+#' factores mide su codo con su propio costo (metricas_cualitativo.R), y la
+#' card del codo no tiene que saber cuál de los dos le tocó.
+#'
 #' @return data.frame(k, inercia, proporcion)
-inercia_por_k <- function(ajuste, k_max = 10L) {
+inercia_por_k <- function(ajuste, k_max = 10L) UseMethod("inercia_por_k")
+
+inercia_por_k.default <- function(ajuste, k_max = 10L) {
   k_max <- max(2L, min(as.integer(k_max), ajuste$n - 1L))
   marco <- as.data.frame(ajuste$z)
   filas <- lapply(2:k_max, function(k) {
@@ -156,12 +176,14 @@ inercia_por_k <- function(ajuste, k_max = 10L) {
 #' @return data.frame(grupo, n, inercia, radio_medio, proporcion)
 resumen_grupos <- function(ajuste) {
   tamanos <- ajuste$tamanos
+  # Un ajuste cualitativo no tiene inercia (no hay centroide que promediar):
+  # el reparto se dibuja igual y esas dos columnas quedan en NA.
+  inercia <- ajuste$inercia_por_grupo %||% rep(NA_real_, ajuste$k)
   data.frame(grupo = factor(seq_len(ajuste$k)),
              n = tamanos,
-             inercia = ajuste$inercia_por_grupo,
+             inercia = inercia,
              radio_medio = ifelse(tamanos > 0,
-                                  sqrt(ajuste$inercia_por_grupo / pmax(tamanos, 1)),
-                                  0),
+                                  sqrt(inercia / pmax(tamanos, 1)), 0),
              proporcion = tamanos / sum(tamanos))
 }
 
@@ -194,6 +216,9 @@ centroides_tabla <- function(ajuste) {
 #' @param k grupos del corte; por defecto, los del ajuste
 #' @return list(segmentos, hojas, rectangulos, corte, k, n, enlace, distancia)
 arbol_jerarquico <- function(ajuste, k = ajuste$k) {
+  # Gower con PAM no construye árbol: NULL y el gráfico lo dice, en vez de un
+  # error de cutree() sobre algo que no es un hclust.
+  if (is.null(ajuste$arbol)) return(NULL)
   arbol <- ajuste$arbol
   n <- length(arbol$order)
   altura <- arbol$height
@@ -271,15 +296,16 @@ cofenetico <- function(ajuste, muestra_max = 20000L, semilla = 42L) {
 
 metricas_de_corrida.ajuste_agrupamiento <- function(ajuste) {
   siluetas <- silueta(ajuste)
-  list(n = ajuste$n, p = ajuste$p, k = ajuste$k,
-       inercia = ajuste$inercia,
-       proporcion_explicada = ajuste$proporcion_explicada,
-       silueta_media = mean(siluetas$s),
-       silueta_muestreada = isTRUE(attr(siluetas, "muestreada")),
-       grupo_menor = min(ajuste$tamanos),
-       grupo_mayor = max(ajuste$tamanos),
-       iteraciones = ajuste$iteraciones,
-       convergio = isTRUE(ajuste$convergio))
+  c(list(n = ajuste$n, p = ajuste$p, k = ajuste$k,
+         inercia = ajuste$inercia,
+         proporcion_explicada = ajuste$proporcion_explicada,
+         silueta_media = mean(siluetas$s),
+         silueta_muestreada = isTRUE(attr(siluetas, "muestreada")),
+         grupo_menor = min(ajuste$tamanos),
+         grupo_mayor = max(ajuste$tamanos),
+         iteraciones = ajuste$iteraciones,
+         convergio = isTRUE(ajuste$convergio)),
+    metricas_de_referencia(ajuste))
 }
 
 metricas_de_corrida.ajuste_jerarquico <- function(ajuste) {

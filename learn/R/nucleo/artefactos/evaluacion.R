@@ -16,6 +16,11 @@ poblar_artefactos_evaluacion <- function() {
     logica  = "R/logica/metricas_grupos.R::resumen_grupos",
     descripcion = "Cuántos cayeron en cada grupo y qué tan apretado quedó.")
 
+  registrar_artefacto("f4.desempeno.cruce_clase", "Grupos contra clase real",
+    grafico = "R/graficos/grupos.R::graficar_cruce_clase",
+    logica  = "R/logica/metricas_cualitativo.R::cruce_con_clase",
+    descripcion = "La partición cruzada con la clase conocida, con ARI y pureza.")
+
   registrar_artefacto("f4.desempeno.roc", "Curva ROC",
     grafico = "R/graficos/desempeno.R::graficar_roc",
     logica  = "R/logica/metricas_clasificacion.R::calcular_roc",
@@ -141,10 +146,11 @@ poblar_artefactos_evaluacion <- function() {
     logica  = "R/logica/metricas_grupos.R::indices_internos",
     descripcion = "Silueta, Calinski-Harabasz y Davies-Bouldin, comparados.")
 
+  # Lo produce hoy clases_latentes; un GMM con su tabla `seleccion` entra igual.
   registrar_artefacto("f4.diagnostico.bic", "BIC por modelo",
     grafico = "R/graficos/diagnostico.R::graficar_bic",
-    logica  = "R/logica/metricas_grupos.R::bic_mezclas",
-    descripcion = "Cómo el GMM elige número de componentes y forma de covarianza.")
+    logica  = "R/logica/metricas_cualitativo.R::bic_mezclas",
+    descripcion = "BIC y AIC contra k: cómo un modelo de mezclas elige cuántos grupos.")
 
   registrar_artefacto("f4.diagnostico.qq_mahalanobis", "Q-Q de Mahalanobis (residual)",
     grafico = "R/graficos/diagnostico.R::graficar_qq_mahalanobis",
@@ -211,6 +217,11 @@ poblar_artefactos_evaluacion <- function() {
     grafico = "R/graficos/grupos.R::graficar_centroides",
     logica  = "R/logica/metricas_grupos.R::centroides_tabla",
     descripcion = "En qué variables se aparta cada grupo del promedio.")
+
+  registrar_artefacto("f4.explicabilidad.modos", "Modos de los grupos",
+    grafico = "R/graficos/grupos.R::graficar_modos",
+    logica  = "R/logica/metricas_cualitativo.R::perfiles_grupos",
+    descripcion = "Proporción de cada categoría dentro de cada grupo, con el modo marcado.")
 
   registrar_artefacto("f4.explicabilidad.mapa_2d", "Mapa en dos dimensiones",
     grafico = "R/graficos/explicabilidad.R::graficar_mapa_2d",

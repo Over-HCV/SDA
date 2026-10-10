@@ -42,12 +42,18 @@ graficar_convergencia <- function(tabla, escala_log = FALSE,
     ggplot2::geom_line(linewidth = 0.8) +
     ggplot2::geom_point(size = 1.1) +
     scale_color_cat(n_componentes, name = "componente") +
+    # Las iteraciones son enteras: con tres pasos el eje marcaba 1.5 y 2.5.
+    ggplot2::scale_x_continuous(breaks = function(limites) {
+      marcas <- pretty(limites); marcas[marcas == round(marcas)] }) +
     ggplot2::labs(x = "iteracion acumulada", y = objetivo,
                   subtitle = .subtitulo_convergencia(nrow(tabla), n_componentes,
                                                      recortadas)) +
     tema_ggplot()
 
   if (escala_log) grafico <- grafico + ggplot2::scale_y_log10()
+  # Una sola componente (k-medias, k-modas) no necesita leyenda que la nombre.
+  if (n_componentes == 1L)
+    grafico <- grafico + ggplot2::theme(legend.position = "none")
   grafico
 }
 

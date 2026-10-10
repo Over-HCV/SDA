@@ -26,7 +26,8 @@ poblar_catalogo_agrupamiento <- function() {
       traza = TRUE, paso_a_paso = TRUE),
     artefactos = c("f3.consola.estado", "f3.analisis.convergencia",
                    "f3.analisis.trayectoria",
-                   "f4.desempeno.grupos", "f4.diagnostico.silueta",
+                   "f4.desempeno.grupos", "f4.desempeno.cruce_clase",
+                   "f4.diagnostico.silueta",
                    "f4.diagnostico.codo", "f4.explicabilidad.mapa_2d",
                    "f4.explicabilidad.centroides"),
     supuestos = c("escalado_previo", "grupos_esfericos", "tamanos_similares",
@@ -59,10 +60,89 @@ poblar_catalogo_agrupamiento <- function() {
     optimizador = list(metodos = "aglomerativo", traza = TRUE,
                        paso_a_paso = TRUE),
     artefactos = c("f3.analisis.convergencia", "f3.analisis.trayectoria",
-                   "f4.desempeno.grupos", "f4.diagnostico.dendrograma",
+                   "f4.desempeno.grupos", "f4.desempeno.cruce_clase",
+                   "f4.diagnostico.dendrograma",
                    "f4.diagnostico.silueta", "f4.diagnostico.cofenetico",
                    "f4.explicabilidad.mapa_2d", "f4.explicabilidad.centroides"),
     supuestos = c("escalado_previo", "distancia_valida"))
+
+  # Proyecto final: agrupamiento de variables cualitativas. Los tres métodos
+  # que siguen cambian una pieza de k-medias cada uno: el centro (kmodos), la
+  # distancia (gower) o el modelo (clases_latentes).
+  #
+  # `inicializacion` y `reinicios` NO van en hiper: ajustar_por_registro() ya
+  # los pasa como argumentos de control, y declararlos otra vez los duplica.
+  registrar_metodo(
+    clave = "kmodos", nombre = "K-modas",
+    objetivo = "agrupar", supervision = "no_supervisado", sesion = 5,
+    nodo = "100-agrupamiento/020-kmeans",
+    estado = "activo", ajustar = ajustar_kmodos,
+    entrada = list(tipo = "matriz_cualitativa", min_p = 2L, min_n = 10L,
+                   faltantes = FALSE),
+    hiper = list(
+      k = list(tipo = "entero", min = 2, max = 12, def = 3, paso = 1,
+               etiqueta = "Número de grupos (k)")),
+    optimizador = list(
+      metodos = "Huang",
+      inicializaciones = c("Huang", "Cao", "aleatoria"),
+      traza = TRUE, paso_a_paso = TRUE),
+    artefactos = c("f3.consola.estado", "f3.analisis.convergencia",
+                   "f3.analisis.trayectoria",
+                   "f4.desempeno.grupos", "f4.desempeno.cruce_clase",
+                   "f4.diagnostico.silueta", "f4.diagnostico.codo",
+                   "f4.explicabilidad.modos", "f4.explicabilidad.mapa_2d"),
+    supuestos = character(0))
+
+  # `faltantes = FALSE` aunque daisy tolera NA por pares: agregar_grupos()
+  # alinea la columna de grupos con complete.cases y una fila incompleta
+  # quedaría con el grupo de otra.
+  registrar_metodo(
+    clave = "gower", nombre = "Gower + PAM / jerárquico",
+    objetivo = "agrupar", supervision = "no_supervisado", sesion = 5,
+    nodo = "100-agrupamiento/040-otros-enfoques",
+    estado = "activo", ajustar = ajustar_gower,
+    entrada = list(tipo = "matriz_cualitativa", min_p = 2L, min_n = 5L,
+                   faltantes = FALSE),
+    hiper = list(
+      k = list(tipo = "entero", min = 2, max = 12, def = 3, paso = 1,
+               etiqueta = "Número de grupos (k)"),
+      estrategia = list(tipo = "opcion", opciones = c("pam", "jerarquico"),
+                        def = "pam", etiqueta = "Estrategia"),
+      enlace = list(tipo = "opcion",
+                    opciones = c("average", "complete", "single", "ward.D2"),
+                    def = "average", etiqueta = "Enlace (solo jerárquico)"),
+      binarias_asimetricas = list(tipo = "logico", def = FALSE,
+                                  etiqueta = "Binarias asimétricas (no/no no cuenta)")),
+    optimizador = list(metodos = "PAM / aglomerativo", traza = TRUE,
+                       paso_a_paso = FALSE),
+    artefactos = c("f3.analisis.convergencia", "f3.analisis.trayectoria",
+                   "f4.desempeno.grupos", "f4.desempeno.cruce_clase",
+                   "f4.diagnostico.dendrograma", "f4.diagnostico.silueta",
+                   "f4.diagnostico.codo",
+                   "f4.explicabilidad.modos", "f4.explicabilidad.mapa_2d"),
+    supuestos = character(0))
+
+  # El análogo categórico de la mezcla gaussiana: EM a mano, BIC para k.
+  # `k_max` solo arma la tabla de BIC; el ajuste que se lee es el de `k`.
+  registrar_metodo(
+    clave = "clases_latentes", nombre = "Clases latentes",
+    objetivo = "agrupar", supervision = "no_supervisado", sesion = 5,
+    nodo = "100-agrupamiento/040-otros-enfoques",
+    estado = "activo", ajustar = ajustar_clases_latentes,
+    entrada = list(tipo = "matriz_cualitativa", min_p = 2L, min_n = 10L,
+                   faltantes = FALSE),
+    hiper = list(
+      k = list(tipo = "entero", min = 2, max = 12, def = 3, paso = 1,
+               etiqueta = "Número de clases (k)"),
+      k_max = list(tipo = "entero", min = 2, max = 12, def = 8, paso = 1,
+                   etiqueta = "K máximo en la tabla de BIC")),
+    optimizador = list(metodos = "EM", traza = TRUE, paso_a_paso = TRUE),
+    artefactos = c("f3.consola.estado", "f3.analisis.convergencia",
+                   "f3.analisis.trayectoria",
+                   "f4.desempeno.grupos", "f4.desempeno.cruce_clase",
+                   "f4.diagnostico.bic", "f4.diagnostico.silueta",
+                   "f4.explicabilidad.modos", "f4.explicabilidad.mapa_2d"),
+    supuestos = "categorias_suficientes")
 
   registrar_metodo(
     clave = "dbscan", nombre = "DBSCAN",

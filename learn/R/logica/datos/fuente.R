@@ -18,10 +18,10 @@
 fuentes_disponibles <- function() {
   data.frame(
     clave = c("charcoal_crudo", "charcoal_pivot", "twins", "ori", "eia",
-              "sintetico_anova", "sintetico_regresion"),
+              "zoo", "sintetico_anova", "sintetico_regresion"),
     nombre = c("charcoal · panel crudo", "charcoal · pais x anio",
                "twins", "ori · meteorologico IDEAM", "eia · energia por pais",
-               "sintetico · anova", "sintetico · regresion"),
+               "zoo · animales UCI", "sintetico · anova", "sintetico · regresion"),
     descripcion = c(
       "Produccion y comercio de carbon vegetal por pais, ano y flujo.",
       "Matriz pais x anio de un solo flujo, ya agregada.",
@@ -30,10 +30,12 @@ fuentes_disponibles <- function() {
             "18 variables. Se baja de Kaggle (overhcv/ori-dataset)."),
       paste("Taller 02: petroleo y electricidad de 111 paises, 57",
             "variables. Se baja de Kaggle (overhcv/eia-united-states)."),
+      paste("Proyecto final: 101 animales, 16 atributos cualitativos y su",
+            "clase real (tipo). Se baja de Kaggle (overhcv/uci-zoo)."),
       "k grupos normales con medias separadas por 'efecto'.",
       "Relacion cubica con ruido: la recta se queda corta a proposito."),
-    filas_aprox = c(35113L, 145L, 182L, 4543L, 111L, 100L, 100L),
-    diferida = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE),
+    filas_aprox = c(35113L, 145L, 182L, 4543L, 111L, 101L, 100L, 100L),
+    diferida = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE),
     stringsAsFactors = FALSE)
 }
 
@@ -94,6 +96,13 @@ cargar_fuente <- function(clave, semilla = 42L, n = 100L, k_grupos = 4L,
                                               "se usa la copia incluida en la app"),
                                         conditionMessage(e))
                                 ruta_eia()
+                              })),
+    zoo = cargar_zoo(tryCatch(suppressWarnings(descargar_zoo()),
+                              error = function(e) {
+                                agregar(paste("no se pudo bajar Zoo de Kaggle;",
+                                              "se usa la copia incluida en la app"),
+                                        conditionMessage(e))
+                                ruta_zoo()
                               })),
     sintetico_anova = gen_sintetico(n = n, k_grupos = k_grupos, efecto = efecto,
                                     semilla = semilla, tipo = "anova"),

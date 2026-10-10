@@ -27,6 +27,11 @@ FORMATO_METRICA <- list(
   grupo_menor = list("grupo mas chico", "entero"),
   grupo_mayor = list("grupo mas grande", "entero"),
   correlacion_cofenetica = list("correlacion cofenetica", "decimal"),
+  ari = list("ARI contra la clase real", "decimal"),
+  costo = list("costo (desacuerdos)", "decimal"),
+  d_particion = list("d de la partición", "decimal"),
+  log_verosimilitud = list("log-verosimilitud", "decimal"),
+  bic = list("BIC", "decimal"),
   iteraciones = list("iteraciones", "entero"))
 
 # Métricas que son banderas, no números: informan sobre otra métrica y no
@@ -55,6 +60,9 @@ salida_desempeno <- function(ns) {
     panel_si_declara(ns, "f4.desempeno.grupos",
                      shiny::plotOutput(ns("tamanos"), height = "300px"),
                      contexto = salida_contexto(ns, "contexto_tamanos")),
+    panel_si_declara(ns, "f4.desempeno.cruce_clase",
+                     shiny::plotOutput(ns("cruce_clase"), height = "360px"),
+                     contexto = salida_contexto(ns, "contexto_cruce_clase")),
     shiny::conditionalPanel(
       condition = sprintf("output.%s",
                           bandera_artefacto("f4.diagnostico.scree")), ns = ns,
@@ -90,6 +98,16 @@ servidor_desempeno <- function(input, output, session, corrida) {
 
   output$tamanos <- shiny::renderPlot(graficar_tamanos(resumen_grupos(ajuste())))
 
+  # La clase viaja en el ajuste (adjuntar_referencia, al correr): sin ella el
+  # cruce no tiene contra qué medir, y se dice cómo declararla.
+  output$cruce_clase <- shiny::renderPlot({
+    a <- ajuste()
+    shiny::validate(shiny::need(!is.null(a$referencia), paste(
+      "Declarale a la clase conocida el rol 'respuesta' en ① Datos ›",
+      "Diccionario y volvé a correr: no entra al ajuste, solo se usa acá.")))
+    graficar_cruce_clase(cruce_con_clase(a))
+  })
+
   output$tabla_varianza <- shiny::renderTable({
     tabla <- varianza_explicada(ajuste())
     data.frame(
@@ -100,15 +118,17 @@ servidor_desempeno <- function(input, output, session, corrida) {
       check.names = FALSE)
   }, striped = TRUE, width = "100%")
 
-  dibujar_contexto(output, "f4.desempeno.grupos",
-                   corrida = shiny::reactive(corrida()),
-                   params = shiny::reactive({
-                     c <- corrida(); if (is.null(c)) NULL else c$params
-                   }),
-                   metricas = shiny::reactive({
-                     c <- corrida(); if (is.null(c)) NULL else c$metricas
-                   }),
-                   sufijo = "contexto_tamanos")
+  for (par in list(c("f4.desempeno.grupos", "contexto_tamanos"),
+                   c("f4.desempeno.cruce_clase", "contexto_cruce_clase")))
+    dibujar_contexto(output, par[1],
+                     corrida = shiny::reactive(corrida()),
+                     params = shiny::reactive({
+                       c <- corrida(); if (is.null(c)) NULL else c$params
+                     }),
+                     metricas = shiny::reactive({
+                       c <- corrida(); if (is.null(c)) NULL else c$metricas
+                     }),
+                     sufijo = par[2])
   invisible(TRUE)
 }
 

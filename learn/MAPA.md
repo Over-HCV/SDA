@@ -11,11 +11,11 @@ Todas las rutas son relativas a `learn/`.
 
 ## Resumen
 
-- **Métodos**: 56 registrados — 4 activos, 46 pendientes, 6 bloqueados
+- **Métodos**: 59 registrados — 7 activos, 46 pendientes, 6 bloqueados
 - **Explorables en ①**: 8 pendientes ya corren como análisis de datos
-- **Artefactos**: 90 registrados
-- **Textos escritos**: 49 de 90
-- **Fichas escritas**: 5 de 56
+- **Artefactos**: 92 registrados
+- **Textos escritos**: 52 de 92
+- **Fichas escritas**: 8 de 59
 
 ## Artefactos
 
@@ -70,6 +70,7 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f4.comparacion.metricas` | Métricas lado a lado | `R/graficos/comparacion.R::tabla_comparacion` | `R/logica/comparacion.R::comparar_corridas` | *pendiente* |
 | `f4.desempeno.ajuste` | Ajuste sobre los datos | `R/graficos/desempeno.R::graficar_ajuste` | `R/logica/metricas_regresion.R::metricas_regresion` | *pendiente* |
 | `f4.desempeno.calibracion` | Curva de calibración | `R/graficos/desempeno.R::graficar_calibracion` | `R/logica/metricas_clasificacion.R::calibracion` | *pendiente* |
+| `f4.desempeno.cruce_clase` | Grupos contra clase real | `R/graficos/grupos.R::graficar_cruce_clase` | `R/logica/metricas_cualitativo.R::cruce_con_clase` | `textos/f4/desempeno/cruce_clase.md` |
 | `f4.desempeno.distribucion_bootstrap` | Distribución bootstrap | `R/graficos/desempeno.R::graficar_bootstrap` | `R/logica/remuestreo.R::distribucion_bootstrap` | *pendiente* |
 | `f4.desempeno.distribucion_nula` | Distribución nula | `R/graficos/desempeno.R::graficar_nula` | `R/logica/remuestreo.R::distribucion_permutacion` | *pendiente* |
 | `f4.desempeno.grupos` | Tamaño de los grupos | `R/graficos/grupos.R::graficar_tamanos` | `R/logica/metricas_grupos.R::resumen_grupos` | `textos/f4/desempeno/grupos.md` |
@@ -81,7 +82,7 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f4.desempeno.tabla_anova` | Tabla ANOVA | `R/graficos/desempeno.R::tabla_anova_formateada` | `R/logica/metricas_anova.R::descomponer_varianza` | *pendiente* |
 | `f4.desempeno.tabla_contingencia` | Tabla de contingencia | `R/graficos/desempeno.R::tabla_contingencia_formateada` | `R/logica/contingencia.R::tabla_contingencia` | *pendiente* |
 | `f4.desempeno.tamano_efecto` | Tamaño del efecto | `R/graficos/desempeno.R::graficar_tamano_efecto` | `R/logica/metricas_anova.R::tamano_efecto` | *pendiente* |
-| `f4.diagnostico.bic` | BIC por modelo | `R/graficos/diagnostico.R::graficar_bic` | `R/logica/metricas_grupos.R::bic_mezclas` | *pendiente* |
+| `f4.diagnostico.bic` | BIC por modelo | `R/graficos/diagnostico.R::graficar_bic` | `R/logica/metricas_cualitativo.R::bic_mezclas` | `textos/f4/diagnostico/bic.md` |
 | `f4.diagnostico.codo` | Codo de la inercia | `R/graficos/diagnostico.R::graficar_codo` | `R/logica/metricas_grupos.R::inercia_por_k` | `textos/f4/diagnostico/codo.md` |
 | `f4.diagnostico.cofenetico` | Correlación cofenética | `R/graficos/diagnostico.R::graficar_cofenetico` | `R/logica/metricas_grupos.R::cofenetico` | `textos/f4/diagnostico/cofenetico.md` |
 | `f4.diagnostico.dendrograma` | Dendrograma | `R/graficos/diagnostico.R::graficar_dendrograma` | `R/logica/metricas_grupos.R::arbol_jerarquico` | `textos/f4/diagnostico/dendrograma.md` |
@@ -112,6 +113,7 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `f4.explicabilidad.importancia` | Importancia por permutación | `R/graficos/explicabilidad.R::graficar_importancia` | `R/logica/explicabilidad.R::importancia_permutacion` | *pendiente* |
 | `f4.explicabilidad.local` | Explicación local (LIME / SHAP) | `R/graficos/explicabilidad.R::graficar_explicacion_local` | `R/logica/explicabilidad.R::explicar_observacion` | *pendiente* |
 | `f4.explicabilidad.mapa_2d` | Mapa en dos dimensiones | `R/graficos/explicabilidad.R::graficar_mapa_2d` | `R/logica/metricas.R::coordenadas_2d` | `textos/f4/explicabilidad/mapa_2d.md` |
+| `f4.explicabilidad.modos` | Modos de los grupos | `R/graficos/grupos.R::graficar_modos` | `R/logica/metricas_cualitativo.R::perfiles_grupos` | `textos/f4/explicabilidad/modos.md` |
 | `f4.explicabilidad.pdp` | Dependencia parcial (PDP / ICE) | `R/graficos/explicabilidad.R::graficar_pdp` | `R/logica/explicabilidad.R::dependencia_parcial` | *pendiente* |
 | `f4.explicabilidad.series_por_grupo` | Series por grupo | `R/graficos/explicabilidad.R::graficar_series_grupo` | `R/logica/metricas_grupos.R::centroides_series` | *pendiente* |
 
@@ -150,9 +152,12 @@ Clave: `fase.subseccion.artefacto`. Un texto *pendiente* significa que el
 | `espectral` | Agrupamiento espectral | 5 | agrupar | pendiente | — | no | `fichas/espectral.md` | `100-agrupamiento/040-otros-enfoques` |
 | `jerarquico` | Agrupamiento jerárquico | 5 | agrupar | activo | — | sí | `fichas/jerarquico.md` | `100-agrupamiento/030-jerarquico` |
 | `biclustering` | Biclustering | 5 | agrupar | pendiente | — | no | `fichas/biclustering.md` | `100-agrupamiento/040-otros-enfoques` |
+| `clases_latentes` | Clases latentes | 5 | agrupar | activo | — | sí | `fichas/clases_latentes.md` | `100-agrupamiento/040-otros-enfoques` |
 | `dbscan` | DBSCAN | 5 | agrupar | pendiente | — | sí | `fichas/dbscan.md` | `100-agrupamiento/040-otros-enfoques/010-dbscan` |
 | `comunidades` | Detección de comunidades | 5 | agrupar | pendiente | — | no | `fichas/comunidades.md` | `150-extensiones/090-no-estructurados` |
+| `gower` | Gower + PAM / jerárquico | 5 | agrupar | activo | — | sí | `fichas/gower.md` | `100-agrupamiento/040-otros-enfoques` |
 | `kmeans` | K-medias | 5 | agrupar | activo | — | sí | `fichas/kmeans.md` | `100-agrupamiento/020-kmeans` |
+| `kmodos` | K-modas | 5 | agrupar | activo | — | sí | `fichas/kmodos.md` | `100-agrupamiento/020-kmeans` |
 | `validacion_grupos` | Validación de grupos | 5 | agrupar | pendiente | — | sí | `fichas/validacion_grupos.md` | `100-agrupamiento/050-validacion` |
 | `regresion_multiple` | Regresión lineal múltiple | 6 | predecir | pendiente | — | sí | `fichas/regresion_multiple.md` | `120-regresion/040-multiple` |
 | `regresion_simple` | Regresión lineal simple | 6 | predecir | pendiente | — | sí | `fichas/regresion_simple.md` | `120-regresion/030-simple` |

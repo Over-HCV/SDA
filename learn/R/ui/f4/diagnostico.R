@@ -59,6 +59,9 @@ salida_diagnostico <- function(ns) {
     panel_si_declara(ns, "f4.diagnostico.cofenetico",
                      shiny::plotOutput(ns("cofenetico"), height = "340px"),
                      contexto = salida_contexto(ns, "contexto_cofenetico")),
+    panel_si_declara(ns, "f4.diagnostico.bic",
+                     shiny::plotOutput(ns("bic"), height = "340px"),
+                     contexto = salida_contexto(ns, "contexto_bic")),
     plegable("Lo que falta en esta subsección", shiny::tagList(pendientes)))
 }
 
@@ -103,6 +106,7 @@ servidor_diagnostico <- function(input, output, session, corrida) {
     graficar_dendrograma(arbol_jerarquico(ajuste())))
   output$cofenetico <- shiny::renderPlot(
     graficar_cofenetico(cofenetico(ajuste())))
+  output$bic <- shiny::renderPlot(graficar_bic(bic_mezclas(ajuste())))
 
   parametros <- shiny::reactive({
     c <- corrida()
@@ -118,7 +122,8 @@ servidor_diagnostico <- function(input, output, session, corrida) {
                    c("f4.diagnostico.codo", "contexto_codo"),
                    c("f4.diagnostico.silueta", "contexto_silueta"),
                    c("f4.diagnostico.dendrograma", "contexto_dendrograma"),
-                   c("f4.diagnostico.cofenetico", "contexto_cofenetico")))
+                   c("f4.diagnostico.cofenetico", "contexto_cofenetico"),
+                   c("f4.diagnostico.bic", "contexto_bic")))
     dibujar_contexto(output, par[1], corrida = shiny::reactive(corrida()),
                      params = parametros, metricas = metricas, sufijo = par[2])
   invisible(TRUE)

@@ -247,13 +247,13 @@ dataset_de_sesion <- function(fase1) {
 
 #' Los paneles marcados, listos para el cuaderno. Se descartan los que apuntan
 #' a claves que ya no existen: una sesión vieja no debe romper el arranque.
-#' Los de la fase 4 (los arma la consola: `lab.R cuaderno f4....`) pasan si el
-#' registro los conoce, porque traen consigo el método con que se ajustan.
+#' Los de las fases 3 y 4 (los arma la consola: `lab.R cuaderno f4....`)
+#' pasan si el registro los conoce: traen consigo el método con que se ajustan.
 seleccion_de_sesion <- function(fase1) {
   entradas <- fase1$seleccion %||% list()
   Filter(function(e) !is.null(e$clave) &&
            (e$clave %in% CASILLAS_INFORME ||
-              (startsWith(e$clave, "f4.") && existe_artefacto(e$clave))),
+              (grepl("^f[34][.]", e$clave) && existe_artefacto(e$clave))),
          entradas)
 }
 

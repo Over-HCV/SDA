@@ -7,8 +7,9 @@
 # su firma. Fase 4: se ajusta el método (lab/metodos.R) y se encadenan la
 # lógica y el gráfico del artefacto con los mismos argumentos que les pasa la
 # card de la app (ui/f4/diagnostico.R, aportes.R, explicabilidad.R,
-# desempeno.R). Un artefacto sin receta propia —el dendrograma, cuando llegue—
-# se resuelve por el registro: lógica(ajuste) y gráfico(resultado).
+# desempeno.R). Un artefacto sin receta propia se resuelve por el registro:
+# lógica(ajuste) y gráfico(resultado). Las recetas de las fases 1 y 3 y el
+# guardado como imagen viven en lab/figuras.R.
 
 # Las columnas de estilo (color, alpha, linetype) no son el resultado: son cómo
 # se pintó. Se van para que quede la tabla que uno leería del dibujo.
@@ -25,6 +26,10 @@ ESTILO_CAPAS <- c("colour", "fill", "alpha", "linewidth", "linetype", "shape",
 .lab_capas <- function(grafico, encabezado) {
   construido <- ggplot2::ggplot_build(grafico)
   cat(sprintf("%s · %d capa(s)\n", encabezado, length(construido$data)))
+  # El subtítulo lleva el número que resume el panel (silueta media, ARI,
+  # acumulado del scree): sin él, la tabla de capas no lo dice en ningún lado.
+  if (length(grafico$labels$subtitle))
+    cat("subtítulo:", grafico$labels$subtitle, "\n")
   lapply(construido$data, .lab_capa_legible, construido$layout)
 }
 
@@ -49,19 +54,46 @@ ESTILO_CAPAS <- c("colour", "fill", "alpha", "linewidth", "linetype", "shape",
   cbind(as.data.frame(nombres, stringsAsFactors = FALSE), limpia)
 }
 
-#' El gráfico de un panel, como tabla. Las claves `f4.` van por su lado: no
-#' miran columnas, miran un ajuste.
+#' El gráfico de un panel, como tabla. Las claves `f3.` y `f4.` van por su
+#' lado: no miran columnas, miran un ajuste.
 tabla_de_panel <- function(ds, clave, columnas, opciones = list()) {
+  panel <- grafico_de_panel(ds, clave, columnas, opciones)
+  if (!inherits(panel$grafico, "ggplot")) {
+    cat(panel$encabezado, "\n")
+    return(panel$grafico)
+  }
+  capas <- .lab_capas(panel$grafico, panel$encabezado)
+  contexto <- panel$contexto
+  if (is.null(contexto) || !clave %in% PANELES_DE_INDIVIDUOS) return(capas)
+  # El color se fue con las columnas de estilo; acá vuelve como el valor que
+  # pinta (el grupo de cada país), que es lo que dice la leyenda.
+  lapply(capas, function(capa) {
+    if (!is.null(contexto$nombres) && nrow(capa) == length(contexto$nombres))
+      capa$etiqueta <- contexto$nombres
+    if (!is.null(contexto$grupo) && nrow(capa) == length(contexto$grupo))
+      capa[[contexto$color]] <- contexto$grupo
+    capa
+  })
+}
+
+#' El gráfico de un panel tal como lo dibuja la app, sin leerlo todavía:
+#' list(grafico, encabezado, contexto). Lo comparten la tabla (`panel`) y la
+#' figura (`panel --salida x.png`, lab/figuras.R), así que las dos miran el
+#' mismo objeto.
+grafico_de_panel <- function(ds, clave, columnas, opciones = list()) {
   if (!existe_artefacto(clave))
     stop("clave desconocida: ", clave, ". Ver: Rscript learn/R/lab.R casillas")
-  if (startsWith(clave, "f4.")) return(tabla_de_panel_f4(ds, clave, opciones))
+  if (grepl("^f[34][.]", clave)) return(grafico_de_panel_f4(ds, clave, opciones))
+  receta <- RECETAS_F1[[clave]]
   nombre <- .lab_funcion(artefacto(clave)$grafico, clave, "grafico")
-  argumentos <- c(list(ds$df), as.list(columnas))
-  grafico <- tryCatch(do.call(nombre, argumentos), error = function(e)
-    stop(sprintf("%s(datos, %s) falló: %s\n  Probá con otras columnas.",
-                 nombre, paste(columnas, collapse = ", "),
-                 conditionMessage(e)), call. = FALSE))
-  .lab_capas(grafico, sprintf("%s · %s", clave, nombre))
+  grafico <- tryCatch(
+    if (is.null(receta)) do.call(nombre, c(list(ds$df), as.list(columnas)))
+    else receta(ds$df, columnas, opciones),
+    error = function(e)
+      stop(sprintf("%s(datos, %s) falló: %s\n  Probá con otras columnas.",
+                   nombre, paste(columnas, collapse = ", "),
+                   conditionMessage(e)), call. = FALSE))
+  list(grafico = grafico, encabezado = sprintf("%s · %s", clave, nombre))
 }
 
 #' `R/graficos/x.R::graficar_y` -> "graficar_y", comprobando que esté cargada.
@@ -87,6 +119,15 @@ RECETAS_F4 <- list(
     graficar_codo(inercia_por_k(a, k_max = x$k_max), k = a$k),
   "f4.diagnostico.silueta" = function(a, x) graficar_silueta(silueta(a)),
   "f4.desempeno.grupos" = function(a, x) graficar_tamanos(resumen_grupos(a)),
+  "f4.desempeno.cruce_clase" = function(a, x) {
+    cruce <- cruce_con_clase(a, x$clase)
+    cruce$eje_clase <- a$etiqueta_referencia
+    cruce$eje_grupo <- a$etiqueta_particion
+    graficar_cruce_clase(cruce)
+  },
+  "f4.diagnostico.dendrograma" = function(a, x)
+    graficar_dendrograma(arbol_jerarquico(a), etiquetas = x$hojas,
+                         forma = x$forma),
   "f4.explicabilidad.cargas" = function(a, x)
     graficar_cargas(cargas(a, componentes = unique(x$ejes))),
   "f4.explicabilidad.contribuciones" = function(a, x)
@@ -111,36 +152,27 @@ RECETAS_F4 <- list(
 PANELES_DE_INDIVIDUOS <- c("f4.explicabilidad.mapa_2d",
                            "f4.explicabilidad.biplot")
 
-#' Un panel de la fase 4 como tabla: ajusta, arma el contexto y llama la receta
-#' (o el registro, si la clave no tiene receta).
-tabla_de_panel_f4 <- function(ds, clave, opciones = list()) {
+#' Un panel de las fases 3-4: ajusta, arma el contexto y llama la receta (o
+#' el registro, si la clave no tiene receta). Con `--comparar` la clase de
+#' referencia pasa a ser la partición del otro método (lab/figuras.R).
+grafico_de_panel_f4 <- function(ds, clave, opciones = list()) {
   metodo <- metodo_para_clave(clave, opciones$metodo)
   if (!clave %in% metodo(metodo)$artefactos)
     message("[aviso] ", metodo, " no declara ", clave,
             ": la app no mostraría este panel")
-  ajustado <- ajustar_cli(ds, metodo, opciones,
-                          .lab_hiper_para_ejes(metodo, opciones))
-  ajuste <- ajustado$ajuste
-  contexto <- .lab_contexto_f4(ds, ajuste, opciones)
-  receta <- RECETAS_F4[[clave]] %||% function(a, x) .lab_por_registro(clave, a, x)
-  resultado <- receta(ajuste, contexto)
-  encabezado <- sprintf("%s · %s · %s", clave, metodo,
-                        texto_de_pares(ajustado$parametros))
-  if (!inherits(resultado, "ggplot")) {
-    cat(encabezado, "\n")
-    return(resultado)
-  }
-  capas <- .lab_capas(resultado, encabezado)
-  if (!clave %in% PANELES_DE_INDIVIDUOS) return(capas)
-  # El color se fue con las columnas de estilo; acá vuelve como el valor que
-  # pinta (el grupo de cada país), que es lo que dice la leyenda.
-  lapply(capas, function(capa) {
-    if (!is.null(contexto$nombres) && nrow(capa) == length(contexto$nombres))
-      capa$etiqueta <- contexto$nombres
-    if (!is.null(contexto$grupo) && nrow(capa) == length(contexto$grupo))
-      capa[[contexto$color]] <- contexto$grupo
-    capa
-  })
+  # Las `*_comparar` son del segundo ajuste y salen antes del primero: `$` de
+  # una lista completa nombres parciales, y sin --semilla, `opciones$semilla`
+  # devolvía la de --semilla_comparar.
+  propias <- sin_opciones_de_comparacion(opciones)
+  ajustado <- ajustar_cli(ds, metodo, propias,
+                          .lab_hiper_para_ejes(metodo, propias))
+  ajuste <- adjuntar_comparacion(ds, ajustado, opciones)
+  contexto <- .lab_contexto_f4(ds, ajuste, propias)
+  receta <- RECETAS_F4[[clave]] %||% RECETAS_F3[[clave]] %||%
+    function(a, x) .lab_por_registro(clave, a, x)
+  list(grafico = receta(ajuste, contexto), contexto = contexto,
+       encabezado = sprintf("%s · %s · %s", clave, metodo,
+                            texto_de_pares(ajustado$parametros)))
 }
 
 #' `--ejes 2,3` sobre un ACP que retiene dos componentes: la app no ofrece la
@@ -173,8 +205,12 @@ tabla_de_panel_f4 <- function(ds, clave, opciones = list()) {
   list(ejes = ejes, etiquetas = nombres_ejes[pmin(ejes, length(nombres_ejes))],
        umbral = as.numeric(opciones$umbral %||% 0.8),
        k_max = as.integer(opciones$k_max %||% 10L), k = ajuste$k,
-       color = color,
+       color = color, hojas = if (!is.null(opciones$hojas))
+         as.logical(toupper(opciones$hojas)),
+       forma = opciones$forma %||% "rectangular",
        grupo = if (!is.null(color)) ds$df[[color]][completas] else NULL,
+       # La clase de referencia ya viene recortada en el ajuste (ajustar_cli).
+       clase = ajuste$referencia,
        nombres = .lab_nombres_filas(ds)[completas])
 }
 
