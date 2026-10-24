@@ -202,6 +202,31 @@ centroides_tabla <- function(ajuste) {
 # El árbol de un jerárquico
 # ---------------------------------------------------------------------------
 
+#' El mismo ajuste con otros enlaces, un árbol por enlace.
+#'
+#' No se reajusta nada: las distancias son las mismas (la de Gower guardada, o
+#' la de `z` con la métrica del ajuste) y solo cambia cómo se mide la
+#' distancia entre grupos. Por eso los árboles se pueden comparar de a uno: la
+#' diferencia es el enlace y nada más.
+#'
+#' @param enlaces p. ej. c("complete", "average", "single")
+#' @return lista con nombre (el enlace) de salidas de arbol_jerarquico()
+arboles_por_enlace <- function(ajuste, enlaces, k = ajuste$k) {
+  if (is.null(ajuste$arbol)) return(NULL)
+  distancias <- ajuste$matriz_disimilitud %||%
+    stats::dist(ajuste$z, method = ajuste$distancia %||% "euclidean")
+  etiquetas <- ajuste$arbol$labels
+  stats::setNames(lapply(enlaces, function(enlace) {
+    otro <- ajuste
+    otro$arbol <- .construir_arbol(distancias, enlace)
+    otro$arbol$labels <- etiquetas
+    otro$enlace <- enlace
+    otro$correlacion_cofenetica <- stats::cor(
+      as.numeric(distancias), as.numeric(stats::cophenetic(otro$arbol)))
+    arbol_jerarquico(otro, k)
+  }), enlaces)
+}
+
 #' El dendrograma como tablas: segmentos, hojas, rectángulos del corte.
 #'
 #' Se calcula a mano desde `$merge`, `$height` y `$order` en vez de pasar por
@@ -257,7 +282,33 @@ arbol_jerarquico <- function(ajuste, k = ajuste$k) {
                ymin = 0, ymax = corte, grupo = factor(g, levels = seq_len(k)))
   }))
 
+  # Nodos y enlaces padre -> hijo, para la forma radial (curvas en vez de
+  # escalones). Un nodo es «raíz de grupo» si pertenece a un grupo y su padre
+  # no: es el punto donde nace ese grupo, justo bajo el corte. Una hoja que
+  # queda sola en su grupo también lo es.
+  nodo_hoja <- data.frame(x = posicion, y = 0, grupo = grupos,
+                          tipo = "hoja", padre_grupo = NA_integer_)
+  nodo_int <- data.frame(x = x_nodo, y = altura, grupo = grupo_nodo,
+                         tipo = "interno", padre_grupo = NA_integer_)
+  enlaces <- vector("list", 2L * (n - 1L))
+  for (i in seq_len(n - 1L)) for (lado in 1:2) {
+    j <- fusiones[i, lado]
+    hijo_nodo <- if (j < 0) nodo_hoja[-j, ] else nodo_int[j, ]
+    enlaces[[2L * (i - 1L) + lado]] <- data.frame(
+      x = x_nodo[i], y = altura[i], xend = hijo_nodo$x, yend = hijo_nodo$y,
+      grupo = hijo_nodo$grupo)
+    if (j < 0) nodo_hoja$padre_grupo[-j] <- grupo_nodo[i]
+    else nodo_int$padre_grupo[j] <- grupo_nodo[i]
+  }
+  nodos <- rbind(nodo_hoja, nodo_int)
+  nodos$raiz_grupo <- !is.na(nodos$grupo) & is.na(nodos$padre_grupo)
+  nodos$grupo <- factor(nodos$grupo, levels = seq_len(k))
+  nodos$padre_grupo <- NULL
+  enlaces <- do.call(rbind, enlaces)
+  enlaces$grupo <- factor(enlaces$grupo, levels = seq_len(k))
+
   list(segmentos = segmentos, hojas = hojas, rectangulos = rectangulos,
+       nodos = nodos, enlaces = enlaces,
        corte = corte, k = as.integer(k), n = n, enlace = ajuste$enlace,
        distancia = ajuste$distancia,
        cofenetica = ajuste$correlacion_cofenetica)

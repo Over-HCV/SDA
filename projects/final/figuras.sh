@@ -27,6 +27,7 @@ K7="--hiper k=7"
 ANCHA="--ancho 8 --alto 4.5 --dpi 200"
 MEDIA="--ancho 6 --alto 4.5 --dpi 200"
 ARBOL="--ancho 10 --alto 5.5 --dpi 200"
+RADIAL="--ancho 6.4 --alto 6.4 --dpi 200"
 GOWER_JER="--metodo gower --hiper estrategia=jerarquico"
 TANDEM="--reduccion acm --hiper n_componentes=5 --hiper escalar=FALSE"
 
@@ -57,12 +58,15 @@ lab panel f4.desempeno.cruce_clase --metodo kmodos --inicializacion Huang $K7 \
   --salida "$SALIDA/kmodos-estabilidad.png" $MEDIA
 
 # --- Parte 3: jerárquico sobre Gower -----------------------------------------
-lab panel f4.diagnostico.dendrograma $GOWER_JER --hiper enlace=complete $K7 $ZOO \
-  --salida "$SALIDA/gower-dendrograma-completo.png" $ARBOL
+# Los tres enlaces en un solo círculo radial, un sector por enlace: lo que se
+# compara es la forma (grupos compactos contra el efecto cadena del simple). El
+# punto grande es donde nace cada grupo.
+lab panel f4.diagnostico.dendrograma $GOWER_JER $K7 $ZOO \
+  --enlaces complete,average,single \
+  --salida "$SALIDA/gower-enlaces.png" $RADIAL
+# El de cortar el árbol sí lleva nombres: ahí se lee qué animal cae en qué grupo.
 lab panel f4.diagnostico.dendrograma $GOWER_JER --hiper enlace=average $K7 $ZOO \
   --salida "$SALIDA/gower-dendrograma.png" $ARBOL
-lab panel f4.diagnostico.dendrograma $GOWER_JER --hiper enlace=single $K7 $ZOO \
-  --salida "$SALIDA/gower-dendrograma-simple.png" $ARBOL
 # Concordancia: el table(K_means, Jerarquico) de la sesión 5, con su ARI.
 lab panel f4.desempeno.cruce_clase --metodo kmodos $K7 \
   --comparar gower --hiper estrategia=jerarquico --hiper enlace=average $ZOO \

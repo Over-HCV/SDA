@@ -126,8 +126,10 @@ RECETAS_F4 <- list(
     graficar_cruce_clase(cruce)
   },
   "f4.diagnostico.dendrograma" = function(a, x)
-    graficar_dendrograma(arbol_jerarquico(a), etiquetas = x$hojas,
-                         forma = x$forma),
+    if (length(x$enlaces))
+      graficar_enlaces_radial(arboles_por_enlace(a, x$enlaces))
+    else graficar_dendrograma(arbol_jerarquico(a), etiquetas = x$hojas,
+                              forma = x$forma),
   "f4.explicabilidad.cargas" = function(a, x)
     graficar_cargas(cargas(a, componentes = unique(x$ejes))),
   "f4.explicabilidad.contribuciones" = function(a, x)
@@ -208,6 +210,8 @@ grafico_de_panel_f4 <- function(ds, clave, opciones = list()) {
        color = color, hojas = if (!is.null(opciones$hojas))
          as.logical(toupper(opciones$hojas)),
        forma = opciones$forma %||% "rectangular",
+       enlaces = if (!is.null(opciones$enlaces))
+         trimws(strsplit(opciones$enlaces, ",", fixed = TRUE)[[1]]),
        grupo = if (!is.null(color)) ds$df[[color]][completas] else NULL,
        # La clase de referencia ya viene recortada en el ajuste (ajustar_cli).
        clase = ajuste$referencia,

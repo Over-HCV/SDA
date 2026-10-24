@@ -2379,18 +2379,29 @@
     <bcf:citekey order="3" intorder="1">ggplot2</bcf:citekey>
     <bcf:citekey order="4" intorder="1">ggally</bcf:citekey>
     <bcf:citekey order="5" intorder="1">factoextra</bcf:citekey>
-    <bcf:citekey order="6" intorder="1">pearson1895</bcf:citekey>
-    <bcf:citekey order="7" intorder="1">spearman1904</bcf:citekey>
-    <bcf:citekey order="8" intorder="1">pearson1901</bcf:citekey>
-    <bcf:citekey order="8" intorder="2">hotelling1933</bcf:citekey>
-    <bcf:citekey order="9" intorder="1">kaiser1960</bcf:citekey>
-    <bcf:citekey order="10" intorder="1">macqueen1967</bcf:citekey>
-    <bcf:citekey order="11" intorder="1">sokal1958</bcf:citekey>
-    <bcf:citekey order="12" intorder="1">rousseeuw1987</bcf:citekey>
-    <bcf:citekey order="13" intorder="1" nocite="1">ideam-datos</bcf:citekey>
-    <bcf:citekey order="14" intorder="2">r-core</bcf:citekey>
-    <bcf:citekey order="15" intorder="3">ggplot2</bcf:citekey>
-    <bcf:citekey order="16" intorder="4" nocite="1">ggextra</bcf:citekey>
+    <bcf:citekey order="6" intorder="1">eia-notas</bcf:citekey>
+    <bcf:citekey order="7" intorder="1">pearson1895</bcf:citekey>
+    <bcf:citekey order="8" intorder="1">spearman1904</bcf:citekey>
+    <bcf:citekey order="9" intorder="1">pearson1901</bcf:citekey>
+    <bcf:citekey order="9" intorder="2">hotelling1933</bcf:citekey>
+    <bcf:citekey order="10" intorder="1">kaiser1960</bcf:citekey>
+    <bcf:citekey order="11" intorder="1">jolliffe2002</bcf:citekey>
+    <bcf:citekey order="12" intorder="1">johnson2007</bcf:citekey>
+    <bcf:citekey order="13" intorder="1">tukey1977</bcf:citekey>
+    <bcf:citekey order="14" intorder="1">jolliffe2002</bcf:citekey>
+    <bcf:citekey order="15" intorder="1">macqueen1967</bcf:citekey>
+    <bcf:citekey order="16" intorder="1">sokal1958</bcf:citekey>
+    <bcf:citekey order="17" intorder="1">rousseeuw1987</bcf:citekey>
+    <bcf:citekey order="18" intorder="1">kaufman1990</bcf:citekey>
+    <bcf:citekey order="19" intorder="1">hubert1985</bcf:citekey>
+    <bcf:citekey order="20" intorder="1">chang1983</bcf:citekey>
+    <bcf:citekey order="21" intorder="1">arabie1994</bcf:citekey>
+    <bcf:citekey order="22" intorder="1">ward1963</bcf:citekey>
+    <bcf:citekey order="23" intorder="1">murtagh2014</bcf:citekey>
+    <bcf:citekey order="24" intorder="1" nocite="1">ideam-datos</bcf:citekey>
+    <bcf:citekey order="25" intorder="2">r-core</bcf:citekey>
+    <bcf:citekey order="26" intorder="3">ggplot2</bcf:citekey>
+    <bcf:citekey order="27" intorder="4" nocite="1">ggextra</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nyt">

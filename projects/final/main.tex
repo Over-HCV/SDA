@@ -303,13 +303,24 @@
 % =============================================================================
 
 \begin{frame}{Los tres enlaces}
-  \centering
-  \figura[0.32\linewidth]{gower-dendrograma-completo.png}{0.55\textheight}\hfill
-  \figura[0.32\linewidth]{gower-dendrograma.png}{0.55\textheight}\hfill
-  \figura[0.32\linewidth]{gower-dendrograma-simple.png}{0.55\textheight}
+  \begin{columns}[c]
+    \begin{column}{0.66\textwidth}
+      \centering\figura{gower-enlaces.png}{0.8\textheight}
+    \end{column}
+    \begin{column}{0.3\textwidth}
+      {\fontsize{6}{7.5}\selectfont\color{mcmBlack!75}
+      Un sector por enlace, con la misma distancia de Gower y el mismo corte
+      en $K = 7$.
 
-  \footnotesize Completo · promedio · simple. El promedio suele ser el más
-  robusto; el simple forma cadenas.
+      \vspace{0.6em}
+      Raíz adentro, hojas en el borde; el punto grande es donde nace cada
+      grupo.
+
+      \vspace{0.6em}
+      \textbf{Promedio}: grupos compactos.\\
+      \textbf{Simple}: encadena y deja animales sueltos como grupos de uno.\par}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \begin{frame}{Cortar el árbol}

@@ -130,6 +130,7 @@ artefact (`f4.diagnostico.reglas_k`) prints its table.
 | Option | Meaning |
 |---|---|
 | `--filtro Col=a,b` / `Col!=a,b` | keep / exclude rows; repeatable, applied in order |
+| `--transformar tipo[:ColA,ColB]` | push a phase-1 transformation (`TRANSFORMACIONES`: `logaritmo`, `raiz`, `estandarizar`, …) onto the same pila as `--filtro`; no columns = all numeric; repeatable, applied in order AFTER all filters; `logaritmo` shifts a column with values <= 0 by `-min + 1` first (zeros → `log(x + 1)`, never `-Inf`); travels to `cuaderno`/`sesion` like the filter |
 | `--hiper nombre=valor` | repeatable; each method in play takes the names its registry declares; unknown names fail |
 | `--columnas a,b,c` | columns that enter the fit (default: all admissible) |
 | `--grupos <metodo>` | fit that method before the command and add factor column `grupo` (rol `grupo`) |
@@ -138,6 +139,7 @@ artefact (`f4.diagnostico.reglas_k`) prints its table.
 | `--clase col` | reference class (rol `respuesta`): excluded from default fit columns, attached to the fit AFTER fitting (`adjuntar_referencia()`), read by `f4.desempeno.cruce_clase` and the `ari` metric |
 | `--inicializacion x` | optimiser start (`Huang`, `Cao`, `aleatoria` for kmodos; `k-means++`, … for kmeans) |
 | `--comparar <metodo>` | with `panel f4.desempeno.cruce_clase`: cross the main fit against a second method (`--hiper_comparar a=1,b=2`, `--semilla_comparar n`, `--inicializacion_comparar x`) instead of the reference class; ARI between the two partitions |
+| `--forma circular\|radial`, `--enlaces a,b,c` | dendrogram only: round shapes (radial = curved links + one dot per node, big dot where each group starts); `--enlaces` redraws the same distances with several linkages in one radial circle, one sector each (`arboles_por_enlace()`, no refit) |
 | `--salida fig.png\|fig.pdf` | with `panel`: save the figure exactly as the app draws it (`--ancho 7 --alto 4.5 --dpi 200`, `--hojas FALSE`) instead of printing the table; f1, f3 and f4 keys. `projects/final/figuras.sh` is the worked example |
 | `--reduccion acm` | tandem: fit ACM (`--hiper n_componentes=d`, columns from `--columnas_reduccion` or all qualitative inputs) and append `Dim1..Dimd`; a numeric method without `--columnas` clusters on them; the recipe travels to the notebook as `params$reduccion` |
 
@@ -172,6 +174,7 @@ Rscript learn/R/pruebas/test_informe_f4.R   # runs the phase-4 chunks on EIA
 Rscript learn/R/pruebas/test_lab.R
 Rscript learn/R/pruebas/test_lab_cualitativo.R  # Zoo: --clase, ACM + k-medias tandem, notebook
 Rscript learn/R/pruebas/test_figuras_cli.R      # panel --salida png/pdf, qualitative elbow, --comparar
+Rscript learn/R/pruebas/test_transformar_cli.R  # --transformar logaritmo: pila after filters, zeros finite, notebook/session
 Rscript learn/R/pruebas/test_informe_cualitativo.R  # notebook chunks for kmodos/gower/clases_latentes == lab
 
 # Qualitative clustering family (fake fits, no method needed), no GUI

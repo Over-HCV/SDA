@@ -148,6 +148,41 @@ probar("dice que el árbol existe solo con estrategia jerárquica", {
     function(capa) capa$aes_params$label)), fixed = TRUE))
 })
 
+cat("\n[dendrograma circular y radial]\n")
+jer <- ajustar_cli(ds, "gower", list(hiper = c("k=7", "estrategia=jerarquico")))$ajuste
+arbol <- arbol_jerarquico(jer)
+probar("el árbol trae un nodo por hoja y por fusión, y un enlace por hijo",
+       nrow(arbol$nodos) == 2L * arbol$n - 1L &&
+         nrow(arbol$enlaces) == 2L * (arbol$n - 1L))
+probar("hay exactamente una raíz por grupo",
+       all(table(arbol$nodos$grupo[arbol$nodos$raiz_grupo]) == 1L) &&
+         sum(arbol$nodos$raiz_grupo) == arbol$k)
+for (forma in c("circular", "radial")) {
+  probar(sprintf("la forma %s se dibuja en polares, con y sin nombres", forma), {
+    con <- graficar_dendrograma(arbol, etiquetas = TRUE, forma = forma)
+    sin <- graficar_dendrograma(arbol, etiquetas = FALSE, forma = forma)
+    inherits(con$coordinates, "CoordPolar") &&
+      length(con$layers) == length(sin$layers) + 1L &&
+      !is.null(ggplot2::ggplot_build(con))
+  })
+}
+probar("arboles_por_enlace rehace el árbol sin reajustar: mismas hojas, otro enlace", {
+  tres <- arboles_por_enlace(jer, c("complete", "average", "single"))
+  identical(names(tres), c("complete", "average", "single")) &&
+    all(vapply(tres, function(a) a$n, 1L) == arbol$n) &&
+    isTRUE(all.equal(tres$average$corte, arbol$corte))
+})
+probar("--enlaces junta los tres árboles en un solo PNG",
+       es_png(figura("enlaces.png", c("panel", "f4.diagnostico.dendrograma",
+                                      "--metodo", "gower", "--hiper", "k=7",
+                                      "--hiper", "estrategia=jerarquico",
+                                      "--enlaces", "complete,average,single"))))
+probar("--forma radial guarda el PNG",
+       es_png(figura("radial.png", c("panel", "f4.diagnostico.dendrograma",
+                                     "--metodo", "gower", "--hiper", "k=7",
+                                     "--hiper", "estrategia=jerarquico",
+                                     "--forma", "radial", "--hojas", "FALSE"))))
+
 cat(sprintf("\n[test_figuras_cli] %s\n",
             if (.FALLOS == 0L) "todo verde" else sprintf("%d FALLO(S)", .FALLOS)))
 if (.FALLOS > 0L) quit(status = 1L)

@@ -248,7 +248,9 @@ correr_lab <- function(argumentos = commandArgs(trailingOnly = TRUE)) {
     cat("comandos:", paste(names(COMANDOS), collapse = " · "), "\n")
     cat("opciones: --fuente <clave> · --filtro Columna=valor|Columna!=valor",
         "(repetible) · --sesion archivo.json · --texto completo|breve|ninguno",
-        "· --incluir pieza,pieza · --excluir pieza · --salida archivo\n")
+        "· --incluir pieza,pieza · --excluir pieza · --salida archivo\n",
+        "         --transformar logaritmo[:ColA,ColB] (repetible; sin columnas:",
+        "todas las numéricas; tras los filtros; <= 0 se desplaza a -min+1)\n")
     cat("fases 2-4: momentos <col> <col> ... · metodo <clave> ·",
         "panel f4.<...> --metodo <clave>\n",
         "         --hiper nombre=valor (repetible) · --columnas a,b,c ·",
@@ -260,7 +262,8 @@ correr_lab <- function(argumentos = commandArgs(trailingOnly = TRUE)) {
         "--semilla_comparar n --inicializacion_comparar x] (concordancia)\n",
         "figura: panel <clave> ... --salida fig.png|fig.pdf [--ancho 7 --alto 4.5",
         "--dpi 200] · --hojas FALSE (dendrograma sin nombres) ·",
-        "--forma circular (dendrograma radial)\n")
+        "--forma circular|radial ·",
+        "--enlaces complete,average,single (varios enlaces en un círculo)\n")
     cat("métodos activos:", paste(Filter(function(k)
       metodo(k)$estado == "activo", claves_metodos()), collapse = " · "), "\n")
     cat("piezas del cuaderno:", paste(names(PIEZAS_CUADERNO), collapse = " · "),

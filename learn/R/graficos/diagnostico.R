@@ -166,11 +166,14 @@ graficar_silueta <- function(tabla, ...) {
 #' @param arbol salida de arbol_jerarquico()
 #' @param etiquetas TRUE pone el nombre de cada hoja; NULL decide por n (más
 #'   de 150 hojas no se leen y solo ensucian)
-#' @param forma "rectangular" (raíz arriba, hojas abajo) o "circular" (raíz al
-#'   centro, hojas en el borde): con 100 hojas la circular les da a los nombres
-#'   todo el perímetro en vez de un renglón, y tres árboles caben lado a lado
+#' @param forma "rectangular" (raíz arriba, hojas abajo), "circular" (raíz al
+#'   centro, hojas en el borde, escalones) o "radial" (lo mismo con enlaces
+#'   curvos y un punto por nodo): con 100 hojas las formas redondas les dan a
+#'   las hojas todo el perímetro en vez de un renglón, y tres árboles caben
+#'   lado a lado
 graficar_dendrograma <- function(arbol, etiquetas = NULL,
-                                 forma = c("rectangular", "circular")) {
+                                 forma = c("rectangular", "circular",
+                                           "radial")) {
   forma <- match.arg(forma)
   # arbol_jerarquico() devuelve NULL cuando el ajuste no construyó árbol (Gower
   # con PAM parte por medoides): se dice por qué, en vez de un lienzo vacío.
@@ -185,6 +188,8 @@ graficar_dendrograma <- function(arbol, etiquetas = NULL,
   etiquetas <- etiquetas %||% (arbol$n <= 150L)
   if (forma == "circular")
     return(.dendrograma_circular(arbol, isTRUE(etiquetas)))
+  if (forma == "radial")
+    return(.dendrograma_radial(arbol, isTRUE(etiquetas)))
   techo <- max(arbol$segmentos$yend)
   grafico <- ggplot2::ggplot(arbol$segmentos,
                              ggplot2::aes(x = .data$x, y = .data$y,
@@ -224,87 +229,6 @@ graficar_dendrograma <- function(arbol, etiquetas = NULL,
                        inherit.aes = FALSE, angle = 90, hjust = 1,
                        size = 2.1, show.legend = FALSE) +
     ggplot2::expand_limits(y = -0.32 * techo)
-}
-
-# El mismo árbol en coordenadas polares: el ángulo es la posición de la hoja y
-# el radio, la altura al revés (la raíz al centro, las hojas en el borde).
-#
-# Dos detalles que coord_polar no resuelve solo:
-#   · geom_segment no se curva en polares: un tramo horizontal (que une dos
-#     ramas a la misma altura) saldría como cuerda recta y cruzaría el árbol.
-#     Por eso esos tramos se parten en puntos y van con geom_path, que sí se
-#     dobla siguiendo el arco.
-#   · El círculo no se cierra: se deja un hueco del 4 % entre la última hoja y
-#     la primera, porque si se tocan parecen vecinas y no lo son.
-# Los rectángulos punteados de la versión rectangular se omiten: en polares
-# serían sectores que tapan las etiquetas, y el color ya dice el grupo.
-.dendrograma_circular <- function(arbol, etiquetas) {
-  k <- arbol$k
-  techo <- max(arbol$segmentos$yend)
-  seg <- arbol$segmentos
-  seg$id <- seq_len(nrow(seg))
-  horizontal <- abs(seg$y - seg$yend) < 1e-12 & abs(seg$x - seg$xend) > 1e-12
-  arcos <- do.call(rbind, lapply(which(horizontal), function(i) {
-    puntos <- max(2L, ceiling(abs(seg$xend[i] - seg$x[i]) * 4))
-    data.frame(x = seq(seg$x[i], seg$xend[i], length.out = puntos),
-               y = seg$y[i], grupo = seg$grupo[i], id = seg$id[i])
-  }))
-  rectas <- seg[!horizontal, , drop = FALSE]
-  rectas <- rbind(
-    data.frame(x = rectas$x, y = rectas$y, grupo = rectas$grupo, id = rectas$id),
-    data.frame(x = rectas$xend, y = rectas$yend, grupo = rectas$grupo,
-               id = rectas$id))
-  trazos <- rbind(arcos, rectas)
-  n <- arbol$n
-  hueco <- 0.04 * n
-  margen <- if (etiquetas) 0.3 * techo else 0.02 * techo
-
-  grafico <- ggplot2::ggplot(trazos, ggplot2::aes(x = .data$x, y = .data$y,
-                                                   group = .data$id,
-                                                   color = .data$grupo)) +
-    ggplot2::geom_path(linewidth = 0.4) +
-    ggplot2::geom_hline(yintercept = arbol$corte, linetype = "dotted",
-                        color = "grey20") +
-    ggplot2::scale_color_manual(values = paleta_cat(k), na.value = "grey55",
-                                breaks = as.character(seq_len(k)),
-                                name = "grupo") +
-    ggplot2::scale_x_continuous(limits = c(0.5, n + 0.5 + hueco),
-                                expand = c(0, 0)) +
-    # Invertida: la raíz (altura máxima) al centro. El tramo negativo es el
-    # anillo exterior donde van los nombres.
-    ggplot2::scale_y_reverse(limits = c(techo, -margen), expand = c(0, 0)) +
-    ggplot2::coord_polar(theta = "x", clip = "off") +
-    ggplot2::guides(color = ggplot2::guide_legend(nrow = 1)) +
-    # El subtítulo en dos renglones: la figura es cuadrada y en uno se corta.
-    ggplot2::labs(x = NULL, y = NULL,
-                  subtitle = sub(" · (?=[0-9]+ hojas)", "\n",
-                                 .subtitulo_dendrograma(arbol), perl = TRUE)) +
-    tema_ggplot() +
-    # La cuadrícula del tema se apaga elemento por elemento: tema_ggplot() fija
-    # los .major.x/.y, que le ganan a `panel.grid`, y en polares dibujarían
-    # anillos y radios que no significan nada.
-    ggplot2::theme(axis.text = ggplot2::element_blank(),
-                   axis.ticks = ggplot2::element_blank(),
-                   panel.grid.major.x = ggplot2::element_blank(),
-                   panel.grid.major.y = ggplot2::element_blank(),
-                   panel.grid.minor.x = ggplot2::element_blank(),
-                   panel.grid.minor.y = ggplot2::element_blank(),
-                   legend.position = "bottom")
-  if (!etiquetas) return(grafico)
-
-  # Cada nombre sale radial desde su hoja. En la mitad izquierda se voltea
-  # 180° para que no quede de cabeza, y entonces se alinea al otro extremo.
-  hojas <- arbol$hojas
-  angulo <- 90 - 360 * (hojas$x - 0.5) / (n + hueco)
-  izquierda <- angulo < -90
-  hojas$angulo <- ifelse(izquierda, angulo + 180, angulo)
-  hojas$ajuste <- ifelse(izquierda, 1, 0)
-  grafico +
-    ggplot2::geom_text(data = hojas,
-                       ggplot2::aes(x = .data$x, y = -0.02 * techo,
-                                    label = .data$etiqueta, color = .data$grupo,
-                                    angle = .data$angulo, hjust = .data$ajuste),
-                       inherit.aes = FALSE, size = 1.9, show.legend = FALSE)
 }
 
 .subtitulo_dendrograma <- function(arbol) {

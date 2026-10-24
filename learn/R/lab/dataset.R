@@ -9,7 +9,7 @@
 
 # Las opciones que se acumulan en vez de pisarse: repetirlas es lo normal (dos
 # filtros encadenados, tres columnas declaradas, varios hiperparámetros).
-OPCIONES_REPETIBLES <- c("filtro", "escala", "hiper")
+OPCIONES_REPETIBLES <- c("filtro", "transformar", "escala", "hiper")
 
 #' Parte los argumentos en posicionales y opciones `--clave valor`.
 #'
@@ -35,8 +35,10 @@ partir_argumentos <- function(argumentos) {
   list(posicionales = posicionales, opciones = opciones)
 }
 
-#' El dataset sobre el que corre el comando: fuente + filtros, en orden, la
-#' clase de referencia (`--clase`), las dimensiones de una reducción
+#' El dataset sobre el que corre el comando: fuente + filtros, en orden, las
+#' transformaciones de `--transformar` (también en orden, DESPUÉS de todos los
+#' filtros: el desplazamiento del logaritmo se calcula sobre las filas que
+#' quedan, no sobre los países que se sacaron), la clase de referencia (`--clase`), las dimensiones de una reducción
 #' (`--reduccion`) y al final los grupos de `--grupos` si se pidieron. El orden
 #' importa: la clase se declara antes de reducir para quedar fuera del ACM, y
 #' las dimensiones existen antes de agrupar para que el tándem las use.
@@ -48,6 +50,8 @@ armar_dataset <- function(opciones) {
         else .dataset_de_fuente_cli(opciones)
   for (filtro in opciones$filtro %||% character(0))
     ds <- aplicar_filtro_cli(ds, filtro)
+  for (transformacion in opciones$transformar %||% character(0))
+    ds <- aplicar_transformacion_cli(ds, transformacion)
   ds <- declarar_escalas_cli(ds, opciones$escala)
   ds <- declarar_clase_cli(ds, opciones$clase)
   ds <- agregar_dimensiones_cli(ds, opciones)
@@ -119,17 +123,56 @@ aplicar_filtro_cli <- function(ds, expresion) {
   excluir <- grepl("^[^=]*!=", expresion)
   columna <- sub("!?=.*$", "", expresion)
   valores <- strsplit(sub("^[^=]*=", "", expresion), ",", fixed = TRUE)[[1]]
-  pila <- agregar_transformacion(ds$transformaciones, "filtro", columna,
-                                 list(valores = valores, excluir = excluir))
+  .apilar_cli(ds, "filtro", columna, list(valores = valores, excluir = excluir))
+}
+
+#' Un `--transformar tipo[:Col,Col]` (sin columnas: todas las numéricas) como
+#' una entrada más de la pila: la misma receta que apila el botón "Aplicar" de
+#' la subsección Transformación, así que viaja igual al cuaderno y a la sesión.
+#'
+#' `logaritmo` es el de la app: si la columna trae valores <= 0 se desplaza
+#' sumando -min + 1 antes del log. Con mínimo 0 (los ceros de la EIA) eso es
+#' log(x + 1): el cero queda en 0 y no sale ningún -Inf.
+aplicar_transformacion_cli <- function(ds, expresion) {
+  tipo <- sub(":.*$", "", expresion)
+  if (!tipo %in% TRANSFORMACIONES)
+    stop("transformación desconocida: ", tipo, " · válidas: ",
+         paste(TRANSFORMACIONES, collapse = ", "), call. = FALSE)
+  columnas <- .lista_de_opcion(if (grepl(":", expresion, fixed = TRUE))
+    sub("^[^:]*:", "", expresion) else "")
+  if (!length(columnas)) columnas <- columnas_numericas(ds)
+  faltan <- setdiff(columnas, names(ds$df))
+  if (length(faltan))
+    stop("no existe la columna: ", paste(faltan, collapse = ", "), call. = FALSE)
+  .apilar_cli(ds, tipo, columnas)
+}
+
+# Apila una receta y la aplica sobre el df actual: solo la nueva, porque las
+# anteriores ya están en ds$df. Los avisos se imprimen en vez de perderse.
+.apilar_cli <- function(ds, tipo, columnas, params = list()) {
+  pila <- agregar_transformacion(ds$transformaciones, tipo, columnas, params)
   resultado <- aplicar_transformaciones(ds$df, list(pila[[length(pila)]]))
-  for (aviso in resultado$avisos)
-    message("[", aviso$severidad, "] ", aviso$mensaje)
+  .imprimir_avisos_cli(resultado$avisos)
   ds$df <- resultado$datos
   ds$transformaciones <- pila
   ds$diccionario <- rehacer_diccionario(ds$diccionario, resultado$datos)
   ds$n <- nrow(resultado$datos)
   ds$p <- ncol(resultado$datos)
   ds
+}
+
+# Un log sobre las 57 columnas de la EIA da 45 avisos idénticos salvo el
+# nombre: se muestran los primeros, la cuenta del resto y la sugerencia una
+# sola vez, que es lo que se alcanza a leer.
+.imprimir_avisos_cli <- function(avisos, maximo = 3L) {
+  for (aviso in utils::head(avisos, maximo))
+    message("[", aviso$severidad, "] ", aviso$mensaje)
+  if (length(avisos) > maximo)
+    message(sprintf("[aviso] ... y %d más del mismo paso",
+                    length(avisos) - maximo))
+  sugerencias <- unique(stats::na.omit(vapply(avisos, function(aviso)
+    aviso$sugerencia %||% NA_character_, "")))
+  for (sugerencia in sugerencias) message("        ", sugerencia)
 }
 
 #' `--grupos <metodo>` (con su `--hiper`): ajusta ese método sobre el dataset

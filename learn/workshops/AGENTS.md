@@ -76,7 +76,12 @@ Rscript learn/R/lab.R cuaderno <claves> --fuente <f> --filtro Col=valor \
 - **Preguntas para el profesor**: En los recuadros `::: notas` el bloque de
   preguntas abiertas se titula `**Preguntas para el profesor.**` y cada
   viñeta lleva debajo `*Por qué importa.*` con la razón, apoyada en cifras
-  que ya están en el informe.
+  que ya están en el informe. Cuando una pregunta se resuelve (calculando lo
+  pendiente con R), el bloque pasa a `**Decisiones.**`: Cada viñeta abre con
+  la decisión en negrita, sigue con la razón y sus cifras (salidas de un
+  chunk corto dentro de la pregunta) y lleva debajo `*Respaldo.*` con la
+  sesión de clase o la cita (`\parencite`/`\textcite`) que la sostiene. No
+  quedan «No se calculó» en el entregable.
 - **Código**: ≤ 68 columnas (más ancho se sale del margen), un chunk por
   pregunta, `echo: true`.
 - **`dos_columnas()`** solo cuando la salida es uno o dos números; el resto va como
