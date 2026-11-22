@@ -19,9 +19,9 @@ fuentes_disponibles <- function() {
   data.frame(
     clave = c("charcoal_crudo", "charcoal_pivot", "twins", "ori", "eia",
               "zoo", "sintetico_anova", "sintetico_regresion"),
-    nombre = c("charcoal · panel crudo", "charcoal · pais x anio",
-               "twins", "ori · meteorologico IDEAM", "eia · energia por pais",
-               "zoo · animales UCI", "sintetico · anova", "sintetico · regresion"),
+    nombre = c("charcoal - panel crudo", "charcoal - pais x anio",
+               "twins", "ori - meteorologico IDEAM", "eia - energia por pais",
+               "zoo - animales UCI", "sintetico - anova", "sintetico - regresion"),
     descripcion = c(
       "Produccion y comercio de carbon vegetal por pais, ano y flujo.",
       "Matriz pais x anio de un solo flujo, ya agregada.",

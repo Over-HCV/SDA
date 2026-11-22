@@ -8,11 +8,11 @@
 # Un archivo por método, igual que en las pruebas sin GUI: el ACP tiene el suyo
 # en test_app_metodo.R. Lo que este añade y aquel no puede dar:
 #
-#   · que la fase 4 APAGUE las vistas del ACP y ENCIENDA las de grupos, que es
+#   - que la fase 4 APAGUE las vistas del ACP y ENCIENDA las de grupos, que es
 #     el mecanismo que el hito 4 tuvo que construir;
-#   · que los controles propios de esta familia (inicialización, reinicios)
+#   - que los controles propios de esta familia (inicialización, reinicios)
 #     estén enlazados — la tercera pata de C11;
-#   · que el paso a paso dibuje el estado de cada iteración.
+#   - que el paso a paso dibuje el estado de cada iteración.
 
 suppressPackageStartupMessages(library(shinytest2))
 Sys.setenv(NOT_CRAN = "true")
@@ -79,7 +79,7 @@ app <- AppDriver$new(app_dir = "learn/R", name = "sda-lab-kmeans",
 on.exit(app$stop(), add = TRUE)
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 1 · un dataset guardado en Objetos]\n")
+cat("\n[fase 1 - un dataset guardado en Objetos]\n")
 
 invisible(ir_a(app, "① Datos", "Fuente"))
 app$set_inputs(`datos-fuente` = "twins", wait_ = FALSE)
@@ -91,7 +91,7 @@ probar("el dataset queda guardado como objeto",
        grepl("d1", esperar_html(app, "d1"), fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 2 · k-medias ya no es un pendiente]\n")
+cat("\n[fase 2 - k-medias ya no es un pendiente]\n")
 
 html_f2 <- ir_a(app, "② Modelado", "elegir_kmeans")
 probar("k-medias ofrece Elegir en el catálogo",
@@ -146,7 +146,7 @@ probar("el modelo queda guardado como objeto",
              fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 3 · Lloyd, reinicios y los centroides caminando]\n")
+cat("\n[fase 3 - Lloyd, reinicios y los centroides caminando]\n")
 
 html_f3 <- ir_a(app, "③ Ajuste", "Recalcular cada centroide")
 probar("el optimizador sale del registro del método",
@@ -201,7 +201,7 @@ probar("la receta guarda los mandos de esta familia",
              fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 4 · el registro decide qué se dibuja]\n")
+cat("\n[fase 4 - el registro decide qué se dibuja]\n")
 
 invisible(ir_a(app, "④ Evaluación", "Compatibilidad"))
 # La franja de la fase 3 tambien dice "inercia" y page_navbar deja las cuatro

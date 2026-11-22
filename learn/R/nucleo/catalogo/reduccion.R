@@ -1,7 +1,7 @@
 # learn/R/nucleo/catalogo/reduccion.R
 #
-# Sesión 4 · Reducción de dimensionalidad.
-# Fuentes: notes/SDA/NB3 · libs/topics-map.md filas 11-17.
+# Sesión 4 - Reducción de dimensionalidad.
+# Fuentes: notes/SDA/NB3 - libs/topics-map.md filas 11-17.
 
 poblar_catalogo_reduccion <- function() {
 

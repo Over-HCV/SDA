@@ -1,6 +1,6 @@
 # learn/R/ui/transversal/referencia.R
 #
-# ⓘ Referencia · glosario, árbol de temas, catálogo tabular y entorno.
+# ⓘ Referencia - glosario, árbol de temas, catálogo tabular y entorno.
 #
 # Todo lo estático de consulta vive acá y no dentro de las fases (C5): es
 # contenido que no cambia con ningún input, así que no puede ocupar píxeles de

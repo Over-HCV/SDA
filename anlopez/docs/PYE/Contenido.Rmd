@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Probabilidad y Estadística · Nicolás López</title>
+    <title>Probabilidad y Estadística - Nicolás López</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -325,7 +325,7 @@
     </main>
 
     <footer class="border-t border-gray-100 dark:border-[#334155] py-6 sm:py-8 text-center text-xs sm:text-sm text-gray-400 dark:text-gray-500">
-        <p>© 2026 Andrés Nicolás López · 
+        <p>© 2026 Andrés Nicolás López - 
             <span class="lang-es">Curso de pregrado</span>
             <span class="lang-en">Undergraduate course</span>
         </p>

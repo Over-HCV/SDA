@@ -62,7 +62,7 @@ juguete <- data.frame(v1 = c("a", "a", "a", "b", "b", "b"),
                       v3 = c("p", "p", "p", "q", "q", "q"),
                       stringsAsFactors = FALSE)
 
-cat("\n[kmodos · el caso hecho a mano]\n")
+cat("\n[kmodos - el caso hecho a mano]\n")
 
 for (ini in c("Huang", "Cao", "aleatoria")) {
   a <- ajustar_kmodos(juguete, k = 2L, inicializacion = ini, reinicios = 5L)
@@ -93,7 +93,7 @@ probar("contra los modos da n x k, y la suma de los minimos es el costo",
          sum(apply(contra_modos, 1L, min)) == a_juguete$costo)
 
 # ---------------------------------------------------------------------------
-cat("\n[kmodos · la entrada]\n")
+cat("\n[kmodos - la entrada]\n")
 
 probar("k = 1 falla y explica", falla(ajustar_kmodos(juguete, k = 1L)))
 probar("mas grupos que filas distintas falla en vez de duplicar modas",
@@ -129,7 +129,7 @@ probar("sin columnas, el identificador sale de las variables y nombra las filas"
 })
 
 # ---------------------------------------------------------------------------
-cat("\n[kmodos · la traza y la semilla]\n")
+cat("\n[kmodos - la traza y la semilla]\n")
 
 ajustes <- lapply(c("Huang", "Cao", "aleatoria"), function(ini)
   ajustar_kmodos(zoo, columnas = entrada_zoo, k = 7L, inicializacion = ini))
@@ -184,7 +184,7 @@ probar("la semilla ganadora es una de las que se probaron",
        huang$semilla_ganadora %in% (42L + 0:9))
 
 # ---------------------------------------------------------------------------
-cat("\n[kmodos · el resultado]\n")
+cat("\n[kmodos - el resultado]\n")
 
 probar("devuelve el contrato compartido de la familia cualitativa",
        all(c("grupos", "k", "n", "p", "tamanos", "x", "columnas",
@@ -217,11 +217,11 @@ probar("mas grupos nunca dejan mas costo",
        ajustar_kmodos(zoo, columnas = entrada_zoo, k = 9L)$costo <= huang$costo)
 
 # ---------------------------------------------------------------------------
-cat("\n[kmodos · zoo contra la clase real]\n")
+cat("\n[kmodos - zoo contra la clase real]\n")
 
 for (ini in names(ajustes)) {
   a <- ajustes[[ini]]
-  cat(sprintf("  ARI (k = 7, %s) = %.3f · costo %g · %d iteraciones\n",
+  cat(sprintf("  ARI (k = 7, %s) = %.3f - costo %g - %d iteraciones\n",
               ini, rand_ajustado(a$grupos, zoo$tipo), a$costo, a$iteraciones))
 }
 print(table(tipo = zoo$tipo, grupo = huang$grupos))

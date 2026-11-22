@@ -175,6 +175,6 @@ componible <- function(avisos) severidad_maxima(avisos) != "error"
 #' Resumen de una línea para la franja de estado de la fase 4.
 resumen_compatibilidad <- function(avisos) {
   niveles <- vapply(avisos, `[[`, "", "severidad")
-  sprintf("%d error(es) · %d aviso(s)",
+  sprintf("%d error(es) - %d aviso(s)",
           sum(niveles == "error"), sum(niveles == "aviso"))
 }

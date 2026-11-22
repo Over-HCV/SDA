@@ -55,7 +55,7 @@ tema_inicial <- bslib::bs_theme(bootswatch = "flatly",
 # --- UI ------------------------------------------------------------------
 ui <- page_navbar(
   id = "tab",
-  title = "SDA · ANOVA + distribuciones",
+  title = "SDA - ANOVA + distribuciones",
   navbar_options = navbar_options(bg = "#0B1623", type = "dark"),
   theme = tema_inicial,
   header = tags$head(tags$style(".value-box {min-height: 110px;}")),

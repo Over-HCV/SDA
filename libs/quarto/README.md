@@ -1,4 +1,4 @@
-# Proyecto 2 — Quarto + Observable JS · PCA + Clustering
+# Proyecto 2 — Quarto + Observable JS - PCA + Clustering
 
 Dashboard Quarto estático para explorar **PCA** y **k-means** sobre dos
 datasets reales del curso. **Hook pedagógico**: todo el cómputo pesado

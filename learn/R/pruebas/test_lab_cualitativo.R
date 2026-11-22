@@ -32,7 +32,7 @@ TANDEM <- c("--fuente", "zoo", "--clase", "tipo", "--reduccion", "acm",
 opciones <- partir_argumentos(TANDEM)$opciones
 opciones$metodo <- "kmeans"
 
-cat("\n[--clase · la referencia no entra al ajuste]\n")
+cat("\n[--clase - la referencia no entra al ajuste]\n")
 ds_clase <- armar_dataset(list(fuente = "zoo", clase = "tipo"))
 probar("--clase declara el rol 'respuesta' en el diccionario",
        identical(columna_referencia(ds_clase), "tipo"))
@@ -46,7 +46,7 @@ probar("una columna de --clase inexistente falla diciendo cuál", {
   grepl("tipa", error)
 })
 
-cat("\n[--reduccion acm · las dimensiones como columnas]\n")
+cat("\n[--reduccion acm - las dimensiones como columnas]\n")
 ds <- suppressMessages(armar_dataset(opciones))
 probar("agrega Dim1..Dim5 numéricas y guarda la receta", {
   dims <- paste0("Dim", 1:5)
@@ -59,7 +59,7 @@ probar("son las puntuaciones del ACM de los 16 atributos", {
   max(abs(as.matrix(ds$df[paste0("Dim", 1:5)]) - acm$puntuaciones)) < 1e-12
 })
 
-cat("\n[tándem · k-medias sobre las dimensiones]\n")
+cat("\n[tándem - k-medias sobre las dimensiones]\n")
 ajustado <- ajustar_cli(ds, "kmeans", opciones)
 probar("sin --columnas, k-medias toma las dimensiones del ACM",
        identical(ajustado$ajuste$columnas, paste0("Dim", 1:5)) &&
@@ -87,7 +87,7 @@ probar("el mapa 2D del tándem se pinta por tipo con --color", {
   nrow(mapa[[3]]) == 101L && "tipo" %in% names(mapa[[3]])
 })
 
-cat("\n[cuaderno · el tándem se reproduce fuera del lab]\n")
+cat("\n[cuaderno - el tándem se reproduce fuera del lab]\n")
 pedido <- paste0("f4.explicabilidad.mapa_2d:metodo=kmeans,",
                  "f4.desempeno.cruce_clase:metodo=kmeans")
 seleccion <- suppressMessages(seleccion_de_args(ds, pedido, opciones))

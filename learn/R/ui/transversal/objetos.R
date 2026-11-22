@@ -1,6 +1,6 @@
 # learn/R/ui/transversal/objetos.R
 #
-# ⚙ Objetos · el CRUD de las cuatro piezas que la fase 4 compone.
+# ⚙ Objetos - el CRUD de las cuatro piezas que la fase 4 compone.
 #
 # Existe como sección propia porque los objetos sobreviven a la fase que los
 # creó: un dataset preparado en la fase 1 se reusa en veinte corridas. Sin un
@@ -116,7 +116,7 @@ restaurar_fase1_en <- function(fase1, dataset, seleccion, cuaderno = NULL) {
   marcados <- seleccion_con_tablas(seleccion_de_sesion(fase1),
                                    reconstruido$dataset)
   seleccion(marcados)
-  sprintf("Sesión restaurada · %s · %d x %d · %d paneles marcados",
+  sprintf("Sesión restaurada - %s - %d x %d - %d paneles marcados",
           reconstruido$dataset$nombre, reconstruido$dataset$n,
           reconstruido$dataset$p, length(marcados))
 }

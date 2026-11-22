@@ -75,7 +75,7 @@ servidor_composicion <- function(input, output, session, piezas, corrida,
     p <- piezas()
     tabla <- puntuaciones_como_dataframe(c$ajuste)
     guardado <- almacen_agregar(almacen(), nuevo_dataset(
-      NULL, sprintf("%s · %d componentes", p$dataset$nombre %||% "puntuaciones",
+      NULL, sprintf("%s - %d componentes", p$dataset$nombre %||% "puntuaciones",
                     ncol(tabla)),
       tabla, fuente = sprintf("componentes de %s", c$id %||% p$modelo$metodo),
       semilla = p$dataset$semilla %||% 42L))
@@ -154,7 +154,7 @@ servidor_composicion <- function(input, output, session, piezas, corrida,
 .tarjeta_pieza <- function(titulo, objeto, ayuda) {
   cuerpo <- if (is.null(objeto))
     shiny::tags$span(class = "text-muted", ayuda)
-  else shiny::tagList(shiny::tags$strong(objeto$id), " · ",
+  else shiny::tagList(shiny::tags$strong(objeto$id), " - ",
                       resumen_objeto(objeto))
   shiny::tags$div(
     class = "d-flex gap-3 align-items-baseline border-bottom py-2",

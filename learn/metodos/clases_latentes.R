@@ -14,10 +14,10 @@
 #
 # Lo que este método añade a k-modos y a PAM:
 #
-#   · Una asignación BLANDA: cada fila trae su probabilidad posterior de
+#   - Una asignación BLANDA: cada fila trae su probabilidad posterior de
 #     pertenecer a cada clase, y la partición dura es solo el máximo de esa
 #     fila. Un animal ambiguo se ve ambiguo, en vez de esconderse en un grupo.
-#   · Un criterio con fundamento para elegir k: la verosimilitud es comparable
+#   - Un criterio con fundamento para elegir k: la verosimilitud es comparable
 #     entre modelos, y el BIC la penaliza por los parámetros que cuesta.
 #
 # El EM está escrito a mano, sin poLCA. La razón es la de k-medias: poLCA
@@ -120,7 +120,7 @@ ajustar_clases_latentes <- function(datos, columnas = NULL, k = 3L,
 }
 
 # La matriz indicadora n x J y a qué variable pertenece cada columna. Con ella
-# el paso E es un solo producto de matrices: log f_c(x_i) = Y · log θ.
+# el paso E es un solo producto de matrices: log f_c(x_i) = Y - log θ.
 .diseno_latente <- function(x) {
   bloques <- lapply(x, function(v) {
     y <- outer(as.integer(v), seq_len(nlevels(v)), "==") * 1
@@ -132,7 +132,7 @@ ajustar_clases_latentes <- function(datos, columnas = NULL, k = 3L,
        categorias = lapply(x, levels), nombres = names(x))
 }
 
-# (k − 1) pesos libres + k · Σ (R_j − 1) probabilidades libres.
+# (k − 1) pesos libres + k - Σ (R_j − 1) probabilidades libres.
 .parametros_latentes <- function(k, diseno) {
   libres <- sum(lengths(diseno$categorias) - 1L)
   (k - 1L) + k * libres
@@ -167,7 +167,7 @@ ajustar_clases_latentes <- function(datos, columnas = NULL, k = 3L,
 
 # Paso E. El piso entra SOLO dentro del logaritmo: θ = 0 es una solución de
 # frontera legítima (ningún animal con plumas en la clase de los peces) y el
-# paso M la produce exacta. Sin piso, 0 · log 0 da NaN en el producto de
+# paso M la produce exacta. Sin piso, 0 - log 0 da NaN en el producto de
 # matrices; con un piso de 1e-300 la celda vale −690 en log, que ya es cero en
 # la posterior. No se suaviza θ (nada de Laplace): eso cambiaría el óptimo y
 # dejaría de coincidir con poLCA.

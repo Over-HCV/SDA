@@ -156,7 +156,7 @@ adjuntar_comparacion <- function(ds, ajustado, opciones) {
   ajuste$etiqueta_referencia <- .etiqueta_corrida(otro, segundo, propias)
   ajuste$etiqueta_particion <- .etiqueta_corrida(
     opciones$metodo %||% "", ajustado, sin_opciones_de_comparacion(opciones))
-  message(sprintf("[comparar] %s contra %s · ARI = %.3f",
+  message(sprintf("[comparar] %s contra %s - ARI = %.3f",
                   ajuste$etiqueta_particion, ajuste$etiqueta_referencia,
                   indice_rand_ajustado(ajuste$grupos, ajuste$referencia)))
   ajuste

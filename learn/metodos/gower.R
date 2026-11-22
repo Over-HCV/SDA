@@ -9,12 +9,12 @@
 #
 # Lo que este método añade a k-medias y al jerárquico numérico:
 #
-#   · Una distancia que no exige números. Gower (1971) compara variable a
+#   - Una distancia que no exige números. Gower (1971) compara variable a
 #     variable con la regla que le corresponde a su tipo —coincidir o no para
 #     una categoría, diferencia relativa al rango para un número— y promedia.
 #     Con solo categorías es la proporción de variables en que dos filas
 #     difieren: la distancia de Hamming dividida por p.
-#   · Un centro que existe. k-medias necesita promediar filas y "el promedio de
+#   - Un centro que existe. k-medias necesita promediar filas y "el promedio de
 #     un pez y un ave" no es un animal. PAM elige como centro una observación
 #     real, el medoide, y para eso solo hace falta poder medir disimilitudes:
 #     sirve con Gower y con cualquier otra.

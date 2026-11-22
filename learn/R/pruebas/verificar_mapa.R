@@ -48,12 +48,12 @@ verificar_mapa <- function() {
   # --- 2. MAPA.md al día --------------------------------------------------
   ruta <- ruta_app("MAPA.md")
   if (!file.exists(ruta)) {
-    cat("[mapa] falta MAPA.md · generalo con: Rscript learn/R/mapa.R\n")
+    cat("[mapa] falta MAPA.md - generalo con: Rscript learn/R/mapa.R\n")
     ok <- FALSE
   } else {
     en_disco <- readLines(ruta, warn = FALSE, encoding = "UTF-8")
     if (!identical(en_disco, generar_mapa())) {
-      cat("[mapa] MAPA.md está desactualizado · Rscript learn/R/mapa.R\n")
+      cat("[mapa] MAPA.md está desactualizado - Rscript learn/R/mapa.R\n")
       ok <- FALSE
     }
   }
@@ -61,9 +61,9 @@ verificar_mapa <- function() {
   # --- 3. Deuda (informativa) ---------------------------------------------
   deuda <- .contar_deuda()
   cobertura <- cobertura_textos()
-  cat(sprintf("[mapa] %d métodos · %d artefactos\n",
+  cat(sprintf("[mapa] %d métodos - %d artefactos\n",
               length(claves_metodos()), length(claves_artefactos())))
-  cat(sprintf("[mapa] deuda · código %d/%d · textos %d/%d · fichas %d/%d\n",
+  cat(sprintf("[mapa] deuda - código %d/%d - textos %d/%d - fichas %d/%d\n",
               deuda$archivos_escritos, deuda$archivos_totales,
               cobertura$textos_escritos, cobertura$textos_esperados,
               cobertura$fichas_escritas, cobertura$fichas_esperadas))

@@ -8,10 +8,10 @@
 #
 # Es k-medias con dos piezas cambiadas, y nada más (Huang, 1998):
 #
-#   · la distancia euclidiana pasa a ser el emparejamiento simple: cuántas
+#   - la distancia euclidiana pasa a ser el emparejamiento simple: cuántas
 #     variables tienen categorías distintas. Restar "ave" de "pez" no tiene
 #     sentido, contar si son iguales sí;
-#   · la media pasa a ser la moda, variable por variable: la categoría más
+#   - la media pasa a ser la moda, variable por variable: la categoría más
 #     frecuente del grupo es la que minimiza los desacuerdos, igual que la media
 #     minimiza los cuadrados.
 #

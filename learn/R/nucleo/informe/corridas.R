@@ -47,7 +47,7 @@ armar_informe <- function(corrida, dataset = NULL, modelo = NULL, receta = NULL)
 .encabezado <- function(titulo) .bloque(
   "---",
   sprintf('title: "%s"', titulo),
-  'subtitle: "Análisis Estadístico de Datos · generado con SDA Lab"',
+  'subtitle: "Análisis Estadístico de Datos - generado con SDA Lab"',
   sprintf('date: "%s"', format(Sys.Date(), "%Y-%m-%d")),
   "output:",
   "  html_document:",
@@ -59,7 +59,7 @@ armar_informe <- function(corrida, dataset = NULL, modelo = NULL, receta = NULL)
 .seccion_metodo <- function(m) {
   if (is.null(m)) return(character(0))
   c("# El método", "",
-    sprintf("**%s** · objetivo: %s · sesión %s del curso.",
+    sprintf("**%s** - objetivo: %s - sesión %s del curso.",
             m$nombre, m$objetivo, m$sesion), "",
     if (!is.na(m$nodo))
       sprintf("Ancla teórica: `notes/tree.md → %s`", m$nodo) else NULL, "",
@@ -135,7 +135,7 @@ armar_informe <- function(corrida, dataset = NULL, modelo = NULL, receta = NULL)
 
 .seccion_pie <- function(corrida, m) {
   c("---", "",
-    sprintf("Corrida `%s` · %s · modo %s.", corrida$id, corrida$creado,
+    sprintf("Corrida `%s` - %s - modo %s.", corrida$id, corrida$creado,
             modo_ejecucion()),
     if (!is.null(m)) sprintf("Ficha del método: `learn/%s`.", m$ficha) else NULL,
     "")

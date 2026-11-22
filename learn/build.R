@@ -169,7 +169,7 @@ inventario_bundle <- function(destino = ruta_app("docs")) {
   archivos <- jsonlite::fromJSON(app_json, simplifyDataFrame = FALSE)
   nombres <- vapply(archivos, `[[`, "", "name")
 
-  cat(sprintf("\n[bundle] %d archivos · app.json %.1f MB\n", length(archivos),
+  cat(sprintf("\n[bundle] %d archivos - app.json %.1f MB\n", length(archivos),
               file.size(app_json) / 1024^2))
   por_carpeta <- table(ifelse(grepl("/", nombres),
                               sub("/.*$", "/", nombres), "(raíz)"))

@@ -96,7 +96,7 @@ graficar_modos <- function(tabla) {
     ggplot2::facet_grid(variable ~ ., scales = "free_y", space = "free_y",
                         switch = "y") +
     ggplot2::labs(x = "grupo", y = NULL,
-                  subtitle = sprintf(paste("%d grupos · %d variables ·",
+                  subtitle = sprintf(paste("%d grupos - %d variables ·",
                                            "recuadro = modo del grupo"),
                                      length(levels(tabla$grupo)),
                                      length(levels(tabla$variable)))) +
@@ -138,7 +138,7 @@ graficar_cruce_clase <- function(cruce) {
                                  labels = function(v) paste0(round(100 * v), "%")) +
     ggplot2::labs(x = cruce$eje_clase %||% "clase real",
                   y = cruce$eje_grupo %||% "grupo",
-                  subtitle = sprintf("ARI = %.3f · pureza %.0f%% · n = %d",
+                  subtitle = sprintf("ARI = %.3f - pureza %.0f%% - n = %d",
                                      cruce$ari, 100 * cruce$pureza, cruce$n)) +
     tema_ggplot() +
     ggplot2::theme(panel.grid = ggplot2::element_blank(),

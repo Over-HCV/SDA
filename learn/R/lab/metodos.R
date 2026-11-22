@@ -31,7 +31,7 @@ hiper_cli <- function(metodo, opciones, pares = opciones$hiper) {
     convertir_hiper(metodo, nombre, propios[[nombre]])), names(propios))
 }
 
-#' Una lista con nombre como `k=3 · escalar=TRUE`. `unlist()` la volvía
+#' Una lista con nombre como `k=3 - escalar=TRUE`. `unlist()` la volvía
 #' `escalar=1`: mezcla tipos y gana el numérico.
 texto_de_pares <- function(lista, separador = ", ")
   paste(names(lista), vapply(lista, function(v) paste(format(v), collapse = ","),
@@ -90,7 +90,7 @@ ajustar_cli <- function(ds, metodo, opciones, hiper = hiper_cli(metodo, opciones
 comando_momentos <- function(ds, args, opciones = list()) {
   columnas <- if (length(args)) args else NULL
   momentos <- momentos_muestrales(ds$df, columnas)
-  cat(sprintf("%d variables · n = %d filas completas%s\n",
+  cat(sprintf("%d variables - n = %d filas completas%s\n",
               length(momentos$medias), momentos$n,
               if (momentos$descartadas)
                 sprintf(" (%d descartadas por faltantes)", momentos$descartadas)
@@ -115,16 +115,16 @@ comando_metodo <- function(ds, args, opciones = list()) {
                    "metodo <clave> [--hiper nombre=valor] [--columnas a,b]")
   resultado <- ajustar_cli(ds, clave, opciones)
   ajuste <- resultado$ajuste
-  cat(sprintf("%s · %s · %.2fs\n", clave, resultado$metodo$nombre,
+  cat(sprintf("%s - %s - %.2fs\n", clave, resultado$metodo$nombre,
               resultado$duracion))
-  cat("hiper:", texto_de_pares(resultado$parametros, " · "), "\n")
+  cat("hiper:", texto_de_pares(resultado$parametros, " - "), "\n")
   resumen <- resumen_ajuste(ajuste)
-  cat("resumen:", paste(names(resumen), unlist(resumen), collapse = " · "), "\n")
+  cat("resumen:", paste(names(resumen), unlist(resumen), collapse = " - "), "\n")
   metricas <- metricas_de_corrida(ajuste)
   cat("métricas:", paste(names(metricas),
                          vapply(metricas, function(v)
                            paste(format(v, digits = 6), collapse = ","), ""),
-                         sep = " = ", collapse = " · "), "\n")
+                         sep = " = ", collapse = " - "), "\n")
   cat("lectura:", lectura_resultado(ajuste), "\n\n")
   tabla_resultado(ajuste)
 }

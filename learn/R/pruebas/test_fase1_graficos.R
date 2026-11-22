@@ -36,7 +36,7 @@ con_huecos <- data.frame(x = rnorm(50), y = rnorm(50),
 con_huecos$x[c(2, 5)] <- NA
 muestra <- muestrear_para_grafico(sintetico, umbral = 200L, semilla = 8L)$datos
 
-cat("\n[fase 1 · graficos univariados]\n")
+cat("\n[fase 1 - graficos univariados]\n")
 probar("histograma con densidad superpuesta",
        dibuja(graficar_histograma(muestra, "valor", 24L, densidad = TRUE)))
 probar("densidad kernel", dibuja(graficar_densidad(muestra, "valor")))
@@ -56,7 +56,7 @@ probar("histograma con la normal ajustada superpuesta",
 probar("densidad kernel contra la normal ajustada",
        dibuja(graficar_densidad(muestra, "valor", normal = TRUE)))
 
-cat("\n[fase 1 · graficos bivariados]\n")
+cat("\n[fase 1 - graficos bivariados]\n")
 probar("dispersion con conteo por celda",
        dibuja(graficar_dispersion(muestra, "valor", "observacion",
                                   celdas = TRUE)))
@@ -91,7 +91,7 @@ probar("mosaico de dos cualitativas", {
   dibuja(graficar_mosaico(tabla_contingencia(cruzado$grupo, cruzado$categoria)))
 })
 
-cat("\n[fase 1 · graficos multivariados y de preparacion]\n")
+cat("\n[fase 1 - graficos multivariados y de preparacion]\n")
 probar("matriz de dispersion",
        dibuja(graficar_pares(muestra, c("valor", "observacion"))))
 probar("mapa de calor de correlaciones",

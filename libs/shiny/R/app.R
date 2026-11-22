@@ -45,7 +45,7 @@ TEMA_INICIAL <- Sys.getenv("SDA_TEMA", "flatly")
 # --- UI ------------------------------------------------------------------
 ui <- page_navbar(
   id = "tab",
-  title = "SDA · Regresion sobre charcoal",
+  title = "SDA - Regresion sobre charcoal",
   navbar_options = navbar_options(bg = "#0B1623", type = "dark"),
   theme = tema(TEMA_INICIAL),
   header = tags$head(tags$style(".value-box {min-height: 110px;}")),

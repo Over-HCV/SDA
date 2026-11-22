@@ -15,4 +15,4 @@ Como datos se usa el conjunto *Zoo* de UCI (101 animales, 16 atributos cualitati
 
 Quedamos atentos a sus comentarios.
 
-Anyelo Álvarez · Daniel Arias · Tania Mora · Over Castrillón
+Anyelo Álvarez - Daniel Arias - Tania Mora - Over Castrillón

@@ -23,8 +23,8 @@
 
 \title[Clustering cualitativo]{Clustering de variables cualitativas}
 \subtitle{Cuando la media no existe: k-modas, Gower y clases latentes}
-\author{Álvarez · Arias · Mora · Castrillón}
-\institute{Análisis Estadístico de Datos · Universidad del Rosario}
+\author{Álvarez - Arias - Mora - Castrillón}
+\institute{Análisis Estadístico de Datos - Universidad del Rosario}
 \date{2026}
 \titlegraphic{\includegraphics[height=0.8cm]{tema/logos/ur-logo.png}}
 
@@ -54,7 +54,7 @@
 % \parte{n}{nombre}{título}: el pie de cada diapositiva pasa a decir quién
 % expone, y una diapositiva de relevo marca el cambio en el video.
 \newcommand{\parte}[3]{%
-  \author[Parte #1/4 · #2]{Álvarez · Arias · Mora · Castrillón}%
+  \author[Parte #1/4 - #2]{Álvarez - Arias - Mora - Castrillón}%
   \begin{frame}[plain]
     \centering\vfill
     {\usebeamercolor[fg]{frametitle}\color{mcmPrimary}\Large\textsc{Parte #1 de 4}}\par
@@ -118,7 +118,7 @@
     \midrule
     Boxplots y correlación          & Frecuencias y asociación \\
     ACP: primer plano factorial     & ACM: primer plano factorial \\
-    Euclídea + estandarizar         & Emparejamiento simple · Gower \\
+    Euclídea + estandarizar         & Emparejamiento simple - Gower \\
     $d^2$ de la partición           & $d$ de la partición (desacuerdos) \\
     K-medias (Lloyd, \texttt{nstart}) & K-modas (Huang, reinicios) \\
     Codo sobre $d^2$                & Codo sobre desacuerdos \\
@@ -424,16 +424,16 @@
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
       \begin{alertblock}{K-modas}
-        \footnotesize Depende del arranque · empates de moda · pesos iguales ·
+        \footnotesize Depende del arranque - empates de moda - pesos iguales ·
         pierde el orden de las ordinales.
       \end{alertblock}
       \begin{alertblock}{Gower}
-        \footnotesize Pesos iguales · binarias asimétricas · memoria $O(n^2)$.
+        \footnotesize Pesos iguales - binarias asimétricas - memoria $O(n^2)$.
       \end{alertblock}
     \end{column}
     \begin{column}{0.48\textwidth}
       \begin{alertblock}{Clases latentes}
-        \footnotesize Independencia local (pelo y leche) · máximos locales ·
+        \footnotesize Independencia local (pelo y leche) - máximos locales ·
         celdas con $\theta = 0$ o $1$.
       \end{alertblock}
       \begin{alertblock}{Tándem}

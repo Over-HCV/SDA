@@ -25,7 +25,7 @@ flowchart TB
 
 ---
 
-## 010 · Fundamentos matemáticos `010-fundamentos/`
+## 010 - Fundamentos matemáticos `010-fundamentos/`
 
 Cimiento. No es "estadística" pero sin esto los métodos multivariados son recetas ciegas.
 
@@ -76,7 +76,7 @@ Cimiento. No es "estadística" pero sin esto los métodos multivariados son rece
 
 ---
 
-## 020 · Datos y estadística descriptiva `020-descriptiva/`
+## 020 - Datos y estadística descriptiva `020-descriptiva/`
 
 - Marco conceptual `010-marco`
   - Población y muestra `010-poblacion-muestra` **[N, n]**
@@ -149,7 +149,7 @@ Cimiento. No es "estadística" pero sin esto los métodos multivariados son rece
 
 ---
 
-## 030 · Probabilidad `030-probabilidad/`
+## 030 - Probabilidad `030-probabilidad/`
 
 - Experimento aleatorio y espacio muestral `010-espacio-muestral` **[Ω]**
   - Determinístico vs. aleatorio
@@ -178,7 +178,7 @@ Cimiento. No es "estadística" pero sin esto los métodos multivariados son rece
 
 ---
 
-## 040 · Variables aleatorias y modelos `040-variables-aleatorias/`
+## 040 - Variables aleatorias y modelos `040-variables-aleatorias/`
 
 - Variable aleatoria `010-variable-aleatoria` **[X: Ω → ℝ]**
   - Discreta vs. continua
@@ -239,7 +239,7 @@ Cimiento. No es "estadística" pero sin esto los métodos multivariados son rece
 
 ---
 
-## 050 · Pensamiento bivariado y dependencia `050-bivariado/`
+## 050 - Pensamiento bivariado y dependencia `050-bivariado/`
 
 - Por qué dos variables no son dos análisis univariados `010-motivacion`
 - Distribuciones conjuntas `020-conjunta`
@@ -269,7 +269,7 @@ Cimiento. No es "estadística" pero sin esto los métodos multivariados son rece
 
 ---
 
-## 060 · Muestreo e inferencia `060-inferencia/`
+## 060 - Muestreo e inferencia `060-inferencia/`
 
 - El problema inferencial `010-problema-inferencial`
   - De la muestra a la población: inducción bajo incertidumbre
@@ -333,7 +333,7 @@ Cimiento. No es "estadística" pero sin esto los métodos multivariados son rece
 
 ---
 
-## 070 · Datos multivariados `070-multivariado/`
+## 070 - Datos multivariados `070-multivariado/`
 
 - Qué es la estadística multivariada `010-que-es`
   - El salto de p = 1 a p > 1: correlación, dimensión y volumen
@@ -378,7 +378,7 @@ Cimiento. No es "estadística" pero sin esto los métodos multivariados son rece
 
 ---
 
-## 080 · Normal multivariada e inferencia sobre μ `080-normal-multivariada/`
+## 080 - Normal multivariada e inferencia sobre μ `080-normal-multivariada/`
 
 - De la normal univariada a la multivariada `010-de-uni-a-multi`
   - El exponente escalar se vuelve forma cuadrática **[(x−μ)ᵀΣ⁻¹(x−μ)]**
@@ -413,7 +413,7 @@ Cimiento. No es "estadística" pero sin esto los métodos multivariados son rece
 
 ---
 
-## 090 · Reducción de dimensionalidad `090-reduccion/`
+## 090 - Reducción de dimensionalidad `090-reduccion/`
 
 - Motivación `010-motivacion`
   - Muchas variables correlacionadas ⇒ información redundante
@@ -465,7 +465,7 @@ Cimiento. No es "estadística" pero sin esto los métodos multivariados son rece
 
 ---
 
-## 100 · Agrupamiento (clustering) `100-agrupamiento/`
+## 100 - Agrupamiento (clustering) `100-agrupamiento/`
 
 - Planteamiento `010-planteamiento`
   - Aprendizaje no supervisado: no hay etiqueta verdadera
@@ -518,7 +518,7 @@ Cimiento. No es "estadística" pero sin esto los métodos multivariados son rece
 
 ---
 
-## 110 · Clasificación `110-clasificacion/`
+## 110 - Clasificación `110-clasificacion/`
 
 Puente natural desde el agrupamiento: aquí sí hay etiqueta conocida.
 
@@ -553,7 +553,7 @@ Puente natural desde el agrupamiento: aquí sí hay etiqueta conocida.
 
 ---
 
-## 120 · Regresión lineal `120-regresion/`
+## 120 - Regresión lineal `120-regresion/`
 
 - Propósito y motivación `010-motivacion`
   - Describir, explicar y predecir: tres objetivos distintos
@@ -640,7 +640,7 @@ Puente natural desde el agrupamiento: aquí sí hay etiqueta conocida.
 
 ---
 
-## 130 · Análisis de varianza `130-anova/`
+## 130 - Análisis de varianza `130-anova/`
 
 - Planteamiento `010-planteamiento`
   - Comparar más de dos medias: por qué no sirven múltiples pruebas t `010-problema-multiple`
@@ -690,7 +690,7 @@ Puente natural desde el agrupamiento: aquí sí hay etiqueta conocida.
 
 ---
 
-## 140 · Tablas de contingencia y correspondencias `140-contingencia/`
+## 140 - Tablas de contingencia y correspondencias `140-contingencia/`
 
 - Datos categóricos cruzados `010-datos-categoricos`
   - Tabla de contingencia r×c `010-tabla` **[nᵢⱼ]**
@@ -714,7 +714,7 @@ Puente natural desde el agrupamiento: aquí sí hay etiqueta conocida.
 
 ---
 
-## 150 · Hacia dónde sigue `150-extensiones/`
+## 150 - Hacia dónde sigue `150-extensiones/`
 
 Punteros, no desarrollo. Marcan los bordes del mapa para saber que existen.
 

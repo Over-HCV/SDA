@@ -1,7 +1,7 @@
 # learn/R/nucleo/catalogo/basicos.R
 #
-# Sesiones 1-2 · Herramientas estadísticas básicas.
-# Fuentes: notes/SDA/NB1_1_EST, NB1_2_EST · libs/topics-map.md filas 1-5.
+# Sesiones 1-2 - Herramientas estadísticas básicas.
+# Fuentes: notes/SDA/NB1_1_EST, NB1_2_EST - libs/topics-map.md filas 1-5.
 
 poblar_catalogo_basicos <- function() {
 

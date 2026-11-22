@@ -1,6 +1,6 @@
 # learn/R/ui/f0/inicio.R
 #
-# Inicio · dónde estoy, qué hay hecho, por dónde sigo.
+# Inicio - dónde estoy, qué hay hecho, por dónde sigo.
 #
 # Todo lo que muestra sale del estado vivo (dataset, paneles marcados,
 # almacén) y del registro, nunca de constantes escritas a mano: si el catálogo
@@ -118,7 +118,7 @@ mod_inicio_server <- function(id, almacen, dataset = NULL, seleccion = NULL,
         con_unidad <- sum(nzchar(ds$diccionario$unidad %||% ""), na.rm = TRUE)
         shiny::tagList(
           .renglon("Dataset", shiny::tags$strong(ds$nombre %||% ds$fuente),
-                   sprintf(" · %s de %s filas · %d columnas",
+                   sprintf(" - %s de %s filas - %d columnas",
                            format(ds$n, big.mark = ".", decimal.mark = ","),
                            format(n_crudo, big.mark = ".", decimal.mark = ","), ds$p)),
           .renglon("Preparación",
@@ -127,7 +127,7 @@ mod_inicio_server <- function(id, almacen, dataset = NULL, seleccion = NULL,
                                     lapply(c(pila, extra), shiny::tags$li))
                    else "sin filtros ni transformaciones"),
           .renglon("Diccionario",
-                   sprintf("%d declaradas a mano%s · %d con unidad",
+                   sprintf("%d declaradas a mano%s - %d con unidad",
                            length(declaradas),
                            if (length(declaradas))
                              paste0(" (", paste(utils::head(declaradas, 4),
@@ -142,10 +142,10 @@ mod_inicio_server <- function(id, almacen, dataset = NULL, seleccion = NULL,
 
       shiny::tagList(
         datos,
-        .renglon("Informe", sprintf("%d paneles marcados · %d con lectura",
+        .renglon("Informe", sprintf("%d paneles marcados - %d con lectura",
                                     length(entradas), con_lectura),
                  if (!is.null(cuaderno))
-                   sprintf(" · cuaderno: %d piezas", length(cuaderno()))),
+                   sprintf(" - cuaderno: %d piezas", length(cuaderno()))),
         franja_estado(list(
           "datasets" = almacen_contar(cuentas, "dataset"),
           "modelos"  = almacen_contar(cuentas, "modelo"),
@@ -207,7 +207,7 @@ mod_inicio_server <- function(id, almacen, dataset = NULL, seleccion = NULL,
       shiny::tagList(lapply(seq_len(nrow(progreso)), function(i) {
         fila <- progreso[i, ]
         sesion <- as.character(fila$sesion)
-        etiqueta <- sprintf("Sesión %s · %s", sesion,
+        etiqueta <- sprintf("Sesión %s - %s", sesion,
                             TITULOS_SESION[[sesion]] %||% "")
         entrega <- ENTREGAS_SESION[sesion]
         paneles <- intersect(PANELES_SESION[[sesion]] %||% character(0),

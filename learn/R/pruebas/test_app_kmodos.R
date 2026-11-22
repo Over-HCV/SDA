@@ -7,11 +7,11 @@
 #
 # El molde es test_app_kmeans.R. Lo que este añade y aquel no puede dar:
 #
-#   · que una fuente cualitativa llegue entera a la fase 2 y que el método
+#   - que una fuente cualitativa llegue entera a la fase 2 y que el método
 #     ofrezca sus columnas (entrada `matriz_cualitativa`), no las numéricas;
-#   · que la fase 3 hable de disimilitud y no de inercia, y que el paso a paso
+#   - que la fase 3 hable de disimilitud y no de inercia, y que el paso a paso
 #     funcione con modas en vez de centroides;
-#   · que la fase 4 encienda las vistas de la familia cualitativa y apague las
+#   - que la fase 4 encienda las vistas de la familia cualitativa y apague las
 #     que suponen una matriz numérica (centroides, cargas).
 
 suppressPackageStartupMessages(library(shinytest2))
@@ -82,7 +82,7 @@ app <- AppDriver$new(app_dir = "learn/R", name = "sda-lab-kmodos",
 on.exit(app$stop(), add = TRUE)
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 1 · Zoo guardado en Objetos]\n")
+cat("\n[fase 1 - Zoo guardado en Objetos]\n")
 
 invisible(ir_a(app, "① Datos", "Fuente"))
 app$set_inputs(`datos-fuente` = "zoo", wait_ = FALSE)
@@ -96,7 +96,7 @@ probar("el dataset queda guardado como objeto",
        grepl("d1", esperar_html(app, "d1"), fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 2 · k-modas en el catálogo]\n")
+cat("\n[fase 2 - k-modas en el catálogo]\n")
 
 html_f2 <- ir_a(app, "② Modelado", "elegir_kmodos")
 probar("k-modas ofrece Elegir en el catálogo",
@@ -131,7 +131,7 @@ probar("el modelo queda guardado como objeto",
              fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 3 · Huang, arranques y las modas caminando]\n")
+cat("\n[fase 3 - Huang, arranques y las modas caminando]\n")
 
 html_f3 <- ir_a(app, "③ Ajuste", "Huang")
 probar("el optimizador sale del registro del método",
@@ -174,7 +174,7 @@ probar("la receta guarda los mandos de esta familia",
              fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 4 · las vistas de la familia cualitativa]\n")
+cat("\n[fase 4 - las vistas de la familia cualitativa]\n")
 
 invisible(ir_a(app, "④ Evaluación", "Compatibilidad"))
 app$click("evaluacion-correr")

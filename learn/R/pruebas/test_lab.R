@@ -24,7 +24,7 @@ probar <- function(descripcion, expresion) {
   invisible(resultado)
 }
 
-cat("\n[lab.R · argumentos y dataset]\n")
+cat("\n[lab.R - argumentos y dataset]\n")
 probar("las opciones se separan de los posicionales", {
   partido <- partir_argumentos(c("resumen", "Temperatura", "--fuente", "ori"))
   identical(partido$posicionales, c("resumen", "Temperatura")) &&
@@ -56,7 +56,7 @@ probar("el dataset de consola es el mismo objeto que usa la app",
        all(c("df", "diccionario", "transformaciones", "n", "p") %in%
              names(ds_cli)))
 
-cat("\n[lab.R · paneles como tablas]\n")
+cat("\n[lab.R - paneles como tablas]\n")
 probar("un panel se devuelve como la tabla de lo que dibujaría", {
   capas <- tabla_de_panel(ds_cli, "f1.analisis.histograma", "Temperatura")
   # Una fila por barra, con su intervalo y su altura: es lo que uno lee del
@@ -130,7 +130,7 @@ probar("el codigo de cada panel CORRE sobre los datos, no solo parsea", {
   length(rotas) == 0L
 })
 
-cat("\n[lab.R · pedidos y cuadernos]\n")
+cat("\n[lab.R - pedidos y cuadernos]\n")
 probar("un pedido lleva columnas y opciones con nombre", {
   entrada <- entrada_de_pedido(
     "f1.analisis.dispersion:Temperatura+Velocidad_del_Viento+marginales=TRUE",
@@ -146,8 +146,8 @@ probar("un campo plural se lleva todas las columnas", {
 probar("el titulo de la seccion distingue paneles repetidos", {
   lineas <- COMANDOS$cuaderno(
     ds_cli, "f1.analisis.densidad:Temperatura,f1.analisis.densidad:Presion")
-  any(grepl("## Densidad kernel · Temperatura", lineas, fixed = TRUE)) &&
-    any(grepl("## Densidad kernel · Presion", lineas, fixed = TRUE))
+  any(grepl("## Densidad kernel - Temperatura", lineas, fixed = TRUE)) &&
+    any(grepl("## Densidad kernel - Presion", lineas, fixed = TRUE))
 })
 probar("el cuaderno tambien se arma desde la consola", {
   lineas <- COMANDOS$cuaderno(ds_cli, "f1.analisis.boxplot")
@@ -179,7 +179,7 @@ exportar_sesion_json(sesion_actual(nuevo_almacen(), ds_sesion, seleccion_sesion)
 probar("el cuaderno se arma desde la sesion, sin listar claves", {
   lineas <- COMANDOS$cuaderno(ds_sesion, character(0),
                               list(sesion = archivo_sesion))
-  any(grepl("## Resumen numérico · Temperatura", lineas, fixed = TRUE)) &&
+  any(grepl("## Resumen numérico - Temperatura", lineas, fixed = TRUE)) &&
     any(grepl("La media queda debajo de la mediana.", lineas, fixed = TRUE))
 })
 probar("el resumen de una variable de intervalo trae summary() y la asimetria", {
@@ -207,7 +207,7 @@ probar("el diccionario declarado viaja dentro del chunk", {
     any(grepl("intervalo", paste(codigo, collapse = " "), fixed = TRUE))
 })
 
-cat("\n[lab.R · Taller 02: filtro de exclusión, fases 2-4]\n")
+cat("\n[lab.R - Taller 02: filtro de exclusión, fases 2-4]\n")
 PAISES_ATIPICOS <- "Country!=UnitedStates,China,SaudiArabia,Russia"
 CINCO <- c("Crude_oil_including_lease_condensate_production_TBPD",
            "Petroleum_and_other_liquids_consumption_TBPD",

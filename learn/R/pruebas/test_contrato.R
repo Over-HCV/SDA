@@ -57,7 +57,7 @@ grupal <- correr("prueba-kmeans", metodo = "kmeans", fuente = nube,
 leido_grupal <- jsonlite::fromJSON(file.path(salida_abs, "prueba-kmeans.json"))
 
 # ---------------------------------------------------------------------------
-cat("\n[contrato S2 · los archivos]\n")
+cat("\n[contrato S2 - los archivos]\n")
 
 probar("la corrida queda lista y con duracion medida",
        corrida$estado == "listo" && is.finite(corrida$duracion))
@@ -95,7 +95,7 @@ probar("el CSV de una particion trae la tabla de grupos, no la de componentes", 
 })
 
 # ---------------------------------------------------------------------------
-cat("\n[C11 · la regla de las tres partes]\n")
+cat("\n[C11 - la regla de las tres partes]\n")
 
 probar("cada hiperparametro del registro es argumento de la funcion pura",
        all(names(metodo("acp")$hiper) %in%

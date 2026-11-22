@@ -67,7 +67,7 @@ app <- AppDriver$new(app_dir = "learn/R", name = "sda-lab-taller01",
 on.exit(app$stop(), add = TRUE)
 
 # ---------------------------------------------------------------------------
-cat("\n[taller 01 · cargar ORI y filtrar el mediodía]\n")
+cat("\n[taller 01 - cargar ORI y filtrar el mediodía]\n")
 
 invisible(ir_a(app, "① Datos", "Fuente"))
 app$set_inputs(`datos-fuente` = "ori", wait_ = FALSE)
@@ -95,7 +95,7 @@ probar("el filtro queda anotado en la pila, como una transformación más",
        grepl("filtro Hora en [12:00]", html_medio_dia, fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[taller 01 · marcar paneles y leer el cuaderno]\n")
+cat("\n[taller 01 - marcar paneles y leer el cuaderno]\n")
 
 html_marginal <- ir_a_pestana(app, "datos-pestana", "▣ Análisis",
                               "Histogramas marginales")
@@ -117,7 +117,7 @@ probar("la pestaña Informe lista el panel marcado en ① Datos",
 probar("el conteo de paneles refleja la selección",
        grepl("1 panel", html_informe, fixed = TRUE))
 probar("el cuaderno sabe sobre qué dataset se armó",
-       grepl("ori · 118 x 18", html_informe, fixed = TRUE))
+       grepl("ori - 118 x 18", html_informe, fixed = TRUE))
 
 # La pregunta 4 del taller pide la caja de DOS variables. La casilla es por
 # panel, así que sin identidad la segunda reemplazaba a la primera y el

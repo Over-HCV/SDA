@@ -1,7 +1,7 @@
 # learn/R/nucleo/catalogo/multivariada.R
 #
-# Sesión 3 · Normal multivariada, distancias y visualización.
-# Fuentes: notes/SDA/NB2_EST · libs/topics-map.md filas 6-10.
+# Sesión 3 - Normal multivariada, distancias y visualización.
+# Fuentes: notes/SDA/NB2_EST - libs/topics-map.md filas 6-10.
 
 poblar_catalogo_multivariada <- function() {
 

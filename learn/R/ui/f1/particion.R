@@ -82,7 +82,7 @@ servidor_particion <- function(input, output, session, dataset) {
     shiny::req(ds, ds$particion)
     particion <- ds$particion
     shiny::tags$p(class = "small text-muted mb-0", sprintf(
-      "%s · semilla %s · estratificada por %s", particion$tipo,
+      "%s - semilla %s - estratificada por %s", particion$tipo,
       particion$semilla,
       if (is.na(particion$estratificar)) "nada" else particion$estratificar))
   })

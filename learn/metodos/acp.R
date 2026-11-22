@@ -8,9 +8,9 @@
 #
 # Dos caminos al mismo resultado, y esa es la lección:
 #
-#   svd      · descomposición en un paso. Es lo que hace prcomp(). Exacto y
+#   svd      - descomposición en un paso. Es lo que hace prcomp(). Exacto y
 #              aburrido: no hay nada que mirar mientras corre.
-#   potencia · iteración de potencia con deflación. Empieza en un vector al
+#   potencia - iteración de potencia con deflación. Empieza en un vector al
 #              azar, lo multiplica por S y lo normaliza; el vector gira hacia
 #              la dirección de mayor varianza y se queda ahí. Deflacionando
 #              (S ← S − λ v vᵀ) sale la siguiente componente.

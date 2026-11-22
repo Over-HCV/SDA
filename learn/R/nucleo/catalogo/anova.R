@@ -1,7 +1,7 @@
 # learn/R/nucleo/catalogo/anova.R
 #
-# Sesión 8 · Análisis de varianza.
-# Fuentes: notes/SDA/NB6_EST · libs/topics-map.md filas 28-32.
+# Sesión 8 - Análisis de varianza.
+# Fuentes: notes/SDA/NB6_EST - libs/topics-map.md filas 28-32.
 
 poblar_catalogo_anova <- function() {
 

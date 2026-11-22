@@ -26,7 +26,7 @@ graficar_antes_despues <- function(antes, despues, columna, clases = 30L) {
     ggplot2::facet_wrap(~ momento, scales = "free", ncol = 2) +
     scale_fill_cat(2) +
     ggplot2::labs(x = columna, y = "frecuencia", fill = NULL,
-                  subtitle = sprintf("g1 antes %.2f · g1 despues %.2f",
+                  subtitle = sprintf("g1 antes %.2f - g1 despues %.2f",
                                      .asimetria(crudos[!is.na(crudos)]),
                                      .asimetria(tratados[!is.na(tratados)]))) +
     tema_ggplot() +
@@ -48,7 +48,7 @@ graficar_perfil_boxcox <- function(perfil) {
     ggplot2::geom_vline(xintercept = perfil$redondeado, color = "grey55",
                         linetype = "dashed", linewidth = 0.6) +
     ggplot2::labs(x = "lambda", y = "log-verosimilitud",
-                  subtitle = sprintf("optimo %.2f · redondo sugerido %.2f",
+                  subtitle = sprintf("optimo %.2f - redondo sugerido %.2f",
                                      perfil$optimo, perfil$redondeado)) +
     tema_ggplot()
 }
@@ -114,7 +114,7 @@ graficar_nube_sinteticos <- function(datos, x, y, origen, grupo = NULL) {
 
   grafico +
     ggplot2::labs(x = x, y = y, shape = NULL, alpha = NULL,
-                  subtitle = sprintf("%d originales · %d remuestreadas",
+                  subtitle = sprintf("%d originales - %d remuestreadas",
                                      sum(marco$origen == "original"),
                                      sum(marco$origen == "remuestreada"))) +
     tema_ggplot()

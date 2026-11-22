@@ -4,7 +4,7 @@
 #
 # Mismo contrato de cuatro funciones por subsección que f1/datos.R:
 #
-#   controles_<x>(ns) · actualizar_<x>(session, ds) · salida_<x>(ns) ·
+#   controles_<x>(ns) - actualizar_<x>(session, ds) - salida_<x>(ns) ·
 #   servidor_<x>(input, output, session, ...)
 #
 # De dónde sale el dataset: del almacén, no de la fase 1 directamente. Las
@@ -126,7 +126,7 @@ mod_modelado_server <- function(id, almacen = NULL, dataset_f1 = NULL,
     shiny::observeEvent(almacen(), {
       ids <- almacen_ids(almacen(), "dataset")
       etiquetas <- vapply(ids, function(id)
-        sprintf("%s · %s", id, almacen_obtener(almacen(), "dataset", id)$nombre),
+        sprintf("%s - %s", id, almacen_obtener(almacen(), "dataset", id)$nombre),
         "")
       .rellenar_selector(session, "dataset",
                          stats::setNames(ids, etiquetas), input$dataset)
@@ -176,7 +176,7 @@ mod_modelado_server <- function(id, almacen = NULL, dataset_f1 = NULL,
     shiny::observeEvent(input$guardar, {
       shiny::req(!is.null(almacen), clave_metodo())
       modelo <- nuevo_modelo(
-        NULL, sprintf("%s · %d vars", metodo(clave_metodo())$nombre,
+        NULL, sprintf("%s - %d vars", metodo(clave_metodo())$nombre,
                       length(columnas())),
         clave_metodo(), spec = columnas(), hiper = hiper())
       guardado <- almacen_agregar(almacen(), modelo)

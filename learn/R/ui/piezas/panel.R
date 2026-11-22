@@ -102,7 +102,7 @@ panel_pendiente <- function(titulo, hito, detalle = NULL) {
         class = "text-center text-muted py-5",
         bsicons::bs_icon("cone-striped", size = "2.5rem"),
         shiny::tags$p(class = "mt-3 mb-1",
-                      shiny::tags$strong(sprintf("En construcción · %s", hito))),
+                      shiny::tags$strong(sprintf("En construcción - %s", hito))),
         if (!is.null(detalle)) shiny::tags$p(class = "small", detalle),
         shiny::tags$p(class = "small mb-0",
                       "El plan y su avance están en ", shiny::tags$code("learn/PLAN.md"))

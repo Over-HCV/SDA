@@ -1,7 +1,7 @@
 # learn/R/nucleo/catalogo/agrupamiento.R
 #
-# Sesión 5 · Agrupamiento.
-# Fuentes: notes/SDA/NB4_EST · libs/topics-map.md filas 18-22.
+# Sesión 5 - Agrupamiento.
+# Fuentes: notes/SDA/NB4_EST - libs/topics-map.md filas 18-22.
 
 poblar_catalogo_agrupamiento <- function() {
 

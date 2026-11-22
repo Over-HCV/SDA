@@ -34,7 +34,7 @@ graficar_pares <- function(datos, columnas = NULL, grupo = NULL, alfa = 0.5,
     capa +
     ggplot2::facet_grid(fila ~ columna, scales = "free") +
     ggplot2::labs(x = NULL, y = NULL,
-                  subtitle = sprintf("%d variables · n = %d", length(columnas),
+                  subtitle = sprintf("%d variables - n = %d", length(columnas),
                                      nrow(datos))) +
     tema_ggplot()
   if (!is.null(grupo))
@@ -105,7 +105,7 @@ graficar_coordenadas_paralelas <- function(datos, columnas = NULL, grupo = NULL,
   grafico <- ggplot2::ggplot(largo, ggplot2::aes(x = .data$eje, y = .data$valor)) +
     capa +
     ggplot2::labs(x = NULL, y = paste("escala", metodo),
-                  subtitle = sprintf("%d variables · %d observaciones",
+                  subtitle = sprintf("%d variables - %d observaciones",
                                      length(columnas), nrow(datos))) +
     tema_ggplot() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 30, hjust = 1))
@@ -142,7 +142,7 @@ graficar_elipsoide <- function(datos, x, y, niveles = c(0.5, 0.95)) {
     ggplot2::annotate("point", x = mean(marco$x), y = mean(marco$y),
                       shape = 4, size = 3, color = "grey25") +
     ggplot2::labs(x = x, y = y, color = "concentracion",
-                  subtitle = sprintf("r = %.3f · el centro es la media conjunta",
+                  subtitle = sprintf("r = %.3f - el centro es la media conjunta",
                                      stats::cor(marco$x, marco$y))) +
     tema_ggplot()
 }
@@ -168,7 +168,7 @@ graficar_qq_mahalanobis <- function(distancias, p, nivel = 0.975) {
                                 labels = c("dentro", "atipico")) +
     ggplot2::labs(x = sprintf("cuantil chi2 con %d gl", p),
                   y = "distancia de Mahalanobis al cuadrado", color = NULL,
-                  subtitle = sprintf("corte al %.1f%% = %.2f · %d por encima",
+                  subtitle = sprintf("corte al %.1f%% = %.2f - %d por encima",
                                      100 * nivel, corte, sum(puntos$atipico))) +
     tema_ggplot()
 }

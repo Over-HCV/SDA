@@ -127,7 +127,7 @@ perfiles_grupos <- function(ajuste) {
 #' 0 = no más acuerdo que el azar; puede ser negativo.
 #'
 #'   ARI = (Σ C(n_ij,2) − E) / (½[Σ C(a_i,2) + Σ C(b_j,2)] − E)
-#'   E   = Σ C(a_i,2) · Σ C(b_j,2) / C(n,2)
+#'   E   = Σ C(a_i,2) - Σ C(b_j,2) / C(n,2)
 #'
 #' @param a,b dos particiones de las mismas observaciones (se ignoran los NA)
 indice_rand_ajustado <- function(a, b) {

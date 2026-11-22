@@ -56,7 +56,7 @@ graficar_modelo_manual <- function(proyeccion, columnas, objetivo = NULL,
     return(.grafico_vacio("sin filas completas en esas dos variables"))
 
   subtitulo <- if (is.null(objetivo) || is.na(objetivo$proporcion)) NULL else
-    sprintf("capta %.1f%% de la varianza · queda fuera %.3f",
+    sprintf("capta %.1f%% de la varianza - queda fuera %.3f",
             100 * objetivo$proporcion, objetivo$error_reconstruccion)
 
   ggplot2::ggplot(proyeccion, ggplot2::aes(x = .data$x, y = .data$y)) +

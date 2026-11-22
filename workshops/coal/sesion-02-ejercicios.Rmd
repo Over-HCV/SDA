@@ -1,6 +1,6 @@
 ---
 title: "Ejercicios de la sesión 02 — Solución / Explicación"
-subtitle: "Análisis Estadístico de Datos · datos de carbón vegetal (charcoal), 2019"
+subtitle: "Análisis Estadístico de Datos - datos de carbón vegetal (charcoal), 2019"
 author: "Over V."
 date: "`r format(Sys.Date(), '%Y-%m-%d')`"
 output:
@@ -673,7 +673,7 @@ ggplot(bivar_neg, aes(Consumo, Excedente)) +
   geom_point(alpha = 0.7, colour = "#d95f0e") +
   labs(title = "Un caso de covarianza negativa",
        subtitle = paste0("Cov = ", format(round(cov_neg), big.mark = " "),
-                         " · r = ", round(cor_neg, 3)),
+                         " - r = ", round(cor_neg, 3)),
        x = "Consumo por hogares", y = "Excedente (producción − consumo)") +
   theme_minimal(base_size = 11)
 ```

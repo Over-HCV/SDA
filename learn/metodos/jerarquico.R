@@ -8,11 +8,11 @@
 #
 # Lo que el jerárquico añade al marco y k-medias no podía dar:
 #
-#   · Un resultado que no depende de la semilla. Arranca con cada observación
+#   - Un resultado que no depende de la semilla. Arranca con cada observación
 #     sola y en cada paso junta los dos grupos más cercanos; no hay arranque
 #     que sortear. La pregunta deja de ser "¿otra semilla da lo mismo?" y pasa a
 #     ser "¿otro enlace da lo mismo?".
-#   · Todas las particiones a la vez. El árbol guarda de n grupos a uno; k_corte
+#   - Todas las particiones a la vez. El árbol guarda de n grupos a uno; k_corte
 #     solo elige a qué altura se lee. Por eso cambiar k no reajusta nada.
 #
 # Acá SÍ se delega en stats::hclust(), al revés que k-medias. No se pierde la
@@ -147,7 +147,7 @@ ajustar_jerarquico <- function(datos, columnas = NULL, enlace = "ward.D2",
 # y el parámetro que se sigue es la inercia intra-grupo de la partición que
 # queda después de cada fusión: la misma W que minimiza k-medias, leída al
 # revés. Se acumula sin recalcular: juntar A y B sube W en
-# |A||B| / (|A| + |B|) · ‖c_A − c_B‖², que es la cuenta de Ward.
+# |A||B| / (|A| + |B|) - ‖c_A − c_B‖², que es la cuenta de Ward.
 .traza_fusiones <- function(arbol, z) {
   n <- nrow(z)
   traza <- nueva_traza("altura de fusion", sentido = "asciende")

@@ -163,7 +163,7 @@ graficar_camino <- function(res) {
     ggplot2::labs(
       title = sprintf("Camino de coeficientes (alpha = %.2f)", res$alpha),
       subtitle = sprintf(
-        "lambda = %.5f | activos = %d de %d\nrojo = actual · azul = lambda.min · verde = lambda.1se",
+        "lambda = %.5f | activos = %d de %d\nrojo = actual - azul = lambda.min - verde = lambda.1se",
         res$lambda, res$no_cero, res$p),
       x = "log(lambda)", y = "coeficiente"
     )

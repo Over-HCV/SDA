@@ -60,10 +60,10 @@ ajustar_recta <- function(x, y) {
        r2 = if (total > 0) 1 - residual / total else NA_real_)
 }
 
-#' Texto corto de la recta para un subtítulo: "y = 1.2 + 0.35x · R² = 0.41".
+#' Texto corto de la recta para un subtítulo: "y = 1.2 + 0.35x - R² = 0.41".
 describir_recta <- function(recta) {
   if (is.na(recta$pendiente)) return("recta no calculable")
-  sprintf("y = %.3g %s %.3gx · R² = %.3f", recta$corte,
+  sprintf("y = %.3g %s %.3gx - R² = %.3f", recta$corte,
           if (recta$pendiente < 0) "-" else "+", abs(recta$pendiente), recta$r2)
 }
 

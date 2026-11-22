@@ -32,7 +32,7 @@ badge_muestreo <- function(n_total, n_muestra, semilla, id_boton = NULL) {
   shiny::tags$span(
     class = "badge bg-warning text-dark d-inline-flex align-items-center gap-1",
     bsicons::bs_icon("funnel"),
-    sprintf("graficando %s de %s · semilla %s",
+    sprintf("graficando %s de %s - semilla %s",
             format(n_muestra, big.mark = ".", decimal.mark = ","),
             format(n_total, big.mark = ".", decimal.mark = ","), semilla),
     if (!is.null(id_boton))

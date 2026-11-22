@@ -91,6 +91,6 @@
 
 .codigo_qq <- function(p)
   c(sprintf("x <- datos$%s", p$variable),
-    sprintf('qqnorm(x, main = "Q-Q normal · %s")', p$variable),
+    sprintf('qqnorm(x, main = "Q-Q normal - %s")', p$variable),
     "qqline(x, col = \"firebrick\")",
     'cat("Shapiro-Wilk:\\n"); print(shapiro.test(x))')

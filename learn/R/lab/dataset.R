@@ -97,7 +97,7 @@ declarar_escalas_cli <- function(ds, expresiones) {
     columna <- sub("=.*$", "", expresion)
     valor <- sub("^[^=]*=", "", expresion)
     if (!valor %in% ESCALAS)
-      stop("escala desconocida: ", valor, " · válidas: ",
+      stop("escala desconocida: ", valor, " - válidas: ",
            paste(ESCALAS, collapse = ", "), call. = FALSE)
     if (!columna %in% ds$diccionario$columna)
       stop("no existe la columna: ", columna, call. = FALSE)
@@ -136,7 +136,7 @@ aplicar_filtro_cli <- function(ds, expresion) {
 aplicar_transformacion_cli <- function(ds, expresion) {
   tipo <- sub(":.*$", "", expresion)
   if (!tipo %in% TRANSFORMACIONES)
-    stop("transformación desconocida: ", tipo, " · válidas: ",
+    stop("transformación desconocida: ", tipo, " - válidas: ",
          paste(TRANSFORMACIONES, collapse = ", "), call. = FALSE)
   columnas <- .lista_de_opcion(if (grepl(":", expresion, fixed = TRUE))
     sub("^[^:]*:", "", expresion) else "")
@@ -189,8 +189,8 @@ agregar_grupos_cli <- function(ds, opciones) {
                        reinicios = as.integer(opciones$reinicios %||% 25L),
                        semilla = as.integer(opciones$semilla %||% 42L))
   tamanos <- table(ds$df$grupo)
-  message(sprintf("[grupos] %s · %s", metodo, paste(sprintf(
-    "grupo %s: %d", names(tamanos), as.integer(tamanos)), collapse = " · ")))
+  message(sprintf("[grupos] %s - %s", metodo, paste(sprintf(
+    "grupo %s: %d", names(tamanos), as.integer(tamanos)), collapse = " - ")))
   ds
 }
 
@@ -241,7 +241,7 @@ agregar_dimensiones_cli <- function(ds, opciones) {
   ds$diccionario <- rehacer_diccionario(ds$diccionario, ds$df)
   ds$reduccion <- list(metodo = metodo, hiper = as.list(hiper),
                        columnas = ajuste$columnas, dimensiones = dimensiones)
-  message(sprintf("[reduccion] %s sobre %d columnas · %s · inercia %s",
+  message(sprintf("[reduccion] %s sobre %d columnas - %s - inercia %s",
                   metodo, length(ajuste$columnas),
                   paste(dimensiones, collapse = ", "),
                   paste(sprintf("%.1f%%", 100 * ajuste$varianza_explicada[

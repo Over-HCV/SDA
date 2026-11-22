@@ -48,7 +48,7 @@ por_tipo <- ajuste_falso(as.integer(zoo$tipo),
 set.seed(1)
 al_azar <- ajuste_falso(sample(rep(1:4, length.out = nrow(zoo))))
 
-cat("\n[ARI · casos a mano]\n")
+cat("\n[ARI - casos a mano]\n")
 probar("dos particiones idénticas dan 1",
        indice_rand_ajustado(c(1, 1, 2, 2, 3), c(1, 1, 2, 2, 3)) == 1)
 probar("la numeración no importa: renombrar los grupos sigue dando 1",

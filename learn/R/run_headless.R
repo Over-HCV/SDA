@@ -96,9 +96,9 @@ correr <- function(escenario, metodo = "acp", fuente = "twins", columnas = NULL,
     out_dir = out_dir)
 
   resumen <- resumen_ajuste(ajuste)
-  cat(sprintf("[correr] %s · %s · %s · %.2fs\n", escenario, metodo,
+  cat(sprintf("[correr] %s - %s - %s - %.2fs\n", escenario, metodo,
               paste(sprintf("%s %s", names(resumen), unlist(resumen)),
-                    collapse = " · "), duracion))
+                    collapse = " - "), duracion))
   invisible(corrida)
 }
 
@@ -131,7 +131,7 @@ correr <- function(escenario, metodo = "acp", fuente = "twins", columnas = NULL,
   graves <- Filter(function(a) a$severidad != "ok", avisos)
   resumen <- if (!length(graves)) "composicion sin avisos"
              else paste(vapply(graves, `[[`, "", "mensaje"), collapse = " | ")
-  sprintf("%s sobre %s (n = %d) · %s", m$nombre, dataset$nombre, dataset$n,
+  sprintf("%s sobre %s (n = %d) - %s", m$nombre, dataset$nombre, dataset$n,
           resumen)
 }
 

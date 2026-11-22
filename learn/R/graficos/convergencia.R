@@ -60,7 +60,7 @@ graficar_convergencia <- function(tabla, escala_log = FALSE,
 .subtitulo_convergencia <- function(iteraciones, componentes, recortadas) {
   base <- sprintf("%d iteraciones en %d componente(s)", iteraciones, componentes)
   if (recortadas == 0L) return(base)
-  sprintf("%s · %d con objetivo cero fuera de la escala log", base, recortadas)
+  sprintf("%s - %d con objetivo cero fuera de la escala log", base, recortadas)
 }
 
 #' Trayectoria: cada parámetro contra la iteración.
@@ -112,8 +112,8 @@ graficar_trayectoria <- function(tabla, componente = NULL) {
 
 .subtitulo_trayectoria <- function(componente, mostrados, total) {
   if (mostrados == total)
-    return(sprintf("componente %s · %d parametros", componente, total))
-  sprintf("componente %s · los %d parametros que mas se movieron, de %d",
+    return(sprintf("componente %s - %d parametros", componente, total))
+  sprintf("componente %s - los %d parametros que mas se movieron, de %d",
           componente, mostrados, total)
 }
 

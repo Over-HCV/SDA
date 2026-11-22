@@ -1,6 +1,6 @@
 # learn/R/ui/transversal/informe.R
 #
-# ⤓ Informe · exportar la exploración de la fase 1 como cuaderno reproducible.
+# ⤓ Informe - exportar la exploración de la fase 1 como cuaderno reproducible.
 #
 # El flujo: cada panel con casilla "Añadir" (fase 1) deja un snapshot en la
 # selección —clave, parámetros vigentes, texto y estado del dataset— y esta
@@ -143,7 +143,7 @@ mod_informe_server <- function(id, seleccion, dataset, cuaderno = NULL) {
       if (is.null(ds)) return(shiny::tags$span(
         class = "badge text-bg-warning", "sin dataset"))
       shiny::tags$span(class = "badge text-bg-secondary",
-                       sprintf("%s · %d x %d", ds$nombre, ds$n, ds$p))
+                       sprintf("%s - %d x %d", ds$nombre, ds$n, ds$p))
     })
 
     # Cada panel trae su caja de lectura (nota_<id>) y sus flechas. Las cajas se
@@ -165,7 +165,7 @@ mod_informe_server <- function(id, seleccion, dataset, cuaderno = NULL) {
         resumen <- paste(vapply(names(entrada$params), function(nombre)
           sprintf("%s = %s", nombre, paste(format(entrada$params[[nombre]]),
                                            collapse = " ")), ""),
-          collapse = " · ")
+          collapse = " - ")
         campo <- paste0("nota_", entrada$id %||% paste0("p", i))
         shiny::tags$div(
           class = "border rounded p-2 mb-2",
@@ -176,7 +176,7 @@ mod_informe_server <- function(id, seleccion, dataset, cuaderno = NULL) {
               shiny::tags$span(class = "fw-bold",
                                sprintf("%d. %s", i, entrada$titulo)),
               shiny::tags$span(class = "text-muted small ms-2",
-                               sprintf("%s · %s", entrada$clave,
+                               sprintf("%s - %s", entrada$clave,
                                        entrada$cuando))),
             shiny::tags$div(
               class = "btn-group btn-group-sm",

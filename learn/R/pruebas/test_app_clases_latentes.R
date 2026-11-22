@@ -7,11 +7,11 @@
 #
 # Calcado de test_app_kmeans.R. Lo que este añade y aquel no puede dar:
 #
-#   · un dataset cualitativo de punta a punta (Zoo): la fase 2 tiene que
+#   - un dataset cualitativo de punta a punta (Zoo): la fase 2 tiene que
 #     ofrecer factores, no números, y el identificador `animal` no puede
 #     romper el ajuste aunque quede seleccionado;
-#   · una traza que SUBE: la consola registra la log-verosimilitud;
-#   · la fase 4 encendiendo las vistas cualitativas (modos, cruce con la clase
+#   - una traza que SUBE: la consola registra la log-verosimilitud;
+#   - la fase 4 encendiendo las vistas cualitativas (modos, cruce con la clase
 #     real, BIC) y apagando las que solo tienen sentido con centroides.
 
 suppressPackageStartupMessages(library(shinytest2))
@@ -86,7 +86,7 @@ app <- AppDriver$new(app_dir = "learn/R", name = "sda-lab-clases-latentes",
 on.exit(app$stop(), add = TRUE)
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 1 · Zoo guardado en Objetos]\n")
+cat("\n[fase 1 - Zoo guardado en Objetos]\n")
 
 invisible(ir_a(app, "① Datos", "Fuente"))
 app$set_inputs(`datos-fuente` = "zoo", wait_ = FALSE)
@@ -98,7 +98,7 @@ probar("el dataset queda guardado como objeto",
        grepl("d1", esperar_html(app, "d1"), fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 2 · clases latentes con columnas cualitativas]\n")
+cat("\n[fase 2 - clases latentes con columnas cualitativas]\n")
 
 html_f2 <- ir_a(app, "② Modelado", "elegir_clases_latentes")
 probar("clases latentes ofrece Elegir en el catálogo",
@@ -138,7 +138,7 @@ probar("el modelo queda guardado como objeto",
              fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 3 · EM, reinicios y la verosimilitud subiendo]\n")
+cat("\n[fase 3 - EM, reinicios y la verosimilitud subiendo]\n")
 
 invisible(ir_a(app, "③ Ajuste", "El algoritmo, paso a paso"))
 app$wait_for_idle(duration = 800, timeout = 30000)
@@ -176,7 +176,7 @@ probar("la receta queda guardada",
              fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 4 · las vistas cualitativas]\n")
+cat("\n[fase 4 - las vistas cualitativas]\n")
 
 invisible(ir_a(app, "④ Evaluación", "Compatibilidad"))
 app$click("evaluacion-correr")

@@ -59,7 +59,7 @@ app <- AppDriver$new(app_dir = "learn/R", name = "sda-lab-traspaso",
 on.exit(app$stop(), add = TRUE)
 
 # ---------------------------------------------------------------------------
-cat("\n[① Datos · cargar SIN guardar en Objetos]\n")
+cat("\n[① Datos - cargar SIN guardar en Objetos]\n")
 
 invisible(ir_a(app, "① Datos", "Fuente"))
 app$set_inputs(`datos-fuente` = "twins", wait_ = FALSE)
@@ -68,7 +68,7 @@ app$wait_for_idle(duration = 1500, timeout = 30000)
 probar("twins carga en ①", grepl("183", esperar_html(app, "183"), fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[② Modelado · entrar sin haber guardado]\n")
+cat("\n[② Modelado - entrar sin haber guardado]\n")
 
 # Ni un clic en datos-guardar: entrar a la sección tiene que bastar.
 html_f2 <- ir_a(app, "② Modelado", "guardado como d1")
@@ -86,7 +86,7 @@ probar("no queda el aviso de dataset faltante",
        !grepl("Elegí un dataset", html_spec, fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[idempotencia · cambiar la fuente en ① no guarda otro]\n")
+cat("\n[idempotencia - cambiar la fuente en ① no guarda otro]\n")
 
 invisible(ir_a(app, "① Datos", "Fuente"))
 app$set_inputs(`datos-fuente` = "sintetico_regresion", wait_ = FALSE)
@@ -100,7 +100,7 @@ probar("y sigue seleccionado d1",
        identical(app$get_value(input = "modelado-dataset"), "d1"))
 
 # ---------------------------------------------------------------------------
-cat("\n[catálogo · el salto a ① Datos]\n")
+cat("\n[catálogo - el salto a ① Datos]\n")
 
 app$set_inputs(`modelado-pestana` = "Catálogo", wait_ = FALSE)
 html_cat <- esperar_html(app, "Ver en ① Datos")
@@ -111,7 +111,7 @@ probar("los pendientes sin lógica siguen diciendo la verdad",
 
 app$click("modelado-ver_normalidad")
 app$wait_for_idle(duration = 1000, timeout = 30000)
-probar("el salto aterriza en ① Datos · Análisis",
+probar("el salto aterriza en ① Datos - Análisis",
        identical(app$get_value(input = "seccion"), "① Datos") &&
          identical(app$get_value(input = "datos-pestana"), "▣ Análisis"))
 

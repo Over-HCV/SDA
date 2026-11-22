@@ -1,6 +1,6 @@
-# Taller 01 · Solucionario
+# Taller 01 - Solucionario
 
-**Base:** `data/ORI.csv` · **Filas usadas en casi todo el taller:** las 118 del mediodía.
+**Base:** `data/ORI.csv` - **Filas usadas en casi todo el taller:** las 118 del mediodía.
 
 Este documento tiene tres caras por pregunta:
 
@@ -22,11 +22,11 @@ difiere, cambian.
 Todas las preguntas menos la 1 y la 3 se responden sobre los registros del
 mediodía, así que el filtro se aplica **una vez** y queda puesto:
 
-1. **① Datos → Fuente** → fuente `ori · meteorologico IDEAM` → **Cargar**.
+1. **① Datos → Fuente** → fuente `ori - meteorologico IDEAM` → **Cargar**.
    La franja de estado debe decir 4.543 filas × 18 columnas.
 2. **① Datos → Filtro** → *Filtrar por columna* `Hora` → *Valores a conservar*
    `12:00` → **Aplicar filtro**.
-   El panel pasa a decir **filas al cargar 4543 · filas ahora 118 · filas fuera 4425**,
+   El panel pasa a decir **filas al cargar 4543 - filas ahora 118 - filas fuera 4425**,
    y la pila registra `filtro Hora en [12:00]`.
 
 El filtro no destruye nada: la pila se reaplica siempre desde los datos crudos, y
@@ -60,7 +60,7 @@ medio_dia <- datos[trimws(datos$Hora) == "12:00", ]
 
 ## Parte 1. Fundamentos estadísticos
 
-### Pregunta 1 · UE, variables y registros del mediodía
+### Pregunta 1 - UE, variables y registros del mediodía
 
 **En el lab.** ① Datos → **Fuente**, sin filtrar todavía: la franja de estado y el
 pie de la vista previa dan filas y columnas. Después de aplicar el filtro, el
@@ -72,14 +72,14 @@ estadísticas —cada una es *una medición en un municipio a una hora concreta*
 uno de los 59 municipios en cada una de las 2 fechas de la base.
 
 **Por consola.** `Rscript learn/R/lab.R datos $ORI` imprime el encabezado
-`ori · 118 filas × 18 columnas` y la pila aplicada.
+`ori - 118 filas × 18 columnas` y la pila aplicada.
 
 ```R
 dim(datos)                                    # 4543   18
 nrow(medio_dia)                               # 118
 ```
 
-### Pregunta 2 · Pronóstico más y menos frecuente al mediodía
+### Pregunta 2 - Pronóstico más y menos frecuente al mediodía
 
 **En el lab.** ① Datos → **Balanceo** → *Clase* `Pronostico`: el panel
 «Frecuencias por clase» es la tabla de frecuencias con su gráfico de barras.
@@ -107,7 +107,7 @@ frecuente **Parcialmente Nublado - Tormenta Ligera (2)**.
 sort(table(medio_dia$Pronostico), decreasing = TRUE)
 ```
 
-### Pregunta 3 · Escala y clase de cuatro variables
+### Pregunta 3 - Escala y clase de cuatro variables
 
 **En el lab.** ① Datos → **Diccionario**: una fila por columna, con *escala* y
 *clase* editables. El lab las autodetecta y deja corregirlas — que es justo el
@@ -129,7 +129,7 @@ ejercicio.
 > los cocientes no significan nada — 30 °C **no** es "el doble de calor" que
 > 15 °C —, mientras que 3 mph sí es el triple de viento que 1 mph.
 
-### Pregunta 4 · Descripción gráfica: cajas de temperatura y viento
+### Pregunta 4 - Descripción gráfica: cajas de temperatura y viento
 
 **En el lab.** ① Datos → **▣ Análisis → Univariado** → *Variable* `Temperatura`,
 panel «Diagrama de caja». Repetir con `Velocidad_del_Viento`.
@@ -169,7 +169,7 @@ boxplot(medio_dia$Temperatura, horizontal = TRUE, main = "Temperatura")
 boxplot(medio_dia$Velocidad_del_Viento, horizontal = TRUE, main = "Viento")
 ```
 
-### Pregunta 5 · Descripción numérica con `summary()`
+### Pregunta 5 - Descripción numérica con `summary()`
 
 **En el lab.** El panel «Resumen numérico», justo debajo de la caja: es
 `summary()` más desviación, RIC y asimetría, con los estadísticos que la escala
@@ -187,7 +187,7 @@ summary(medio_dia$Temperatura)
 summary(medio_dia$Velocidad_del_Viento)
 ```
 
-### Pregunta 6 · Atípicos de Tukey en Presión y Punto de Rocío
+### Pregunta 6 - Atípicos de Tukey en Presión y Punto de Rocío
 
 **En el lab.** ① Datos → **Calidad** → *Criterio* `IQR (1,5 × RIC)` → *Columna*
 `Presion`, y luego `Punto_de_Rocio`. El panel marca los puntos y el badge dice
@@ -220,7 +220,7 @@ boxplot(medio_dia$Presion, plot = FALSE)$out          # 1015.7
 boxplot(medio_dia$Punto_de_Rocio, plot = FALSE)$out   # numeric(0)
 ```
 
-### Pregunta 7 · Dispersión con histogramas marginales
+### Pregunta 7 - Dispersión con histogramas marginales
 
 **En el lab.** ① Datos → **▣ Análisis → Bivariado** → *X* `Temperatura`,
 *Y* `Velocidad_del_Viento`, y marcar **Histogramas marginales**. El panel compone
@@ -246,7 +246,7 @@ par(mar = c(4, 0, 1, 1)); barplot(hy$counts, axes = FALSE, space = 0, horiz = TR
 layout(1)
 ```
 
-### Pregunta 8 · Covarianza y correlación de Pearson
+### Pregunta 8 - Covarianza y correlación de Pearson
 
 **En el lab.** El mismo panel «Dispersión»: el bloque *Contexto* del pie trae
 `covarianza`, `pearson`, `spearman` y `n`.
@@ -255,7 +255,7 @@ layout(1)
 
 | Medida | Valor | Unidades |
 |---|---|---|
-| Covarianza | **0,0472** | **°C · mph** — el producto de las unidades de las dos variables |
+| Covarianza | **0,0472** | **°C - mph** — el producto de las unidades de las dos variables |
 | Pearson (*r*) | **0,0263** | **ninguna** — es adimensional, siempre en [−1, 1] |
 
 No parecen correlacionarse: *r* = 0,026 es prácticamente cero (p = 0,78, o sea que
@@ -263,7 +263,7 @@ ni siquiera se distingue del azar con 118 datos), y Spearman da −0,011, así q
 tampoco hay relación monótona no lineal escondida.
 
 La pregunta de las unidades es la importante: **la correlación es la covarianza
-estandarizada**, r = cov(x,y) / (s_x · s_y). Al dividir por las dos desviaciones,
+estandarizada**, r = cov(x,y) / (s_x - s_y). Al dividir por las dos desviaciones,
 las unidades se cancelan. Por eso la covarianza sola no se puede interpretar —su
 0,0472 °C·mph no dice si es mucho o poco, y cambiaría de valor si midiéramos el
 viento en km/h— mientras que r es comparable entre cualquier par de variables.
@@ -277,7 +277,7 @@ cov(medio_dia$Temperatura, medio_dia$Velocidad_del_Viento)   # 0.04718528
 cor(medio_dia$Temperatura, medio_dia$Velocidad_del_Viento)   # 0.02627245
 ```
 
-### Pregunta 9 · ¿Univariados, bivariados o multivariados?
+### Pregunta 9 - ¿Univariados, bivariados o multivariados?
 
 **Respuesta.** **Multivariados.** Sobre cada unidad estadística —una medición en
 un municipio a las 12:00— se registran 18 variables simultáneas, y las 118
@@ -291,7 +291,7 @@ cambiando de dimensión.
 
 ## Parte 2. Estimación de la densidad
 
-### Pregunta 10 · Densidad de la Temperatura: ¿normal?
+### Pregunta 10 - Densidad de la Temperatura: ¿normal?
 
 **En el lab.** ① Datos → **▣ Análisis → Univariado** → *Variable* `Temperatura`.
 Tres paneles responden esto: «Histograma» (con *Superponer densidad* marcado),
@@ -324,7 +324,7 @@ qqnorm(medio_dia$Temperatura); qqline(medio_dia$Temperatura, col = "firebrick")
 shapiro.test(medio_dia$Temperatura)
 ```
 
-### Pregunta 11 · Densidad de la Presión: ¿simétrica?
+### Pregunta 11 - Densidad de la Presión: ¿simétrica?
 
 **En el lab.** Igual que la 10, con *Variable* `Presion`.
 
@@ -347,7 +347,7 @@ lines(density(medio_dia$Presion), lwd = 2)
 mean(medio_dia$Presion) - median(medio_dia$Presion)   # > 0: cola a la derecha
 ```
 
-### Pregunta 12 · KDE del viento contra la normal ajustada
+### Pregunta 12 - KDE del viento contra la normal ajustada
 
 **En el lab.** ① Datos → **▣ Análisis → Univariado** → *Variable*
 `Velocidad_del_Viento`, y marcar **Superponer normal (media y desvío)**. La

@@ -40,7 +40,7 @@ figura <- function(nombre, argumentos) {
   ruta
 }
 
-cat("\n[panel --salida · una figura por fase]\n")
+cat("\n[panel --salida - una figura por fase]\n")
 probar("f1: frecuencias de la clase real a PNG",
        es_png(figura("frecuencias.png", c("panel", "f1.balanceo.frecuencias",
                                           "tipo"))))
@@ -119,7 +119,7 @@ probar("emparejamiento cuenta variables distintas por par", {
 probar("la d entra a las métricas de la corrida",
        is.numeric(metricas_de_corrida(kmodos)$d_particion))
 
-cat("\n[concordancia · --comparar]\n")
+cat("\n[concordancia - --comparar]\n")
 probar("un método contra sí mismo: ARI = 1", {
   ajustado <- ajustar_cli(ds, "kmodos", list(hiper = "k=7"))
   opciones <- list(metodo = "kmodos", hiper = "k=7", comparar = "kmodos")

@@ -34,7 +34,7 @@ falla <- function(expresion) {
 datos_prueba <- data.frame(x = rnorm(50), y = rnorm(50),
                            g = rep(c("a", "b"), 25), stringsAsFactors = FALSE)
 # ---------------------------------------------------------------------------
-cat("\n[fase 1 · resumen y escala]\n")
+cat("\n[fase 1 - resumen y escala]\n")
 sintetico <- gen_sintetico(n = 300, k_grupos = 3, efecto = 4, semilla = 7,
                            tipo = "anova")
 
@@ -66,7 +66,7 @@ probar("una escala invalida es un error, no un aviso", {
 })
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 1 · muestreo (C8)]\n")
+cat("\n[fase 1 - muestreo (C8)]\n")
 probar("por debajo del umbral no se muestrea", {
   muestra <- muestrear_para_grafico(sintetico, umbral = 5000L)
   !muestra$muestreado && muestra$n_muestra == nrow(sintetico)
@@ -99,7 +99,7 @@ probar("sin muestreo no hay linea de contexto",
          muestrear_para_grafico(sintetico, umbral = 5000L))))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 1 · calidad y preparacion]\n")
+cat("\n[fase 1 - calidad y preparacion]\n")
 con_huecos <- datos_prueba
 con_huecos$x[c(2, 5)] <- NA
 
@@ -180,7 +180,7 @@ probar("los pesos de clase suman n / clases",
 
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
-cat("\n[fase 1 · fuente ORI y filtro de filas]\n")
+cat("\n[fase 1 - fuente ORI y filtro de filas]\n")
 
 probar("temperatura a las 12:00: IQR 1.5 marca 8 y z 3 marca uno solo", {
   # El caso que parecia un cambio en los datos: era un cambio de criterio.

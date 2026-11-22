@@ -37,7 +37,7 @@ TEMA_INICIAL <- Sys.getenv("SDA_TEMA", "flatly")
 
 ui <- page_navbar(
   id = "tab",
-  title = "01 · LASSO sobre twins",
+  title = "01 - LASSO sobre twins",
   navbar_options = navbar_options(bg = "#0B1623", type = "dark"),
   theme = tema(TEMA_INICIAL),
   header = tags$head(tags$style(".value-box {min-height: 110px;}")),

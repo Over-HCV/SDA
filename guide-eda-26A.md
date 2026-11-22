@@ -33,7 +33,7 @@
 | **Perfil profesional** | Profesional y magíster en Estadística de la Universidad Nacional de Colombia; científico de datos certificado con experiencia en investigación, consultoría y docencia universitaria a niveles de pregrado y posgrado. Estadístico integral con dominio en el análisis de información estructurada y no estructurada, con un gran interés en la aplicación interdisciplinar de la Estadística para la correcta toma de decisiones. Experiencia en la aplicación de metodologías estadísticas clásicas y modelamiento de vanguardia, junto a visualizaciones efectivas de resultados, tanto en roles de ejecución como de liderazgo. Motivado por el aprendizaje de lenguajes de programación, la enseñanza, el trabajo en equipo y la comunicación asertiva de resultados del análisis de información. Interesado en el análisis de información no estructurada, el modelamiento bayesiano y el modelamiento funcional. |
 | **Correo electrónico institucional** | andresn.lopez@urosario.edu.co |
 | **Lugar y horario de atención** | Atención virtual coordinada a través de eaulas |
-| **Página web / Zoom** | <https://anlopezl.github.io/files/AED/Contenido.html> · <https://urosario.zoom.us/j/9945913391> |
+| **Página web / Zoom** | <https://anlopezl.github.io/files/AED/Contenido.html> - <https://urosario.zoom.us/j/9945913391> |
 
 ---
 
@@ -60,7 +60,7 @@ Este curso presenta un conjunto de herramientas estadísticas para analizar dato
 
 De acuerdo con los propósitos de formación establecidos en el programa, se espera que el estudiante pueda alcanzar los siguientes resultados de aprendizaje (RAE) con los respectivos niveles de profundidad:
 
-> **Niveles de profundidad:** **I** = Introductorio · **M** = Medio · **A** = Avanzado
+> **Niveles de profundidad:** **I** = Introductorio - **M** = Medio - **A** = Avanzado
 
 ### Propósitos de formación
 

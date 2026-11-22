@@ -118,7 +118,7 @@ COMANDOS <- list(
                                                          "filas_aprox")],
 
   datos = function(ds, args) {
-    cat(sprintf("%s · %d filas × %d columnas\n", ds$nombre, ds$n, ds$p))
+    cat(sprintf("%s - %d filas × %d columnas\n", ds$nombre, ds$n, ds$p))
     for (entrada in ds$transformaciones)
       cat("  pila:", describir_transformacion(entrada), "\n")
     # `args[1]` es NA sin posicional, y `%||%` solo atrapa NULL.
@@ -143,7 +143,7 @@ COMANDOS <- list(
     tabla <- detectar_atipicos(ds$df, columna, metodo,
                               as.numeric(.arg(args, 3L, "1.5")))
     corte <- attr(tabla, "corte")
-    cat(sprintf("%s · %d atipicos de %d por %s · corte %s\n", columna,
+    cat(sprintf("%s - %d atipicos de %d por %s - corte %s\n", columna,
                 attr(tabla, "n_atipicos"), nrow(tabla), metodo,
                 paste(round(corte, 4), collapse = " a ")))
     # La tabla del panel trae una fila por observación; acá interesa el
@@ -168,7 +168,7 @@ COMANDOS <- list(
     valores <- as.numeric(ds$df[[columna]])
     juicio <- evaluar_normalidad(valores)
     estimada <- estimar_densidad(valores)
-    cat(sprintf("%s · %s · %s\n", columna, juicio$prueba, juicio$veredicto))
+    cat(sprintf("%s - %s - %s\n", columna, juicio$prueba, juicio$veredicto))
     data.frame(medida = c("n", "media", "desviacion", "asimetria", "curtosis",
                           "ancho_banda_h", "estadistico", "p_valor"),
                valor = c(juicio$n, mean(valores, na.rm = TRUE),
@@ -181,7 +181,7 @@ COMANDOS <- list(
     a <- .exigir(args[1], "contingencia <a> <b>")
     b <- .exigir(args[2], "contingencia <a> <b>")
     cruce <- tabla_contingencia(ds$df[[a]], ds$df[[b]], a, b)
-    cat(sprintf("chi2 = %.3f · V de Cramer = %.4f\n", cruce$chi2, cruce$cramer))
+    cat(sprintf("chi2 = %.3f - V de Cramer = %.4f\n", cruce$chi2, cruce$cramer))
     cruce$observado
   },
 
@@ -223,7 +223,7 @@ COMANDOS <- list(
 
 .exigir <- function(valor, uso) {
   if (is.na(valor) || is.null(valor) || !nzchar(valor))
-    stop("faltan argumentos · uso: ", uso, call. = FALSE)
+    stop("faltan argumentos - uso: ", uso, call. = FALSE)
   valor
 }
 
@@ -245,28 +245,28 @@ correr_lab <- function(argumentos = commandArgs(trailingOnly = TRUE)) {
   partido <- partir_argumentos(argumentos)
   comando <- partido$posicionales[1]
   if (is.na(comando) || !comando %in% names(COMANDOS)) {
-    cat("comandos:", paste(names(COMANDOS), collapse = " · "), "\n")
-    cat("opciones: --fuente <clave> · --filtro Columna=valor|Columna!=valor",
-        "(repetible) · --sesion archivo.json · --texto completo|breve|ninguno",
-        "· --incluir pieza,pieza · --excluir pieza · --salida archivo\n",
+    cat("comandos:", paste(names(COMANDOS), collapse = " - "), "\n")
+    cat("opciones: --fuente <clave> - --filtro Columna=valor|Columna!=valor",
+        "(repetible) - --sesion archivo.json - --texto completo|breve|ninguno",
+        "· --incluir pieza,pieza - --excluir pieza - --salida archivo\n",
         "         --transformar logaritmo[:ColA,ColB] (repetible; sin columnas:",
         "todas las numéricas; tras los filtros; <= 0 se desplaza a -min+1)\n")
-    cat("fases 2-4: momentos <col> <col> ... · metodo <clave> ·",
+    cat("fases 2-4: momentos <col> <col> ... - metodo <clave> ·",
         "panel f4.<...> --metodo <clave>\n",
-        "         --hiper nombre=valor (repetible) · --columnas a,b,c ·",
-        "--grupos <metodo> · --reinicios n · --semilla n\n",
-        "         --ejes 2,3 · --umbral 0.8 · --k_max 10 · --color columna\n",
+        "         --hiper nombre=valor (repetible) - --columnas a,b,c ·",
+        "--grupos <metodo> - --reinicios n - --semilla n\n",
+        "         --ejes 2,3 - --umbral 0.8 - --k_max 10 - --color columna\n",
         "         --clase columna (referencia, no entra al ajuste) ·",
         "--reduccion acm [--columnas_reduccion a,b] (tándem: agrega Dim1..Dimd)\n",
-        "         --inicializacion x · --comparar <metodo> [--hiper_comparar a=1,b=2",
+        "         --inicializacion x - --comparar <metodo> [--hiper_comparar a=1,b=2",
         "--semilla_comparar n --inicializacion_comparar x] (concordancia)\n",
         "figura: panel <clave> ... --salida fig.png|fig.pdf [--ancho 7 --alto 4.5",
-        "--dpi 200] · --hojas FALSE (dendrograma sin nombres) ·",
+        "--dpi 200] - --hojas FALSE (dendrograma sin nombres) ·",
         "--forma circular|radial ·",
         "--enlaces complete,average,single (varios enlaces en un círculo)\n")
     cat("métodos activos:", paste(Filter(function(k)
-      metodo(k)$estado == "activo", claves_metodos()), collapse = " · "), "\n")
-    cat("piezas del cuaderno:", paste(names(PIEZAS_CUADERNO), collapse = " · "),
+      metodo(k)$estado == "activo", claves_metodos()), collapse = " - "), "\n")
+    cat("piezas del cuaderno:", paste(names(PIEZAS_CUADERNO), collapse = " - "),
         "\n")
     return(invisible(FALSE))
   }

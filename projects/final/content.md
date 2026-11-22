@@ -12,7 +12,7 @@ El hilo de todo es la sesión 5 (`SL_4.pdf`, cuaderno `NB4_PRF.Rmd`): se repite 
 
 ---
 
-## Parte 1 — La pregunta de la sesión 5 y los datos (Anyelo · 3 min)
+## Parte 1 — La pregunta de la sesión 5 y los datos (Anyelo - 3 min)
 
 **Diapositivas:** portada → cuatro partes → relevo 1 → «La pregunta que quedó abierta» → «El mismo arco, con categorías» → «101 animales» → «Asociación» → «Primer plano factorial del ACM».
 
@@ -28,7 +28,7 @@ Como datos se usa Zoo (UCI), con 101 animales descritos por 15 atributos binario
 
 ---
 
-## Parte 2 — Distancia, calidad de la partición y k-modas (Daniel · 3 min)
+## Parte 2 — Distancia, calidad de la partición y k-modas (Daniel - 3 min)
 
 **Diapositivas:** relevo 2 → «Duros y suaves» → «De la euclídea a los desacuerdos» → «Calidad de la partición» → «Lloyd con otro centro» → «K-modas paso a paso» → «Advertencia: la inicialización» → «Perfiles de los grupos».
 
@@ -46,7 +46,7 @@ La advertencia de la clase sobre la inicialización se cumple aquí con fuerza: 
 
 ---
 
-## Parte 3 — Elegir K y jerárquico sobre Gower (Tania · 3 min)
+## Parte 3 — Elegir K y jerárquico sobre Gower (Tania - 3 min)
 
 **Diapositivas:** relevo 3 → «Dos guías» → «Los tres enlaces» → «Cortar el árbol» → «¿Qué tan concordantes son?».
 
@@ -64,7 +64,7 @@ En el dendrograma, la primera gran separación (altura 0,52) deja a los mamífer
 
 ---
 
-## Parte 4 — Clases latentes, tándem y anexo (Over · 3 min)
+## Parte 4 — Clases latentes, tándem y anexo (Over - 3 min)
 
 **Diapositivas:** relevo 4 → «El GMM de las categorías» → «¿Cuántas clases?» → «Clases latentes en el plano» → «El tándem» → «La estructura que no se midió» → «Dónde se rompe cada uno» → «Para llevarse».
 
@@ -93,4 +93,4 @@ El anexo de la clase mostraba que, sin usar la ubicación, los grupos recuperaba
 | Gower + PAM | 0,644 |
 | Gower + jerárquico promedio | 0,889 |
 | Clases latentes (K = 7 / K = 4 por BIC) | 0,826 / 0,819 |
-| Tándem ACM + k-medias | 0,812 (lab, Lloyd) · 0,829 en el cuaderno (`kmeans()` de R, nstart = 100) |
+| Tándem ACM + k-medias | 0,812 (lab, Lloyd) - 0,829 en el cuaderno (`kmeans()` de R, nstart = 100) |

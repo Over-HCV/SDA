@@ -8,7 +8,7 @@
 
 poblar_artefactos_exploracion <- function() {
 
-  # --- Fase 1 · Análisis univariado -------------------------------------
+  # --- Fase 1 - Análisis univariado -------------------------------------
   registrar_artefacto("f1.analisis.histograma", "Histograma",
     grafico = "R/graficos/univariado.R::graficar_histograma",
     logica  = "R/logica/resumen_univariado.R::resumir_variable",
@@ -38,7 +38,7 @@ poblar_artefactos_exploracion <- function() {
     logica  = "R/logica/normalidad.R::evaluar_normalidad",
     descripcion = "Cuantiles observados contra los de una normal ajustada.")
 
-  # --- Fase 1 · Análisis bivariado --------------------------------------
+  # --- Fase 1 - Análisis bivariado --------------------------------------
   registrar_artefacto("f1.analisis.dispersion", "Diagrama de dispersión",
     grafico = "R/graficos/bivariado.R::graficar_dispersion",
     logica  = "R/logica/asociacion.R::medir_asociacion",
@@ -54,7 +54,7 @@ poblar_artefactos_exploracion <- function() {
     logica  = "R/logica/contingencia.R::tabla_contingencia",
     descripcion = "Asociación entre dos categóricas; el área es la frecuencia.")
 
-  # --- Fase 1 · Análisis multivariado -----------------------------------
+  # --- Fase 1 - Análisis multivariado -----------------------------------
   registrar_artefacto("f1.analisis.matriz_dispersion", "Matriz de dispersión",
     grafico = "R/graficos/multivariado.R::graficar_pares",
     logica  = "R/logica/asociacion.R::matriz_correlacion",
@@ -83,7 +83,7 @@ poblar_artefactos_exploracion <- function() {
   # Los de preparación de la fase 1 (fuente, diccionario, calidad,
   # transformación, partición, balanceo) viven en artefactos/preparacion.R.
 
-  # --- Fase 2 · Especificar el modelo ------------------------------------
+  # --- Fase 2 - Especificar el modelo ------------------------------------
   registrar_artefacto("f2.especificacion.matriz_diseno", "Matriz de diseño",
     grafico = "R/ui/f2/especificacion.R::salida_especificacion",
     logica  = "R/logica/modelo_geometria.R::resumen_matriz_diseno",
@@ -94,7 +94,7 @@ poblar_artefactos_exploracion <- function() {
     logica  = "R/logica/supuestos.R::evaluar_supuestos",
     descripcion = "Lo que el método exige, evaluado sobre este dataset antes de ajustar.")
 
-  # --- Fase 2 · Geometría antes de ajustar -------------------------------
+  # --- Fase 2 - Geometría antes de ajustar -------------------------------
   registrar_artefacto("f2.analisis.espacio_hipotesis", "Espacio de hipótesis",
     grafico = "R/graficos/modelo.R::graficar_espacio_hipotesis",
     logica  = "R/logica/modelo_geometria.R::familia_candidatas",
@@ -125,7 +125,7 @@ poblar_artefactos_exploracion <- function() {
     logica  = "R/logica/potencia.R::calcular_potencia",
     descripcion = "Potencia frente a n y al tamaño del efecto.")
 
-  # --- Fase 3 · El optimizador trabajando --------------------------------
+  # --- Fase 3 - El optimizador trabajando --------------------------------
   registrar_artefacto("f3.analisis.convergencia", "Traza de convergencia",
     grafico = "R/graficos/convergencia.R::graficar_convergencia",
     logica  = "R/logica/traza.R::registrar_iteracion",

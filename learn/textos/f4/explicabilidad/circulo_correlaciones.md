@@ -10,7 +10,7 @@ Cada variable es una flecha desde el origen. Sus coordenadas son las
 correlaciones con las dos componentes:
 
 ```
-r(xᵢ, CPⱼ) = vᵢⱼ · √λⱼ
+r(xᵢ, CPⱼ) = vᵢⱼ - √λⱼ
 ```
 
 Sobre la matriz de correlación esas coordenadas están acotadas por 1, así que

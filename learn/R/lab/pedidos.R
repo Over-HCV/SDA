@@ -16,7 +16,7 @@ seleccion_de_args <- function(ds, args, opciones) {
     return(lapply(seq_along(pedidos), function(i)
       entrada_de_pedido(pedidos[i], ds, sprintf("p%d", i), opciones)))
   if (is.null(opciones$sesion))
-    stop("faltan argumentos · uso: cuaderno <clave>[:col+col][,...] ",
+    stop("faltan argumentos - uso: cuaderno <clave>[:col+col][,...] ",
          "(o --sesion archivo.json)", call. = FALSE)
   guardada <- seleccion_de_sesion(leer_sesion_cli(opciones$sesion)$fase1)
   seleccion_con_tablas(guardada, ds)

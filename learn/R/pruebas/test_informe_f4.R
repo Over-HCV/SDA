@@ -81,7 +81,7 @@ CASOS <- list(
   "f4.desempeno.grupos" = modifyList(KMEANS, list(grupos = JERARQUICO)),
   "f4.diagnostico.dendrograma" = JERARQUICO)
 
-cat("\n[cuaderno · fase 4, cada chunk solo]\n")
+cat("\n[cuaderno - fase 4, cada chunk solo]\n")
 for (clave in names(CASOS)) {
   codigo <- codigo_artefacto(clave, CASOS[[clave]])
   probar(sprintf("%s corre solo sobre EIA", clave), {
@@ -96,7 +96,7 @@ for (clave in names(CASOS)) {
   })
 }
 
-cat("\n[cuaderno · fase 4, la misma sesión]\n")
+cat("\n[cuaderno - fase 4, la misma sesión]\n")
 probar("los mapas de k-medias y del jerárquico también corren", {
   cuaderno <- nuevo_cuaderno()
   correr_chunk(codigo_artefacto("f4.explicabilidad.mapa_2d", KMEANS), cuaderno)
@@ -153,7 +153,7 @@ probar("los países rotulan las filas, no números", {
   "Colombia" %in% rownames(get("acp_normado", envir = cuaderno)$x)
 })
 
-cat("\n[cuaderno · fase 4, bordes]\n")
+cat("\n[cuaderno - fase 4, bordes]\n")
 probar("un panel de grupos pedido para el ACP dice que no aplica", {
   lineas <- codigo_artefacto("f4.diagnostico.silueta", ACP_NORMADO)
   all(grepl("^#", lineas)) && any(grepl("no se dibuja", lineas))

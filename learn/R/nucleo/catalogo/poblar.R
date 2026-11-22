@@ -10,8 +10,8 @@
 # depender del orden en que se cargaron los archivos.
 #
 # Orden: las sesiones del curso, tal como aparecen en guide-eda-26A.md.
-#   1-2 herramientas básicas · 3 normal multivariada · 4 ACP
-#   5 clustering · 6-7 regresión · 8 ANOVA
+#   1-2 herramientas básicas - 3 normal multivariada - 4 ACP
+#   5 clustering - 6-7 regresión - 8 ANOVA
 #
 # Estado de cada método en el Hito 1: "pendiente" o "bloqueado". Ninguno es
 # "activo" todavía porque `registrar_metodo()` exige una función `ajustar` para

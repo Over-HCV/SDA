@@ -1,6 +1,6 @@
 ---
-title: "SDA · PCA + Clustering"
-subtitle: "Proyecto 2 — Quarto + Observable JS · charcoal y twins precomputados en R"
+title: "SDA - PCA + Clustering"
+subtitle: "Proyecto 2 — Quarto + Observable JS - charcoal y twins precomputados en R"
 format:
   dashboard:
     orientation: rows
@@ -89,7 +89,7 @@ n_total      = obs_nombres.length
 ## Varianza explicada {scroller-height="280px"}
 
 ```{ojs}
-md`**Dataset activo:** ${dataset} · **obs visibles:** ${n_visibles}/${n_total} · **var PC1+PC2:** ${(var_all[0].var_pct + var_all[1].var_pct).toFixed(1)}%`
+md`**Dataset activo:** ${dataset} - **obs visibles:** ${n_visibles}/${n_total} - **var PC1+PC2:** ${(var_all[0].var_pct + var_all[1].var_pct).toFixed(1)}%`
 ```
 
 ```{ojs}
@@ -131,7 +131,7 @@ Plot.plot({
       x: pc_x, y: pc_y,
       fill: color_by === "cluster" ? d => "clúster " + cluster_de.get(d.obs) : accent,
       fillOpacity: opacity, stroke: "white", strokeWidth: 0.5,
-      title: d => `${d.obs} · clúster ${cluster_de.get(d.obs) ?? "?"}`
+      title: d => `${d.obs} - clúster ${cluster_de.get(d.obs) ?? "?"}`
     }),
     ...(show_label
       ? [Plot.text(pca_filtrada, {x: pc_x, y: pc_y, text: "obs",

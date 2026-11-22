@@ -117,6 +117,6 @@ if (.invocado_directamente("mapa.R")) {
   source("learn/R/cargar.R")
   cargar_sda(con_ui = FALSE)
   ruta <- escribir_mapa()
-  cat(sprintf("[mapa] %s · %d métodos · %d artefactos\n", ruta,
+  cat(sprintf("[mapa] %s - %d métodos - %d artefactos\n", ruta,
               length(claves_metodos()), length(claves_artefactos())))
 }

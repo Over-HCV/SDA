@@ -59,7 +59,7 @@ variables <- setdiff(names(animales), "animal")
 p <- length(variables)
 
 # ---------------------------------------------------------------------------
-cat("\n[gower · la disimilitud contada a mano]\n")
+cat("\n[gower - la disimilitud contada a mano]\n")
 
 con_pam <- ajustar_gower(animales, k = 7L)
 d <- as.matrix(con_pam$matriz_disimilitud)
@@ -97,7 +97,7 @@ probar("una numerica aporta |x_i - x_j| / rango, promediada con las demas",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[gower · binarias asimetricas]\n")
+cat("\n[gower - binarias asimetricas]\n")
 
 asimetrico <- ajustar_gower(animales, k = 7L, binarias_asimetricas = TRUE)
 da <- as.matrix(asimetrico$matriz_disimilitud)
@@ -114,7 +114,7 @@ probar("pulga contra gusano: los 'no' compartidos salen del denominador",
          binaria <- variables != "patas"
          difieren <- sum(a != b)
          ausencias <- sum(binaria & a == "no" & b == "no")
-         cat(sprintf("    simetrica %d/%d = %.3f · asimetrica %d/%d = %.3f\n",
+         cat(sprintf("    simetrica %d/%d = %.3f - asimetrica %d/%d = %.3f\n",
                      difieren, p, difieren / p, difieren, p - ausencias,
                      difieren / (p - ausencias)))
          abs(d[i, j] - difieren / p) < 1e-12 &&
@@ -132,7 +132,7 @@ probar("la ausencia es el nivel 'no' aunque los niveles vengan al reves",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[gower · PAM]\n")
+cat("\n[gower - PAM]\n")
 
 probar("k medoides, todos filas reales, y cada uno en su propio grupo",
        length(con_pam$medoides) == 7L &&
@@ -180,7 +180,7 @@ probar("registrar_traza = FALSE no guarda nada y la particion no cambia",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[gower · jerarquico]\n")
+cat("\n[gower - jerarquico]\n")
 
 con_arbol <- ajustar_gower(animales, k = 7L, estrategia = "jerarquico")
 
@@ -226,7 +226,7 @@ probar("el dendrograma de la familia lo dibuja sin cambios",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[gower · bordes]\n")
+cat("\n[gower - bordes]\n")
 
 probar("una fila con algun NA se queda; una sin ningun dato se descarta",
        {
@@ -250,7 +250,7 @@ probar("declara la familia cualitativa y la de agrupamiento",
          inherits(con_pam, "ajuste_agrupamiento"))
 
 # ---------------------------------------------------------------------------
-cat("\n[gower · el zoologico contra su clase verdadera, k = 7]\n")
+cat("\n[gower - el zoologico contra su clase verdadera, k = 7]\n")
 
 probar("el ARI local da 1 consigo mismo y 0 contra una constante",
        rand_ajustado(tipo, tipo) == 1 &&
@@ -270,7 +270,7 @@ probar("PAM y el arbol recuperan buena parte de los tipos (ARI > 0.5)",
          rand_ajustado(con_arbol$grupos, tipo) > 0.5)
 
 # ---------------------------------------------------------------------------
-cat("\n[gower · el catalogo]\n")
+cat("\n[gower - el catalogo]\n")
 
 if (existe_metodo("gower")) {
   probar("gower esta activo y trae su funcion de ajuste",

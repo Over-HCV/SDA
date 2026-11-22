@@ -30,7 +30,7 @@ COLUMNAS <- c("Crude_oil_including_lease_condensate_production_TBPD",
 ds_sin4 <- suppressMessages(armar_dataset(list(fuente = "eia",
                                                 filtro = PAISES_ATIPICOS)))
 
-cat("\n[lab.R · --transformar: la pila de la fase 1 por consola]\n")
+cat("\n[lab.R - --transformar: la pila de la fase 1 por consola]\n")
 ds_log <- suppressMessages(armar_dataset(list(
   fuente = "eia", filtro = PAISES_ATIPICOS, transformar = "logaritmo")))
 probar("--transformar se repite y se apila DESPUÉS de los filtros", {

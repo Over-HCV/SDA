@@ -93,7 +93,7 @@ app <- AppDriver$new(app_dir = "learn/R", name = "sda-lab-metodo",
 on.exit(app$stop(), add = TRUE)
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 1 · un dataset guardado en Objetos]\n")
+cat("\n[fase 1 - un dataset guardado en Objetos]\n")
 
 invisible(ir_a(app, "① Datos", "Fuente"))
 app$set_inputs(`datos-fuente` = "twins", wait_ = FALSE)
@@ -111,7 +111,7 @@ probar("el dataset queda guardado como objeto",
        grepl("d1", esperar_html(app, "d1"), fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 2 · elegir y especificar]\n")
+cat("\n[fase 2 - elegir y especificar]\n")
 
 html_f2 <- ir_a(app, "② Modelado", "elegir_acp")
 probar("el catálogo se dibuja desde el registro",
@@ -186,7 +186,7 @@ probar("el modelo queda guardado como objeto",
              fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 3 · ajustar y mirar la traza]\n")
+cat("\n[fase 3 - ajustar y mirar la traza]\n")
 
 html_f3 <- ir_a(app, "③ Ajuste", "Deflacionar")
 probar("el optimizador sale del registro del método",
@@ -242,7 +242,7 @@ probar("la receta queda guardada",
              fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 4 · componer, correr y leer]\n")
+cat("\n[fase 4 - componer, correr y leer]\n")
 
 html_f4 <- ir_a(app, "④ Evaluación", "Compatibilidad")
 probar("la composición muestra las tres piezas", {

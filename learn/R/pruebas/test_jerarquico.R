@@ -51,7 +51,7 @@ directo <- stats::hclust(stats::dist(scale(nubes[c("x", "y", "z")])),
                          method = "average")
 
 # ---------------------------------------------------------------------------
-cat("\n[jerarquico · coincide con hclust]\n")
+cat("\n[jerarquico - coincide con hclust]\n")
 
 probar("enlace promedio: la particion es la de cutree, numero a numero",
        identical(promedio$grupos,
@@ -93,7 +93,7 @@ probar("un enlace inexistente falla en vez de elegir otro",
        falla(ajustar_jerarquico(nubes, enlace = "ward")))
 
 # ---------------------------------------------------------------------------
-cat("\n[jerarquico · el resultado]\n")
+cat("\n[jerarquico - el resultado]\n")
 
 probar("k_corte grupos, uno por observacion",
        length(promedio$grupos) == nrow(nubes) &&
@@ -142,7 +142,7 @@ probar("las filas con faltantes se descartan, y sus etiquetas tambien",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[jerarquico · la traza es el historial de fusiones]\n")
+cat("\n[jerarquico - la traza es el historial de fusiones]\n")
 
 tabla_traza <- traza_a_tabla(promedio$traza)
 
@@ -175,7 +175,7 @@ probar("registrar_traza = FALSE no guarda nada y la particion no cambia",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[jerarquico · metricas de grupos (fase 4)]\n")
+cat("\n[jerarquico - metricas de grupos (fase 4)]\n")
 
 probar("la silueta corre y con nubes separadas es alta",
        {
@@ -235,7 +235,7 @@ probar("cofenetico da un par por fila y la correlacion del ajuste",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[jerarquico · el catalogo lo declara]\n")
+cat("\n[jerarquico - el catalogo lo declara]\n")
 
 probar("jerarquico esta activo y trae su funcion de ajuste",
        {
@@ -268,7 +268,7 @@ probar("los dos supuestos tienen comprobacion",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[jerarquico · graficos]\n")
+cat("\n[jerarquico - graficos]\n")
 
 probar("dendrograma con etiquetas",
        dibuja(graficar_dendrograma(arbol_jerarquico(promedio))))
@@ -284,7 +284,7 @@ probar("el grafico principal es el dendrograma",
        dibuja(grafico_resultado(promedio)))
 
 # ---------------------------------------------------------------------------
-cat("\n[jerarquico · el corredor batch]\n")
+cat("\n[jerarquico - el corredor batch]\n")
 
 source("learn/R/run_headless.R")
 # on.exit() no corre al nivel de un script de Rscript: se borra a mano al final.

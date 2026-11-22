@@ -54,7 +54,7 @@ verificar_assets <- function(destino) {
   # tipografía del sistema, que es justo lo que no se quiere.
   fuentes <- lengths(regmatches(contenido, gregexpr("www/katex/fonts/",
                                                     contenido, fixed = TRUE)))
-  cat(sprintf("[bundle] assets de KaTeX: %d/%d · %d fuentes\n",
+  cat(sprintf("[bundle] assets de KaTeX: %d/%d - %d fuentes\n",
               length(ASSETS_KATEX) - length(faltan), length(ASSETS_KATEX),
               fuentes))
   if (length(faltan)) cat("    faltan:", paste(faltan, collapse = ", "), "\n")
@@ -153,7 +153,7 @@ verificar_bundle <- function(destino = ruta_app("docs"), espera = ESPERA_WEBR) {
   Sys.sleep(1.5)
 
   url <- sprintf("http://127.0.0.1:%d/index.html", puerto)
-  cat(sprintf("[bundle] %s · hasta %ds esperando a webR\n", url, espera))
+  cat(sprintf("[bundle] %s - hasta %ds esperando a webR\n", url, espera))
 
   sesion <- chromote::ChromoteSession$new()
   on.exit(try(sesion$close(), silent = TRUE), add = TRUE)

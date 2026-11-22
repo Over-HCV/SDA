@@ -20,7 +20,7 @@
 Es el mismo código con dos salidas. La app sabe dónde está corriendo y lo dice
 en la barra superior.
 
-<!-- CAPTURA · pantalla de inicio (descomentar cuando tenga el archivo) -->
+<!-- CAPTURA - pantalla de inicio (descomentar cuando tenga el archivo) -->
 <p align="center">
   <img src="assets/capturas/inicio.png" alt="Inicio de SDA Lab: estado de la sesión y mapa del curso" width="900">
 </p>
@@ -59,23 +59,23 @@ cada resultado que dibuja sabe de dónde salió.
 
 **Qué funciona hoy**
 
-- **Fase 1 · Datos**, completa. Se carga un dataset (del curso, sintético o un
+- **Fase 1 - Datos**, completa. Se carga un dataset (del curso, sintético o un
   CSV propio), se declara qué es cada columna, se limpia, se transforma, se
   parte y se balancea. La subsección **▣ Análisis** trae trece gráficos en
   univariado, bivariado y multivariado.
-- **Fase 2 · Modelado**: el catálogo real, con 56 métodos filtrables y su ficha.
+- **Fase 2 - Modelado**: el catálogo real, con 56 métodos filtrables y su ficha.
   Los seis que no se pueden ejecutar aquí siguen visibles, con el motivo y el
   puente hacia el método equivalente que sí corre. Qué columnas se ofrecen lo
   decide el método: un ACP pide cuantitativas, un ACM pide categorías.
-- **Fase 3 · Ajuste**: el optimizador de los métodos activos, con su traza y su
+- **Fase 3 - Ajuste**: el optimizador de los métodos activos, con su traza y su
   reproducción paso a paso.
-- **Fase 4 · Evaluación**: la composición Dataset × Modelo × Receta, el
+- **Fase 4 - Evaluación**: la composición Dataset × Modelo × Receta, el
   diagnóstico (scree, las tres reglas para elegir k, ortogonalidad de las
   componentes) y la explicabilidad (cargas, círculo, contribución, calidad de
   representación, mapa factorial, biplot, suplementarios). Comparar varias
   corridas sigue pendiente.
 
-<!-- CAPTURA · fase 1 de punta a punta
+<!-- CAPTURA - fase 1 de punta a punta
 <table>
   <tr>
     <td><img src="assets/capturas/f1-fuente.png" alt="Fuente: vista previa del dataset cargado" width="440"></td>
@@ -88,13 +88,13 @@ cada resultado que dibuja sabe de dónde salió.
 </table>
 -->
 
-<!-- CAPTURA · ▣ Análisis, con el slider de clases movido
+<!-- CAPTURA - ▣ Análisis, con el slider de clases movido
 <p align="center">
   <img src="assets/capturas/f1-analisis.png" alt="Análisis univariado: histograma, densidad y Q-Q" width="900">
 </p>
 -->
 
-<!-- CAPTURA · catálogo de la fase 2, filtrado
+<!-- CAPTURA - catálogo de la fase 2, filtrado
 <p align="center">
   <img src="assets/capturas/f2-catalogo.png" alt="Catálogo de métodos filtrado por objetivo" width="900">
 </p>
@@ -138,7 +138,7 @@ camino del navegador sin exportar el bundle. Más detalles en
 .
 ├── learn/            SDA Lab — el laboratorio interactivo
 │   ├── R/            núcleo sin Shiny, lógica pura, gráficos, módulos de UI
-│   ├── textos/       un .md por gráfico: qué muestra · qué buscar · cuándo engaña
+│   ├── textos/       un .md por gráfico: qué muestra - qué buscar - cuándo engaña
 │   ├── fichas/       un .md por método: qué es, por qué, cuándo falla
 │   └── MAPA.md       índice generado: clave del artefacto → archivos
 │
@@ -148,13 +148,13 @@ camino del navegador sin exportar el bundle. Más detalles en
 │
 ├── libs/
 │   ├── _comun/       datos, temas de gráficos, métricas, verificación web
-│   ├── shiny/        Shiny sobre servidor · regresión en charcoal
-│   ├── quarto/       Quarto + Observable · PCA y clustering precomputados
-│   ├── shiny-live/   shinylive · ANOVA con R dentro del navegador
+│   ├── shiny/        Shiny sobre servidor - regresión en charcoal
+│   ├── quarto/       Quarto + Observable - PCA y clustering precomputados
+│   ├── shiny-live/   shinylive - ANOVA con R dentro del navegador
 │   ├── sdd.md        invariantes del repo (S1–S8)
 │   └── topics-map.md los 33 temas del curso → qué app los cubre
 │
-├── data/             charcoal.csv · twins.csv · topics-tf.csv
+├── data/             charcoal.csv - twins.csv - topics-tf.csv
 ├── app.R             punto de entrada del despliegue en servidor
 └── manifest.json     dependencias que instala Posit Connect Cloud
 ```
@@ -202,12 +202,12 @@ Rscript learn/R/pruebas/verificar_bundle.R   # el bundle wasm arranca de verdad
 
 | Sesión | Tema | Dónde está |
 |---|---|---|
-| 1–2 | Herramientas estadísticas básicas | `notes/SDA/NB1_*` · `workshops/twins/` |
+| 1–2 | Herramientas estadísticas básicas | `notes/SDA/NB1_*` - `workshops/twins/` |
 | 3 | Normal multivariada y visualización | `notes/SDA/NB2_*` |
-| 4 | Análisis de componentes principales | `notes/SDA/NB3` · `libs/quarto/` |
-| 5 | Agrupamiento | `notes/SDA/NB4_*` · `libs/quarto/` |
-| 6–7 | Regresión lineal múltiple | `notes/SDA/NB5_*` · `projects/01-lasso/` |
-| 8 | Análisis de varianza a una vía | `notes/SDA/NB6_*` · `libs/shiny-live/` |
+| 4 | Análisis de componentes principales | `notes/SDA/NB3` - `libs/quarto/` |
+| 5 | Agrupamiento | `notes/SDA/NB4_*` - `libs/quarto/` |
+| 6–7 | Regresión lineal múltiple | `notes/SDA/NB5_*` - `projects/01-lasso/` |
+| 8 | Análisis de varianza a una vía | `notes/SDA/NB6_*` - `libs/shiny-live/` |
 
 La evaluación son tres talleres (25 % cada uno) y un proyecto aplicado (25 %):
 un cuaderno RMD y una presentación sobre un método, con video. El exportador a

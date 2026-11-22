@@ -45,7 +45,7 @@ tarjeta_metodo <- function(clave, ns = shiny::NS(NULL)) {
       shiny::tags$div(
         class = "text-muted small mb-2",
         sprintf("%s%s", ETIQUETA_OBJETIVO[[m$objetivo]] %||% m$objetivo,
-                if (!is.na(m$sesion)) sprintf(" · sesión %d", m$sesion) else "")),
+                if (!is.na(m$sesion)) sprintf(" - sesión %d", m$sesion) else "")),
       if (bloqueado) shiny::tags$div(class = "small", m$motivo) else NULL,
       if (length(m$deps))
         shiny::tags$div(class = "small text-muted",

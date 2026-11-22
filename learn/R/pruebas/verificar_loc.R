@@ -41,7 +41,7 @@ verificar_loc <- function(base = file.path(.raiz_loc(), "learn")) {
   rel <- sub(paste0("^", base, "/"), "", archivos)
   orden <- order(loc, decreasing = TRUE)
 
-  cat(sprintf("[loc] %d archivos · techo %d · alerta %d\n",
+  cat(sprintf("[loc] %d archivos - techo %d - alerta %d\n",
               length(archivos), TECHO, ALERTA))
   for (i in orden) {
     marca <- if (loc[i] > TECHO) "FALLA" else if (loc[i] >= ALERTA) "alerta" else "ok"
@@ -57,7 +57,7 @@ verificar_loc <- function(base = file.path(.raiz_loc(), "learn")) {
     return(invisible(FALSE))
   }
 
-  cat(sprintf("\n[loc] OK · maximo %d LOC (%s)\n",
+  cat(sprintf("\n[loc] OK - maximo %d LOC (%s)\n",
               max(loc), rel[which.max(loc)]))
   invisible(TRUE)
 }

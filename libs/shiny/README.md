@@ -1,4 +1,4 @@
-# Proyecto 1 — Shiny · Regresión sobre charcoal
+# Proyecto 1 — Shiny - Regresión sobre charcoal
 
 App Shiny interactiva para explorar ajustes polinomiales (y loess) sobre la
 producción de carbón vegetal por país y año. **Hook pedagógico**: cada slider

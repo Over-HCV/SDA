@@ -8,7 +8,7 @@ Hereda las invariantes S1–S8 de `libs/sdd.md` y endurece S4.
 
 ---
 
-## C1 · Español en todo lo nuestro
+## C1 - Español en todo lo nuestro
 
 **Por qué**: al abrir cualquier archivo, lo que está en español es nuestro y lo
 que está en inglés viene de una librería. Eso hace legible la frontera entre
@@ -31,7 +31,7 @@ Verifica: `Rscript learn/R/pruebas/verificar_idioma.R`
 
 ---
 
-## C2 · Responsabilidad única, techo de 300 LOC
+## C2 - Responsabilidad única, techo de 300 LOC
 
 **Por qué**: un archivo que hace una sola cosa se lee entero de una sentada, se
 prueba sin montar el mundo, y un agente lo puede cargar en contexto sin gastar
@@ -53,7 +53,7 @@ Verifica: `Rscript learn/R/pruebas/verificar_loc.R`
 
 ---
 
-## C3 · Lógica y presentación, separadas sin excepción
+## C3 - Lógica y presentación, separadas sin excepción
 
 Hereda S1 de `libs/sdd.md`.
 
@@ -68,7 +68,7 @@ Hereda S1 de `libs/sdd.md`.
 Regla operativa: si borrás Shiny del proyecto, todo lo que hay en `logica/`,
 `graficos/` y `metodos/` debe seguir corriendo con `Rscript`.
 
-### C3b · La UI pregunta qué mide, no de qué método es
+### C3b - La UI pregunta qué mide, no de qué método es
 
 Corolario que el segundo método hizo obligatorio. Toda `ajustar_*()` devuelve
 su lista con `class = c("ajuste_<clave>", "ajuste_sda")`, y contesta en
@@ -93,7 +93,7 @@ sin clase es un método a medio escribir, y una vista vacía lo escondería.
 
 ---
 
-## C4 · Layout: tabs y toggles, no columnas fijas
+## C4 - Layout: tabs y toggles, no columnas fijas
 
 El tríptico **entrada → proceso → resultado** es una invariante *lógica*, no
 tres columnas literales.
@@ -126,7 +126,7 @@ Ninguna vista construye estas piezas a mano: todas salen de
 
 ---
 
-## C5 · Regla de lo estático
+## C5 - Regla de lo estático
 
 > Si un contenido **no cambia** en respuesta a los inputs de esta fase, se
 > oculta en un toggle. Los píxeles son para lo que se mueve.
@@ -143,7 +143,7 @@ Ninguna vista construye estas piezas a mano: todas salen de
 
 ---
 
-## C6 · Los textos viven fuera del código
+## C6 - Los textos viven fuera del código
 
 Ningún párrafo explicativo dentro de un `.R`.
 
@@ -166,7 +166,7 @@ Ningún párrafo explicativo dentro de un `.R`.
 | Bloque | Dónde sale | Responde |
 |---|---|---|
 | Para qué sirve | sello ⓘ del encabezado | qué decisión alimenta esta card |
-| Qué muestra · Qué buscar · Cuándo engaña | «¿Cómo se lee?», plegado en el pie | cómo interpretarla |
+| Qué muestra - Qué buscar - Cuándo engaña | «¿Cómo se lee?», plegado en el pie | cómo interpretarla |
 
   El sello ⓘ **no repite la traza**: clave y rutas ya están completas en el
   bloque «Contexto», y las 25 cards lo ofrecen. Un metadato mostrado dos veces
@@ -220,7 +220,7 @@ Verifica: `Rscript learn/R/pruebas/test_app_piezas.R`
 
 ---
 
-## C7 · Tablas siempre acotadas
+## C7 - Tablas siempre acotadas
 
 Ninguna tabla vuelca todo. Se usa `tabla_paginada()` de `ui_piezas.R`, que
 centraliza `pageLength = 10`, `scrollX`, `deferRender`, `filter = "top"` y, en
@@ -228,13 +228,13 @@ modo servidor, `server = TRUE`. Toda tabla lleva pie con "mostrando X de N".
 
 ---
 
-## C8 · Muestreo visible en datos grandes
+## C8 - Muestreo visible en datos grandes
 
 Por encima de **5.000 filas** los gráficos usan una muestra con semilla y
 aparece el badge:
 
 ```
-graficando 5.000 de 35.115 · muestra semilla 42 · [usar todo]
+graficando 5.000 de 35.115 - muestra semilla 42 - [usar todo]
 ```
 
 **Las métricas siempre se calculan sobre el total.** El umbral y la semilla
@@ -242,7 +242,7 @@ viajan al JSON de la corrida.
 
 ---
 
-## C9 · Trazabilidad: toda salida sabe de dónde vino
+## C9 - Trazabilidad: toda salida sabe de dónde vino
 
 Cada artefacto visual tiene una **clave estable** `fase.subseccion.artefacto`
 registrada en `R/nucleo/claves.R` junto a sus rutas de gráfico, lógica y texto.
@@ -258,7 +258,7 @@ Verifica: `Rscript learn/R/pruebas/verificar_mapa.R`
 
 ---
 
-## C10 · Sin JavaScript propio
+## C10 - Sin JavaScript propio
 
 `libs/sdd.md` S2b documenta cuatro bugs que pasaron render limpio y HTTP 200 y
 solo aparecieron en la consola del navegador. JS propio es superficie que R no
@@ -292,7 +292,7 @@ prueba en navegador, y escrito acá con su razón.
 
 ---
 
-## C11 · La regla de las tres partes
+## C11 - La regla de las tres partes
 
 Heredada de `projects/_template/R/run_headless.R`.
 
@@ -306,7 +306,7 @@ Si falta uno, la app y el batch divergen en silencio.
 
 ---
 
-## C12 · Los errores se muestran, no tumban la sesión
+## C12 - Los errores se muestran, no tumban la sesión
 
 Patrón obligatorio en todo módulo, tomado de
 `projects/_template/R/mod_main.R:78-101`:
@@ -321,7 +321,7 @@ resultado <- reactive({
 
 ---
 
-## C13 · Toda aleatoriedad lleva semilla, y la semilla viaja
+## C13 - Toda aleatoriedad lleva semilla, y la semilla viaja
 
 Ninguna llamada a `sample()`, `rnorm()`, `kmeans()` sin `semilla` explícita en
 la firma. La semilla entra al JSON de la corrida. Un resultado que no se puede
@@ -329,7 +329,7 @@ reproducir no es un resultado.
 
 ---
 
-## C14 · Verificación en dos harness, no uno
+## C14 - Verificación en dos harness, no uno
 
 Sin GUI:
 

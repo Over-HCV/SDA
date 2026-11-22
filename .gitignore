@@ -1,6 +1,6 @@
 # ─────────────────────────────────────────────────────────────
 # SDA — .gitignore raíz
-# Multi-motor: renv (R) · Shiny · Shinylive · Quarto (qmd/rmd) · Python · LaTeX
+# Multi-motor: renv (R) - Shiny - Shinylive - Quarto (qmd/rmd) - Python - LaTeX
 # Estrategia aditiva: los .gitignore anidados (anlopez/, libs/shiny-live/,
 # renv/) se mantienen y especializan; este archivo cubre patrones GLOBALES.
 #

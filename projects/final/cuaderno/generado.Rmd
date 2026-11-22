@@ -1,5 +1,5 @@
 ---
-title: "Exploración de datos · SDA Lab"
+title: "Exploración de datos - SDA Lab"
 subtitle: "zoo"
 date: "2026-10-10 12:47"
 output:
@@ -76,7 +76,7 @@ utils::head(datos, 10)
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Frecuencias por clase · tipo
+## Frecuencias por clase - tipo
 
 ```{r}
 # f1.balanceo.frecuencias
@@ -93,7 +93,7 @@ barplot(tabla, horiz = TRUE, las = 1, cex.names = 0.7,
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Gráfico de mosaico · leche vs. tipo
+## Gráfico de mosaico - leche vs. tipo
 
 ```{r}
 # f1.analisis.mosaico
@@ -106,7 +106,7 @@ print(chisq.test(tabla))
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Gráfico de sedimentación · Análisis de correspondencias múltiples
+## Gráfico de sedimentación - Análisis de correspondencias múltiples
 
 ```{r}
 # f4.diagnostico.scree
@@ -167,7 +167,7 @@ barplot(100 * acm$inercia[usar], names.arg = usar, col = "#a6192e",
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Mapa en dos dimensiones · Análisis de correspondencias múltiples
+## Mapa en dos dimensiones - Análisis de correspondencias múltiples
 
 ```{r}
 # f4.explicabilidad.mapa_2d
@@ -217,7 +217,7 @@ ggplot(categorias, aes(x, y, label = rownames(categorias))) +
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Traza de convergencia · K-modas
+## Traza de convergencia - K-modas
 
 ```{r}
 # f3.analisis.convergencia
@@ -341,7 +341,7 @@ cat("Reinicios que llegaron a ese valor:",
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Trayectoria de parámetros · K-modas
+## Trayectoria de parámetros - K-modas
 
 ```{r}
 # f3.analisis.trayectoria
@@ -379,7 +379,7 @@ barplot(cambios, names.arg = seq_along(cambios), col = "#a6192e",
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## El ajuste, iteración por iteración · K-modas
+## El ajuste, iteración por iteración - K-modas
 
 ```{r}
 # f3.consola.estado
@@ -424,7 +424,7 @@ ggplot(estados, aes(Dim1, Dim2, color = grupo)) +
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Mapa en dos dimensiones · K-modas
+## Mapa en dos dimensiones - K-modas
 El texto de este panel está en la primera sección «Mapa en dos dimensiones».
 
 ```{r}
@@ -469,7 +469,7 @@ ggplot(plano, aes(x, y, color = color)) +
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Codo de la inercia · K-modas
+## Codo de la inercia - K-modas
 
 ```{r}
 # f4.diagnostico.codo
@@ -522,7 +522,7 @@ abline(v = kmodas7$k, lty = 2, col = "grey50")
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Silueta · K-modas
+## Silueta - K-modas
 
 ```{r}
 # f4.diagnostico.silueta
@@ -558,7 +558,7 @@ fviz_silhouette(sil)
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Tamaño de los grupos · K-modas
+## Tamaño de los grupos - K-modas
 
 ```{r}
 # f4.desempeno.grupos
@@ -593,7 +593,7 @@ barplot(table(grupos), col = "#a6192e", xlab = "grupo",
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Modos de los grupos · K-modas
+## Modos de los grupos - K-modas
 
 ```{r}
 #| fig-height: 9
@@ -651,7 +651,7 @@ ggplot(perfil, aes(grupo, categoria, fill = proporcion)) +
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Grupos contra clase real · K-modas
+## Grupos contra clase real - K-modas
 
 ```{r}
 # f4.desempeno.cruce_clase
@@ -714,7 +714,7 @@ ggplot(celdas, aes(clase, grupo, fill = p)) +
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Dendrograma · Gower + PAM / jerárquico
+## Dendrograma - Gower + PAM / jerárquico
 
 ```{r}
 # f4.diagnostico.dendrograma
@@ -784,7 +784,7 @@ cat("Correlación cofenética:", round(cofenetica, 3), "\n")
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Silueta · Gower + PAM / jerárquico
+## Silueta - Gower + PAM / jerárquico
 El texto de este panel está en la primera sección «Silueta».
 
 ```{r}
@@ -818,7 +818,7 @@ fviz_silhouette(sil)
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Grupos contra clase real · Gower + PAM / jerárquico
+## Grupos contra clase real - Gower + PAM / jerárquico
 El texto de este panel está en la primera sección «Grupos contra clase real».
 
 ```{r}
@@ -870,7 +870,7 @@ ggplot(celdas, aes(clase, grupo, fill = p)) +
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Traza de convergencia · Clases latentes
+## Traza de convergencia - Clases latentes
 El texto de este panel está en la primera sección «Traza de convergencia».
 
 ```{r}
@@ -1006,7 +1006,7 @@ cat("Reinicios que llegaron a ese valor:",
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## BIC por modelo · Clases latentes
+## BIC por modelo - Clases latentes
 
 ```{r}
 # f4.diagnostico.bic
@@ -1050,7 +1050,7 @@ legend("topright", c("BIC", "AIC"), col = c("#a6192e", "grey40"),
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Modos de los grupos · Clases latentes
+## Modos de los grupos - Clases latentes
 El texto de este panel está en la primera sección «Modos de los grupos».
 
 ```{r}
@@ -1110,7 +1110,7 @@ ggplot(perfil, aes(grupo, categoria, fill = proporcion)) +
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Grupos contra clase real · Clases latentes
+## Grupos contra clase real - Clases latentes
 El texto de este panel está en la primera sección «Grupos contra clase real».
 
 ```{r}
@@ -1164,7 +1164,7 @@ ggplot(celdas, aes(clase, grupo, fill = p)) +
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Mapa en dos dimensiones · K-medias
+## Mapa en dos dimensiones - K-medias
 El texto de este panel está en la primera sección «Mapa en dos dimensiones».
 
 ```{r}
@@ -1224,7 +1224,7 @@ fviz_cluster(list(data = as.matrix(num), cluster = grupos),
 > Interpretá acá qué muestra el gráfico y qué conclusión sacás. Una
 > figura sin lectura no es un resultado: es un adorno.
 
-## Grupos contra clase real · K-medias
+## Grupos contra clase real - K-medias
 El texto de este panel está en la primera sección «Grupos contra clase real».
 
 ```{r}

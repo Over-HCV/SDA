@@ -57,7 +57,7 @@ macqueen <- ajustar_kmeans(nubes, k = 3L, optimizador = "MacQueen",
                            reinicios = 5L)
 
 # ---------------------------------------------------------------------------
-cat("\n[kmeans · los dos optimizadores]\n")
+cat("\n[kmeans - los dos optimizadores]\n")
 
 probar("Lloyd y MacQueen llegan a la misma inercia en un problema separable",
        abs(lloyd$inercia - macqueen$inercia) < 1e-6)
@@ -88,7 +88,7 @@ probar("un optimizador inexistente falla en vez de elegir uno por su cuenta",
        falla(ajustar_kmeans(nubes, k = 3L, optimizador = "Hartigan-Wong")))
 
 # ---------------------------------------------------------------------------
-cat("\n[kmeans · el resultado]\n")
+cat("\n[kmeans - el resultado]\n")
 
 probar("hay un grupo por observacion y ninguno fuera de rango",
        length(lloyd$grupos) == nrow(nubes) &&
@@ -145,7 +145,7 @@ probar("las filas con faltantes se descartan y se cuentan",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[kmeans · la traza y la semilla]\n")
+cat("\n[kmeans - la traza y la semilla]\n")
 
 probar("la inercia nunca sube: la traza es monotona",
        traza_monotona(lloyd$traza) && traza_monotona(macqueen$traza))
@@ -207,7 +207,7 @@ probar("la semilla ganadora es una de las que se probaron",
        lloyd$semilla_ganadora %in% (lloyd$semilla + seq_len(5L) - 1L))
 
 # ---------------------------------------------------------------------------
-cat("\n[kmeans · metricas de grupos (fase 4)]\n")
+cat("\n[kmeans - metricas de grupos (fase 4)]\n")
 
 probar("la silueta trae una fila por observacion, entre -1 y 1",
        {
@@ -264,7 +264,7 @@ probar("el mapa 2d se puede colorear con las asignaciones de una iteracion",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[kmeans · supuestos (fase 2)]\n")
+cat("\n[kmeans - supuestos (fase 2)]\n")
 
 ds_nubes <- nuevo_dataset("d1", "nubes", nubes, fuente = "memoria")
 
@@ -296,7 +296,7 @@ probar("con cuatro filas no hay margen ni para dos grupos",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[kmeans · el catalogo lo declara]\n")
+cat("\n[kmeans - el catalogo lo declara]\n")
 
 probar("kmeans esta activo y trae su funcion de ajuste",
        {
@@ -326,7 +326,7 @@ probar("argumentos_ajuste filtra lo que este metodo no acepta",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[kmeans · graficos]\n")
+cat("\n[kmeans - graficos]\n")
 
 probar("codo de la inercia",
        dibuja(graficar_codo(inercia_por_k(lloyd, k_max = 6L), k = 3L)))

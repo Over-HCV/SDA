@@ -9,11 +9,11 @@
 # el radio, la altura al revés (la raíz al centro, las hojas en el borde).
 #
 # Dos detalles que coord_polar no resuelve solo:
-#   · geom_segment no se curva en polares: un tramo horizontal (que une dos
+#   - geom_segment no se curva en polares: un tramo horizontal (que une dos
 #     ramas a la misma altura) saldría como cuerda recta y cruzaría el árbol.
 #     Por eso esos tramos se parten en puntos y van con geom_path, que sí se
 #     dobla siguiendo el arco.
-#   · El círculo no se cierra: se deja un hueco del 4 % entre la última hoja y
+#   - El círculo no se cierra: se deja un hueco del 4 % entre la última hoja y
 #     la primera, porque si se tocan parecen vecinas y no lo son.
 # Los rectángulos punteados de la versión rectangular se omiten: en polares
 # serían sectores que tapan las etiquetas, y el color ya dice el grupo.
@@ -139,7 +139,7 @@ graficar_enlaces_radial <- function(arboles) {
     # Sin leyenda: el número de grupo no significa lo mismo en cada sector
     # (cada árbol corta a su manera), y el color solo tiene que separar grupos.
     ggplot2::labs(subtitle = sprintf(
-      "distancia %s · %d hojas · k = %d en cada árbol · altura escalada",
+      "distancia %s - %d hojas - k = %d en cada árbol - altura escalada",
       arboles[[1]]$distancia, n, k)) +
     ggplot2::theme(legend.position = "none",
                    plot.margin = ggplot2::margin(6, 52, 30, 52))
@@ -201,7 +201,7 @@ graficar_enlaces_radial <- function(arboles) {
   list(
     ggplot2::guides(color = ggplot2::guide_legend(nrow = 1)),
     ggplot2::labs(x = NULL, y = NULL,
-                  subtitle = sub(" · (?=[0-9]+ hojas)", "\n",
+                  subtitle = sub(" - (?=[0-9]+ hojas)", "\n",
                                  .subtitulo_dendrograma(arbol), perl = TRUE)),
     tema_ggplot(),
     ggplot2::theme(axis.text = ggplot2::element_blank(),

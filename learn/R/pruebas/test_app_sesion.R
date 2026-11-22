@@ -69,7 +69,7 @@ if (!file.exists(file.path("learn", .SESION)))
        " (material del taller, debe estar versionado)")
 
 # ---------------------------------------------------------------------------
-cat("\n[sesión guardada · arrancar con todo puesto]\n")
+cat("\n[sesión guardada - arrancar con todo puesto]\n")
 # La app abierta con SDA_SESION: el caso de uso es entrar al lab y encontrar el
 # filtro aplicado, el diccionario declarado y los paneles del taller marcados,
 # en vez de rehacer los clics cada vez.
@@ -83,7 +83,7 @@ app2 <- local({
 on.exit(app2$stop(), add = TRUE)
 
 probar("al abrir con una sesión, el dataset ya está cargado y filtrado",
-       grepl("ori · 118 x 18", esperar_html(app2, "ori · 118 x 18"),
+       grepl("ori - 118 x 18", esperar_html(app2, "ori - 118 x 18"),
              fixed = TRUE))
 # Se espera por el texto de la caja de lectura y no por el conteo: el
 # encabezado se pinta un ciclo antes que la lista de paneles.

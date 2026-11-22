@@ -91,7 +91,7 @@ escribir_manifiesto <- function(destino = ruta_repo("manifest.json")) {
 
   manifiesto <- jsonlite::fromJSON(destino)
   paquetes <- names(manifiesto$packages)
-  message(sprintf("[manifiesto] %s · %d paquetes · %d archivos · R %s",
+  message(sprintf("[manifiesto] %s - %d paquetes - %d archivos - R %s",
                   destino, length(paquetes), length(manifiesto$files),
                   manifiesto$platform))
 

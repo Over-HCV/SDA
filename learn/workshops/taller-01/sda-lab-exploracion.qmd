@@ -408,7 +408,7 @@ temp <- datos$Temperatura
 viento <- datos$Velocidad_del_Viento
 recta <- lm(viento ~ temp)
 subtitulo <- sprintf(
-  "r = %.4f · cov = %.5f · n = %d\ny = %.2f + %.5fx · R² = %.3f",
+  "r = %.4f - cov = %.5f - n = %d\ny = %.2f + %.5fx - R² = %.3f",
   cor(temp, viento), cov(temp, viento), length(temp),
   coef(recta)[1], coef(recta)[2], summary(recta)$r.squared)
 grafico <- ggplot(datos,

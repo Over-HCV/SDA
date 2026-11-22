@@ -1,7 +1,7 @@
 # learn/R/nucleo/catalogo/regresion.R
 #
-# Sesiones 6-7 · Regresión lineal y sus extensiones.
-# Fuentes: notes/SDA/NB5_EST · libs/topics-map.md filas 23-27.
+# Sesiones 6-7 - Regresión lineal y sus extensiones.
+# Fuentes: notes/SDA/NB5_EST - libs/topics-map.md filas 23-27.
 
 poblar_catalogo_regresion <- function() {
 

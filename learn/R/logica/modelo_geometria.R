@@ -123,7 +123,7 @@ resumen_matriz_diseno <- function(datos, columnas) {
                                       sum(!completas)) else "todas completas"),
     fila("variables (Q)", Q, paste(columnas, collapse = ", ")),
     fila("categorias (J)", J,
-         paste(sprintf("%s: %d", columnas, niveles), collapse = " · ")),
+         paste(sprintf("%s: %d", columnas, niveles), collapse = " - ")),
     fila("inercia total", sprintf("%.3f", J / Q - 1),
          "J/Q - 1: sale de cuantas categorias hay, no de los datos"),
     fila("categorias escasas", sum(escasas),

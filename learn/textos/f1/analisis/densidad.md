@@ -28,7 +28,7 @@ comparar dos histogramas de conteos, no.
 - **Colas**: qué tan rápido cae la curva en los extremos, comparado con la
   campana que uno esperaría si fuera normal.
 - **El valor de h**: aparece en el subtítulo. Por defecto sale de la regla de
-  Silverman, `h = 0.9 · min(s, RIC/1.34) · n^(−1/5)`, que es un punto de
+  Silverman, `h = 0.9 - min(s, RIC/1.34) - n^(−1/5)`, que es un punto de
   partida razonable y nada más.
 
 ## Cuándo engaña

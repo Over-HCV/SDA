@@ -25,7 +25,7 @@ ESTILO_CAPAS <- c("colour", "fill", "alpha", "linewidth", "linetype", "shape",
 #' CP1 y CP2 quedaban mezcladas en una sola tabla sin decir de cuál eran.
 .lab_capas <- function(grafico, encabezado) {
   construido <- ggplot2::ggplot_build(grafico)
-  cat(sprintf("%s · %d capa(s)\n", encabezado, length(construido$data)))
+  cat(sprintf("%s - %d capa(s)\n", encabezado, length(construido$data)))
   # El subtítulo lleva el número que resume el panel (silueta media, ARI,
   # acumulado del scree): sin él, la tabla de capas no lo dice en ningún lado.
   if (length(grafico$labels$subtitle))
@@ -93,7 +93,7 @@ grafico_de_panel <- function(ds, clave, columnas, opciones = list()) {
       stop(sprintf("%s(datos, %s) falló: %s\n  Probá con otras columnas.",
                    nombre, paste(columnas, collapse = ", "),
                    conditionMessage(e)), call. = FALSE))
-  list(grafico = grafico, encabezado = sprintf("%s · %s", clave, nombre))
+  list(grafico = grafico, encabezado = sprintf("%s - %s", clave, nombre))
 }
 
 #' `R/graficos/x.R::graficar_y` -> "graficar_y", comprobando que esté cargada.
@@ -173,7 +173,7 @@ grafico_de_panel_f4 <- function(ds, clave, opciones = list()) {
   receta <- RECETAS_F4[[clave]] %||% RECETAS_F3[[clave]] %||%
     function(a, x) .lab_por_registro(clave, a, x)
   list(grafico = receta(ajuste, contexto), contexto = contexto,
-       encabezado = sprintf("%s · %s · %s", clave, metodo,
+       encabezado = sprintf("%s - %s - %s", clave, metodo,
                             texto_de_pares(ajustado$parametros)))
 }
 

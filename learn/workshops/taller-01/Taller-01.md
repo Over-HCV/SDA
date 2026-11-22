@@ -83,8 +83,8 @@ config:
 flowchart TD
     V["CLASIFICACIÓN DE VARIABLES<br/>(NB1: escala × clase, ejes independientes)"]
 
-    V --> ESC["EJE 1 · ESCALA<br/>¿qué operaciones tienen sentido?"]
-    V --> CLA["EJE 2 · CLASE<br/>¿cuál es el recorrido?"]
+    V --> ESC["EJE 1 - ESCALA<br/>¿qué operaciones tienen sentido?"]
+    V --> CLA["EJE 2 - CLASE<br/>¿cuál es el recorrido?"]
 
     %% ================= EJE 1: ESCALA =================
     ESC --> CUAL["CUALITATIVA<br/>mide atributos → categorías"]
@@ -109,7 +109,7 @@ flowchart TD
     CUAN2 --> DIS["DISCRETA<br/>valores contables"]
     CUAN2 --> CON["CONTINUA<br/>cualquier valor de un intervalo real"]
 
-    BIN --> BINE["Sí / No · Presence {Sí, No}"]
+    BIN --> BINE["Sí / No - Presence {Sí, No}"]
     POL --> POLE["Pronóstico (11 categorías)<br/>Municipio, Departamento"]
     DIS --> DISE["n.° de turbinas<br/>n.° de hijos"]
     CON --> CONE["Temperatura, Presion<br/>Velocidad del viento"]

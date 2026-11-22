@@ -29,7 +29,7 @@ ajustar_por_registro <- function(datos, metodo, columnas = NULL, hiper = list(),
   defecto <- hiper_por_defecto(metodo)
   extranos <- setdiff(names(hiper), names(defecto))
   if (length(extranos))
-    stop(sprintf("'%s' no tiene el hiperparámetro %s · declara: %s", metodo,
+    stop(sprintf("'%s' no tiene el hiperparámetro %s - declara: %s", metodo,
                  paste(extranos, collapse = ", "),
                  paste(names(defecto), collapse = ", ")), call. = FALSE)
   parametros <- utils::modifyList(defecto, as.list(hiper))
@@ -61,7 +61,7 @@ convertir_hiper <- function(metodo, nombre, valor) {
     logico = as.logical(toupper(as.character(valor))),
     opcion = {
       if (!is.null(spec$opciones) && !valor %in% spec$opciones)
-        stop(sprintf("%s=%s no es una opción · válidas: %s", nombre, valor,
+        stop(sprintf("%s=%s no es una opción - válidas: %s", nombre, valor,
                      paste(spec$opciones, collapse = ", ")), call. = FALSE)
       as.character(valor)
     },

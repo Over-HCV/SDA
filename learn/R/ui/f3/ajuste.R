@@ -193,7 +193,7 @@ mod_ajuste_server <- function(id, almacen = NULL) {
 .rellenar_objetos <- function(session, almacen, tipo, previo) {
   ids <- almacen_ids(almacen, tipo)
   etiquetas <- vapply(ids, function(id)
-    sprintf("%s · %s", id, almacen_obtener(almacen, tipo, id)$nombre), "")
+    sprintf("%s - %s", id, almacen_obtener(almacen, tipo, id)$nombre), "")
   .rellenar_selector(session, tipo, stats::setNames(ids, etiquetas), previo)
 }
 

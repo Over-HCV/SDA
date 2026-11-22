@@ -1,5 +1,5 @@
 ---
-title: "Exploración de datos · SDA Lab"
+title: "Exploración de datos - SDA Lab"
 subtitle: "twins"
 date: "2026-09-02 20:08"
 output:
@@ -38,7 +38,7 @@ datos <- read.csv("datos-sda-lab.csv", stringsAsFactors = FALSE)
 Sin filtros ni transformaciones aplicados.
 
 ## Diagrama de caja
-Panel `f1.analisis.boxplot` · marcado a las 20:08:46
+Panel `f1.analisis.boxplot` - marcado a las 20:08:46
 
 ### Para qué sirve
 
@@ -98,7 +98,7 @@ dato que su resumen.
 > figura sin lectura no es un resultado: es un adorno.
 
 ## Diagrama de dispersión
-Panel `f1.analisis.dispersion` · marcado a las 20:08:46
+Panel `f1.analisis.dispersion` - marcado a las 20:08:46
 
 ### Para qué sirve
 
@@ -160,5 +160,5 @@ el total.
 
 ---
 
-2 paneles · dataset twins · generado en modo servidor.
+2 paneles - dataset twins - generado en modo servidor.
 

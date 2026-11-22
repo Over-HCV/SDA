@@ -114,7 +114,7 @@ cargar_sda <- function(con_ui = TRUE, silencioso = TRUE) {
   if (exists("poblar_catalogo",  mode = "function")) poblar_catalogo()
 
   if (!silencioso) {
-    message(sprintf("[cargar_sda] %d archivos · %d métodos · %d artefactos · %s",
+    message(sprintf("[cargar_sda] %d archivos - %d métodos - %d artefactos - %s",
                     n, length(claves_metodos()), length(claves_artefactos()),
                     modo_ejecucion()))
   }

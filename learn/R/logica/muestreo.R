@@ -34,6 +34,6 @@ muestrear_para_grafico <- function(datos, umbral = UMBRAL_MUESTREO,
 #' Devuelve NULL cuando no se muestreó: así el bloque no se llena de ruido.
 descripcion_muestreo <- function(muestreo) {
   if (!isTRUE(muestreo$muestreado)) return(NULL)
-  sprintf("%d de %d filas · semilla %s",
+  sprintf("%d de %d filas - semilla %s",
           muestreo$n_muestra, muestreo$n_total, muestreo$semilla)
 }

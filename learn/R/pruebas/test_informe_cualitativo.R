@@ -63,7 +63,7 @@ CASOS <- list(
 
 for (nombre in names(CASOS)) {
   caso <- CASOS[[nombre]]
-  cat(sprintf("\n[%s · los paneles del cuaderno]\n", nombre))
+  cat(sprintf("\n[%s - los paneles del cuaderno]\n", nombre))
   extra <- unlist(lapply(caso$tokens, function(t) c("--hiper", t)))
   opciones <- partir_argumentos(c(ZOO, extra))$opciones
   opciones$metodo <- caso$metodo
@@ -161,7 +161,7 @@ for (nombre in names(CASOS)) {
   })
 }
 
-cat("\n[cuaderno · bordes]\n")
+cat("\n[cuaderno - bordes]\n")
 probar("el dendrograma pedido para PAM dice que no hay árbol", {
   lineas <- codigo_artefacto("f4.diagnostico.dendrograma",
                              list(metodo = "gower",

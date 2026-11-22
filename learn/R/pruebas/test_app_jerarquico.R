@@ -9,10 +9,10 @@
 # eso: que entró SIN vistas nuevas salvo las suyas. Lo que añade a
 # test_app_kmeans.R:
 #
-#   · que los hiperparámetros propios (enlace, corte) estén enlazados — la
+#   - que los hiperparámetros propios (enlace, corte) estén enlazados — la
 #     tercera pata de C11;
-#   · que la fase 3 reproduzca el historial de fusiones como traza;
-#   · que la fase 4 encienda dendrograma y cofenética y deje apagado el codo,
+#   - que la fase 3 reproduzca el historial de fusiones como traza;
+#   - que la fase 4 encienda dendrograma y cofenética y deje apagado el codo,
 #     que es de k-medias.
 
 suppressPackageStartupMessages(library(shinytest2))
@@ -80,7 +80,7 @@ app <- AppDriver$new(app_dir = "learn/R", name = "sda-lab-jerarquico",
 on.exit(app$stop(), add = TRUE)
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 1 · un dataset guardado en Objetos]\n")
+cat("\n[fase 1 - un dataset guardado en Objetos]\n")
 
 invisible(ir_a(app, "① Datos", "Fuente"))
 app$set_inputs(`datos-fuente` = "twins", wait_ = FALSE)
@@ -92,7 +92,7 @@ probar("el dataset queda guardado como objeto",
        grepl("d1", esperar_html(app, "d1"), fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 2 · el jerárquico ya no es un pendiente]\n")
+cat("\n[fase 2 - el jerárquico ya no es un pendiente]\n")
 
 html_f2 <- ir_a(app, "② Modelado", "elegir_jerarquico")
 probar("el jerárquico ofrece Elegir en el catálogo",
@@ -132,7 +132,7 @@ probar("el modelo queda guardado como objeto",
              fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 3 · el historial de fusiones como traza]\n")
+cat("\n[fase 3 - el historial de fusiones como traza]\n")
 
 html_f3 <- ir_a(app, "③ Ajuste", "Fusionar los dos mas cercanos")
 probar("el optimizador es el aglomerativo, con sus pasos escritos",
@@ -161,7 +161,7 @@ probar("la receta se guarda",
              fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 4 · el registro decide qué se dibuja]\n")
+cat("\n[fase 4 - el registro decide qué se dibuja]\n")
 
 invisible(ir_a(app, "④ Evaluación", "Compatibilidad"))
 app$click("evaluacion-correr")

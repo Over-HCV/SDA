@@ -24,7 +24,7 @@ graficar_histograma <- function(datos, columna, clases = 30L,
       ggplot2::aes(y = ggplot2::after_stat(density)), bins = clases,
       fill = paleta_cat(1), color = "white", linewidth = 0.2) +
     ggplot2::labs(x = columna, y = "densidad",
-                  subtitle = sprintf("%d clases · n = %d", clases, nrow(marco))) +
+                  subtitle = sprintf("%d clases - n = %d", clases, nrow(marco))) +
     tema_ggplot()
 
   if (densidad) {
@@ -60,7 +60,7 @@ graficar_densidad <- function(datos, columna, ancho = NULL, relleno = TRUE,
     grafico <- grafico + .capa_normal(valores[!is.na(valores)])
   grafico +
     ggplot2::labs(x = columna, y = "densidad",
-                  subtitle = sprintf("ancho de banda h = %.4g · n = %d",
+                  subtitle = sprintf("ancho de banda h = %.4g - n = %d",
                                      estimada$ancho, estimada$n)) +
     tema_ggplot()
 }
@@ -163,7 +163,7 @@ graficar_qq <- function(datos, columna) {
                          color = "grey55", linewidth = 0.6, linetype = "dashed") +
     ggplot2::geom_point(color = paleta_cat(1), alpha = 0.6, size = 1.3) +
     ggplot2::labs(x = "cuantil teorico normal", y = paste("cuantil de", columna),
-                  subtitle = sprintf("%s · p = %.4g · %s",
+                  subtitle = sprintf("%s - p = %.4g - %s",
                                      diagnostico$prueba, diagnostico$p_valor,
                                      diagnostico$veredicto)) +
     tema_ggplot()

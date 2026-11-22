@@ -41,7 +41,7 @@ probar("de fábrica sale el cuaderno del taller: sin texto del lab ni ruido", {
     !any(grepl("marcado a las", cuaderno, fixed = TRUE)) &&
     !any(grepl("Parámetros:", cuaderno, fixed = TRUE)) &&
     !any(grepl("Cuaderno generado desde SDA Lab", cuaderno, fixed = TRUE)) &&
-    !any(grepl("1 paneles|paneles · dataset", cuaderno))
+    !any(grepl("1 paneles|paneles - dataset", cuaderno))
 })
 probar("de fábrica el YAML es el de la plantilla y trae los campos a llenar", {
   cuaderno <- armar_informe_exploracion(seleccion, ds)

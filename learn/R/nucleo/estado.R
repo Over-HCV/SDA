@@ -136,16 +136,16 @@ nueva_corrida <- function(id, dataset_id, modelo_id, receta_id, metodo,
 
 resumen_objeto <- function(objeto) {
   switch(objeto$tipo,
-    dataset = sprintf("%d x %d · %s%s", objeto$n, objeto$p, objeto$fuente,
+    dataset = sprintf("%d x %d - %s%s", objeto$n, objeto$p, objeto$fuente,
                       if (length(objeto$transformaciones))
-                        sprintf(" · %d transf.", length(objeto$transformaciones)) else ""),
+                        sprintf(" - %d transf.", length(objeto$transformaciones)) else ""),
     modelo  = sprintf("%s%s", metodo(objeto$metodo)$nombre,
                       if (length(objeto$hiper))
-                        paste0(" · ", .hiper_corto(objeto$hiper)) else ""),
-    receta  = sprintf("%s · tol %g · maxit %s",
+                        paste0(" - ", .hiper_corto(objeto$hiper)) else ""),
+    receta  = sprintf("%s - tol %g - maxit %s",
                       ifelse(is.na(objeto$optimizador), "por defecto", objeto$optimizador),
                       objeto$control$tol %||% NA, objeto$control$maxit %||% "-"),
-    corrida = sprintf("%s x %s x %s · %s", objeto$dataset_id, objeto$modelo_id,
+    corrida = sprintf("%s x %s x %s - %s", objeto$dataset_id, objeto$modelo_id,
                       objeto$receta_id, objeto$estado),
     "-")
 }

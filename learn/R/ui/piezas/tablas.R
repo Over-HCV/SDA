@@ -62,7 +62,7 @@ recortar_para_tabla <- function(df, maximo = 2000L) {
 #' @param n_totales   filas del data.frame original
 pie_tabla <- function(n_mostradas, n_totales) {
   texto_pie <- if (n_mostradas < n_totales) {
-    sprintf("Mostrando %s de %s filas · el resto no viajó al navegador",
+    sprintf("Mostrando %s de %s filas - el resto no viajó al navegador",
             format(n_mostradas, big.mark = ".", decimal.mark = ","),
             format(n_totales, big.mark = ".", decimal.mark = ","))
   } else {

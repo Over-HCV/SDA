@@ -66,7 +66,7 @@ cargas <- function(ajuste, componentes = NULL) {
 
 #' Correlación de cada variable con cada componente.
 #'
-#' Es la carga reescalada: r(xᵢ, CPⱼ) = vᵢⱼ · √λⱼ / sᵢ. Sobre R (datos
+#' Es la carga reescalada: r(xᵢ, CPⱼ) = vᵢⱼ - √λⱼ / sᵢ. Sobre R (datos
 #' estandarizados) sᵢ vale 1 y la correlación cae dentro del círculo de radio 1,
 #' que es lo que hace legible el círculo de correlaciones. Sobre S no: por eso
 #' el gráfico avisa en vez de mentir con un círculo que no aplica.

@@ -30,11 +30,11 @@ metadatos_metodo <- function(clave) {
       .fila_meta("Paquetes", if (!length(m$deps)) NA else
         shiny::tags$code(paste(m$deps, collapse = ", "))),
       .fila_meta("Supuestos", if (!length(m$supuestos)) NA else
-        paste(gsub("_", " ", m$supuestos), collapse = " · ")),
+        paste(gsub("_", " ", m$supuestos), collapse = " - ")),
       .fila_meta("Se lee en", if (!length(m$artefactos)) NA else
-        paste(vapply(m$artefactos, titulo_de, ""), collapse = " · ")),
+        paste(vapply(m$artefactos, titulo_de, ""), collapse = " - ")),
       .fila_meta("Optimizador", if (is.null(m$optimizador)) NA else
-        paste(m$optimizador$metodos, collapse = " · "))
+        paste(m$optimizador$metodos, collapse = " - "))
     )
   )
 }
@@ -70,7 +70,7 @@ ui_ficha <- function(clave) {
     shiny::tags$p(
       class = "text-muted small mb-0",
       "Ficha: ", shiny::tags$code(file.path("learn", m$ficha)),
-      " · clave: ", shiny::tags$code(m$clave))
+      " - clave: ", shiny::tags$code(m$clave))
   )
 }
 

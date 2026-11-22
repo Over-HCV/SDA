@@ -276,7 +276,7 @@ codigo_de_transformacion <- function(entrada) {
   opcion <- grepl("^#[|] ", codigo)
   c(sprintf("## %s", .titulo_con_variables(entrada)),
     if (incluye(opciones, "procedencia"))
-      c(sprintf("Panel `%s` · marcado a las %s", entrada$clave,
+      c(sprintf("Panel `%s` - marcado a las %s", entrada$clave,
                 entrada$cuando), "") else NULL,
     .texto_de_artefacto(entrada$clave, texto, entrada$titulo),
     if (incluye(opciones, "estado") && .lleva_tabla(entrada))
@@ -311,17 +311,17 @@ codigo_de_transformacion <- function(entrada) {
 #' secciones se confunden entre sí.
 .titulo_con_variables <- function(entrada) {
   # Un panel de las fases 3 y 4 se distingue por el método, no por la
-  # clase de referencia: cuatro "Grupos contra clase real · tipo" no dicen
+  # clase de referencia: cuatro "Grupos contra clase real - tipo" no dicen
   # cuál es cuál.
   m <- entrada$params$metodo
   if (grepl("^f[34][.]", entrada$clave %||% "") && !is.null(m) &&
       existe_metodo(m))
-    return(sprintf("%s · %s", entrada$titulo, metodo(m)$nombre))
+    return(sprintf("%s - %s", entrada$titulo, metodo(m)$nombre))
   campos <- c("variable", "columna", "clase", "x", "y", "a", "b", "variables")
   valores <- unlist(entrada$params[intersect(campos, names(entrada$params))],
                     use.names = FALSE)
   if (!length(valores)) return(entrada$titulo)
-  sprintf("%s · %s", entrada$titulo, paste(valores, collapse = " vs. "))
+  sprintf("%s - %s", entrada$titulo, paste(valores, collapse = " vs. "))
 }
 
 #' El texto explicativo del panel (textos/…): markdown ya, pero un nivel más
@@ -391,7 +391,7 @@ codigo_de_transformacion <- function(entrada) {
 
 .pie_exploracion <- function(dataset, n_artefactos) {
   c("---", "",
-    sprintf("%d paneles · dataset %s · generado en modo %s.",
+    sprintf("%d paneles - dataset %s - generado en modo %s.",
             n_artefactos, if (is.null(dataset)) "ninguno" else dataset$nombre,
             modo_ejecucion()), "")
 }

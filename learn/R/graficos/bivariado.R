@@ -48,7 +48,7 @@ graficar_dispersion <- function(datos, x, y, grupo = NULL, alfa = 0.6,
       method = "lm", formula = y ~ x, se = TRUE, color = paleta_cat(6)[6],
       linewidth = 0.8)
 
-  subtitulo <- sprintf("r = %.3f · rho = %.3f · n = %d · %s",
+  subtitulo <- sprintf("r = %.3f - rho = %.3f - n = %d - %s",
                        asociacion$pearson, asociacion$spearman,
                        asociacion$n, asociacion$comentario)
   if (regresion)
@@ -96,7 +96,7 @@ graficar_dispersion_marginal <- function(datos, x, y, grupo = NULL, alfa = 0.6,
   # encajonado entre el histograma y la nube.
   arriba <- .histograma_marginal(marco$x, clases) +
     ggplot2::labs(subtitle = paste0(
-      sprintf("r = %.4f · cov = %.4g · n = %d", asociacion$pearson,
+      sprintf("r = %.4f - cov = %.4g - n = %d", asociacion$pearson,
               asociacion$covarianza, asociacion$n),
       if (regresion) paste0("\n", describir_recta(ajustar_recta(marco$x, marco$y)))))
   derecha <- .histograma_marginal(marco$y, clases) + ggplot2::coord_flip()
@@ -163,7 +163,7 @@ graficar_densidad_conjunta <- function(datos, x, y, ancho_x = NULL,
 
   grafico +
     ggplot2::labs(x = x, y = y, fill = "densidad",
-                  subtitle = sprintf("h_x = %.4g · h_y = %.4g · n = %d",
+                  subtitle = sprintf("h_x = %.4g - h_y = %.4g - n = %d",
                                      estimada$ancho_x, estimada$ancho_y,
                                      estimada$n)) +
     tema_ggplot()
@@ -206,7 +206,7 @@ graficar_mosaico <- function(cruce) {
     ggplot2::labs(x = names(dimnames(cruce$tabla))[1],
                   y = names(dimnames(cruce$tabla))[2],
                   fill = "residuo",
-                  subtitle = sprintf("chi2 = %.2f · gl = %s · p = %.4g · V = %.3f",
+                  subtitle = sprintf("chi2 = %.2f - gl = %s - p = %.4g - V = %.3f",
                                      cruce$chi2, cruce$gl, cruce$p_valor,
                                      cruce$cramer)) +
     tema_ggplot()

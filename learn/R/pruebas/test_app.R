@@ -112,7 +112,7 @@ probar("aparecen los títulos de las sesiones del curso",
 probar("el panel de corridas explica que todavía no hay ninguna",
        grepl("Todavía no hay corridas", html_inicio, fixed = TRUE))
 
-cat("\n[fase 2 · catálogo]\n")
+cat("\n[fase 2 - catálogo]\n")
 html_catalogo <- ir_a(app, "② Modelado", cuenta(TOTAL_METODOS))
 
 probar("el catálogo se dibuja desde el registro",
@@ -173,7 +173,7 @@ for (seccion in names(marcas)) {
            !grepl("Error:", html, fixed = TRUE))
 }
 
-cat("\n[fase 1 · estructura]\n")
+cat("\n[fase 1 - estructura]\n")
 # Se espera por la franja de estado y no por un título: los títulos son UI
 # estática y ya están en el DOM antes de que el servidor rinda el sidebar.
 html_datos <- ir_a(app, "① Datos", "sin cargar")
@@ -186,13 +186,13 @@ probar("las 7 subsecciones de Datos ya existen como pestañas", {
 probar("la pestaña de Análisis está presente en la fase 1",
        grepl("Análisis", html_datos, fixed = TRUE))
 probar("la fase 1 ya no es un andamio del Hito 2",
-       !grepl("En construcción · Hito 2", html_datos, fixed = TRUE))
+       !grepl("En construcción - Hito 2", html_datos, fixed = TRUE))
 probar("la franja de estado arranca sin dataset",
        grepl("sin cargar", html_datos, fixed = TRUE))
 probar("el sidebar ofrece las fuentes del curso",
        grepl("charcoal", html_datos, fixed = TRUE))
 
-cat("\n[fase 1 · cargar y mirar]\n")
+cat("\n[fase 1 - cargar y mirar]\n")
 app$set_inputs(`datos-fuente` = "sintetico_anova", wait_ = FALSE)
 app$wait_for_idle(duration = 400, timeout = 20000)
 app$click("datos-cargar")
@@ -218,7 +218,7 @@ app$wait_for_idle(duration = 400, timeout = 20000)
 probar("mover las clases no rompe el panel",
        grepl("Histograma", app$get_html("body"), fixed = TRUE))
 
-cat("\n[fase 1 · la escala manda]\n")
+cat("\n[fase 1 - la escala manda]\n")
 # Se espera por un encabezado de la tabla: los rótulos del sidebar ya están en
 # el DOM aunque su pestaña esté oculta, así que no sirven de señal.
 html_diccionario <- ir_a_pestana(app, "datos-pestana", "Diccionario",
@@ -242,7 +242,7 @@ probar("marcar la variable como nominal bloquea el histograma",
 probar("el bloqueo viene con su razón escrita",
        grepl("Promediarlas no significa nada", html_bloqueado, fixed = TRUE))
 
-cat("\n[fase 1 · preparar de verdad]\n")
+cat("\n[fase 1 - preparar de verdad]\n")
 html_calidad <- ir_a_pestana(app, "datos-pestana", "Calidad",
                              "Matriz de nulidad")
 probar("Calidad ofrece los tres criterios de atípico",
@@ -274,7 +274,7 @@ app$wait_for_idle(duration = 400, timeout = 20000)
 app$click("datos-partir")
 html_particion <- esperar_html(app, "estratificada por grupo")
 probar("partir deja constancia de tipo, semilla y estrato",
-       grepl("holdout · semilla 42 · estratificada por grupo", html_particion,
+       grepl("holdout - semilla 42 - estratificada por grupo", html_particion,
              fixed = TRUE))
 probar("la franja de estado registra la partición",
        grepl("holdout", html_particion, fixed = TRUE))
@@ -288,7 +288,7 @@ probar("balancear avisa de lo que hizo y por qué importa",
 probar("rebalancear invalida la partición anterior",
        grepl("balanceo", html_balanceo, fixed = TRUE))
 
-cat("\n[fase 1 · muestreo visible (C8)]\n")
+cat("\n[fase 1 - muestreo visible (C8)]\n")
 invisible(ir_a_pestana(app, "datos-pestana", "Fuente", "Vista previa"))
 app$set_inputs(`datos-fuente` = "charcoal_crudo", wait_ = FALSE)
 app$wait_for_idle(duration = 400, timeout = 20000)
@@ -300,7 +300,7 @@ html_charcoal <- ir_a_pestana(app, "datos-pestana", "▣ Análisis", "graficando
 probar("con 35.113 filas aparece el badge de muestreo",
        grepl("graficando", html_charcoal, fixed = TRUE))
 probar("el badge dice cuántas filas se dibujan y con qué semilla",
-       grepl("de 35.113 · semilla 42", html_charcoal, fixed = TRUE))
+       grepl("de 35.113 - semilla 42", html_charcoal, fixed = TRUE))
 probar("la franja sigue reportando el total, no la muestra",
        grepl("35.113", html_charcoal, fixed = TRUE))
 

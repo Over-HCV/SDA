@@ -7,10 +7,10 @@
 #
 # Un archivo por método (C14). Lo que este aporta y k-medias no podía dar:
 #
-#   · una vara externa. El EM está escrito a mano y poLCA es la referencia del
+#   - una vara externa. El EM está escrito a mano y poLCA es la referencia del
 #     área; la verosimilitud, los parámetros y el BIC tienen que coincidir con
 #     los suyos. poLCA se usa SOLO acá, nunca en el método.
-#   · una verdad conocida: datos simulados desde un modelo de dos clases, donde
+#   - una verdad conocida: datos simulados desde un modelo de dos clases, donde
 #     "recupera π y θ" es una aserción positiva y no una opinión.
 #
 # Al final imprime la tabla de BIC del zoológico y el ARI contra `tipo`: no
@@ -76,7 +76,7 @@ simulado <- as.data.frame(lapply(theta_real, function(th) {
 sim <- ajustar_clases_latentes(simulado, k = 2L, reinicios = 5L, k_max = 3L)
 
 # ---------------------------------------------------------------------------
-cat("\n[clases latentes · recupera el modelo que genero los datos]\n")
+cat("\n[clases latentes - recupera el modelo que genero los datos]\n")
 
 probar("los pesos recuperados estan a menos de 0.03 de los reales",
        max(abs(sim$pesos - pi_real)) < 0.03)
@@ -93,7 +93,7 @@ probar("el BIC elige k = 2 entre 1 y 3",
        sim$seleccion$k[which.min(sim$seleccion$bic)] == 2L)
 
 # ---------------------------------------------------------------------------
-cat("\n[clases latentes · la traza]\n")
+cat("\n[clases latentes - la traza]\n")
 
 probar("la log-verosimilitud nunca baja: la traza es monotona",
        traza_monotona(sim$traza) &&
@@ -132,7 +132,7 @@ probar("registrar_traza = FALSE no guarda nada y el ajuste sigue valiendo",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[clases latentes · el contrato]\n")
+cat("\n[clases latentes - el contrato]\n")
 
 zoo3 <- ajustar_clases_latentes(zoo, columnas = variables_zoo, k = 3L,
                                 reinicios = 50L)
@@ -191,7 +191,7 @@ probar("en la seleccion, la fila del k pedido es el ajuste principal",
        zoo3$seleccion$log_verosimilitud[3] == zoo3$log_verosimilitud)
 
 # ---------------------------------------------------------------------------
-cat("\n[clases latentes · entradas]\n")
+cat("\n[clases latentes - entradas]\n")
 
 probar("por defecto se aparta el identificador y nombra las filas",
        {
@@ -249,7 +249,7 @@ probar("mas reinicios nunca empeoran la verosimilitud",
                                  reinicios = 1L, k_max = 1L)$log_verosimilitud)
 
 # ---------------------------------------------------------------------------
-cat("\n[clases latentes · contra poLCA]\n")
+cat("\n[clases latentes - contra poLCA]\n")
 
 suppressPackageStartupMessages(library(poLCA))
 codigos <- as.data.frame(lapply(zoo3$x, as.integer))
@@ -265,9 +265,9 @@ zoo2 <- ajustar_clases_latentes(zoo, columnas = variables_zoo, k = 2L,
                                 reinicios = 20L, k_max = 1L)
 polca2 <- polca(2L, nrep = 20)
 polca3 <- polca(3L, nrep = 20, maxiter = 3000)
-cat(sprintf("    k = 2 · propia %.4f · poLCA %.4f\n",
+cat(sprintf("    k = 2 - propia %.4f - poLCA %.4f\n",
             zoo2$log_verosimilitud, polca2$llik))
-cat(sprintf("    k = 3 · propia %.4f · poLCA %.4f\n",
+cat(sprintf("    k = 3 - propia %.4f - poLCA %.4f\n",
             zoo3$log_verosimilitud, polca3$llik))
 
 probar("k = 2: la misma log-verosimilitud que poLCA (1e-6 relativo)",
@@ -303,7 +303,7 @@ probar("arrancado desde nuestro optimo, poLCA no se mueve de ahi",
        })
 
 # ---------------------------------------------------------------------------
-cat("\n[clases latentes · el catalogo lo declara]\n")
+cat("\n[clases latentes - el catalogo lo declara]\n")
 
 registrado <- !is.null(tryCatch(metodo("clases_latentes"),
                                 error = function(e) NULL))
@@ -321,7 +321,7 @@ if (!registrado) {
 }
 
 # ---------------------------------------------------------------------------
-cat("\n[clases latentes · el zoologico, para el informe]\n")
+cat("\n[clases latentes - el zoologico, para el informe]\n")
 
 zoo_bic <- ajustar_clases_latentes(zoo, columnas = variables_zoo, k = 3L,
                                    reinicios = 20L, k_max = 8L)
@@ -336,7 +336,7 @@ print(format(tabla_bic, digits = 6), row.names = FALSE)
 for (kk in unique(c(k_bic, 7L))) {
   a <- ajustar_clases_latentes(zoo, columnas = variables_zoo, k = kk,
                                reinicios = 20L, k_max = 1L)
-  cat(sprintf("    k = %d · log-verosimilitud %.3f · ARI contra tipo = %.3f%s\n",
+  cat(sprintf("    k = %d - log-verosimilitud %.3f - ARI contra tipo = %.3f%s\n",
               kk, a$log_verosimilitud, rand_ajustado(a$grupos, zoo$tipo),
               if (kk == k_bic) " (elegido por BIC)" else ""))
 }

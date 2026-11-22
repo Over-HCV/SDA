@@ -21,7 +21,7 @@
     "se produjo y el código R que lo redibuja sobre `datos`.") else NULL
   if (!incluye(opciones, "plantilla_taller")) return(.bloque(
     "---",
-    'title: "Exploración de datos · SDA Lab"',
+    'title: "Exploración de datos - SDA Lab"',
     sprintf('subtitle: "%s"', nombre),
     sprintf('date: "%s"', format(Sys.time(), "%Y-%m-%d %H:%M")),
     "output:",

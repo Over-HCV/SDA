@@ -90,7 +90,7 @@ actualizar_explicabilidad <- function(session, corrida, dataset,
   }, ids)
   if (!length(sirven)) return(c("ninguno" = ""))
   etiquetas <- vapply(sirven, function(id)
-    sprintf("%s · %s", id, almacen_obtener(lista, "dataset", id)$nombre), "")
+    sprintf("%s - %s", id, almacen_obtener(lista, "dataset", id)$nombre), "")
   c(stats::setNames("", "ninguno"), stats::setNames(sirven, etiquetas))
 }
 

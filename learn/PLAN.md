@@ -17,7 +17,7 @@ Al terminar: la app se recorre entera, las 4 fases navegan, el catálogo se
 dibuja solo desde el registro, el tema cambia, y está viva en GitHub Pages.
 **Cero estadística.**
 
-### E0 · Andamiaje y convenciones
+### E0 - Andamiaje y convenciones
 
 - [x] `CONVENCIONES.md` — C1…C14
 - [x] `PLAN.md` — este archivo
@@ -28,7 +28,7 @@ dibuja solo desde el registro, el tema cambia, y está viva en GitHub Pages.
 - [x] `R/pruebas/verificar_loc.R` — exit 1 si algún `.R` pasa de 300 LOC (C2)
 - [x] `R/pruebas/verificar_idioma.R` — identificadores nuestros en español ASCII (C1)
 
-### E1 · Núcleo headless (sin UI)
+### E1 - Núcleo headless (sin UI)
 
 - [x] `R/nucleo/registro.R` — `registrar_metodo()`, `metodos()`, `metodo()`, `filtrar_metodos()`
 - [x] `R/nucleo/catalogo/` — 54 métodos en 7 archivos por macro-tema; Hito 1 solo
@@ -39,7 +39,7 @@ dibuja solo desde el registro, el tema cambia, y está viva en GitHub Pages.
 - [x] `R/nucleo/claves.R` — `registrar_artefacto()`, `rutas_de()`, `contexto_de()` (C9)
 - [x] `R/nucleo/artefactos/` — 71 artefactos en 2 archivos por fase
 - [x] `R/nucleo/textos.R` — `texto(clave)`; si falta el `.md`, aviso discreto (C6)
-- [x] `R/nucleo/exportar.R` — JSON · CSV · PNG · RDS · Rmd · MD
+- [x] `R/nucleo/exportar.R` — JSON - CSV - PNG - RDS - Rmd - MD
 - [x] `R/nucleo/informe/corridas.R` — armado del cuaderno `.Rmd`
 - [x] `R/mapa.R` + `MAPA.md` generado
 - [x] `R/pruebas/verificar_mapa.R` — huérfanos + `MAPA.md` al día + deuda
@@ -48,7 +48,7 @@ dibuja solo desde el registro, el tema cambia, y está viva en GitHub Pages.
 > Completado el 2026-08-13. El núcleo carga con `cargar_sda(con_ui = FALSE)` sin
 > bslib ni DT: es la base sobre la que puede montarse una CLI.
 
-### E2 · Piezas de UI reutilizables
+### E2 - Piezas de UI reutilizables
 
 Codifica C4, C5 y C7 una sola vez, para que ninguna vista las reinvente.
 
@@ -72,20 +72,20 @@ Codifica C4, C5 y C7 una sola vez, para que ninguna vista las reinvente.
 > fórmulas del parser y KaTeX vendorizado pintándolas (ver C6 y C10 en
 > CONVENCIONES.md).
 
-### E3 · Shell navegable
+### E3 - Shell navegable
 
 - [x] `R/app.R` — `page_navbar`: ⌂ ① ② ③ ④ ⚙ ⓘ + tema + badge de modo. Solo cablea
 - [x] `R/ui/f0/inicio.R` — estado, mapa del curso, cobertura de textos, corridas
 - [x] `R/ui/f2/catalogo.R` + `f2/modelado.R` — **la vista real del hito**
 - [x] `R/ui/transversal/objetos.R` — CRUD + exportar/importar sesión
-- [x] `R/ui/transversal/referencia.R` — glosario · catálogo · artefactos · entorno
+- [x] `R/ui/transversal/referencia.R` — glosario - catálogo - artefactos - entorno
 - [x] `R/ui/f1/datos.R`, `f3/ajuste.R`, `f4/evaluacion.R` — pestañas reales, vacías
 - [x] `R/nucleo/tema_app.R` — `tema_seguro()`: sin `font_google()` en wasm
 - [x] `R/pruebas/test_app.R` — 31 aserciones, cero errores de consola (C14)
 
 > Completado el 2026-08-13.
 
-### E4 · Despliegue día 0
+### E4 - Despliegue día 0
 
 - [x] `app.R` — wrapper con `$value` **y** las librerías declaradas
 - [x] `build.R` — staging fuera del repo, `verificar_staging()`,
@@ -123,28 +123,28 @@ limpia, transforma, parte y balancea, y se lo mira en univariado, bivariado y
 multivariado. Entran las dos invariantes que hasta ahora solo estaban escritas:
 el muestreo visible (C8) y la escala de medición gobernando la UI.
 
-### E5 · Lógica pura de la fase 1
+### E5 - Lógica pura de la fase 1
 
 - [x] `R/logica/muestreo.R` — `UMBRAL_MUESTREO`, `muestrear_para_grafico()`:
       los gráficos reciben la muestra, las métricas el total (C8)
 - [x] `R/logica/resumen_univariado.R` — estadísticos filtrados por escala
-- [x] `R/logica/densidad.R` · `normalidad.R` · `asociacion.R` ·
-      `contingencia.R` · `distancias.R`
+- [x] `R/logica/densidad.R` - `normalidad.R` - `asociacion.R` ·
+      `contingencia.R` - `distancias.R`
 - [x] `R/logica/datos/` — `fuente`, `diccionario`, `calidad`,
       `transformacion`, `particion`, `balanceo` (una carpeta, sin prefijos)
 - [x] Cero dependencias nuevas: imputación por media/mediana/moda, atípicos por
       IQR/z/Mahalanobis, balanceo por sub/sobre-muestreo y bootstrap. MICE y
       SMOTE quedan como pendientes del catálogo
 
-### E6 · Gráficos de la fase 1
+### E6 - Gráficos de la fase 1
 
-- [x] `R/graficos/univariado.R` · `bivariado.R` · `multivariado.R` ·
-      `calidad.R` · `preparacion.R` — 25 funciones, ggplot puro
+- [x] `R/graficos/univariado.R` - `bivariado.R` - `multivariado.R` ·
+      `calidad.R` - `preparacion.R` — 25 funciones, ggplot puro
 - [x] Contra el sobreploteo: transparencia, jitter y conteo por celda
       (`geom_bin2d`, sin traer hexbin)
 - [x] Densidad 2D y elipsoide a mano, sin `MASS`
 
-### E7 · Artefactos y textos
+### E7 - Artefactos y textos
 
 - [x] `R/nucleo/artefactos/preparacion.R` — 8 claves nuevas
       (`f1.fuente.*`, `f1.diccionario.*`, `f1.transformacion.*`,
@@ -154,23 +154,23 @@ el muestreo visible (C8) y la escala de medición gobernando la UI.
 - [x] `textos/<fase>/<subseccion>/<artefacto>.md` — 24 textos de `f1`, con los
       tres bloques fijos
 
-### E8 · UI de las 7 subsecciones
+### E8 - UI de las 7 subsecciones
 
 - [x] `R/ui/f1/` — `datos.R` (cableado) + una subsección por archivo
-- [x] `R/ui/f1/analisis/` — `analisis.R` + `univariado.R` · `bivariado.R` ·
+- [x] `R/ui/f1/analisis/` — `analisis.R` + `univariado.R` - `bivariado.R` ·
       `multivariado.R`
 - [x] Controles estáticos con `conditionalPanel` + `update*Input`, no un
       sidebar rendido con `renderUI` (ver la trampa en `AGENT.md`)
 - [x] Badge de muestreo, franja de estado persistente y "Guardar en Objetos"
 
-### E9 · Datos y despliegue
+### E9 - Datos y despliegue
 
 - [x] `twins_path()` resuelve `data/` **y** `workshops/twins/`
 - [x] `libs/shiny-live/build.R` copia los datos por nombre: ya no falla
 - [x] charcoal crudo y pivot, ambos con carga diferida y aviso de peso en wasm
 - [x] `.github/workflows/pages.yml`
 
-### E10 · Pruebas
+### E10 - Pruebas
 
 - [x] `R/pruebas/test_fase1.R` — 50 pruebas de lógica y gráficos, sin Shiny
 - [x] `test_app.R` — recorrido real de la fase: cargar, transformar, partir,
@@ -203,7 +203,7 @@ mismo JSON que produce `Rscript learn/R/run_headless.R`.
 
 El primer método existente. Lo que valida no es el ACP: es el marco.
 
-### E11 · Lógica pura del método
+### E11 - Lógica pura del método
 
 - [x] `metodos/acp.R` — `ajustar_acp()` con dos optimizadores: `svd`
       (`prcomp`) y `potencia` (iteración de potencia con deflación). Convención
@@ -220,13 +220,13 @@ El primer método existente. Lo que valida no es el ACP: es el marco.
 - [x] `R/logica/supuestos.R` — `evaluar_supuestos()` recorre
       `metodo(clave)$supuestos` y devuelve avisos con la forma de `contratos.R`
 
-### E12 · Gráficos
+### E12 - Gráficos
 
-- [x] `R/graficos/modelo.R` · `convergencia.R` · `diagnostico.R` ·
+- [x] `R/graficos/modelo.R` - `convergencia.R` - `diagnostico.R` ·
       `explicabilidad.R` — 10 funciones, ggplot puro
 - [x] Biplot y círculo de correlaciones a mano: nada de `factoextra`
 
-### E13 · Registro, artefactos y textos
+### E13 - Registro, artefactos y textos
 
 - [x] `acp` pasa a `estado = "activo"` con `ajustar = ajustar_acp` y 12
       artefactos declarados. El optimizador declara `potencia` y `svd`
@@ -234,37 +234,37 @@ El primer método existente. Lo que valida no es el ACP: es el marco.
       `f2.supuestos.semaforo`
 - [x] 10 textos nuevos en `textos/f2/`, `f3/` y `f4/`, con los cuatro bloques
 
-### E14 · Fase 2 — Modelado
+### E14 - Fase 2 — Modelado
 
 - [x] `R/ui/f2/` — `modelado.R` (cableado) + `especificacion.R` ·
-      `supuestos.R` · `hiperparametros.R` · `analisis.R`
+      `supuestos.R` - `hiperparametros.R` - `analisis.R`
 - [x] El catálogo usa por fin su `al_elegir`: elegir un método lleva a
       Especificación con el método ya seleccionado
 - [x] «Guardar modelo en Objetos» → `nuevo_modelo()`
 
-### E15 · Fase 3 — Ajuste
+### E15 - Fase 3 — Ajuste
 
-- [x] `R/ui/f3/` — `ajuste.R` (cableado) + `optimizador.R` · `control.R` ·
-      `consola.R` · `analisis.R`
+- [x] `R/ui/f3/` — `ajuste.R` (cableado) + `optimizador.R` - `control.R` ·
+      `consola.R` - `analisis.R`
 - [x] Modo paso a paso: **reproduce** la traza registrada, no recalcula. Con
       `invalidateLater` para la reproducción automática, sin JavaScript (C10)
 - [x] «Guardar receta» y «Guardar corrida»
 
-### E16 · Fase 4 — Evaluación
+### E16 - Fase 4 — Evaluación
 
-- [x] `R/ui/f4/` — `evaluacion.R` (cableado) + `composicion.R` · `desempeno.R` ·
-      `diagnostico.R` · `explicabilidad.R` · `analisis.R`
+- [x] `R/ui/f4/` — `evaluacion.R` (cableado) + `composicion.R` - `desempeno.R` ·
+      `diagnostico.R` - `explicabilidad.R` - `analisis.R`
 - [x] Composición real: `validar_compatibilidad()` + `lista_avisos()` + Correr
-- [x] El informe compuesto con descargas `.Rmd` · JSON · CSV · RDS
+- [x] El informe compuesto con descargas `.Rmd` - JSON - CSV - RDS
 
-### E17 · `R/run_headless.R`
+### E17 - `R/run_headless.R`
 
 - [x] `correr()` recorre el registro y escribe el contrato S2 con
       `escribir_salida()`. No sabe nada del ACP: k-medias no lo va a tocar
 - [x] `hiper_por_defecto()` se mudó de `ui/formulario.R` a `nucleo/registro.R`:
       el batch corre con `con_ui = FALSE` y no sourcea `ui/`
 
-### E18 · Pruebas y documentación
+### E18 - Pruebas y documentación
 
 - [x] `R/pruebas/test_acp.R` — 55 pruebas del método, sin Shiny
 - [x] `R/pruebas/test_contrato.R` — 16 pruebas del contrato S2 y de C11
@@ -276,7 +276,7 @@ El primer método existente. Lo que valida no es el ACP: es el marco.
 - [x] `verificar_loc.R` verde — máximo 261 LOC
 - [x] `verificar_idioma.R` verde
 - [x] `verificar_mapa.R` verde — 81 artefactos, deuda de código 30/47
-- [x] `test_headless.R` · `test_fase1.R` · `test_acp.R` · `test_contrato.R`
+- [x] `test_headless.R` - `test_fase1.R` - `test_acp.R` - `test_contrato.R`
 - [x] `test_app.R` y `test_app_metodo.R` verdes, consola del navegador limpia
 - [x] Cero dependencias nuevas
 
@@ -326,7 +326,7 @@ falso: con un solo método, «las métricas de la corrida» y «las métricas de
 ACP» eran la misma cosa, y la fase 4 llamaba a `graficar_scree()` por su
 nombre. El segundo método es lo que separa las dos ideas.
 
-### E19 · Lógica pura del método
+### E19 - Lógica pura del método
 
 - [x] `metodos/kmeans.R` — `ajustar_kmeans()` con dos optimizadores escritos a
       mano: **Lloyd** (asignar todo, después recentrar) y **MacQueen** (cada
@@ -346,7 +346,7 @@ nombre. El segundo método es lo que separa las dos ideas.
       `stats::kmeans()` daría un resultado sin traza, que es justo lo que la
       fase 3 muestra
 
-### E20 · Despacho por familia
+### E20 - Despacho por familia
 
 - [x] `R/logica/metricas.R` — seis genéricas S3 que la app le hace a cualquier
       ajuste: `metricas_de_corrida()`, `coordenadas_2d()`, `tabla_resultado()`,
@@ -361,7 +361,7 @@ nombre. El segundo método es lo que separa las dos ideas.
 - [x] `R/logica/modelo_geometria.R` — `k_del_modelo()`: la fase 2 tenía escrito
       `hiper$n_componentes`, que era la última suposición del ACP que quedaba
 
-### E21 · Métricas y gráficos de grupos
+### E21 - Métricas y gráficos de grupos
 
 - [x] `R/logica/metricas_grupos.R` — `silueta()`, `inercia_por_k()`,
       `resumen_grupos()`, `centroides_tabla()` y los métodos S3 de la familia.
@@ -373,13 +373,13 @@ nombre. El segundo método es lo que separa las dos ideas.
       direcciones principales y colorea por grupo, así que `graficar_mapa_2d()`
       se reusa sin tocarla
 
-### E22 · Supuestos
+### E22 - Supuestos
 
 - [x] `grupos_esfericos` y `tamanos_similares` dejan de caer en
       `.supuesto_sin_prueba()`: el catálogo las prometía desde el Hito 1
 - [x] El mensaje de `estructura_lineal` deja de nombrar al ACP
 
-### E23 · UI de las fases 3 y 4
+### E23 - UI de las fases 3 y 4
 
 Ninguna vista nueva: lo que cambia es que las existentes despachan.
 
@@ -397,7 +397,7 @@ Ninguna vista nueva: lo que cambia es que las existentes despachan.
       fijos; `f4/diagnostico.R` y `f4/explicabilidad.R` encienden cada card
       según el registro; `f4/analisis.R` exporta `tabla_resultado()`
 
-### E24 · `run_headless.R`
+### E24 - `run_headless.R`
 
 - [x] `plot_obj = grafico_resultado(ajuste)`, `datos_df = tabla_resultado(ajuste)`
       y el resumen final por `resumen_ajuste()`. El archivo vuelve a merecer su
@@ -405,14 +405,14 @@ Ninguna vista nueva: lo que cambia es que las existentes despachan.
 - [x] `correr()` gana `inicializacion` y `reinicios`, en la firma y en el
       bloque `params` (C11)
 
-### E25 · Artefactos y textos
+### E25 - Artefactos y textos
 
 - [x] Tres claves nuevas: `f3.consola.estado`, `f4.desempeno.grupos` y
       `f4.explicabilidad.centroides`
 - [x] Cinco textos nuevos con los cuatro bloques y LaTeX donde hace falta
 - [x] `fichas/kmeans.md` ya estaba escrita desde el Hito 1. No se tocó
 
-### E26 · Pruebas
+### E26 - Pruebas
 
 - [x] `R/pruebas/test_kmeans.R` — 59 pruebas. Las dos que el ACP no podía dar:
       la traza baja de verdad (`traza_monotona()` sobre la inercia) y la
@@ -429,7 +429,7 @@ Ninguna vista nueva: lo que cambia es que las existentes despachan.
 - [x] `verificar_loc.R` verde
 - [x] `verificar_idioma.R` verde
 - [x] `verificar_mapa.R` verde — 84 artefactos
-- [x] `test_headless.R` · `test_fase1.R` · `test_acp.R` · `test_kmeans.R` ·
+- [x] `test_headless.R` - `test_fase1.R` - `test_acp.R` - `test_kmeans.R` ·
       `test_contrato.R` verdes
 - [x] `test_app.R`, `test_app_metodo.R` y `test_app_kmeans.R` verdes, consola
       del navegador limpia
@@ -473,7 +473,7 @@ Lo que valida este hito no es el taller: es que la fase 1 sirva para responder
 una pregunta REAL de principio a fin. Con un taller concreto encima aparecieron
 tres huecos que ningún dataset de juguete había destapado.
 
-### E27 · La pregunta manda: filtrar filas
+### E27 - La pregunta manda: filtrar filas
 
 - [x] `R/ui/f1/filtro.R` — subsección **Filtro**, entre Fuente y Diccionario.
       Once de las doce preguntas dicen «para los registros recolectados a medio
@@ -485,7 +485,7 @@ tres huecos que ningún dataset de juguete había destapado.
       intactos con un aviso de error. Un `data.frame` de cero filas rompe todo
       lo que viene después, y en silencio
 
-### E28 · Los tres huecos de análisis que faltaban
+### E28 - Los tres huecos de análisis que faltaban
 
 - [x] `medir_asociacion()` devuelve **covarianza** junto a Pearson y Spearman:
       la pregunta 8 es justamente por qué una tiene unidades y la otra no
@@ -496,7 +496,7 @@ tres huecos que ningún dataset de juguete había destapado.
       `patchwork` o `ggExtra` lo harían en una línea y serían una dependencia
       más en el bundle wasm
 
-### E29 · ⤓ Informe: llevarse el laboratorio
+### E29 - ⤓ Informe: llevarse el laboratorio
 
 - [x] Casilla «Añadir» en el encabezado de 17 paneles (`casilla_informe()`), con
       la selección viviendo en un `reactiveVal` de `app.R`: ① Datos la llena y
@@ -514,7 +514,7 @@ tres huecos que ningún dataset de juguete había destapado.
 - [x] `R/ui/transversal/informe.R` — la pestaña: cuaderno (`.qmd` o `.Rmd`),
       CSV de los datos actuales y JSON de la selección
 
-### E30 · Que los datos del taller lleguen al despliegue
+### E30 - Que los datos del taller lleguen al despliegue
 
 - [x] `data/ORI.csv` en `build.R` y en el espejo de `manifiesto.R`: sin eso el
       archivo estaba en el repo pero no viajaba ni a GH-Pages ni a Posit
@@ -525,7 +525,7 @@ tres huecos que ningún dataset de juguete había destapado.
 - [x] `learn/workshops/Taller-01-Sln.md` — el solucionario: por pregunta, la
       ruta en la app, la respuesta con sus números y el R equivalente
 
-### E31 · El laboratorio también por consola
+### E31 - El laboratorio también por consola
 
 - [x] `R/lab.R` — la fase 1 sin navegador: `datos`, `diccionario`, `resumen`,
       `frecuencias`, `atipicos`, `asociacion`, `normalidad`, `contingencia`,
@@ -547,9 +547,9 @@ tres huecos que ningún dataset de juguete había destapado.
 
 ## Hitos siguientes
 
-- [ ] **Hito 5 · LASSO** — valida barrido de hiperparámetros y ruta de
+- [ ] **Hito 5 - LASSO** — valida barrido de hiperparámetros y ruta de
       regularización; migra `projects/01-lasso/`
-- [ ] **Hito 6 · Evaluación completa** — explicabilidad, comparación de corridas,
+- [ ] **Hito 6 - Evaluación completa** — explicabilidad, comparación de corridas,
       exportador a `.Rmd` + `revealjs`. El exportador a `.Rmd` ya está hecho para
       la fase 1 (Hito 4b): falta extenderlo a las corridas y añadir `revealjs`.
 
@@ -587,7 +587,7 @@ tres huecos que ningún dataset de juguete había destapado.
       clave del método), y `.numericas_de()` existía en `ui/f1/analisis/` con un
       solo argumento — una privada homónima en otra carpeta se sobrescribe en
       silencio al sourcear y el error sale a diez archivos de distancia
-- [ ] **Hito 7 · Poblar el catálogo** — el resto de `libs/topics-map.md`, un
+- [ ] **Hito 7 - Poblar el catálogo** — el resto de `libs/topics-map.md`, un
       método por vez, con su ficha y sus textos
 
   - [x] `metodos/jerarquico.R` — aglomerativo sobre `stats::hclust()` (Taller

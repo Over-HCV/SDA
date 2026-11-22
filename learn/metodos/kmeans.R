@@ -8,10 +8,10 @@
 #
 # Lo que k-medias añade al marco y el ACP no podía dar:
 #
-#   · Un optimizador que de verdad puede terminar en el sitio equivocado. El
+#   - Un optimizador que de verdad puede terminar en el sitio equivocado. El
 #     ACP siempre converge al mismo subespacio; acá la partición depende de
 #     dónde arrancaron los centroides, y por eso `reinicios` no es un lujo.
-#   · Una traza con estado: no solo baja un número, se mueven los centroides y
+#   - Una traza con estado: no solo baja un número, se mueven los centroides y
 #     cambian las asignaciones. Eso es lo que hace que el paso a paso enseñe.
 #
 # Lloyd y MacQueen están escritos a mano, sin stats::kmeans(). No es purismo:

@@ -48,7 +48,7 @@ potencia <- ajustar_acp(nube, n_componentes = 2L, optimizador = "potencia")
 svd <- ajustar_acp(nube, n_componentes = 2L, optimizador = "svd")
 
 # ---------------------------------------------------------------------------
-cat("\n[acp · los dos optimizadores]\n")
+cat("\n[acp - los dos optimizadores]\n")
 
 probar("potencia y svd dan los mismos valores propios",
        max(abs(potencia$valores_propios - svd$valores_propios)) < 1e-6)
@@ -66,7 +66,7 @@ probar("las dos rutas retienen el mismo numero de componentes",
        potencia$k == svd$k && potencia$k == 2L)
 
 # ---------------------------------------------------------------------------
-cat("\n[acp · el resultado]\n")
+cat("\n[acp - el resultado]\n")
 
 probar("la varianza explicada suma 1",
        abs(sum(potencia$varianza_explicada) - 1) < 1e-10)
@@ -121,7 +121,7 @@ probar("con una sola numerica no hay ACP posible",
        falla(ajustar_acp(nube["a"])))
 
 # ---------------------------------------------------------------------------
-cat("\n[acp · la traza (fase 3)]\n")
+cat("\n[acp - la traza (fase 3)]\n")
 
 tabla_traza <- traza_a_tabla(potencia$traza)
 
@@ -181,7 +181,7 @@ probar("comparar_reinicios resume una corrida por semilla", {
 })
 
 # ---------------------------------------------------------------------------
-cat("\n[acp · metricas de reduccion (fase 4)]\n")
+cat("\n[acp - metricas de reduccion (fase 4)]\n")
 
 probar("varianza_explicada acumula hasta 1", {
   tabla <- varianza_explicada(potencia)
@@ -215,7 +215,7 @@ probar("componentes_sugeridas devuelve la primera que pasa el umbral", {
 })
 
 # ---------------------------------------------------------------------------
-cat("\n[acp · geometria antes de ajustar (fase 2)]\n")
+cat("\n[acp - geometria antes de ajustar (fase 2)]\n")
 
 probar("el maximo de la familia de direcciones es la primera componente", {
   familia <- familia_candidatas(nube, c("a", "b"))
@@ -256,7 +256,7 @@ probar("resumen_matriz_diseno detecta columnas colineales", {
 })
 
 # ---------------------------------------------------------------------------
-cat("\n[acp · supuestos]\n")
+cat("\n[acp - supuestos]\n")
 
 dataset <- nuevo_dataset("d1", "nube", nube)
 
@@ -288,7 +288,7 @@ probar("sin correlaciones que resumir, avisa de que reducir no gana nada", {
 })
 
 # ---------------------------------------------------------------------------
-cat("\n[acp · el catalogo lo declara]\n")
+cat("\n[acp - el catalogo lo declara]\n")
 
 probar("acp esta activo y trae su funcion de ajuste", {
   m <- metodo("acp")
@@ -315,7 +315,7 @@ probar("cada hiperparametro del registro es argumento de la funcion pura", {
 })
 
 # ---------------------------------------------------------------------------
-cat("\n[acp · graficos]\n")
+cat("\n[acp - graficos]\n")
 
 probar("espacio de hipotesis",
        dibuja(graficar_espacio_hipotesis(familia_candidatas(nube, c("a", "b")),

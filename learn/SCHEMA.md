@@ -8,7 +8,7 @@ de implementar.
 
 ---
 
-## 0 · Premisas
+## 0 - Premisas
 
 ### 0.1 Principio rector
 
@@ -74,10 +74,10 @@ Tus 4 fases se conservan como columna vertebral. La fase 3 se renombra:
 
 | Tu nombre | Nombre en la app | Por qué |
 |---|---|---|
-| Knowledge | **1 · Datos** | Todo lo que se le hace a los datos, en orden |
-| Modeling | **2 · Modelado** | Especificar la familia de hipótesis y sus hiperparámetros |
-| Setup  | **3 · Ajuste** | No training pues en `prcomp`/`lm`/`aov` no hay épocas |
-| Evaluation | **4 · Evaluación** | Componer los tres anteriores, correr y analizar |
+| Knowledge | **1 - Datos** | Todo lo que se le hace a los datos, en orden |
+| Modeling | **2 - Modelado** | Especificar la familia de hipótesis y sus hiperparámetros |
+| Setup  | **3 - Ajuste** | No training pues en `prcomp`/`lm`/`aov` no hay épocas |
+| Evaluation | **4 - Evaluación** | Componer los tres anteriores, correr y analizar |
 
 **Importante.** Barra de progreso, curva de pérdida,
 decaimiento, épocas. En estadística multivariada clásica se llama **iteración del optimizador**. Sí es observable:
@@ -121,7 +121,7 @@ Invariantes heredadas de `libs/sdd.md`: lógica pura sin `input`/`reactive`
 
 ---
 
-## 1 · Mapa del sitio
+## 1 - Mapa del sitio
 
 ```
 SDA Lab
@@ -136,7 +136,7 @@ SDA Lab
 │     ├─ Transformación ........... centrar, escalar, log, Box–Cox, dummies
 │     ├─ Partición ................ train/test, k-fold, estratificación
 │     ├─ Balanceo ................. sub/sobre-muestreo, SMOTE, bootstrap
-│     └─ ▣ Análisis ............... univariado · bivariado · multivariado
+│     └─ ▣ Análisis ............... univariado - bivariado - multivariado
 │
 ├─ ②  Modelado .................... Modeling
 │     ├─ Catálogo ................. los 33+ métodos, filtrables
@@ -149,7 +149,7 @@ SDA Lab
 │     ├─ Optimizador .............. método, tolerancia, iteraciones, semilla
 │     ├─ Control .................. paso, decaimiento, criterio de parada
 │     ├─ Consola .................. barra de progreso + log live/realtime
-│     └─ ▣ Análisis ............... convergencia · trayectoria · estabilidad
+│     └─ ▣ Análisis ............... convergencia - trayectoria - estabilidad
 │
 ├─ ④  Evaluación ................... Evaluation
 │     ├─ Composición .............. Dataset × Modelo × Receta → Corrida
@@ -160,12 +160,12 @@ SDA Lab
 │     └─ ▣ Análisis ............... el informe compuesto, exportable
 │
 ├─ ⚙  Objetos ...................... CRUD transversal
-│     └─ Datasets · Modelos · Recetas · Ejecuciones
+│     └─ Datasets - Modelos - Recetas - Ejecuciones
 │
 ├─ ⤓  Informe ...................... el laboratorio como cuaderno .Rmd
 │     └─ lo que se marcó con la casilla «Añadir», en orden
 │
-└─ ⓘ  Referencia ................... glosario · árbol de temas · galería · tema
+└─ ⓘ  Referencia ................... glosario - árbol de temas - galería - tema
 ```
 
 **▣ Análisis** es una subsección real, no un adorno: es el lugar donde la fase
@@ -173,7 +173,7 @@ deja de configurarse y empieza a *mirarse*.
 
 ---
 
-## 2 · Las cuatro piezas que se componen
+## 2 - Las cuatro piezas que se componen
 
 El corazón del diseño. Cuatro objetos con CRUD independiente que la fase 4
 combina. Una **Corrida** es lo único que produce resultados.
@@ -255,7 +255,7 @@ usuario).
 
 ---
 
-## 3 · Wireframes por vista
+## 3 - Wireframes por vista
 
 Ancho de referencia ≥ 1280 px. Debajo de 992 px el sidebar se pliega y las
 pestañas siguen igual.
@@ -271,7 +271,7 @@ Convención de los wireframes: `▸` marca un plegable **cerrado por defecto**
 ├──────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
 │  ┌─ Estado de la sesión ──────────┐  ┌─ Ruta sugerida ─────────────────┐ │
-│  │ Dataset  charcoal · 35115×5  ✓ │  │ 1. Cargá twins                  │ │
+│  │ Dataset  charcoal - 35115×5  ✓ │  │ 1. Cargá twins                  │ │
 │  │ Modelo   — sin definir       ○ │  │ 2. Marcá DLHRWAGE como respuesta│ │
 │  │ Receta   por defecto         ✓ │  │ 3. Elegí LASSO en el catálogo   │ │
 │  │ Corridas 3 guardadas           │  │ 4. Mové λ y mirá los ceros      │ │
@@ -288,14 +288,14 @@ Convención de los wireframes: `▸` marca un plegable **cerrado por defecto**
 │  └──────────────────────────────────────────────────────────────────────┘│
 │                                                                          │
 │  ┌─ Últimas corridas ───────────────────────────────────────────────────┐│
-│  │ #12 twins · lasso · λ=0.04    R²=0.31  12:04  [abrir] [clonar] [🗑]  ││
-│  │ #11 piv   · kmeans · k=4      sil=0.52 11:47  [abrir] [clonar] [🗑]  ││
+│  │ #12 twins - lasso - λ=0.04    R²=0.31  12:04  [abrir] [clonar] [🗑]  ││
+│  │ #11 piv   - kmeans - k=4      sil=0.52 11:47  [abrir] [clonar] [🗑]  ││
 │  └──────────────────────────────────────────────────────────────────────┘│
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Acciones**: abrir ruta sugerida · saltar a cualquier fase · restaurar corrida ·
-importar/exportar sesión (JSON) · cambiar tema.
+**Acciones**: abrir ruta sugerida - saltar a cualquier fase - restaurar corrida ·
+importar/exportar sesión (JSON) - cambiar tema.
 **Diagramas**: barras de progreso por sesión del curso.
 
 ---
@@ -320,14 +320,14 @@ el feedback-loop de la fase. Dar clic en la sección denotada [① DATOS] retorn
 │   n:    ──●───    │  ┌─ ¿Por qué esta subsección? ────────────────────┐  │
 │   efecto:──●──    │  │ Un método no se aplica a "datos": se aplica a  │  │
 │   semilla: 42     │  │ una matriz X (n×p) con roles definidos. Antes  │  │
-│ ○ Subir archivo   │  ⚠ graficando 5.000 de 35.115 · semilla 42 [usar todo]│
+│ ○ Subir archivo   │  ⚠ graficando 5.000 de 35.115 - semilla 42 [usar todo]│
 │   [Examinar…]     │  Mostrando 10 de 35.115 filas                        │
 │                   │                                                      │
 │ [Cargar]          │  ▸ ¿Por qué esta subsección?                          │
 │                   │  ▸ contexto                              │
 ├───────────────────┴──────────────────────────────────────────────────────┤
 │ ESTADO  n=35115  p=5  faltantes 0.4%  numéricas 2  categóricas 3         │
-│         partición: ninguna · balanceo: ninguno · transformaciones: 0      │
+│         partición: ninguna - balanceo: ninguno - transformaciones: 0      │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -338,13 +338,13 @@ en toda tabla.
 
 | Subsección | Acciones | Salida visible en vivo |
 |---|---|---|
-| **Fuente** | elegir del curso · generar sintético (tipo, n, efecto, semilla) · subir CSV (delimitador, decimal, encoding, símbolo de NA) | vista previa DT + franja de estado |
-| **Filtro** | elegir columna (hasta 60 niveles) · marcar los valores a conservar · entra en la misma pila que las transformaciones, con deshacer | filas antes / ahora / fuera + la pila completa en orden |
-| **Diccionario** | editar por fila: etiqueta, descripción, escala, clase, rol, unidad · autodetección con revisión manual | tabla editable + badges de conflicto ("marcaste `Year` como razón; es discreta") |
-| **Calidad** | patrón de faltantes (MCAR/MAR/MNAR) · imputar (media, mediana, k-NN, MICE) · duplicados · atípicos (IQR, z, Mahalanobis) · coerción de tipos | matriz de nulidad, mapa de calor de faltantes, tabla de atípicos con su distancia |
-| **Transformación** | centrar `H` · escalar · log · √ · Box–Cox (λ con slider) · dummies + categoría de referencia · interacciones · pila ordenada con deshacer | histograma antes/después lado a lado, en vivo |
-| **Partición** | holdout con proporción · k-fold · estratificada por columna · semilla | barra apilada de tamaños + tabla de balance por partición |
-| **Balanceo** | sub-muestreo · sobre-muestreo · SMOTE · bootstrap · pesos de clase | barras de frecuencia por clase antes/después + nube 2D con los sintéticos marcados |
+| **Fuente** | elegir del curso - generar sintético (tipo, n, efecto, semilla) - subir CSV (delimitador, decimal, encoding, símbolo de NA) | vista previa DT + franja de estado |
+| **Filtro** | elegir columna (hasta 60 niveles) - marcar los valores a conservar - entra en la misma pila que las transformaciones, con deshacer | filas antes / ahora / fuera + la pila completa en orden |
+| **Diccionario** | editar por fila: etiqueta, descripción, escala, clase, rol, unidad - autodetección con revisión manual | tabla editable + badges de conflicto ("marcaste `Year` como razón; es discreta") |
+| **Calidad** | patrón de faltantes (MCAR/MAR/MNAR) - imputar (media, mediana, k-NN, MICE) - duplicados - atípicos (IQR, z, Mahalanobis) - coerción de tipos | matriz de nulidad, mapa de calor de faltantes, tabla de atípicos con su distancia |
+| **Transformación** | centrar `H` - escalar - log - √ - Box–Cox (λ con slider) - dummies + categoría de referencia - interacciones - pila ordenada con deshacer | histograma antes/después lado a lado, en vivo |
+| **Partición** | holdout con proporción - k-fold - estratificada por columna - semilla | barra apilada de tamaños + tabla de balance por partición |
+| **Balanceo** | sub-muestreo - sobre-muestreo - SMOTE - bootstrap - pesos de clase | barras de frecuencia por clase antes/después + nube 2D con los sintéticos marcados |
 
 #### ① ▣ Análisis
 
@@ -386,20 +386,20 @@ la fórmula —LaTeX de verdad, pintado por KaTeX— y la trampa del gráfico:
 
 ```
 │ ▾ ¿Cómo se lee?                                                          │
-│   Qué muestra · frecuencias por intervalo; la altura es un conteo.       │
-│   Qué buscar  · centro, dispersión, forma, modas, huecos.                │
-│   Cuándo engaña · el número de clases cambia la historia. Con pocas      │
+│   Qué muestra - frecuencias por intervalo; la altura es un conteo.       │
+│   Qué buscar  - centro, dispersión, forma, modas, huecos.                │
+│   Cuándo engaña - el número de clases cambia la historia. Con pocas      │
 │     barras todo parece una campana; con muchas, ruido dentado. Movelo.   │
 ```
 
 | Pestaña | Diagramas | Hook interactivo |
 |---|---|---|
-| **Univariado** | barras · histograma · densidad kernel · boxplot · violín · beeswarm · Q–Q normal · ojiva | slider de `bins` y de ancho `h`: el mismo dato, dos historias |
-| **Bivariado** | dispersión (+ jitter, alfa, hexbin) · densidad conjunta con curvas de nivel · boxplot agrupado · mosaico · tabla de contingencia con residuos estandarizados | selector de par + slider de transparencia; el sobreploteo se ve y se cura |
-| **Multivariado** | matriz de dispersión · mapa de calor de `R` (con reordenamiento) · coordenadas paralelas · elipsoide de concentración · Q–Q de distancias de Mahalanobis · superficie de densidad bivariada 3D | multi-select de variables; el elipsoide se deforma con la correlación |
+| **Univariado** | barras - histograma - densidad kernel - boxplot - violín - beeswarm - Q–Q normal - ojiva | slider de `bins` y de ancho `h`: el mismo dato, dos historias |
+| **Bivariado** | dispersión (+ jitter, alfa, hexbin) - densidad conjunta con curvas de nivel - boxplot agrupado - mosaico - tabla de contingencia con residuos estandarizados | selector de par + slider de transparencia; el sobreploteo se ve y se cura |
+| **Multivariado** | matriz de dispersión - mapa de calor de `R` (con reordenamiento) - coordenadas paralelas - elipsoide de concentración - Q–Q de distancias de Mahalanobis - superficie de densidad bivariada 3D | multi-select de variables; el elipsoide se deforma con la correlación |
 
-Cada gráfico lleva su texto con la estructura fija **para qué sirve · qué
-muestra · qué buscar · cuándo engaña**. El primero va al sello ⓘ del
+Cada gráfico lleva su texto con la estructura fija **para qué sirve - qué
+muestra - qué buscar - cuándo engaña**. El primero va al sello ⓘ del
 encabezado; los otros tres al plegable «¿Cómo se lee?». Los textos viven en
 `learn/textos/<fase>/<subseccion>/<artefacto>.md`, uno por
 artefacto, y se escriben incrementalmente: si falta el archivo, la UI lo avisa
@@ -441,7 +441,7 @@ Al dar clic en una tarjeta se abre la **ficha del método**, que es la
 respuesta a "qué es y por qué es necesaria":
 
 ```
-┌─ ACP · Análisis de componentes principales ──────────────── [Elegir] ────┐
+┌─ ACP - Análisis de componentes principales ──────────────── [Elegir] ────┐
 │ QUÉ ES     Rotación ortogonal de X a ejes ordenados por varianza.        │
 │ POR QUÉ    p variables correlacionadas cargan información redundante.    │
 │            Sin reducir, no podés ver la nube ni ajustar sin colinealidad.│
@@ -449,9 +449,9 @@ respuesta a "qué es y por qué es necesaria":
 │ SALIDA     λᵢ (varianzas), vᵢ (cargas), scores, % explicado              │
 │ SUPONE     estructura lineal; sensible a atípicos y a la escala          │
 │ FALLA SI   la estructura es no lineal (→ kernel PCA, t-SNE, UMAP)        │
-│ SE LEE EN  scree plot · círculo de correlaciones · biplot                │
+│ SE LEE EN  scree plot - círculo de correlaciones - biplot                │
 │ TEORÍA     notes/tree.md → 090-reduccion/020-acp                         │
-│ EN R       prcomp() · factoextra::fviz_pca_biplot()                      │
+│ EN R       prcomp() - factoextra::fviz_pca_biplot()                      │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -468,8 +468,8 @@ Las tarjetas 🔒 **también abren su ficha** — con las secciones QUÉ ES / PO
 
 | Subsección | Acciones | Feedback en vivo |
 |---|---|---|
-| **Catálogo** | filtrar por objetivo / sesión / supervisión / ejecutable · buscar · abrir ficha · elegir método · saltar a ① Datos desde los pendientes que ya corren como análisis | contador "N métodos visibles" + resaltado de los compatibles con el dataset actual |
-| **Especificación** | constructor de fórmula (`y ~ x₁ + x₂ + x₁:x₂`) con arrastre de columnas · o selección de bloques X / Y · vista del texto de la fórmula generada | matriz de diseño resultante: dimensiones, rango, nombres de dummies creadas |
+| **Catálogo** | filtrar por objetivo / sesión / supervisión / ejecutable - buscar - abrir ficha - elegir método - saltar a ① Datos desde los pendientes que ya corren como análisis | contador "N métodos visibles" + resaltado de los compatibles con el dataset actual |
+| **Especificación** | constructor de fórmula (`y ~ x₁ + x₂ + x₁:x₂`) con arrastre de columnas - o selección de bloques X / Y - vista del texto de la fórmula generada | matriz de diseño resultante: dimensiones, rango, nombres de dummies creadas |
 | **Supuestos** | checklist específico del método, evaluado **sobre el dataset actual antes de ajustar** | semáforo por supuesto (normalidad, homocedasticidad, colinealidad VIF, tamaño mínimo, escalas) con el gráfico que lo prueba al lado |
 | **Hiperparámetros** | solo los del *modelo*, no los del ajuste: `k`, nº de componentes, `α`, tipo de enlace, `ε`/`minPts`, kernel… | previsualización del efecto donde sea barato (ej.: `k` mueve el corte del dendrograma sin recalcular) |
 
@@ -530,9 +530,9 @@ la fase 3 le muestra cómo la máquina hace lo mismo, más rápido.
 
 | Subsección | Acciones | Diagramas |
 |---|---|---|
-| **Optimizador** | elegir algoritmo · inicialización · nº de reinicios · (para los que aplican: paso, decaimiento, momento) | descripción del algoritmo paso a paso, resaltando el paso actual mientras corre |
-| **Control** | máx. iteraciones · tolerancia · criterio de parada · semilla · registrar traza sí/no · validación cruzada durante el ajuste | — |
-| **Consola** | ▶ ajustar · ■ detener · paso a paso (una iteración por clic) · velocidad de reproducción | barra de progreso real, log de iteraciones, cronómetro |
+| **Optimizador** | elegir algoritmo - inicialización - nº de reinicios - (para los que aplican: paso, decaimiento, momento) | descripción del algoritmo paso a paso, resaltando el paso actual mientras corre |
+| **Control** | máx. iteraciones - tolerancia - criterio de parada - semilla - registrar traza sí/no - validación cruzada durante el ajuste | — |
+| **Consola** | ▶ ajustar - ■ detener - paso a paso (una iteración por clic) - velocidad de reproducción | barra de progreso real, log de iteraciones, cronómetro |
 
 **Modo paso a paso**: el botón que más enseña. Una iteración por clic, con el
 gráfico de resultado actualizándose. En k-medias se ven los centroides caminar;
@@ -584,19 +584,19 @@ La composición es explícita: tres selectores arriba, resultado abajo.
 
 | Subsección | Acciones | Diagramas |
 |---|---|---|
-| **Composición** | elegir los 3 objetos · validar compatibilidad · correr · encolar barrido (grid de hiperparámetros) | panel de compatibilidad con avisos accionables |
-| **Desempeño** | elegir conjunto (train / test / CV) · umbral de decisión · métrica principal | value boxes · ROC + AUC · precisión-exhaustividad · calibración · matriz de confusión interactiva (clic en celda → ver esos casos) |
-| **Diagnóstico** | según el método | residuos vs. ajustados · Q–Q de residuos · escala-localización · leverage y distancia de Cook · VIF · Durbin–Watson · silueta · scree · dendrograma con corte móvil |
-| **Explicabilidad** | elegir técnica y observación | importancia por permutación · PDP · ICE · LIME local · SHAP (si el método lo admite) · cargas y círculo de correlaciones · biplot · caracterización de grupos |
-| **Comparación** | seleccionar 2+ corridas | tabla de métricas lado a lado · coordenadas paralelas de hiperparámetros vs. métrica · superposición de curvas ROC · diferencias significativas entre corridas |
+| **Composición** | elegir los 3 objetos - validar compatibilidad - correr - encolar barrido (grid de hiperparámetros) | panel de compatibilidad con avisos accionables |
+| **Desempeño** | elegir conjunto (train / test / CV) - umbral de decisión - métrica principal | value boxes - ROC + AUC - precisión-exhaustividad - calibración - matriz de confusión interactiva (clic en celda → ver esos casos) |
+| **Diagnóstico** | según el método | residuos vs. ajustados - Q–Q de residuos - escala-localización - leverage y distancia de Cook - VIF - Durbin–Watson - silueta - scree - dendrograma con corte móvil |
+| **Explicabilidad** | elegir técnica y observación | importancia por permutación - PDP - ICE - LIME local - SHAP (si el método lo admite) - cargas y círculo de correlaciones - biplot - caracterización de grupos |
+| **Comparación** | seleccionar 2+ corridas | tabla de métricas lado a lado - coordenadas paralelas de hiperparámetros vs. métrica - superposición de curvas ROC - diferencias significativas entre corridas |
 
 #### ④ ▣ Análisis — el informe compuesto
 
 Reúne lo mejor de las cuatro fases en un solo documento con narrativa:
 **qué datos → qué modelo → cómo se ajustó → qué resultó → qué significa**.
 
-Acciones: exportar a `.Rmd` · a HTML autocontenido · a PDF de diapositivas
-(`revealjs`) · a JSON del contrato S2 · copiar el código R equivalente.
+Acciones: exportar a `.Rmd` - a HTML autocontenido - a PDF de diapositivas
+(`revealjs`) - a JSON del contrato S2 - copiar el código R equivalente.
 
 > **El exportador a `.Rmd` no es un extra.** La guía del curso (§15) pide
 > cuaderno RMD + diapositivas PDF + video. Un informe exportable convierte
@@ -611,13 +611,13 @@ Acciones: exportar a `.Rmd` · a HTML autocontenido · a PDF de diapositivas
 │  [Datasets 4] [Modelos 7] [Recetas 3] [Corridas 12]                      │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ id  nombre              resumen                    creado    acciones    │
-│ d3  twins-particionado  146/36 · 15 vars · z-score 11:20  👁 ✎ ⧉ ⤓ 🗑    │
-│ d2  charcoal-pivot      145×31 · numérico          10:58  👁 ✎ ⧉ ⤓ 🗑    │
-│ m5  lasso-wage          LASSO α=1 · y~.            11:31  👁 ✎ ⧉ ⤓ 🗑    │
-│ r1  cd-estricta         tol 1e-7 · cv 10 · s=42    11:33  👁 ✎ ⧉ ⤓ 🗑    │
-│ c12 —                   d3 × m5 × r1 · R²=0.312    12:04  👁    ⧉ ⤓ 🗑    │
+│ d3  twins-particionado  146/36 - 15 vars - z-score 11:20  👁 ✎ ⧉ ⤓ 🗑    │
+│ d2  charcoal-pivot      145×31 - numérico          10:58  👁 ✎ ⧉ ⤓ 🗑    │
+│ m5  lasso-wage          LASSO α=1 - y~.            11:31  👁 ✎ ⧉ ⤓ 🗑    │
+│ r1  cd-estricta         tol 1e-7 - cv 10 - s=42    11:33  👁 ✎ ⧉ ⤓ 🗑    │
+│ c12 —                   d3 × m5 × r1 - R²=0.312    12:04  👁    ⧉ ⤓ 🗑    │
 └──────────────────────────────────────────────────────────────────────────┘
-   👁 ver · ✎ editar (te lleva a su fase) · ⧉ clonar · ⤓ exportar JSON · 🗑
+   👁 ver - ✎ editar (te lleva a su fase) - ⧉ clonar - ⤓ exportar JSON - 🗑
 ```
 
 Todo objeto es exportable e importable. Una sesión entera cabe en un JSON, lo
@@ -651,7 +651,7 @@ SDA_SESION=sesion.json Rscript -e 'shiny::runApp("learn/R/app.R")'
 
 ---
 
-## 4 · El registro de métodos
+## 4 - El registro de métodos
 
 Una sola tabla declarativa gobierna el catálogo, los filtros, los candados y
 qué entra en el bundle wasm. Añadir un método es añadir una fila y un archivo.
@@ -706,7 +706,7 @@ bloqueados) y 84 artefactos. Poblados desde `libs/topics-map.md`, los seis cuade
 
 ---
 
-## 5 · Dos salidas, un código
+## 5 - Dos salidas, un código
 
 ```
                     learn/R/  (mismo código fuente)
@@ -718,7 +718,7 @@ bloqueados) y 84 artefactos. Poblados desde `libs/topics-map.md`, los seis cuade
    staging + shinylive::export()     todo el catálogo disponible
           │                                │
           ▼                                ▼
-   GitHub Pages                      local · shinyapps.io
+   GitHub Pages                      local - shinyapps.io
    cero instalación                  cualquier paquete CRAN
    arranque lento (webR)             arranque inmediato
    solo métodos wasm ejecutables     todos ejecutables
@@ -748,7 +748,7 @@ catálogo (`brms`, `torch`, `mclust`) no compilan a WebAssembly.
 
 ---
 
-## 6 · Los métodos bloqueados
+## 6 - Los métodos bloqueados
 
 Visibles, con ficha completa, sin botón de ejecutar. No son huecos: son el borde
 del mapa, y saber que existe un borde es parte de entender el territorio.
@@ -769,7 +769,7 @@ logística en el lab, después imaginá una capa más."*
 
 ---
 
-## 7 · Estructura de archivos
+## 7 - Estructura de archivos
 
 Construida, no propuesta. El techo de 300 LOC (C2) es lo que obliga a las
 subcarpetas: un módulo por subsección, un catálogo por macro-tema del curso.
@@ -798,7 +798,7 @@ learn/
 │  │   ├─ almacen.R             CRUD puro (devuelve copias)
 │  │   ├─ contratos.R           validar_compatibilidad()
 │  │   ├─ textos.R              texto() y ficha(), tolerantes a .md ausente
-│  │   ├─ exportar.R            JSON · CSV · PNG · RDS · Rmd · MD
+│  │   ├─ exportar.R            JSON - CSV - PNG - RDS - Rmd - MD
 │  │   ├─ informe/              el cuaderno exportable
 │  │   │   ├─ corridas.R        armado del cuaderno .Rmd (corridas, f2-f4)
 │  │   │   ├─ exploracion.R     cuaderno de la fase 1 + CASILLAS_INFORME
@@ -813,16 +813,16 @@ learn/
 │  │   ├─ muestreo.R            UMBRAL_MUESTREO + muestrear_para_grafico() (C8)
 │  │   ├─ resumen_univariado.R  densidad.R  normalidad.R
 │  │   ├─ asociacion.R  contingencia.R  distancias.R
-│  │   └─ datos/                fuente · diccionario · calidad ·
-│  │                            transformacion · particion · balanceo
+│  │   └─ datos/                fuente - diccionario - calidad ·
+│  │                            transformacion - particion - balanceo
 │  ├─ graficos/             ggplot puro
 │  │   └─ univariado.R  bivariado.R  multivariado.R  calidad.R  preparacion.R
 │  ├─ ui/
-│  │   ├─ piezas/               panel · tablas · indicadores · tarjetas · fase
+│  │   ├─ piezas/               panel - tablas - indicadores - tarjetas - fase
 │  │   ├─ ficha.R  formulario.R
 │  │   ├─ f1/                   un archivo por subsección + analisis/
 │  │   ├─ f0/ f2/ f3/ f4/
-│  │   └─ transversal/          objetos.R · referencia.R · informe.R
+│  │   └─ transversal/          objetos.R - referencia.R - informe.R
 │  └─ pruebas/
 │      ├─ verificar_loc.R       techo de 300 LOC
 │      ├─ verificar_idioma.R    español ASCII, snake_case, sin raíces inglesas
@@ -861,7 +861,7 @@ ya estaban en `renv.lock`.
 
 ---
 
-## 8 · Preguntas abiertas
+## 8 - Preguntas abiertas
 
 Cerradas durante el Hito 1:
 

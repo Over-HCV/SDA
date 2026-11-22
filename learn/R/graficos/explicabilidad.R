@@ -197,7 +197,7 @@ graficar_contribuciones <- function(tabla) {
                         color = "grey40") +
     ggplot2::facet_wrap(~ etiqueta, nrow = 1) +
     ggplot2::labs(x = "contribucion (%)", y = NULL,
-                  subtitle = sprintf("reparto de 100 por componente · reparto parejo = %.1f %%",
+                  subtitle = sprintf("reparto de 100 por componente - reparto parejo = %.1f %%",
                                      referencia)) +
     tema_ggplot()
 }

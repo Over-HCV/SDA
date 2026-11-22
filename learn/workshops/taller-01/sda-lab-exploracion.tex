@@ -704,7 +704,7 @@ registro pertenece a un grupo de municipios con comportamiento propio.
 \NormalTok{viento }\OtherTok{\textless{}{-}}\NormalTok{ datos}\SpecialCharTok{$}\NormalTok{Velocidad\_del\_Viento}
 \NormalTok{recta }\OtherTok{\textless{}{-}} \FunctionTok{lm}\NormalTok{(viento }\SpecialCharTok{\textasciitilde{}}\NormalTok{ temp)}
 \NormalTok{subtitulo }\OtherTok{\textless{}{-}} \FunctionTok{sprintf}\NormalTok{(}
-  \StringTok{"r = \%.4f · cov = \%.5f · n = \%d}\SpecialCharTok{\textbackslash{}n}\StringTok{y = \%.2f + \%.5fx · R² = \%.3f"}\NormalTok{,}
+  \StringTok{"r = \%.4f - cov = \%.5f - n = \%d}\SpecialCharTok{\textbackslash{}n}\StringTok{y = \%.2f + \%.5fx - R² = \%.3f"}\NormalTok{,}
   \FunctionTok{cor}\NormalTok{(temp, viento), }\FunctionTok{cov}\NormalTok{(temp, viento), }\FunctionTok{length}\NormalTok{(temp),}
   \FunctionTok{coef}\NormalTok{(recta)[}\DecValTok{1}\NormalTok{], }\FunctionTok{coef}\NormalTok{(recta)[}\DecValTok{2}\NormalTok{], }\FunctionTok{summary}\NormalTok{(recta)}\SpecialCharTok{$}\NormalTok{r.squared)}
 \NormalTok{grafico }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(datos,}

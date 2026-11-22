@@ -1,4 +1,4 @@
-# Proyecto 3 — shinylive · ANOVA + distribuciones (R corriendo en el navegador)
+# Proyecto 3 — shinylive - ANOVA + distribuciones (R corriendo en el navegador)
 
 App Shiny que demuestra **shinylive**: la misma app de Shiny corre en el
 navegador vía **webR** (R compilado a WebAssembly), **sin servidor de R**.

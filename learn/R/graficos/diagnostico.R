@@ -67,7 +67,7 @@ graficar_scree <- function(tabla, k = NULL, umbral = 0.8, reglas = NULL) {
     sprintf("con %d componentes se pasa el %.0f%%", alcanza[1], 100 * umbral)
     else sprintf("ninguna cantidad de componentes llega al %.0f%%", 100 * umbral)
   if (is.null(k) || !k %in% tabla$componente) return(parte_umbral)
-  sprintf("retenidas %d · acumulan %.1f%% · %s", k,
+  sprintf("retenidas %d - acumulan %.1f%% - %s", k,
           100 * tabla$acumulada[k], parte_umbral)
 }
 
@@ -150,8 +150,8 @@ graficar_silueta <- function(tabla, ...) {
 .subtitulo_silueta <- function(tabla, media, muestreada = FALSE) {
   negativas <- sum(tabla$s < 0)
   parte <- if (isTRUE(muestreada))
-    sprintf(" · sobre una muestra de %d", nrow(tabla)) else ""
-  sprintf("silueta media %.3f · %d observaciones mal ubicadas%s",
+    sprintf(" - sobre una muestra de %d", nrow(tabla)) else ""
+  sprintf("silueta media %.3f - %d observaciones mal ubicadas%s",
           media, negativas, parte)
 }
 
@@ -232,7 +232,7 @@ graficar_dendrograma <- function(arbol, etiquetas = NULL,
 }
 
 .subtitulo_dendrograma <- function(arbol) {
-  sprintf("enlace %s · distancia %s · %d hojas cortadas en k = %d · cofenetica %.3f",
+  sprintf("enlace %s - distancia %s - %d hojas cortadas en k = %d - cofenetica %.3f",
           arbol$enlace, arbol$distancia, arbol$n, arbol$k,
           arbol$cofenetica %||% NA_real_)
 }
@@ -263,7 +263,7 @@ graficar_cofenetico <- function(tabla) {
                   attr(tabla, "correlacion") %||% NA_real_,
                   attr(tabla, "pares") %||% nrow(tabla))
   if (!isTRUE(attr(tabla, "muestreada"))) return(base)
-  sprintf("%s · se dibujan %d", base, nrow(tabla))
+  sprintf("%s - se dibujan %d", base, nrow(tabla))
 }
 
 #' BIC y AIC contra k: cómo un modelo de mezclas elige cuántos grupos.
@@ -307,5 +307,5 @@ graficar_bic <- function(tabla) {
 .subtitulo_bic <- function(minimos, elegido) {
   partes <- sprintf("%s minimo en k = %d", minimos$criterio, minimos$k)
   if (!is.null(elegido)) partes <- c(partes, sprintf("elegido k = %d", elegido))
-  paste(partes, collapse = " · ")
+  paste(partes, collapse = " - ")
 }

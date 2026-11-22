@@ -96,7 +96,7 @@ app <- AppDriver$new(app_dir = "learn/R", name = "sda-lab-gower",
 on.exit(app$stop(), add = TRUE)
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 1 · el zoológico guardado en Objetos]\n")
+cat("\n[fase 1 - el zoológico guardado en Objetos]\n")
 
 invisible(ir_a(app, "① Datos", "Fuente"))
 app$set_inputs(`datos-fuente` = "zoo", wait_ = FALSE)
@@ -108,7 +108,7 @@ probar("el dataset queda guardado como objeto",
        grepl("d1", esperar_html(app, "d1"), fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 2 · Gower entra por las columnas cualitativas]\n")
+cat("\n[fase 2 - Gower entra por las columnas cualitativas]\n")
 
 html_f2 <- ir_a(app, "② Modelado", "elegir_gower")
 probar("Gower ofrece Elegir en el catálogo",
@@ -145,7 +145,7 @@ probar("el modelo queda guardado como objeto",
              fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 3 · las fusiones del árbol sobre Gower]\n")
+cat("\n[fase 3 - las fusiones del árbol sobre Gower]\n")
 
 invisible(ir_a(app, "③ Ajuste", "Consola"))
 invisible(ir_a_pestana(app, "ajuste-pestana", "Consola",
@@ -157,7 +157,7 @@ probar("la consola registra las alturas de fusión",
              fixed = TRUE))
 
 # ---------------------------------------------------------------------------
-cat("\n[fase 4 · el registro decide qué se dibuja]\n")
+cat("\n[fase 4 - el registro decide qué se dibuja]\n")
 
 invisible(ir_a(app, "④ Evaluación", "Compatibilidad"))
 app$click("evaluacion-correr")
