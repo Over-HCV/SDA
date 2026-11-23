@@ -1,0 +1,6 @@
+# latexmkrc: Esta presentación solo compila con LuaLaTeX (el tema carga
+# fontspec). Así cualquier latexmk, incluido el de LaTeX Workshop con su
+# opción -pdf, termina llamando a lualatex y no a pdflatex.
+$pdf_mode = 4;
+$lualatex = 'lualatex -synctex=1 -file-line-error %O %S';
+$pdflatex = 'lualatex -synctex=1 -file-line-error %O %S';

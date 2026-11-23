@@ -88,5 +88,20 @@ lab panel f4.desempeno.cruce_clase $GOWER_JER --hiper enlace=average $K7 $ZOO \
 # distancias-ejemplo.png: el lab no tiene todavía un panel de disimilitudes
 # entre filas, así que no se produce (la diapositiva muestra su recuadro).
 
+# --- Figuras del cuaderno -----------------------------------------------------
+# Las diapositivas de código muestran el código del cuaderno junto a la
+# figura que ese mismo código dibuja. Se compila el cuaderno en una carpeta
+# temporal (para no ensuciar cuaderno/) y se copian los PNG de sus chunks.
+TMP=$(mktemp -d)
+cp projects/final/cuaderno/clustering-cualitativo.Rmd "$TMP/"
+Rscript -e "rmarkdown::render('$TMP/clustering-cualitativo.Rmd',
+  quiet = TRUE, clean = FALSE)"
+FIG="$TMP/clustering-cualitativo_files/figure-html"
+cp "$FIG/kmodas-convergencia-1.png" "$SALIDA/cuaderno-kmodas.png"
+cp "$FIG/jerarquico-clase-1.png"    "$SALIDA/cuaderno-jerarquico.png"
+cp "$FIG/clases-bic-1.png"          "$SALIDA/cuaderno-bic.png"
+cp "$FIG/comparacion-grafico-1.png" "$SALIDA/cuaderno-ari.png"
+rm -rf "$TMP"
+
 echo "figuras en $SALIDA:"
 ls -1 "$SALIDA"

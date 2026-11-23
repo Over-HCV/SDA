@@ -1,3 +1,5 @@
+% !TEX program = lualatex
+% !TEX TS-program = lualatex
 % =============================================================================
 % Proyecto final AED — Clustering de variables cualitativas
 %
@@ -14,6 +16,16 @@
 \usepackage[spanish, es-noshorthands]{babel}
 \usepackage{amsmath, amssymb}
 \usepackage{booktabs}
+\usepackage{listings}
+% Código R de las diapositivas: el mismo del cuaderno, con su color.
+\lstset{language=R, basicstyle=\ttfamily\fontsize{7.4}{9}\selectfont,
+  keywordstyle=\color{mcmPrimary}\bfseries,
+  commentstyle=\color{mcmBlack!55}\itshape,
+  stringstyle=\color{mcmBlack!80}, columns=fullflexible,
+  keepspaces=true, showstringspaces=false, upquote=true,
+  aboveskip=0pt, belowskip=0pt,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1
+           {ú}{{\'u}}1 {ñ}{{\~n}}1 {¿}{{\textquestiondown}}1}
 \usepackage[backend=biber, style=authoryear, sorting=nyt]{biblatex}
 \addbibresource{refs.bib}
 
@@ -247,6 +259,37 @@
   \end{columns}
 \end{frame}
 
+\begin{frame}[fragile]{K-modas en R}
+  \begin{columns}[c]
+    \begin{column}{0.61\textwidth}
+\begin{lstlisting}
+# Asignación: Cada animal a la moda con menos desacuerdos
+d <- colSums(t(modas) != codigos[i, ])
+destino <- which.min(d)
+# Actualización: La categoría más frecuente de cada atributo
+modas_de <- function(g) t(sapply(seq_len(k), function(j)
+  sapply(seq_len(ncol(codigos)), function(v)
+    which.max(tabulate(codigos[g == j, v], niveles[v])))))
+# Costo: Desacuerdos de cada animal con la moda de su grupo
+costo <- function(g, m) sum(codigos != m[g, , drop = FALSE])
+
+# 25 arranques (semillas 42 a 66) y gana el de menor costo
+kmodas7 <- kmodas(cuali, k = 7)
+kmodas7$costo   # 138
+\end{lstlisting}
+
+      \vspace{0.4em}
+      {\tiny\color{mcmBlack!60} Extracto de \texttt{kmodas\_una()} en el
+      cuaderno.}
+    \end{column}
+    \begin{column}{0.37\textwidth}
+      \centering\figura{cuaderno-kmodas.png}{0.5\textheight}
+
+      \footnotesize Los 25 arranques (en gris) y el ganador (en rojo).
+    \end{column}
+  \end{columns}
+\end{frame}
+
 \begin{frame}{K-modas paso a paso}
   \centering\figura{kmodos-traza.png}{0.75\textheight}
 \end{frame}
@@ -332,6 +375,36 @@
   \centering\figura{gower-dendrograma.png}{0.75\textheight}
 \end{frame}
 
+\begin{frame}[fragile]{Gower y jerárquico en R}
+  \begin{columns}[c]
+    \begin{column}{0.61\textwidth}
+\begin{lstlisting}
+# Gower con solo factores: Fracción de atributos distintos
+gower <- daisy(cuali, metric = "gower")
+arbol <- hclust(gower, method = "average")
+jerarquico7 <- cutree(arbol, k = 7)
+# ¿Cuánto respeta el árbol las distancias?
+cor(as.numeric(gower),
+    as.numeric(cophenetic(arbol)))   # 0.857
+# PAM: El centro es un animal real (el medoide)
+pam7 <- pam(gower, k = 7, diss = TRUE)
+# Validación con la clase que nunca entró al ajuste
+ari(jerarquico7, datos$tipo)         # 0.889
+\end{lstlisting}
+
+      \vspace{0.4em}
+      {\tiny\color{mcmBlack!60} \texttt{daisy()}, \texttt{pam()} y
+      \texttt{hclust()} son de los paquetes \texttt{cluster} y
+      \texttt{stats}.}
+    \end{column}
+    \begin{column}{0.37\textwidth}
+      \centering\figura{cuaderno-jerarquico.png}{0.5\textheight}
+
+      \footnotesize Grupos del jerárquico promedio contra la clase real.
+    \end{column}
+  \end{columns}
+\end{frame}
+
 \begin{frame}{Concordancia entre k-modas y jerárquico}
   \centering\figura{concordancia.png}{0.72\textheight}
 
@@ -364,6 +437,37 @@
 
   \footnotesize El BIC elige 4 clases y el AIC, que castiga menos cada
   parámetro, elige 7, que es justo el número de tipos de Zoo.
+\end{frame}
+
+\begin{frame}[fragile]{Clases latentes en R: El algoritmo EM}
+  \begin{columns}[c]
+    \begin{column}{0.61\textwidth}
+\begin{lstlisting}
+# Paso E: Posterior de cada animal en cada clase
+log_f <- Y %*% log(theta) +
+  rep(log(pesos), each = nrow(Y))
+tope <- apply(log_f, 1, max)
+suma <- rowSums(exp(log_f - tope))
+posterior <- exp(log_f - tope - log(suma))
+# Paso M: Pesos y probabilidades de cada clase
+masa  <- colSums(posterior)
+theta <- sweep(crossprod(Y, posterior), 2, masa, "/")
+pesos <- masa / sum(masa)
+# BIC: Cada clase de más suma 21 parámetros
+bic <- -2 * ll + n_par * log(nrow(cuali))
+\end{lstlisting}
+
+      \vspace{0.4em}
+      {\tiny\color{mcmBlack!60} Resumido de \texttt{em\_latente()} en el
+      cuaderno; $Y$ es la tabla indicadora.}
+    \end{column}
+    \begin{column}{0.37\textwidth}
+      \centering\figura{cuaderno-bic.png}{0.5\textheight}
+
+      \footnotesize BIC y AIC para $k = 1, \dots, 8$ con 25 arranques
+      cada uno.
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \begin{frame}{Clases latentes en el plano del ACM}
@@ -468,17 +572,22 @@
 \end{frame}
 
 \begin{frame}{Conclusiones}
-  \begin{itemize}
-    \item El procedimiento de la clase 5 sirve con variables cualitativas
-      cambiando la distancia, el centro o el modelo.
-    \item Para categorías también hay métodos duros (k-modas, Gower) y
-      suaves (clases latentes).
-    \item En Zoo los que mejor recuperaron los tipos fueron los
-      jerárquicos sobre Gower (ARI 0.94 con enlace simple y 0.89 con
-      promedio) y el más bajo fue k-modas con arranque de Huang (0.63).
-    \item El ACM sirve para ver los grupos y el agrupamiento para formarlos,
-      así que usamos los dos.
-  \end{itemize}
+  \begin{columns}[c]
+    \begin{column}{0.56\textwidth}
+      \centering\figura{cuaderno-ari.png}{0.62\textheight}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \small
+      \begin{itemize}
+        \item El procedimiento de la clase 5 sirve cambiando la
+          distancia, el centro o el modelo.
+        \item Hay métodos duros (k-modas, Gower) y suaves (clases
+          latentes) para categorías.
+        \item El ACM sirve para ver los grupos y el agrupamiento para
+          formarlos.
+      \end{itemize}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \begin{frame}[allowframebreaks]{Referencias}
