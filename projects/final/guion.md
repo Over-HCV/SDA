@@ -66,20 +66,59 @@ En el dendrograma la primera gran separación (altura 0.52) deja a los 41 mamíf
 
 ## Parte 4: Clases latentes, tándem y validación (Over)
 
-**Diapositivas:** Relevo 4 → "Modelo de clases latentes" → "Número de clases: BIC y AIC" → "Clases latentes en el plano del ACM" → "ACM seguido de k-medias (tándem)" → "Validación con la variable tipo" → "Limitaciones de cada método" → "Conclusiones".
+**La idea de toda la parte.** En las partes 2 y 3 cambiamos el centro y la distancia. Aquí cambiamos el modelo: En vez de buscar grupos por cercanía suponemos que hay grupos ocultos que generan los datos y los estimamos. Después revisamos el atajo de agrupar sobre el ACM y cerramos comprobando cuánto de la clase real encontraron los métodos sin haberla visto nunca.
 
-**Guion.** En clase el GMM (el método suave con normales y EM) quedó para exposición de otro grupo y su versión categórica son las **clases latentes**: Donde el GMM pone una normal, aquí va un producto de distribuciones categóricas, con el supuesto de independencia local (dentro de cada clase los atributos no dependen entre sí). Se estima con EM, que alterna las probabilidades de pertenencia de cada animal con las nuevas proporciones y probabilidades por clase, y K lo elegimos con el BIC. En Zoo el BIC elige **4 clases** (ARI 0.82) aunque haya 7 tipos, y forzando 7 clases el ARI apenas sube a 0.83, de forma que el BIC prefiere menos parámetros a cambio de casi la misma recuperación. El AIC, que castiga menos cada parámetro, tiene su mínimo justo en 7 clases, que es el número real de tipos. Cada k de esa tabla lo ajustamos con los mismos 25 arranques y por eso la verosimilitud crece con k como debe (con menos arranques un k alto quedaba en un máximo local peor, el mismo problema de k-medias).
+### 1. Modelo de clases latentes
 
-La tabla de cruce con K = 4 muestra qué se fusiona: Una clase de mamíferos (39), una de aves (20, con un reptil), una de insectos e invertebrados juntos (18) y una de animales acuáticos y de sangre fría (13 peces, 4 anfibios, 4 reptiles y 2 mamíferos), así que el BIC absorbe justo las clases pequeñas.
+**Qué contar.** La parte 3 cierra con la pregunta de qué pasa con un animal que está entre dos grupos. Los métodos duros lo obligan a escoger uno y un modelo suave le da una probabilidad de pertenecer a cada grupo. En la clase 5 ese papel lo cumplía el GMM, que supone que cada grupo es una normal. Con categorías no hay normal, así que cada clase se describe con una tabla de probabilidades: Qué tan probable es que un animal de esa clase tenga pelo, ponga huevos o tenga cuatro patas. La fórmula dice justo eso: La probabilidad de un animal es una mezcla de clases y dentro de cada clase se multiplican las probabilidades de sus atributos.
 
-En la clase 5 el maestro dijo que el ACP es una herramienta de diagnóstico y que no hace parte del agrupamiento. El tándem (ACM a 5 dimensiones y luego k-medias) lo mostramos como contraejemplo: Aquí recupera bien los tipos (ARI 0.83), pero las primeras dimensiones son las que más inercia resumen y nada asegura que sean las que mejor separan los grupos, por lo que en otros datos podría no repetirse.
+**El insight.** Multiplicar solo vale si dentro de una clase los atributos no dependen entre sí (independencia local). Es el supuesto fuerte del modelo y lo retomamos en las limitaciones.
 
-El anexo de la clase mostraba que, sin usar la ubicación, los grupos recuperaban zonas de Bogotá, y aquí pasa lo mismo con la taxonomía: `tipo` nunca entró al agrupamiento y aun así se recupera, con los mejores resultados en Gower jerárquico (0.94 con enlace simple y 0.89 con promedio) y el más bajo en k-modas con arranque de Huang (0.63). Cerramos con las limitaciones de cada método y las conclusiones.
+### 2. Número de clases: BIC y AIC
+
+**Qué contar.** Más clases siempre ajustan mejor los datos, así que la verosimilitud sola no sirve para elegir K. Los criterios de información le cobran al modelo por cada parámetro: El BIC cobra más y el AIC menos, y por eso eligen distinto (4 clases el BIC y 7 el AIC).
+
+**El insight.** Ninguno está mal, cada uno responde una pregunta distinta. El BIC dice que con 4 clases ya se explica casi todo y para eso junta las clases pequeñas (anfibios y reptiles con los peces, insectos con invertebrados), mientras que el AIC acepta pagar más parámetros para separarlas. Que el AIC caiga en 7, el número real de tipos, es interesante pero no lo tomamos como prueba. Es el mismo dilema del codo: Hasta dónde vale la pena complicar el modelo.
+
+### 3. Clases latentes en R: El algoritmo EM
+
+**Qué contar.** El modelo se estima con EM, que alterna dos preguntas. En el paso E nos preguntamos, con lo que sabemos de cada clase, qué tan probable es que cada animal pertenezca a cada una. En el paso M, con esas probabilidades, recalculamos cómo es cada clase. Se repite hasta que la verosimilitud deja de subir.
+
+**El insight.** Es el mismo esquema de k-medias y k-modas (asignar y actualizar), con la diferencia de que la asignación es suave. Y hereda el mismo problema de los arranques, por eso corremos 25 y nos quedamos con el mejor.
+
+### 4. Clases latentes en el plano del ACM
+
+**Qué contar.** Sobre el mismo plano de la parte 1 pintamos las clases del modelo. Se ven los bloques grandes (mamíferos y aves) y la mezcla de los grupos pequeños cerca del centro.
+
+**El insight.** El plano y el modelo llegan a lo mismo por caminos distintos: Los animales que el ACM no logra separar en dos dimensiones son en buena parte los que el BIC decide juntar.
+
+### 5. ACM seguido de k-medias (tándem)
+
+**Qué contar.** Una tentación natural es convertir las categorías en números con el ACM y luego usar el k-medias de siempre. En la clase 5 el maestro dijo que el ACP sirve para diagnosticar y que el agrupamiento se hace sobre las variables originales, y este es el caso de esa advertencia.
+
+**El insight.** Aquí funciona bien, pero porque los datos ayudan. El ACM ordena las dimensiones por cuánta inercia resumen y nada asegura que esas sean las que separan los grupos. Si en otros datos los grupos se distinguen por un atributo que varía poco, el tándem lo puede perder.
+
+### 6. Validación con la variable tipo
+
+**Qué contar.** La clase real nunca entró a ningún ajuste y ahora la usamos para ver cuánto de la taxonomía encontró cada método, igual que en el anexo de la clase 5 los grupos recuperaban zonas de Bogotá sin usar la ubicación. El ARI mide ese acuerdo corregido por el azar.
+
+**El insight.** Todos recuperan buena parte de la taxonomía, lo que dice que la estructura ya está en los datos y cada método la encuentra a su manera. Las diferencias muestran qué premia cada uno: Los que arman grupos alrededor de un centro (k-modas y PAM) parten a los mamíferos en dos porque buscan grupos parecidos en todos los atributos, mientras que el jerárquico los deja juntos. Eso sí, un ARI alto dice que la estructura coincide con esta clase y no que el método sea mejor en cualquier base.
+
+### 7. Limitaciones de cada método
+
+**Qué contar.** Cada método falla justo por la pieza que cambió. K-modas falla por el centro: Depende del arranque y la moda empata con facilidad. Gower falla por la distancia: Pesa igual todos los atributos y hay que decidir qué binarias son asimétricas. Las clases latentes fallan por el modelo: Suponen independencia local, que en Zoo no se cumple con pelo y leche. Y el tándem falla por el atajo: Las dimensiones del ACM resumen inercia y nada asegura que separen grupos.
+
+**El insight.** Ningún método gana en todo, por eso vale la pena comparar varios y mirar dónde discrepan, porque ahí están los animales de frontera.
+
+### 8. Conclusiones
+
+**Qué contar.** Volvemos a la idea del principio: El procedimiento de la clase 5 sirve con variables cualitativas si cambiamos una pieza (la distancia, el centro o el modelo). Para categorías hay tanto métodos duros como suaves y el gráfico resume cuánto recuperó cada uno. El ACM nos sirve para ver los grupos y el agrupamiento para formarlos, así que usamos los dos.
 
 **Preguntas probables**
 - **¿Qué es independencia local y se cumple?** Que, conocida la clase, un atributo no dice nada de otro. En Zoo falla para pelo y leche, por lo que el modelo puede necesitar más clases o confundirlas.
 - **¿Por qué BIC y AIC eligen distinto?** El BIC multiplica cada parámetro por log(n) ≈ 4.6 y el AIC por 2, de forma que con 21 parámetros por clase adicional el BIC frena antes (k = 4) y el AIC llega a k = 7.
 - **¿Cómo se cuentan los parámetros del BIC?** Son (K − 1) proporciones más K·Σ(R_j − 1) probabilidades, que en Zoo con 16 atributos crece rápido.
+- **¿Qué diferencia hay entre categoría y clase?** Un atributo es una característica (pelo, patas), una categoría es uno de sus valores posibles (sí o no, 0 o 4 patas) y una clase es un grupo de animales. Cada clase latente se describe con la probabilidad de cada categoría de cada atributo.
 - **¿Qué mide el ARI?** El acuerdo entre dos particiones corregido por el acuerdo que se esperaría al azar, sin importar cómo se numeren los grupos (1 es acuerdo perfecto y 0 es azar).
 
 ---
