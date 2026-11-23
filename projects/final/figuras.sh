@@ -101,6 +101,7 @@ cp "$FIG/kmodas-convergencia-1.png" "$SALIDA/cuaderno-kmodas.png"
 cp "$FIG/jerarquico-clase-1.png"    "$SALIDA/cuaderno-jerarquico.png"
 cp "$FIG/clases-bic-1.png"          "$SALIDA/cuaderno-bic.png"
 cp "$FIG/comparacion-grafico-1.png" "$SALIDA/cuaderno-ari.png"
+cp "$FIG/clases-4-perfil-1.png"     "$SALIDA/cuaderno-perfil-lca.png"
 rm -rf "$TMP"
 
 echo "figuras en $SALIDA:"

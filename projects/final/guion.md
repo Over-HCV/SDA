@@ -70,29 +70,52 @@ En el dendrograma la primera gran separación (altura 0.52) deja a los 41 mamíf
 
 ### 1. Modelo de clases latentes
 
-**Qué contar.** La parte 3 cierra con la pregunta de qué pasa con un animal que está entre dos grupos. Los métodos duros lo obligan a escoger uno y un modelo suave le da una probabilidad de pertenecer a cada grupo. En la clase 5 ese papel lo cumplía el GMM, que supone que cada grupo es una normal. Con categorías no hay normal, así que cada clase se describe con una tabla de probabilidades: Qué tan probable es que un animal de esa clase tenga pelo, ponga huevos o tenga cuatro patas. La fórmula dice justo eso: La probabilidad de un animal es una mezcla de clases y dentro de cada clase se multiplican las probabilidades de sus atributos.
+**Qué contar.** La parte 3 cierra con la pregunta de qué pasa con un animal que está entre dos grupos. Los métodos duros lo obligan a escoger uno <por ejemplo, ¿cómo?> y un modelo suave le da una probabilidad de pertenecer a cada grupo. En la clase 5 ese papel lo cumplía el GMM, que supone que cada grupo es una normal.
+Con categorías no hay normal, así que cada clase se describe con una tabla de probabilidades: Qué tan probable es que un animal de esa clase tenga pelo, ponga huevos o tenga cuatro patas.
+> La fórmula busca decir eso: La probabilidad para definir un animal es una mezcla de clases; Dentro de cada clase ($\theta_c$) se multiplican las probabilidades de sus atributos ($\pi_c$?). <!-- pero no entiendo cada variable ni los símbolos, explica bien la fórmula, necesito entender mejor cada variable y subíndice-->
 
-**El insight.** Multiplicar solo vale si dentro de una clase los atributos no dependen entre sí (independencia local). Es el supuesto fuerte del modelo y lo retomamos en las limitaciones.
+**El insight.** Multiplicar solo vale si dentro de una clase los atributos no dependen entre sí **(independencia local)**. Es el supuesto fuerte del modelo y lo retomamos en las limitaciones.
 
-### 2. Número de clases: BIC y AIC
+### 2. Número de clases: BIC y AIC (Akaike)
 
 **Qué contar.** Más clases siempre ajustan mejor los datos, así que la verosimilitud sola no sirve para elegir K. Los criterios de información le cobran al modelo por cada parámetro: El BIC cobra más y el AIC menos, y por eso eligen distinto (4 clases el BIC y 7 el AIC).
 
-**El insight.** Ninguno está mal, cada uno responde una pregunta distinta. El BIC dice que con 4 clases ya se explica casi todo y para eso junta las clases pequeñas (anfibios y reptiles con los peces, insectos con invertebrados), mientras que el AIC acepta pagar más parámetros para separarlas. Que el AIC caiga en 7, el número real de tipos, es interesante pero no lo tomamos como prueba. Es el mismo dilema del codo: Hasta dónde vale la pena complicar el modelo.
+**El insight.** Ninguno está mal, cada uno responde una pregunta distinta. El BIC dice que con 4 clases ya se explica casi todo <!--decir "casi todo" me parece algo ambiguo, no?-->
+- y para eso junta las clases pequeñas (anfibios y reptiles con los peces, insectos con invertebrados),
+- mientras que el AIC acepta pagar más parámetros para separarlas. Que el AIC caiga en 7, el número real de tipos, es interesante pero no lo tomamos como prueba.
 
-### 3. Clases latentes en R: El algoritmo EM
+>Es el mismo dilema del codo: Hasta dónde vale la pena complicar el modelo.
 
-**Qué contar.** El modelo se estima con EM, que alterna dos preguntas. En el paso E nos preguntamos, con lo que sabemos de cada clase, qué tan probable es que cada animal pertenezca a cada una. En el paso M, con esas probabilidades, recalculamos cómo es cada clase. Se repite hasta que la verosimilitud deja de subir.
+### 3. Clases latentes en R: El algoritmo EM (Maximización Esperanza)
 
-**El insight.** Es el mismo esquema de k-medias y k-modas (asignar y actualizar), con la diferencia de que la asignación es suave. Y hereda el mismo problema de los arranques, por eso corremos 25 y nos quedamos con el mejor.
+**El insight.** Usa el mismo esquema de k-medias y k-modas (asignar y actualizar), con la diferencia de que la asignación es suave <!---ejemplo inline?--->. Y hereda el mismo problema de los arranques <!---qué problema?--->, por eso corremos 25 y nos quedamos con el mejor.
 
-### 4. Clases latentes en el plano del ACM
+**Qué contar.** El modelo se estima con EM, que alterna dos preguntas.
 
-**Qué contar.** Sobre el mismo plano de la parte 1 pintamos las clases del modelo. Se ven los bloques grandes (mamíferos y aves) y la mezcla de los grupos pequeños cerca del centro.
+Primeramente [paso E] nos preguntamos  
+- con lo que sabemos de cada clase
+- qué tan probable es que cada animal pertenezca a cada una. 
 
-**El insight.** El plano y el modelo llegan a lo mismo por caminos distintos: Los animales que el ACM no logra separar en dos dimensiones son en buena parte los que el BIC decide juntar.
+ En el [paso M]:
+- Con esas probabilidades, recalculamos cómo es cada clase.
+ 
+ 
+Se repite hasta que la verosimilitud deja de subir. <!---pero no veo como el condicional ese, no? O no importa?--->
 
-### 5. ACM seguido de k-medias (tándem)
+
+### 4. Perfil de las 4 clases
+
+**Qué contar.** Esta es la salida principal de un [análisis de clases latentes]. Para cada clase vemos la probabilidad de cada atributo y el tamaño de la clase <!---es el porcentaje ese?--->, es con eso le ponemos *nombre*:
+- La clase con pelo y leche son los mamíferos
+- la de plumas y huevos son las aves
+- la de dientes y vida acuática son los peces, anfibios y reptiles
+- y la que no tiene columna ni dientes son los insectos e invertebrados.
+
+**El insight.** El modelo nunca vio la clase real y aun así cada clase se puede leer como un grupo de la taxonomía.
+
+Además, en Zoo todos los animales lograron quedar en su clase con probabilidad casi 1, así que aquí el método **[suave]** termina comportándose como uno duro porque en ese esecenario clases están muy separadas.
+
+### 5. ACM seguido de k-medias (tándem) [A. Corresp. Múlt.]
 
 **Qué contar.** Una tentación natural es convertir las categorías en números con el ACM y luego usar el k-medias de siempre. En la clase 5 el maestro dijo que el ACP sirve para diagnosticar y que el agrupamiento se hace sobre las variables originales, y este es el caso de esa advertencia.
 

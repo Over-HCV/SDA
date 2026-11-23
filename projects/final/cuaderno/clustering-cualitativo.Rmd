@@ -683,6 +683,7 @@ clases_latentes <- function(x, k, reinicios = 25, semilla = 42,
   n_par <- (k - 1) + k * sum(sapply(x, nlevels) - 1)
   list(grupos = setNames(match(grupos, orden), rownames(x)), k = k,
        pesos = mejor$pesos[orden], probabilidades = probabilidades,
+       posterior = mejor$posterior[, orden, drop = FALSE],
        ll = mejor$ll, n_parametros = n_par,
        traza = mejor$traza,
        trazas = lapply(intentos, `[[`, "traza"))
@@ -750,6 +751,40 @@ cruce_con_tipo(clases7$grupos)
 clases4 <- por_k[[4]]
 cruce_con_tipo(clases4$grupos)
 ```
+
+El resultado principal de un análisis de clases latentes es el **perfil** de cada clase: La probabilidad de cada categoría dado que el animal pertenece a esa clase, junto con el tamaño de cada clase. Con el perfil le ponemos nombre a cada clase.
+
+```{r clases-4-perfil, fig.width=8, fig.height=4.5}
+# P(atributo = si | clase) para los 15 atributos binarios.
+binarios <- setdiff(names(cuali), "patas")
+perfil4 <- do.call(rbind, lapply(binarios, function(v)
+  data.frame(atributo = v, clase = factor(1:4),
+             p = clases4$probabilidades[[v]][, "si"])))
+etiquetas <- sprintf("clase %d (%.0f %%)", 1:4,
+                     100 * clases4$pesos)
+ggplot(perfil4, aes(factor(atributo, levels = binarios), p,
+                    color = clase, group = clase)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_color_manual(values = c("#a6192e", "#f08a3c",
+                                "#2b6cb0", "#3c8d5a"),
+                     labels = etiquetas) +
+  labs(x = NULL, y = "P(atributo = sí | clase)", color = NULL) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# patas no es binaria: Su distribución completa en cada clase.
+round(clases4$probabilidades$patas, 2)
+# Qué tan segura es la asignación: La probabilidad de la clase
+# más probable de cada animal, en promedio y la más baja.
+seguridad <- setNames(apply(clases4$posterior, 1, max),
+                      rownames(cuali))
+cat("La asignación menos segura:", names(which.min(seguridad)),
+    "con probabilidad", format(min(seguridad), digits = 6), "\n")
+```
+
+Cada clase tiene una firma clara. La clase 1 (39 %) tiene pelo y leche con probabilidad 1, así que son los mamíferos. La clase 3 (21 %) tiene plumas y huevos y casi siempre vuela, así que son las aves. La clase 2 (23 %) son vertebrados con dientes que viven en el agua y en buena parte tienen aletas (peces, anfibios y reptiles), y la clase 4 (18 %) son los animales sin columna ni dientes, la mayoría con seis patas (insectos e invertebrados). Los atributos que casi no cambian entre clases (venenoso, doméstico) no ayudan a distinguirlas.
+
+> **Nota.** Ninguna asignación tiene dudas: Hasta el animal menos seguro (el delfín) queda en su clase con probabilidad prácticamente 1. Con 16 atributos y clases tan distintas el modelo no necesita repartir a nadie entre dos clases, así que en Zoo la parte "suave" del método casi no se usa. En datos con grupos más parecidos sí aparecerían animales repartidos.
 
 Con k = 4 el ARI baja apenas a 0.819. Las clases son una de mamíferos (39), una de aves (20, con un reptil), una de insectos e invertebrados juntos (18) y una de animales acuáticos y de sangre fría (13 peces, 4 anfibios, 4 reptiles y 2 mamíferos). O sea que el BIC junta justo las clases pequeñas y a cambio se ahorra 63 parámetros.
 
