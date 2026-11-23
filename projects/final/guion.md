@@ -117,25 +117,46 @@ Además, en Zoo todos los animales lograron quedar en su clase con probabilidad 
 
 ### 5. ACM seguido de k-medias (tándem) [A. Corresp. Múlt.]
 
-**Qué contar.** Una tentación natural es convertir las categorías en números con el ACM y luego usar el k-medias de siempre. En la clase 5 el maestro dijo que el ACP sirve para diagnosticar y que el agrupamiento se hace sobre las variables originales, y este es el caso de esa advertencia.
+**Qué contar.** Una tentación natural sería convertir las categorías en números con el ACM y luego usar el k-means de siempre.
+El problema: se nos avisó que el ACP sirve para diagnosticar y que el agrupamiento se hace sobre las variables originales, y este es el caso de esa advertencia.
 
-**El insight.** Aquí funciona bien, pero porque los datos ayudan. El ACM ordena las dimensiones por cuánta inercia resumen y nada asegura que esas sean las que separan los grupos. Si en otros datos los grupos se distinguen por un atributo que varía poco, el tándem lo puede perder.
+**El insight.** Aquí funciona bien PERO porque los datos nos ayudan.
+> El ACM ordena las dimensiones por [cuánta inercia resumen] y NADA asegura que esas sean las que [**separan** los grupos] <!---siento que falta como un ejecmplo más obvio/intuitivo, no tan teórico y términos rimbombantes--->.
+
+Si fueran otros datos donde los grupos se distinguen por un atributo que varía poco, el tándem lo puede perder.
 
 ### 6. Validación con la variable tipo
 
-**Qué contar.** La clase real nunca entró a ningún ajuste y ahora la usamos para ver cuánto de la taxonomía encontró cada método, igual que en el anexo de la clase 5 los grupos recuperaban zonas de Bogotá sin usar la ubicación. El ARI mide ese acuerdo corregido por el azar.
+**Qué contar.** La clase real nunca entró a ningún ajuste y [ahora la usamos] para ver cuánto de la taxonomía encontró cada método;
+Así como cuando se recuperaban las zonas de Bogotá sin usar la ubicación.
+> ARI (Adj. Rand Idx) lo que hace mide ese acuerdo corregido por el azar.
 
-**El insight.** Todos recuperan buena parte de la taxonomía, lo que dice que la estructura ya está en los datos y cada método la encuentra a su manera. Las diferencias muestran qué premia cada uno: Los que arman grupos alrededor de un centro (k-modas y PAM) parten a los mamíferos en dos porque buscan grupos parecidos en todos los atributos, mientras que el jerárquico los deja juntos. Eso sí, un ARI alto dice que la estructura coincide con esta clase y no que el método sea mejor en cualquier base.
+**El insight.** Todos recuperan buena parte de la taxonomía, lo que dice que la estructura ya está en los datos y cada método la encuentra a su manera.
+Las diferencias muestran qué premia cada uno:
+- Los que arman grupos alrededor de un centro (k-modas y PAM) parten a los mamíferos en dos porque buscan grupos parecidos en todos los atributos,
+- mientras que el jerárquico los deja juntos.
+
+> Eso sí, un ARI alto <!---qué es alto? Cercano a 1?---> dice que la {estructura} coincide con esta clase y no que el {método} sea mejor en cualquier base <!---qué es una base?--->.
 
 ### 7. Limitaciones de cada método
 
-**Qué contar.** Cada método falla justo por la pieza que cambió. K-modas falla por el centro: Depende del arranque y la moda empata con facilidad. Gower falla por la distancia: Pesa igual todos los atributos y hay que decidir qué binarias son asimétricas. Las clases latentes fallan por el modelo: Suponen independencia local, que en Zoo no se cumple con pelo y leche. Y el tándem falla por el atajo: Las dimensiones del ACM resumen inercia y nada asegura que separen grupos.
+Cada método falla justo por la pieza que cambió.
+- K-modas = el centro: Depende del arranque y la moda empata con facilidad.
+- Gower = la distancia: Pesa igual todos los atributos y hay que decidir qué binarias son asimétricas.
+- Clases latentes = el modelo: Suponen independencia local, que en Zoo no se cumple con pelo y leche. 
+- y Tándem = el atajo: Las dimensiones del ACM resumen inercia y nada asegura que separen grupos.
 
-**El insight.** Ningún método gana en todo, por eso vale la pena comparar varios y mirar dónde discrepan, porque ahí están los animales de frontera.
+**El insight.** Ningún método gana en todo, por eso vale la pena comparar varios y mirar dónde discrepan,
+> Ahí están los animales de frontera.
 
 ### 8. Conclusiones
 
-**Qué contar.** Volvemos a la idea del principio: El procedimiento de la clase 5 sirve con variables cualitativas si cambiamos una pieza (la distancia, el centro o el modelo). Para categorías hay tanto métodos duros como suaves y el gráfico resume cuánto recuperó cada uno. El ACM nos sirve para ver los grupos y el agrupamiento para formarlos, así que usamos los dos.
+Volvemos a la idea del principio:
+- El procedimiento de la clase 5 sirve con variables cualitativas si cambiamos una pieza (la distancia, el centro o el modelo).
+- Para categorías hay tanto métodos duros como suaves y el gráfico resume cuánto recuperó cada uno.
+- El ACM nos sirve para ver los grupos y el agrupamiento para formarlos, así que usamos los dos.
+
+---
 
 **Preguntas probables**
 - **¿Qué es independencia local y se cumple?** Que, conocida la clase, un atributo no dice nada de otro. En Zoo falla para pelo y leche, por lo que el modelo puede necesitar más clases o confundirlas.
