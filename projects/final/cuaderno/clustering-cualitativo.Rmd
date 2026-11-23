@@ -691,8 +691,11 @@ clases_latentes <- function(x, k, reinicios = 25, semilla = 42,
 
 clases7 <- clases_latentes(cuali, k = 7)
 trazas <- clases7$trazas
-plot(NULL, xlim = c(0, max(lengths(trazas)) - 1),
-     ylim = range(unlist(trazas)), xlab = "iteración EM",
+# Solo las primeras 40 iteraciones (después todo queda plano) y sin
+# el arranque al azar, que aplastaría la escala.
+plot(NULL, xlim = c(0, 40),
+     ylim = range(unlist(lapply(trazas, `[`, -1))),
+     xlab = "iteración EM",
      ylab = "log-verosimilitud", main = "Convergencia")
 for (t in trazas) lines(seq_along(t) - 1, t, col = "grey75")
 lines(seq_along(clases7$traza) - 1, clases7$traza, type = "b",
@@ -818,6 +821,8 @@ particiones <- list(
   "K-modas (aleatoria)" = por_arranque[[3]]$grupos,
   "Gower + PAM" = pam7_grupos,
   "Gower + jerárquico promedio" = jerarquico7,
+  "Gower + jerárquico simple" =
+    numerar_por_tamano(cutree(hclust(gower, "single"), k = 7)),
   "Clases latentes (k = 7)" = clases7$grupos,
   "Clases latentes (k = 4, BIC)" = clases4$grupos,
   "Tándem ACM + k-medias" = tandem7_grupos)
@@ -835,15 +840,25 @@ resumen <- data.frame(
 knitr::kable(resumen)
 ```
 
+```{r comparacion-grafico, fig.width=7, fig.height=4}
+ggplot(resumen, aes(reorder(metodo, ari), ari)) +
+  geom_col(fill = "#a6192e") +
+  geom_text(aes(label = sprintf("%.3f", ari)), hjust = -0.15,
+            size = 3.5) +
+  coord_flip(ylim = c(0, 1.05)) +
+  labs(x = NULL, y = "ARI contra la clase real") +
+  theme_minimal()
+```
+
 ------------------------------------------------------------------------
 
 ### Ejercicio 5
 
 > ¿Cuál de los agrupamientos recupera mejor la clase real, y es el mismo que tiene la d más baja?
 
-**¿Cuál?** Los que usan Gower con aglomeración jerárquica: 0.889 con enlace promedio y 0.935 con enlace simple (en la tabla de los tres enlaces). Les siguen k-modas con arranque aleatorio (0.830), el tándem (0.829) y las clases latentes (0.826 con k = 7 y 0.819 con k = 4), y los más bajos son PAM (0.644) y k-modas con arranque de Huang (0.626).
+**¿Cuál?** Los que usan Gower con aglomeración jerárquica: 0.889 con enlace promedio y 0.935 con enlace simple. Les siguen k-modas con arranque aleatorio (0.830), el tándem (0.829) y las clases latentes (0.826 con k = 7 y 0.819 con k = 4), y los más bajos son PAM (0.644) y k-modas con arranque de Huang (0.626).
 
-Tampoco es el de menor d. Entre los de k = 7 el jerárquico promedio tiene la d más alta (115.2) y la más baja es la de PAM (96.9). Que el ARI y la d no ordenen igual tiene sentido: La d premia grupos homogéneos en **todos** los atributos y la clase real se define por unos pocos (leche, plumas, aletas, vertebrado), así que el jerárquico paga en d su grupo de 40 mamíferos, que es grande y variado en los rasgos secundarios. K-modas tampoco tiene la d mínima aunque minimice desacuerdos porque lo que minimiza es el desacuerdo de cada animal con la moda de su grupo, que es distinto del desacuerdo entre pares.
+Tampoco es el de menor d. Entre los de k = 7 los dos jerárquicos tienen las d más altas (115.2 con enlace promedio y 116.8 con simple) y la más baja es la de PAM (96.9). Que el ARI y la d no ordenen igual tiene sentido: La d premia grupos homogéneos en **todos** los atributos y la clase real se define por unos pocos (leche, plumas, aletas, vertebrado), así que los jerárquicos pagan en d su grupo de 40 o 41 mamíferos, que es grande y variado en los rasgos secundarios. K-modas tampoco tiene la d mínima aunque minimice desacuerdos porque lo que minimiza es el desacuerdo de cada animal con la moda de su grupo, que es distinto del desacuerdo entre pares.
 
 > **Nota.** El ARI compara con una clase que el algoritmo nunca vio. Un ARI alto dice que la estructura que encontramos coincide con la taxonomía, lo cual no quiere decir que el método sea mejor en general. Con otra semilla o con otro K los números pueden cambiar.
 

@@ -66,77 +66,102 @@ En el dendrograma la primera gran separación (altura 0.52) deja a los 41 mamíf
 
 ## Parte 4: Clases latentes, tándem y validación (Over)
 
-**La idea de toda la parte.** En las partes 2 y 3 cambiamos el centro y la distancia. Aquí cambiamos el modelo: En vez de buscar grupos por cercanía suponemos que hay grupos ocultos que generan los datos y los estimamos. Después revisamos el atajo de agrupar sobre el ACM y cerramos comprobando cuánto de la clase real encontraron los métodos sin haberla visto nunca.
+**IDEA:** En las partes 2 y 3 cambiamos el centro y la distancia para estimar *(cerrando con la interrogante de qué pasa con un animal que está entre dos grupos;
+Los métodos duros lo obligarían a escoger uno)*. Aquí cambiamos el modelo *(un modelo suave le da una probabilidad de pertenecer a cada grupo)*:
+- ENTONCES = no los buscamos por cercanía SUPONEMOS que hay **grupos ocultos** que generan los datos, los estimamos.
+- Después revisamos ese atajo de agrupar sobre el ACM y validamos CÚANTO de la clase real encontraron los métodos sin NUNCA haberla visto.
 
 ### 1. Modelo de clases latentes
 
-**Qué contar.** La parte 3 cierra con la pregunta de qué pasa con un animal que está entre dos grupos. Los métodos duros lo obligan a escoger uno <por ejemplo, ¿cómo?> y un modelo suave le da una probabilidad de pertenecer a cada grupo. En la clase 5 ese papel lo cumplía el GMM, que supone que cada grupo es una normal.
-Con categorías no hay normal, así que cada clase se describe con una tabla de probabilidades: Qué tan probable es que un animal de esa clase tenga pelo, ponga huevos o tenga cuatro patas.
-> La fórmula busca decir eso: La probabilidad para definir un animal es una mezcla de clases; Dentro de cada clase ($\theta_c$) se multiplican las probabilidades de sus atributos ($\pi_c$?). <!-- pero no entiendo cada variable ni los símbolos, explica bien la fórmula, necesito entender mejor cada variable y subíndice-->
+> 🚫 Antes con GMM partíamos del supuesto que grupo sigue una normal.
+> > Con categorías no hay normal [nazca naturalmente], así que cada clase se describe con una tabla de probabilidades:
+>>- Dice qué tan probable es que un animal de esa clase; Tenga pelo | Ponga huevos | Es cuadrú-pedo.
+> La fórmula busca decir eso:
+1. El exponente 0 o 1 = quedarse solo con la $\theta$ de la categoría que el animal sí tiene
+   - $\prod \theta$: Prob. [anim] $\in c$ (class) tenga cat. $r$ como att $k$.
+   - $\theta_{\text{leche}, \text{sí}, \text{mamíferos}} \approx 1$
+2. Mult. esas probabilidades en [16] atributos =es (independencia local).
+3. Como no sabemos de qué clase es el animal se promedian todas las clases, **PE**-SANDO cada una por su tamaño.
+   - $\sum_1^K\pi_c$: Sum. prob. [anim] $\in$ clase latente ($\sum=1$)
 
-**El insight.** Multiplicar solo vale si dentro de una clase los atributos no dependen entre sí **(independencia local)**. Es el supuesto fuerte del modelo y lo retomamos en las limitaciones.
 
-### 2. Número de clases: BIC y AIC (Akaike)
+> Con eso logramos definir la probabilidad para un animal como una mezcla de clases
 
-**Qué contar.** Más clases siempre ajustan mejor los datos, así que la verosimilitud sola no sirve para elegir K. Los criterios de información le cobran al modelo por cada parámetro: El BIC cobra más y el AIC menos, y por eso eligen distinto (4 clases el BIC y 7 el AIC).
 
-**El insight.** Ninguno está mal, cada uno responde una pregunta distinta. El BIC dice que con 4 clases ya se explica casi todo <!--decir "casi todo" me parece algo ambiguo, no?-->
-- y para eso junta las clases pequeñas (anfibios y reptiles con los peces, insectos con invertebrados),
-- mientras que el AIC acepta pagar más parámetros para separarlas. Que el AIC caiga en 7, el número real de tipos, es interesante pero no lo tomamos como prueba.
+> Multiplicar solo vale si dentro de una clase los atributos no dependen entre sí **(independencia local)**. Es el supuesto fuerte del modelo y lo retomamos en las limitaciones.
 
->Es el mismo dilema del codo: Hasta dónde vale la pena complicar el modelo.
+### 2. Clases latentes en R: El algoritmo EM (Maximización Esperanza)
 
-### 3. Clases latentes en R: El algoritmo EM (Maximización Esperanza)
-
-**El insight.** Usa el mismo esquema de k-medias y k-modas (asignar y actualizar), con la diferencia de que la asignación es suave <!---ejemplo inline?--->. Y hereda el mismo problema de los arranques <!---qué problema?--->, por eso corremos 25 y nos quedamos con el mejor.
+**El insight.** Usa el mismo esquema de k-medias y k-modas (asignar y actualizar), con la diferencia de que la asignación es suave <!---ejemplo inline?--->.
+Hereda el mismo problema de los arranques <!---qué problema?--->,
+por eso corremos 25 y nos quedamos con el mejor.
 
 **Qué contar.** El modelo se estima con EM, que alterna dos preguntas.
 
 Primeramente [paso E] nos preguntamos  
-- con lo que sabemos de cada clase
+- a partir de lo que sé de cada clase
 - qué tan probable es que cada animal pertenezca a cada una. 
 
  En el [paso M]:
 - Con esas probabilidades, recalculamos cómo es cada clase.
  
  
-Se repite hasta que la verosimilitud deja de subir. <!---pero no veo como el condicional ese, no? O no importa?--->
+Se repite hasta que la verosimilitud [converja] deja de subir. <!---pero no veo como el condicional ese, no? O no importa?--->
 
+### 3. Número de clases: BIC y AIC (Akaike)
+
+**Qué contar.** Más clases siempre ajustan mejor los individuos "datos", así que la verosimilitud SOLA no sirve para elegir K.
+
+Los criterios de información lo que hacen es cobrarle al modelo por cada parámetro:
+- Al Crit. Bay cobra más que al Crit. de Aka,
+- Por eso eligen distinto (4 clases el BIC y 7 el AIC).
+
+Ninguno está mal, cada uno responde una pregunta distinta. El BIC YA dice que con 4 clases ya se explica significativamente  <!--decir "casi todo" me parece algo ambiguo, no?-->
+- Para eso junta las clases pequeñas (anfibios y reptiles con los peces, insectos con invertebrados),
+- mientras que el AIC acepta pagar más parámetros para separarlas.
+ 
+> Que Crit. Aka caiga en 7, el número real de tipos, es interesante pero no lo tomamos como prueba.
+
+>Es el mismo dilema del codo: Hasta dónde vale la pena complicar el modelo.
 
 ### 4. Perfil de las 4 clases
 
-**Qué contar.** Esta es la salida principal de un [análisis de clases latentes]. Para cada clase vemos la probabilidad de cada atributo y el tamaño de la clase <!---es el porcentaje ese?--->, es con eso le ponemos *nombre*:
+Esta es la salida principal de un [análisis de clases latentes]. Para .CADA clase vemos la probabilidad de CADA atributo + TAMAÑO de la clase, es con eso le ponemos *NOMBRE*:
 - La clase con pelo y leche son los mamíferos
 - la de plumas y huevos son las aves
 - la de dientes y vida acuática son los peces, anfibios y reptiles
 - y la que no tiene columna ni dientes son los insectos e invertebrados.
 
-**El insight.** El modelo nunca vio la clase real y aun así cada clase se puede leer como un grupo de la taxonomía.
+<!-- **El insight.** El modelo nunca vio la clase real y aun así cada clase se puede leer como un grupo de la taxonomía.--->
 
-Además, en Zoo todos los animales lograron quedar en su clase con probabilidad casi 1, así que aquí el método **[suave]** termina comportándose como uno duro porque en ese esecenario clases están muy separadas.
+Algo que pasó en Zoo es que los animales lograron quedar en su clase con probabilidad muy alta,
+ aquí el método **[suave]** terminó comportándose casi como uno duro porque en ese esecenario clases están MUY SEPARADAS.
 
 ### 5. ACM seguido de k-medias (tándem) [A. Corresp. Múlt.]
 
-**Qué contar.** Una tentación natural sería convertir las categorías en números con el ACM y luego usar el k-means de siempre.
-El problema: se nos avisó que el ACP sirve para diagnosticar y que el agrupamiento se hace sobre las variables originales, y este es el caso de esa advertencia.
+**Qué contar.** Una TENTACIÓN natural sería convertir las categorías en números con el ACM y luego aplicar el k-means de siempre.
+El problema: se nos avisó que el ACP=(An. Com. Prin.) sirve para diagnosticar y que el agrupamiento se hace sobre las variables originales, y este es el caso de esa advertencia.
 
-**El insight.** Aquí funciona bien PERO porque los datos nos ayudan.
 > El ACM ordena las dimensiones por [cuánta inercia resumen] y NADA asegura que esas sean las que [**separan** los grupos] <!---siento que falta como un ejecmplo más obvio/intuitivo, no tan teórico y términos rimbombantes--->.
 
-Si fueran otros datos donde los grupos se distinguen por un atributo que varía poco, el tándem lo puede perder.
+> Aquí funciona bien PERO porque los datos nos ayudan.
+
+> Si fueran otros datos donde los grupos se distinguen por un atributo que varía poco, el tándem lo puede perder.
+
 
 ### 6. Validación con la variable tipo
 
-**Qué contar.** La clase real nunca entró a ningún ajuste y [ahora la usamos] para ver cuánto de la taxonomía encontró cada método;
-Así como cuando se recuperaban las zonas de Bogotá sin usar la ubicación.
-> ARI (Adj. Rand Idx) lo que hace mide ese acuerdo corregido por el azar.
+AHORA SÍ esas clases reales que nunca entraron a ningún AJUSTE [ahora la usamos] para ver CUÁNTO de la taxonomía encontró cada método;
 
-**El insight.** Todos recuperan buena parte de la taxonomía, lo que dice que la estructura ya está en los datos y cada método la encuentra a su manera.
+> ARI (Ind.Ajus. de Rand) MIDE ese acuerdo corregido por el azar.
+
+**El insight.** Todos recuperan buena parte de la taxonomía, lo que dice que la estructura está en los datos y cada método la encuentra a su manera.
+
 Las diferencias muestran qué premia cada uno:
 - Los que arman grupos alrededor de un centro (k-modas y PAM) parten a los mamíferos en dos porque buscan grupos parecidos en todos los atributos,
 - mientras que el jerárquico los deja juntos.
 
-> Eso sí, un ARI alto <!---qué es alto? Cercano a 1?---> dice que la {estructura} coincide con esta clase y no que el {método} sea mejor en cualquier base <!---qué es una base?--->.
+> Eso sí, un ARI alto <!---qué es alto? Cercano a 1?---> dice que la {estructura} coincide con esta clase y no que el {método} sea mejor en cualquier conjunto de datos.
 
 ### 7. Limitaciones de cada método
 
@@ -151,10 +176,15 @@ Cada método falla justo por la pieza que cambió.
 
 ### 8. Conclusiones
 
-Volvemos a la idea del principio:
-- El procedimiento de la clase 5 sirve con variables cualitativas si cambiamos una pieza (la distancia, el centro o el modelo).
-- Para categorías hay tanto métodos duros como suaves y el gráfico resume cuánto recuperó cada uno.
-- El ACM nos sirve para ver los grupos y el agrupamiento para formarlos, así que usamos los dos.
+La diapositiva dice **qué** concluimos y aquí va el **por qué** de cada punto. El gráfico de la izquierda muestra cuánto recuperó cada método, así que no hace falta decir los números.
+
+- **Ningún método gana en todo.** El que mejor recupera la clase no es el que mejor respeta las distancias, y el que no deja animales sueltos parte a los mamíferos. Por eso vale la pena comparar varios: Donde no coinciden están los animales difíciles, como el ornitorrinco.
+- **Cambia una pieza.** No tuvimos que inventar otro análisis. El de siempre funciona si cambiamos la pieza que dependía de que los datos fueran números:
+  - Restar (la distancia)
+  - promediar (el centro)
+  - o suponer una normal (el modelo).
+- **Todos recuperan la taxonomía.** Ningún método vio el tipo de animal y aun así todos lo encontraron en buena medida. Eso nos dice que los grupos ya están en los datos y que no fueron un invento del método.
+- **El ACM para ver, el agrupamiento para formar.** El ACM fue el mapa para mirar los datos, pero agrupar directamente sobre él es un atajo que aquí funcionó y que en otros datos podría fallar.
 
 ---
 
@@ -169,12 +199,12 @@ Volvemos a la idea del principio:
 
 ## Tabla de resultados (para todos)
 
-| Método (K = 7) | ARI contra `tipo` |
-|---|---|
-| K-modas, arranque Huang (costo 138) | 0.626 |
-| K-modas, arranque aleatorio (costo 139) | 0.830 |
-| Gower + PAM | 0.644 |
-| Gower + jerárquico promedio | 0.889 |
-| Gower + jerárquico simple | 0.935 |
-| Clases latentes (K = 7 / K = 4 por BIC) | 0.826 / 0.819 |
-| Tándem ACM + k-medias | 0.829 |
+| Método (K = 7)                          | ARI contra `tipo` |
+| --------------------------------------- | ----------------- |
+| K-modas, arranque Huang (costo 138)     | 0.626             |
+| K-modas, arranque aleatorio (costo 139) | 0.830             |
+| Gower + PAM                             | 0.644             |
+| Gower + jerárquico promedio             | 0.889             |
+| Gower + jerárquico simple               | 0.935             |
+| Clases latentes (K = 7 / K = 4 por BIC) | 0.826 / 0.819     |
+| Tándem ACM + k-medias                   | 0.829             |

@@ -111,8 +111,7 @@
       \end{alertblock}
       \begin{block}{Lo que proponemos}
         Cambiamos la \textbf{distancia}, el \textbf{centro} o el
-        \textbf{modelo} y el resto del procedimiento de la clase 5 se
-        mantiene.
+        \textbf{modelo} y el resto del procedimiento se mantiene.
       \end{block}
     \end{column}
   \end{columns}
@@ -164,16 +163,14 @@
 \begin{frame}{Asociación entre atributos}
   \centering\figura{zoo-asociacion.png}{0.72\textheight}
 
-  \footnotesize Pelo y leche van juntos porque los dos son rasgos de
-  mamífero, igual que en la clase 5 el CO, el NO y el NO$_2$ subían juntos
-  porque comparten fuente.
+  \footnotesize Pelo y leche van juntos: Los dos son rasgos de mamífero.
 \end{frame}
 
 \begin{frame}{Primer plano factorial del ACM}
   \centering\figura{zoo-acm-mapa.png}{0.72\textheight}
 
-  \footnotesize El ACM es el ACP de las variables cualitativas y lo usamos
-  solo para ver los grupos, como el ACP en la clase 5.
+  \footnotesize El ACM es el ACP de las cualitativas: Sirve para ver los
+  grupos.
 \end{frame}
 
 \parte{2}{Distancia, calidad de la partición y k-modas}
@@ -202,24 +199,21 @@
       \[
         d(\mathbf{x}_i,\mathbf{x}_j) = \sum_{k=1}^{p} \mathbb{1}[x_{ik} \neq x_{jk}]
       \]
-      \footnotesize El emparejamiento simple (Hamming) cuenta en cuántos
-      atributos difieren dos animales. Como todas las variables ya están en
-      la misma escala \textbf{no hace falta estandarizar}.
+      \footnotesize Emparejamiento simple: En cuántos atributos difieren.
+      \textbf{No hace falta estandarizar}.
     \end{column}
     \begin{column}{0.5\textwidth}
       \[
         s_{ij} = \frac{\sum_k w_{ijk}\, s_{ijk}}{\sum_k w_{ijk}}
       \]
-      \footnotesize Gower \parencite{gower1971} normaliza cada numérica por
-      su rango (su forma de estandarizar) cuando hay datos mixtos y en las
-      binarias asimétricas no cuenta como parecido que los dos animales
-      tengan un no.
+      \footnotesize Gower \parencite{gower1971}: Admite datos mixtos y
+      binarias asimétricas.
     \end{column}
   \end{columns}
 \end{frame}
 
 \begin{frame}{Calidad de la partición}
-  La fórmula de la clase 5 solo usa distancias y no necesita un centro:
+  La fórmula vista en clase solo usa distancias:
   \[
     d(\text{Agrupamiento}) = \sum_{k=1}^{K} \frac{1}{n_k}
       \sum_{i,j \in G_k} d(\mathbf{x}_i,\mathbf{x}_j)
@@ -252,9 +246,7 @@
         \sum_{i \in G} d(\mathbf{x}_i,\mathbf{m})
           = \sum_{k}\bigl(n_G - n_k(m_k)\bigr)
       \]
-      \footnotesize Es el algoritmo de Lloyd con la moda como centro. El
-      costo se separa por atributo y lo minimiza la categoría más frecuente
-      \parencite{huang1998}.
+      \footnotesize Lloyd con la moda como centro \parencite{huang1998}.
     \end{column}
   \end{columns}
 \end{frame}
@@ -312,10 +304,7 @@ kmodas7$costo   # 138
       \end{tabular}
 
       \vspace{0.5em}
-      Igual que con \texttt{nstart}, corremos varios arranques y nos
-      quedamos con el de menor costo. Eso sí, Cao dio el menor costo y el
-      ARI más bajo, así que un costo menor no asegura recuperar la clase
-      real.
+      Menor costo no asegura recuperar mejor la clase real.
     \end{column}
   \end{columns}
 \end{frame}
@@ -356,24 +345,16 @@ kmodas7$costo   # 138
     \end{column}
     \begin{column}{0.3\textwidth}
       {\fontsize{6}{7.5}\selectfont\color{mcmBlack!75}
-      Cada sector es un enlace, con la misma distancia de Gower y el mismo
-      corte en $K = 7$.
+      Misma distancia y corte en $K = 7$.
 
       \vspace{0.6em}
-      La raíz está en el centro y las hojas en el borde. El punto grande
-      marca dónde nace cada grupo.
-
-      \vspace{0.6em}
-      \textbf{Completo}: No deja grupos de uno pero parte a los
-      mamíferos (ARI 0.82).
+      \textbf{Completo}: Sin grupos de uno (ARI 0.82).
 
       \vspace{0.4em}
-      \textbf{Promedio}: Respeta mejor las distancias (cofenética 0.86)
-      y deja solo al escorpión (ARI 0.89).
+      \textbf{Promedio}: Mejor cofenética, 0.86 (ARI 0.89).
 
       \vspace{0.4em}
-      \textbf{Simple}: Encadena y deja dos animales solos, pero es el
-      que más recupera los tipos (ARI 0.94).\par}
+      \textbf{Simple}: Encadena (ARI 0.94).\par}
     \end{column}
   \end{columns}
 \end{frame}
@@ -415,8 +396,7 @@ ari(jerarquico7, datos$tipo)         # 0.889
 \begin{frame}{Concordancia entre k-modas y jerárquico}
   \centering\figura{concordancia.png}{0.72\textheight}
 
-  \footnotesize Cruzamos k-modas con Gower jerárquico y en las celdas donde
-  no coinciden quedan los animales de frontera.
+  \footnotesize Donde no coinciden están los animales de frontera.
 \end{frame}
 
 \parte{4}{Clases latentes, tándem y validación}
@@ -431,19 +411,10 @@ ari(jerarquico7, datos$tipo)         # 0.889
       \theta_{krc}^{\,\mathbb{1}[x_{ik}=r]}
   \]
   \begin{itemize}
-    \item Donde el GMM pone una normal, aquí va un producto de categóricas,
-      lo que supone \textbf{independencia local}.
-    \item Se estima con EM, que alterna la probabilidad de pertenencia
-      $\pi_{ic}$ con las nuevas $\pi_c$ y $\theta_{krc}$.
-    \item Elegimos $K$ con el BIC \parencite{linzer2011}.
+    \item Producto de categóricas: Supone \textbf{independencia local}.
+    \item Se estima con EM.
+    \item $K$ se elige con el BIC \parencite{linzer2011}.
   \end{itemize}
-\end{frame}
-
-\begin{frame}{Número de clases: BIC y AIC}
-  \centering\figura{lca-bic.png}{0.72\textheight}
-
-  \footnotesize El BIC elige 4 clases y el AIC, que castiga menos cada
-  parámetro, elige 7, que es justo el número de tipos de Zoo.
 \end{frame}
 
 \begin{frame}[fragile]{Clases latentes en R: El algoritmo EM}
@@ -469,12 +440,18 @@ bic <- -2 * ll + n_par * log(nrow(cuali))
       cuaderno; $Y$ es la tabla indicadora.}
     \end{column}
     \begin{column}{0.37\textwidth}
-      \centering\figura{cuaderno-bic.png}{0.5\textheight}
+      \centering\figura{cuaderno-em.png}{0.5\textheight}
 
-      \footnotesize BIC y AIC para $k = 1, \dots, 8$ con 25 arranques
-      cada uno.
+      \footnotesize Convergencia del EM: Los 25 arranques (en gris) y el
+      ganador (en rojo).
     \end{column}
   \end{columns}
+\end{frame}
+
+\begin{frame}{Número de clases: BIC y AIC}
+  \centering\figura{lca-bic.png}{0.72\textheight}
+
+  \footnotesize BIC: 4 clases. AIC: 7 clases.
 \end{frame}
 
 \begin{frame}{Perfil de las 4 clases}
@@ -495,14 +472,12 @@ bic <- -2 * ll + n_par * log(nrow(cuali))
     \end{column}
     \begin{column}{0.4\textwidth}
       \footnotesize
-      En la clase 5 el maestro dijo que el ACP es una herramienta de
-      diagnóstico y que no hace parte del agrupamiento.
+      Se nos mencionó en clase que el ACP es una herramienta de
+      diagnóstico.
 
       \vspace{0.5em}
-      Aquí el tándem con 5 dimensiones recupera bien los tipos (ARI 0.83).
-      Eso sí, las primeras dimensiones son las que más inercia resumen y
-      nada asegura que sean las que mejor separan los grupos, así que en
-      otros datos podría no repetirse.
+      Aquí funciona (ARI 0.83), pero más inercia no implica separar
+      mejor los grupos.
     \end{column}
   \end{columns}
 \end{frame}
@@ -530,11 +505,6 @@ bic <- -2 * ll + n_par * log(nrow(cuali))
         Tándem ACM + k-medias & 0.83 \\
         \bottomrule
       \end{tabular}
-
-      \vspace{0.5em}
-      En la clase 5 los grupos recuperaron las zonas de Bogotá sin usar la
-      ubicación. Aquí pasa lo mismo con \texttt{tipo}, que nunca entró al
-      agrupamiento.
     \end{column}
   \end{columns}
 \end{frame}
@@ -589,10 +559,11 @@ bic <- -2 * ll + n_par * log(nrow(cuali))
     \begin{column}{0.42\textwidth}
       \small
       \begin{itemize}
-        \item El procedimiento de la clase 5 sirve cambiando la
-          distancia, el centro o el modelo.
-        \item Hay métodos duros (k-modas, Gower) y suaves (clases
-          latentes) para categorías.
+        \item Con categorías cambia una pieza: La distancia (Gower), el
+          centro (la moda) o el modelo (clases latentes).
+        \item Sin ver la clase real, todos recuperan buena parte de la
+          taxonomía.
+        \item Ningún método gana en todo: Cada uno premia algo distinto.
         \item El ACM sirve para ver los grupos y el agrupamiento para
           formarlos.
       \end{itemize}
@@ -600,9 +571,10 @@ bic <- -2 * ll + n_par * log(nrow(cuali))
   \end{columns}
 \end{frame}
 
-\begin{frame}[allowframebreaks]{Referencias}
+\begin{frame}{Referencias}
   \nocite{zoo1990,kaufman1990,greenacre2017,cao2009}
-  \printbibliography[heading=none]
+  {\renewcommand*{\bibfont}{\scriptsize}\setlength{\bibitemsep}{2pt}
+  \printbibliography[heading=none]}
   \vfill
   \tiny Foto de portada: \emph{Slate Blocks}, CC BY 4.0. Formato:
   \emph{Mid-Century Modern} Beamer.
